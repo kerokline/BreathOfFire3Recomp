@@ -1,11 +1,19 @@
 # Bringup — boot / soak log
 
-**Status:** IN PROGRESS (last verified 2026-08-29)
+**Status:** IN PROGRESS (last verified 2026-08-30)
 
 What runs, where it stops, what was fixed. One entry per boot attempt that
 taught us something. Companion to [`STATUS.md`](STATUS.md), which stays short.
 
 ## Boot 001 — 2026-08-29 — first boot, headless
+
+> **SUPERSEDED IN PART by Boot 002 (2026-08-30).** The "parks in a wait
+> loop" conclusion below is **wrong**. The two pinned `store_pc` values are
+> `DrawOTag()` and `VSync()` — i.e. a healthy render loop, not a stall. The
+> CD-ROM hypothesis is dead. The run genuinely reached the title screen; the
+> Release build simply has `PSX_DEBUG_TOOLS=OFF`, so there was no way to see
+> it. Everything else in this entry (generate stats, IRQ health, addresses)
+> still holds.
 
 **Result: the game boots and executes its own code without crashing, then
 parks in a wait loop. Nothing died.**
@@ -115,6 +123,108 @@ the same time.
 3. Label whatever these turn out to be in `symbols.toml` (`emit = false` until
    proven) and re-run `tools/sync_symbols.py`.
 4. Only then consider overlay work — see `psxrecomp/docs/overlay-discovery.md`.
+
+## Boot 002 — 2026-08-30 — the game loads
+
+**Result: title screen renders, input is accepted, the opening prologue plays.
+Boot 001 was never hung.**
+
+### The tooling gap that hid it
+
+Boot 001 could only reason from `psx_freeze_heartbeat.json` because the Release
+build strips every inspection path:
+
+```
+build-release/build.ninja:  ... -DPSX_NO_DEBUG_TOOLS=1 ...
+```
+
+`psxrecomp/runtime/runtime.cmake:60` defaults `PSX_DEBUG_TOOLS` **OFF** for
+Release, and `main.cpp:13084` guards `debug_server_init(debug_port)` behind
+`#ifndef PSX_NO_DEBUG_TOOLS`. So the TCP debug server never listened, and
+`--debug-port` was silently inert. Fixed by building a second tree:
+
+```bash
+export PATH=/c/msys64/mingw64/bin:$PATH
+cmake -S . -B build-dbg -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
+cmake --build build-dbg --target psx-runtime          # 232/232
+```
+
+`build-release/` is left alone; `build-dbg/` is the diagnosis tree.
+
+### Reading the Boot 001 "wait loop"
+
+`tools/disasm_exe.py` (added this session) disassembles the staged boot EXE, so
+the loop could be read instead of guessed:
+
+```bash
+python tools/disasm_exe.py 8017DD60:19 801751C0:39
+```
+
+**`func_8017DD60` is `DrawOTag()`.** It writes four globals that the EXE image
+initialises to GPU/DMA registers:
+
+| Global | Initial value | Register |
+|---|---|---|
+| `0x8018BBA8` | `0x1F801814` | GP1 |
+| `0x8018BBAC` | `0x1F8010A0` | D2_MADR |
+| `0x8018BBB0` | `0x1F8010A4` | D2_BCR |
+| `0x8018BBB4` | `0x1F8010A8` | D2_CHCR |
+
+It stores `GP1(04)=2` (DMA direction CPU→GPU), `MADR=a0`, `BCR=0`, then
+`CHCR=0x01000401` — SyncMode 2, from RAM, start. That is the canonical libgpu
+linked-list DMA kick.
+
+**`func_801751C0` is `VSync()`.** Its timeout branch loads `0x8014A0DC`, which
+is the string `VSync: timeout`. It spins until the libetc counter at
+`0x8018603C` reaches `a0`, decrementing an `a1<<15` timeout.
+
+So `store_pc` pinned to `DrawOTag` + `VSync` is what a **healthy game loop**
+looks like. There was no CD-ROM wait to diagnose.
+
+### What the GPU was actually doing
+
+`gpu_state` over the debug server, mid-run:
+
+| Signal | Value | Reading |
+|---|---|---|
+| `gp0_draw` | 1,198,959 | Draw commands executing |
+| `gp0_writes` | 25,464,573 | GP0 firehose is live |
+| `disabled` | 0 | Display enabled |
+| `draw_offset` | `[0, 240]` | Double-buffered, drawing lower half |
+| `last_world3d_frame` | 11,629 | 3D geometry being submitted |
+
+### Pixels
+
+`--headless` with `renderer = opengl` screenshots **black** — there is no GL
+context to read back. With the software rasteriser the frames are correct:
+
+```bash
+./BreathOfFire3_Recompiled.exe --headless --no-launcher     --renderer software --debug-port 4370
+```
+
+| Capture | Result |
+|---|---|
+| `shot_sw_later.png` | Title screen — logo, `PRESS START BUTTON`, Capcom 1997 notice |
+| `shot_after_start.png` | Opening prologue, Japanese text rendering correctly |
+
+`press` with `buttons=0x0008` (Start, PSX pad bit 3) advances the title; on the
+press `display_y` begins alternating `0`/`240`, i.e. the buffer flip engages.
+
+Screenshots live in the gitignored `build-dbg/` and are deliberately not
+committed.
+
+### Standing caveats
+
+- Headless is unthrottled: ~26k frames in 90 s wall. `vblank_raise_count`
+  equals `frame_count` exactly (45,723 each), so the *guest* pacing is right —
+  it is only wall-clock that runs fast. Not a bug; do not "fix" it.
+- `gpu` is not a debug command; the real one is **`gpu_state`**.
+
+### Next actions
+
+1. Soak from the prologue into gameplay and log where it stops next.
+2. Text-draw PC census — see [`LOCALIZATION.md`](LOCALIZATION.md).
+3. Grow `seeds/ghidra_funcs.txt` as overlay paths surface.
 
 ## Framework observations
 

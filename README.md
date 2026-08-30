@@ -39,8 +39,9 @@ Built on [psxrecomp](https://github.com/mstan/psxrecomp) and
 
 ## Status
 
-**Pre-alpha — not playable yet.** The build pipeline works end to end and the
-game reaches its own code, but it does not yet render or reach a title screen.
+**Pre-alpha — boots and renders, not playable through yet.** The game reaches
+its title screen, accepts input, and plays its opening prologue with text
+drawing correctly. It has not been played end to end.
 
 What works:
 
@@ -50,22 +51,56 @@ What works:
       shards with **zero skipped functions and zero unsupported instructions**
 - [x] Function discovery grows 523 seed targets → **1467** dispatch entries
 - [x] Boots into game code with a live stack and a healthy vblank/IRQ path
-      (~26k frames, no faults, no crash)
+- [x] **Renders.** Title screen and opening prologue, ~1.2M GPU draw commands,
+      double-buffered, 3D geometry submitting
+- [x] **Input.** Start advances the title screen; the buffer flip engages
+- [x] **Savestates.** Save and load, round-trip verified on the LLE backend
 
 What does not work yet:
 
-- [ ] **Boot parks in a wait loop** before rendering anything — the current
-      blocker. The game spins at `0x8017DDA0` / `0x801751F4`, called from
-      `func_8017E0E0`. Cause not yet established; a CD-ROM read that never
-      completes is the leading, *unverified* hypothesis.
+- [ ] Not played past the opening — no soak coverage of real gameplay
 - [ ] Overlay discovery and loading
 - [ ] Audio, video output, save/memcard verification
-- [ ] JP→EN runtime string translation (scaffolded, awaiting a boot that draws text)
+- [ ] JP→EN runtime string translation — the script has been located on disc
+      (see below), but the runtime cannot yet identify which code draws text
+
+### A correction worth recording
+
+Earlier revisions of this file reported that boot "parks in a wait loop" before
+rendering, with a stalled CD-ROM read as the leading hypothesis. **That was
+wrong and is retracted.** The two pinned program counters are `DrawOTag()` and
+`VSync()` — a healthy render loop, not a stall.
+
+The game had been drawing its title screen all along. What hid it: Release
+builds compile with `PSX_DEBUG_TOOLS=OFF`, which strips the TCP debug server, so
+there was no way to look at the screen and the diagnosis rested on inference
+from a heartbeat file. Building with `-DPSX_DEBUG_TOOLS=ON` and capturing a
+frame settled it in minutes.
+
+Two traps that cost time, recorded so they don't cost it again: `--headless`
+with the OpenGL renderer screenshots **black** (there is no GL context — use
+`--renderer software`), and the debug command is `gpu_state`, not `gpu`.
+
+### Localization research
+
+The Japanese script does **not** live in the boot executable. It sits in
+per-area `.EMI` container sections — specifically the section whose destination
+address is `0x80010000`, a selector that resolves unambiguously across all 880
+`.EMI` files on the disc. The script is loaded into RAM by CD-ROM DMA.
+
+This matters because it means translation work aligns by file and slot rather
+than by address. Details in [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md).
+
+The open problem is not extracting text but *applying* it: the framework's
+substitution hook expects a string pointer in an argument register at a call
+boundary, and this game does not pass text that way. Identifying the text-draw
+code is the next task.
 
 Current state, evidence, and next actions live in
-[`docs/STATUS.md`](docs/STATUS.md) and [`docs/BRINGUP.md`](docs/BRINGUP.md).
-Claims in those docs cite the trace or run that established them — that is the
-project's standard, inherited from the framework.
+[`docs/STATUS.md`](docs/STATUS.md), [`docs/BRINGUP.md`](docs/BRINGUP.md), and
+[`docs/LOCALIZATION.md`](docs/LOCALIZATION.md). Claims in those docs cite the
+trace or run that established them — that is the project's standard, inherited
+from the framework.
 
 ## Requirements
 
@@ -182,7 +217,32 @@ Flags are parsed in `psxrecomp/runtime/src/main.cpp`: `--bios`, `--game`,
 `--headless` implies `--no-launcher`, opens no window or audio device, and
 suppresses blocking modal dialogs — it is the right frontend for unattended
 soak runs. A hung or slow run writes `psx_freeze_heartbeat.json` next to the
-executable, which is the primary diagnostic artifact.
+executable.
+
+> **A Release build cannot be inspected.** `PSX_DEBUG_TOOLS` defaults **off**
+> for Release, which compiles out the TCP debug server entirely — `--debug-port`
+> is silently inert and the heartbeat file is your only diagnostic. This cost a
+> misdiagnosis once already (see [Status](#status)).
+
+For anything diagnostic, build a second tree with the tools enabled:
+
+```bash
+cmake -S . -B build-dbg -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
+cmake --build build-dbg --target psx-runtime
+```
+
+That build serves a JSON debug server (default port 4370) offering screenshots,
+GPU state, RAM reads, write tracing, input injection and savestates.
+`tools/playsession.py` wraps the common operations:
+
+```bash
+python tools/playsession.py status          # frame, GPU state, armed traces
+python tools/playsession.py shot out.png    # needs --renderer software
+python tools/playsession.py state save 1    # savestate slot 1
+```
+
+Screenshots require `--renderer software`; with OpenGL in headless there is no
+GL context and captures come back black.
 
 <!-- retcomm-readme-launcher -->
 ## RetComM Launcher
@@ -219,12 +279,14 @@ seeds/                 ghidra_funcs.txt — recompilation seed targets
 codegen_setup.c/.h     setup-wizard host wiring
 CMakeLists.txt         psxrecomp_add_game_runtime(psx-runtime …)
 catalog_identity.json  marketing + ROM identity for launcher catalogs
-docs/                  title-owned notes — STATUS, BRINGUP, findings
+docs/                  title-owned notes — STATUS, BRINGUP, LOCALIZATION
+tools/                 sync_symbols.py, plus disc/EMI/disasm/session helpers
 isos/                  your legal dump          (gitignored, never committed)
 disc/                  staged boot EXE          (gitignored)
 generated/             recompiled C output      (gitignored)
 build-recompiler/      emitter binaries         (gitignored)
 build-release/         native runtime           (gitignored)
+build-dbg/             runtime + debug server   (gitignored, -DPSX_DEBUG_TOOLS=ON)
 psxrecomp/             SUBMODULE — framework    (read-only here)
 recomp-ui/             SUBMODULE — launcher     (read-only here)
 ```
@@ -271,6 +333,7 @@ recomp-ui belong upstream in their own repositories, not as local patches.
 |---|---|
 | [`docs/STATUS.md`](docs/STATUS.md) | Living status — where the project stands, what's in flight, what's blocked |
 | [`docs/BRINGUP.md`](docs/BRINGUP.md) | Boot/soak log — what runs, where it stops, what was fixed |
+| [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) | JP→EN: where the script lives on disc, the `.EMI` container, what blocks applying a translation |
 | [`docs/INVENTORY.md`](docs/INVENTORY.md) | What is actually in this repo |
 | [`docs/README.md`](docs/README.md) | Documentation conventions |
 | `CLAUDE.md` | Session bootstrap for AI agents working in this repo |
@@ -283,14 +346,19 @@ Framework reference lives in `psxrecomp/docs/` — `GAME_PROJECT_SETUP.md`,
 
 The highest-value contributions right now, in order:
 
-1. **Diagnose the boot wait loop.** Read `func_8017E0E0`, `func_8017DD60`, and
-   `func_801751C0` in `generated/`, identify the loop condition and which MMIO
-   it polls, and confirm or kill the CD-ROM hypothesis with a device trace.
-   This is the one thing standing between the project and a real soak.
-2. **Reverse engineering.** Identify functions and record them in
-   `symbols.toml` with the rationale for how they were identified.
+1. **Play it and find where it breaks.** The game boots and renders but has
+   never been played through. Crashes, hangs, and wrong output are all useful.
+   Use a `build-dbg` tree so the run can be inspected live rather than
+   post-mortem, and say roughly which frame and which area.
+2. **Find the text-draw code.** The blocker for localization: identify which
+   functions render on-screen text. The framework's substitution hook expects a
+   string pointer in an argument register at a call boundary and this game does
+   not pass text that way, so a new approach is needed — reads of the script
+   buffer at `0x80010000` are not visible to the existing MMIO read tracer.
 3. **Overlay archaeology.** BoF3 streams overlays from disc; mapping them is
-   the next milestone after boot.
+   the next milestone.
+4. **Reverse engineering.** Identify functions and record them in
+   `symbols.toml` with the rationale for how they were identified.
 
 Ground rules:
 

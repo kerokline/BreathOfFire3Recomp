@@ -1,6 +1,6 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-08-29)
+**Status:** IN PROGRESS (last verified 2026-08-30)
 
 Living status doc — the one place a new session learns where the project
 actually stands. Update this rather than `CLAUDE.md`. Durable findings graduate
@@ -9,46 +9,50 @@ into their own `docs/` file (see [`README.md`](README.md)); this stays a short
 
 ## Where we are
 
-**First boot achieved 2026-08-29.** The full chain — emitters → generate →
-`psx-runtime` → headless boot — runs end to end, all stages exit 0. The game
-executes its own code on its own stack with a healthy vblank/IRQ path, then
-parks in a wait loop without crashing. Details, evidence, and next actions in
-[`BRINGUP.md`](BRINGUP.md).
+**The game loads (2026-08-30).** Title screen renders, Start is accepted, and
+the opening prologue plays with Japanese text drawing correctly. Evidence and
+method in [`BRINGUP.md`](BRINGUP.md) → Boot 002.
+
+**Boot 001's "wait loop" was a misreading and is retracted.** The two pinned
+`store_pc` values are `DrawOTag()` and `VSync()` — a healthy render loop. The
+CD-ROM hypothesis is dead. What actually hid this: the Release build sets
+`PSX_DEBUG_TOOLS=OFF`, which compiles out the TCP debug server, so there was no
+way to look at the screen.
 
 Headlines:
 
-- Game emitted **completely clean under `strict = true`** — 2.5M lines, 35
-  shards, 0 skipped functions, 0 unsupported instructions. Dispatch table grew
-  523 → **1467** entries via closure discovery.
-- Boot reaches game code (`epc = 0x8017E328`, inside game text), runs ~26k
-  frames in 90 s, `fatal: null`, no freeze dumps.
-- It then spins with `store_pc` pinned to `0x8017DDA0` (`func_8017DD60`) and
-  `0x801751F4` (`func_801751C0`), called from `func_8017E0E0`. Cause not yet
-  established — CD-ROM wait is the leading, *unevidenced* hypothesis.
-
-Repo contents inventoried in [`INVENTORY.md`](INVENTORY.md).
+- Game still emits **completely clean under `strict = true`** — 2.5M lines, 35
+  shards, 0 skipped, 0 unsupported, 1467 dispatch entries.
+- `build-dbg/` is the new diagnosis tree (`-DPSX_DEBUG_TOOLS=ON`, 232/232).
+  `build-release/` is untouched and stays the shipping config.
+- GPU is live: 1,198,959 draw commands, `disabled=0`, double-buffered,
+  3D geometry submitting.
+- `tools/disasm_exe.py` added — disassembles the staged boot EXE and resolves
+  `lui`/`lw` pairs to absolute addresses, naming MMIO. This is what turned the
+  "wait loop" into `DrawOTag`/`VSync` instead of another guess.
+- English scaffold `BreathOfFire3EnglishRecomp/` generated from the USA dump
+  (SLUS-00422, 526 seeds). **The US build is not address-compatible with JP** —
+  0x3000 load-base shift, 4.6% seed overlap. See [`LOCALIZATION.md`](LOCALIZATION.md).
 
 ## In flight
 
-Uncommitted at last inventory:
-
-- `game.toml` — added a `[localization]` block (`language = "en"`, dropdown
-  offering `en` + `jp`), enabling the framework's runtime JP→EN string
-  translation path. See `psxrecomp/docs/STRING_TRANSLATION.md`.
-- `game_options.toml` — untracked, still the all-comment template.
+- `docs/LOCALIZATION.md` — new; the JP→EN assessment and the two upstream bugs
+  it turned up (F-3, F-4).
+- `tools/disasm_exe.py` — new, uncommitted.
+- `BreathOfFire3EnglishRecomp/` — scaffolded but **not** generated or built. Its
+  `psxrecomp` gitlink floated to master (`47bda817`) vs this repo's `f24b7e5d`,
+  and its `disc =` is an absolute machine-local path. Both need a decision
+  before it is built.
 
 ## Next up
 
-1. **Diagnose the boot-001 wait loop.** Read `func_8017E0E0`, `func_8017DD60`,
-   `func_801751C0` in `generated/`, find the loop condition and the MMIO it
-   polls, then confirm or kill the CD-ROM hypothesis with a device trace rather
-   than by inference. See [`BRINGUP.md`](BRINGUP.md) → *Next actions*.
-2. **Soak.** Once it gets past the loop, log where it stops next; grow
-   `seeds/ghidra_funcs.txt` as overlay/runtime paths surface.
-3. **Localization Phase 0.** Capture runs unconditionally, so a soak builds the
-   string inventory and text-draw PC census before any translation exists.
-   Blocked in practice until the boot progresses past the loop — nothing draws
-   text yet.
+1. **Soak from the prologue into gameplay.** The game runs; find where it stops
+   next and grow `seeds/ghidra_funcs.txt` as overlay paths surface.
+2. **Text-draw PC census.** Capture is armed but yields no real strings — BoF3
+   does not appear to pass `char*` at dispatch boundaries. Establishing how text
+   reaches the renderer gates all translation work. See `LOCALIZATION.md`.
+3. **Settle the English repo's submodule pin and disc path**, then generate it
+   if a second build is still wanted.
 
 ## Environment
 
@@ -65,22 +69,21 @@ executing. Setup steps and the Windows `PATH`/Python caveats live in the repo
 
 ## Blockers
 
-First boot is done. The boot-001 wait loop is the one thing standing between us
-and a soak — not yet a "blocker" in the sense of being stuck, since it hasn't
-been diagnosed yet.
+None. The game loads and runs.
 
 Open, non-blocking:
 
-- Two upstream framework bugs found during first boot (false-positive BIOS
-  staleness warning; garbage cross-function targets in OpenBIOS discovery).
-  Neither affects BoF3 booting. Documented as F-1 / F-2 in
-  [`BRINGUP.md`](BRINGUP.md); fixes belong in `mstan/psxrecomp`, not here.
-
-- `gh` not installed; affects GitHub CLI flows only, not builds.
-- Ghidra / GhidraMCP **not installed**, so the framework `.mcp.json` entries for
-  `localhost:7777` fail to connect. Not required to build, generate, or boot —
-  static discovery is `psxrecomp-analyze`, which exports *into* Ghidra rather
-  than depending on it. See README → *Optional: Ghidra*.
+- Four upstream framework issues, all documented, none affecting BoF3 booting:
+  F-1 / F-2 in [`BRINGUP.md`](BRINGUP.md) (false-positive BIOS staleness
+  warning; garbage cross-function targets), F-3 / F-4 in
+  [`LOCALIZATION.md`](LOCALIZATION.md) (stale "capture is always-on" docs;
+  Shift-JIS validator accepting MIPS instruction words). Fixes belong in
+  `mstan/psxrecomp`.
+- Release builds cannot be inspected at all (`PSX_DEBUG_TOOLS=OFF`). Expected,
+  but worth knowing before diagnosing anything against `build-release/`.
+- `gh` not installed; affects GitHub CLI flows only.
+- Ghidra / GhidraMCP not installed, so the framework `.mcp.json` entries for
+  `localhost:7777` fail to connect. Not required to build, generate, or boot.
 
 ## Log
 
@@ -89,4 +92,8 @@ Open, non-blocking:
 | 2026-08-29 | Repo inventoried; `docs/` and `CLAUDE.md` established. Localization intent recorded. |
 | 2026-08-29 | Build toolchain installed (MSYS2 MinGW-w64) and proven by a full 169-target emitter build. Toolchain blocker cleared; README gained a *Development environment* section. |
 | 2026-08-29 | Dump moved into gitignored `isos/`; `[game].disc` switched from an absolute machine-local path to repo-relative `isos/Breath of Fire III (Japan).cue`. Portable for any checkout. |
-| 2026-08-29 | **First boot.** Emitters built in this repo's submodule (67/67); generate clean under `strict` (0 skipped, 0 unsupported, 1467 dispatch entries); `psx-runtime` linked (232/232) as `BreathOfFire3_Recompiled.exe`; headless boot reaches game code and runs ~26k frames, then parks in a wait loop. Logged in [`BRINGUP.md`](BRINGUP.md), which also records two upstream framework bugs (false-positive BIOS staleness warning; garbage cross-function targets in OpenBIOS discovery). |
+| 2026-08-29 | **First boot.** Emitters built (67/67); generate clean under `strict`; `psx-runtime` linked (232/232); headless boot reaches game code and runs ~26k frames. Logged in [`BRINGUP.md`](BRINGUP.md) with framework bugs F-1 / F-2. |
+| 2026-08-30 | **The game loads.** Boot 001's wait-loop diagnosis retracted — the pinned PCs are `DrawOTag`/`VSync`. Root cause of the blindness: `PSX_DEBUG_TOOLS=OFF` in Release. Built `build-dbg/`, added `tools/disasm_exe.py`, captured title screen + prologue over the debug server. [`BRINGUP.md`](BRINGUP.md) → Boot 002. |
+| 2026-08-30 | **Savestates verified working** on the LLE backend — save *and* load, round-trip confirmed against the VSync counter at `0x8018603C` (advanced 17,460 -> 20,312, rewound to ~17,828 on load). Files: `saves/openbios/state_8014AA0C_slotNN.pst` + `.thumb`. Driven by `tools/playsession.py state save|load N`. |
+| 2026-08-30 | **Script load path measured.** `wtrace` on the text buffer shows the script arriving by CD-ROM DMA (channel 3) kicked from PC `0x80177B78`. `rtrace_*` is MMIO-only so it cannot see the *readers* — finding text-draw PCs is an open tooling gap. [`LOCALIZATION.md`](LOCALIZATION.md) 4.2b. |
+| 2026-08-30 | **Localization assessed.** Capture pipeline armed via `PSX_XLATE_CAPTURE=1` (it is *not* always-on, contrary to framework docs — F-3); 39.6M calls scanned, 0 real strings, 3 false positives that decode as MIPS instructions (F-4). English scaffold generated; US build shown **not** address-compatible with JP (0x3000 shift, 4.6% seed overlap). [`LOCALIZATION.md`](LOCALIZATION.md). |
