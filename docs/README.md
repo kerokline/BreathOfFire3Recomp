@@ -58,4 +58,4 @@ Create these when the work actually starts — empty stubs are noise:
 | `LOCALIZATION.md` | JP→EN string translation: capture inventory, text-draw PC census, font work |
 | `TEXT_ENGINE.md` | **Exists.** The message interpreter, renderer and glyph path — control codes, the `0x80010004` message-index formula, interpreter state block |
 | `regional-builds.md` | **Exists.** JP/US/EN/FR/DE comparison — no runtime language support, no address-compatible donor, and the `.EMI` evidence isolating the script section |
-| `ENHANCEMENTS.md` | Post-faithfulness work: load-time reduction, widescreen, etc. |
+| `ENHANCEMENTS.md` | **Exists.** Post-faithfulness work, gated behind bringup: CRT scanlines (designed, needs an upstream psxrecomp PR), plus a costed backlog |
