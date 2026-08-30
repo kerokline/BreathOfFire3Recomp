@@ -1,11 +1,15 @@
 # Autofilled by tools/new_project_layout/probe_disc.py from your legal dump.
 # Review before shipping. Runtime quirks / overlay seeds still need hand work.
+# Repo-relative: TOML paths resolve against the detected project root (the
+# nearest ancestor with .git / .gitignore / CMakeLists.txt), not the working
+# directory, so this holds when the exe runs from build-release/.
 
 [game]
 name = "BreathOfFire3"
 id = "SLPS-00990"
 players = 1
 exe = "disc/SLPS_009.90"
+# /isos/ is gitignored -- the dump itself is never committed.
 disc = "isos/Breath of Fire III (Japan).cue"
 load_address = "0x80093800"
 entry_pc = "0x8014AA0C"
@@ -34,6 +38,22 @@ strict = true
 [runtime]
 window_title = "BreathOfFire3 Recompiled"
 memcard_dir = "saves"
+
+# On-the-fly string translation (psxrecomp docs/STRING_TRANSLATION.md).
+# This is the Japanese release (SLPS-00990); English is applied at runtime by
+# text_xlate substituting into the game's own draw calls. The disc is never
+# modified, so the [prepare_disc] digests above stay valid.
+#
+# Capture runs unconditionally -- including under "jp"/"off", which disable
+# only substitution -- so a Phase 0 soak builds the string inventory and the
+# text-draw PC census before any translation exists.
+# `languages` drives the launcher's Localization dropdown.
+[localization]
+language = "en"
+languages = [
+    { code = "en", label = "English" },
+    { code = "jp", label = "Japanese" },
+]
 
 [video]
 renderer = "opengl"
