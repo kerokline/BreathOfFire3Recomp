@@ -1,0 +1,45 @@
+{
+  "format_version": 1,
+  "game": {
+    "name": "BreathOfFire3",
+    "id": "SLPS-00990",
+    "boot_exe": "SLPS_009.90"
+  },
+  "marketing": {
+    "description": "Capcom's 1997 PlayStation RPG, Japanese release, recompiled to native code.",
+    "publisher": "Capcom",
+    "year": "1997",
+    "region": "Japan",
+    "players": 1
+  },
+  "rom_identity": {
+    "cue_name": "Breath of Fire III (Japan).cue",
+    "bin_name": "Breath of Fire III (Japan).bin",
+    "track_counts": [
+      2
+    ],
+    "require_cue": true,
+    "data_track": {
+      "size": 479812704,
+      "md5": "cb8d17ce72fc697fed6ddee7b3fde10b",
+      "sha1": "ee7b20316590b61352868ca4d76f0a5f95c990de"
+    },
+    "disc_fp": "2489523d08dd1729c8448ab005f6b34313fc33cd89fd8a4dbcfb2f4eb874c691"
+  },
+  "exe": {
+    "load_address": "0x80093800",
+    "entry_pc": "0x8014AA0C",
+    "text_size": "0x00163800",
+    "stack_base": "0x801FFFF0"
+  },
+  "seeds": {
+    "count": 523,
+    "source": "boot_exe_jal"
+  },
+  "warnings": [],
+  "notes": [
+    "entry_pc/load_address/text_size/stack_base taken from PS-X EXE header.",
+    "seeds are first-pass boot-EXE JAL targets (+ entry); expect to grow as overlays / runtime paths are discovered.",
+    "required_disc_fp is psxrecomp-toc-v1 (matches runtime DiscIdentity)."
+  ]
+}

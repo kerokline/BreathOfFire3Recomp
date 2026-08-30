@@ -1,0 +1,5 @@
+Box art sourced from libretro-thumbnails (Named_Boxarts).
+Matched name: Breath of Fire III (Japan)
+URL: https://thumbnails.libretro.com/Sony%20-%20PlayStation/Named_Boxarts/Breath%20of%20Fire%20III%20(Japan).png
+https://github.com/libretro-thumbnails/libretro-thumbnails
+PNG is for README; TGA is for recomp-ui LAUNCHER_BOXART.

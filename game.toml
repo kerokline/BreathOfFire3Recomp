@@ -1,0 +1,50 @@
+# Autofilled by tools/new_project_layout/probe_disc.py from your legal dump.
+# Review before shipping. Runtime quirks / overlay seeds still need hand work.
+
+[game]
+name = "BreathOfFire3"
+id = "SLPS-00990"
+players = 1
+exe = "disc/SLPS_009.90"
+disc = "isos/Breath of Fire III (Japan).cue"
+load_address = "0x80093800"
+entry_pc = "0x8014AA0C"
+text_size = "0x00163800"
+stack_base = "0x801FFFF0"
+
+# Digests are for data Track 01 (first BINARY FILE / TRACK 01).
+[prepare_disc]
+out_dir = "disc"
+bin_name = "Breath of Fire III (Japan).bin"
+cue_name = "Breath of Fire III (Japan).cue"
+boot_exe = "SLPS_009.90"
+known_sizes = [479812704]
+known_md5 = [
+  "cb8d17ce72fc697fed6ddee7b3fde10b",
+]
+known_sha1 = [
+  "ee7b20316590b61352868ca4d76f0a5f95c990de",
+]
+
+[recompiler]
+seeds = "seeds/ghidra_funcs.txt"
+out_dir = "generated"
+strict = true
+
+[runtime]
+window_title = "BreathOfFire3 Recompiled"
+memcard_dir = "saves"
+
+[video]
+renderer = "opengl"
+aspect_ratio = "4:3"
+
+[controller]
+default_mode = "digital"
+
+# Online mount gate: digests + track count + optional TOC fingerprint
+# (see docs/NETPLAY.md).
+[netplay]
+require_cue = true
+required_tracks = 2
+required_disc_fp = "2489523d08dd1729c8448ab005f6b34313fc33cd89fd8a4dbcfb2f4eb874c691"
