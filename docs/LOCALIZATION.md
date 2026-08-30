@@ -2,6 +2,10 @@
 
 **Status:** IN PROGRESS (last verified 2026-08-30, revised same day)
 
+> §4.2c and §4.3 were superseded in part on 2026-08-30 — the text engine is
+> identified. Read [`TEXT_ENGINE.md`](TEXT_ENGINE.md) and
+> [`regional-builds.md`](regional-builds.md) before acting on this file.
+
 Scope: what it will actually take to run the Japanese release in English, and
 whether the official US release (SLUS-00422) can supply the script. Companion
 to [`BRINGUP.md`](BRINGUP.md).
@@ -244,7 +248,51 @@ buffer. `rtrace_*` is MMIO-only (`debug_server_trace_mmio_read`, called from
 `0x80010000`. Finding the renderer needs a mechanism that does not exist yet —
 that is the open tooling gap, not a data-collection gap.
 
+### 4.2c Static references to the script buffer (2026-08-30)
+
+A scan of the boot EXE for `lui $r,0x8001` followed by a load/store off that
+register inside `0x80010000`–`0x80013FFF` finds only **three** instructions,
+all reads, all of the same word:
+
+| PC | op | target |
+|---|---|---|
+| `0x80150770` | `lw` | `0x80010004` |
+| `0x80150DB0` | `lw` | `0x80010004` |
+| `0x8015AE78` | `lw` | `0x80010004` |
+
+Zero direct writes (consistent with 4.2b — the data arrives by DMA, not CPU
+stores). `0x80010004` is almost certainly a header field at the head of the
+loaded block — a count or a pointer to the message index — so these three sites
+are plausible **entry points into the text system**, and worth reading first.
+
+The wider lesson: the buffer is reached almost entirely **through pointers**,
+not `lui`-materialised constants. That is why an ad-hoc static scan cannot
+answer "what draws text" — it is a dataflow question. Following the pointer out
+of `0x80010004` through these three functions is the concrete next step, and is
+the argument for a real decompiler (Ghidra) over further scanning.
+
 ### 4.3 What remains
+
+> **Updated 2026-08-30 — three of the four items below moved.** The text engine
+> is now identified ([`TEXT_ENGINE.md`](TEXT_ENGINE.md)):
+>
+> - **Item 1 (slot splitting)** is very likely answered. Control code `8`
+>   resolves a message as `base + *(u16 *)(base + 2*index)` where
+>   `base = 0x80010000 + *(u32 *)0x80010004` — that `u16` table *is* the slot
+>   split. What still needs establishing is the table's length, and whether
+>   every string in a section is reachable through it.
+> - **Item 3 (applying it) is no longer blocked.** The interception point is
+>   that message lookup, not the dispatch boundary — which is why the `char*`
+>   capture ring found nothing. The apply hook does not need dispatch at all.
+> - **Item 4 (font)** is confirmed as the right instinct, and the reference is
+>   now precise: `0x80151F4C` maps a character code onto a 21-glyph-wide atlas
+>   of 12 px cells. Whether the Western builds moved to proportional advance is
+>   the open question — see [`regional-builds.md`](regional-builds.md).
+>
+> Also settled: **no Western release is an address-compatible donor** and none
+> has runtime language support, but the `0x80010000` section is **variable-size**
+> across Capcom's own localizations, so a translation is not bound by the JP
+> byte budget.
 
 The chain disc → aligned JP/EN is proven. What is not yet built:
 

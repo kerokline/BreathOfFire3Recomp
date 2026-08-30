@@ -332,6 +332,7 @@ recomp-ui belong upstream in their own repositories, not as local patches.
 | Doc | Contents |
 |---|---|
 | [`docs/STATUS.md`](docs/STATUS.md) | Living status — where the project stands, what's in flight, what's blocked |
+| [`docs/HANDOFF.md`](docs/HANDOFF.md) | Next-session handoff — what to pick up, and the traps already paid for |
 | [`docs/BRINGUP.md`](docs/BRINGUP.md) | Boot/soak log — what runs, where it stops, what was fixed |
 | [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) | JP→EN: where the script lives on disc, the `.EMI` container, what blocks applying a translation |
 | [`docs/INVENTORY.md`](docs/INVENTORY.md) | What is actually in this repo |

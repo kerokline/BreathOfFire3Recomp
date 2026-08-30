@@ -13,6 +13,9 @@ belong to *this game*, not to the framework.
 | `recomp-ui/docs/` | Launcher submodule | Read-only reference |
 | `/CLAUDE.md` | This repo | Session bootstrap — keep it short and current |
 
+`HANDOFF.md` is the next-session entry point: what to pick up, in order, and
+the traps already paid for. It points at evidence rather than restating it.
+
 `STATUS.md` is the living status doc — where the project stands, what's in
 flight, what's blocked. It is the first thing a new session reads after
 `CLAUDE.md`, and the file that gets updated as work lands. `CLAUDE.md` stays
@@ -53,4 +56,6 @@ Create these when the work actually starts — empty stubs are noise:
 | `OVERLAY_STATUS.md` | BoF3 overlay map — discovered overlays, load addresses, seed gaps |
 | `SYMBOLS_NOTES.md` | Rationale behind `symbols.toml` entries; how each was identified |
 | `LOCALIZATION.md` | JP→EN string translation: capture inventory, text-draw PC census, font work |
+| `TEXT_ENGINE.md` | **Exists.** The message interpreter, renderer and glyph path — control codes, the `0x80010004` message-index formula, interpreter state block |
+| `regional-builds.md` | **Exists.** JP/US/EN/FR/DE comparison — no runtime language support, no address-compatible donor, and the `.EMI` evidence isolating the script section |
 | `ENHANCEMENTS.md` | Post-faithfulness work: load-time reduction, widescreen, etc. |

@@ -11,10 +11,12 @@ submodules.
 2. [`psxrecomp/CLAUDE.md`](psxrecomp/CLAUDE.md) — the framework constitution.
    It governs anything you touch inside the submodule and sets the rules this
    title inherits (see *Inherited rules* below).
-3. [`docs/STATUS.md`](docs/STATUS.md) — where the project stands right now,
+3. [`docs/HANDOFF.md`](docs/HANDOFF.md) — what to pick up next, and the traps
+   already paid for. Read this before starting work.
+4. [`docs/STATUS.md`](docs/STATUS.md) — where the project stands right now,
    what's in flight, and what's blocked.
-4. [`docs/INVENTORY.md`](docs/INVENTORY.md) — what's actually in this repo.
-5. [`docs/README.md`](docs/README.md) — where to put notes you produce.
+5. [`docs/INVENTORY.md`](docs/INVENTORY.md) — what's actually in this repo.
+6. [`docs/README.md`](docs/README.md) — where to put notes you produce.
 
 ## Repo shape
 
