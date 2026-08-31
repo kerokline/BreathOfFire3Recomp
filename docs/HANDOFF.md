@@ -1,227 +1,136 @@
 # Handoff — next session
 
-**Status:** IN PROGRESS (written 2026-08-30, updated 2026-08-30)
+**Status:** IN PROGRESS (rewritten 2026-08-30, end of the play/diagnosis session)
 
-What to pick up, in order, and the traps already paid for. This is a *pointer*
-document — the evidence lives in [`STATUS.md`](STATUS.md),
-[`BRINGUP.md`](BRINGUP.md), [`LOCALIZATION.md`](LOCALIZATION.md),
-[`TEXT_ENGINE.md`](TEXT_ENGINE.md) and
-[`regional-builds.md`](regional-builds.md); read those for why, read this for
-what next.
+Read [`STATUS.md`](STATUS.md) for where the project stands and
+[`OVERLAYS.md`](OVERLAYS.md) for the finding the next task rests on. This file
+is what to pick up and the traps already paid for.
 
 ## Where things stand in one paragraph
 
-The game **loads**. It boots, renders its title screen, accepts input, and plays
-the opening prologue with text drawing. Savestates save and load. The previous
-session's "parks in a wait loop" diagnosis was wrong and is retracted — the
-pinned PCs were `DrawOTag()` and `VSync()`, a healthy render loop. Separately,
-the Japanese script has been located on disc: it lives in per-area `.EMI`
-container sections, selected by destination address `0x80010000`. As of
-2026-08-30 the **text engine is identified** — renderer, stepper, immediate
-draw, font-atlas mapper and the message-index formula — which closes the one
-blocker this document was previously built around. See
-[`TEXT_ENGINE.md`](TEXT_ENGINE.md).
+The game **plays**. It boots, renders, has audio, takes input, writes memory
+cards, and has been played past the prologue into the mines with area
+transitions, name entry and menus. The **text engine is identified and confirmed
+on a live run** — that work is done. The one thing standing between here and a
+real playthrough is that **most of BoF3's code lives in overlays that are not
+statically recompiled**: 81.6% of the boot EXE's text segment is zero-fill, and
+a measured session put 93.6% of interpreted instructions in that space.
 
-## The blocker is resolved
+## The next task — static overlay extraction
 
-**The text engine is identified.** Full evidence in
-[`TEXT_ENGINE.md`](TEXT_ENGINE.md); the short version:
+**Do not build DMA-time capture, and do not enable `[runtime] overlay_cache`.**
+The framework's "disc extraction does not work" advice is Tomba-specific;
+BoF3's `.EMI` TOC states each section's RAM destination and the sections are
+contiguous. Evidence in [`OVERLAYS.md`](OVERLAYS.md) section 5.
 
-| Function | Role |
+Suggested order:
+
+1. **Enumerate.** Walk all 880 `.EMI` files, read each TOC, collect every
+   section whose destination lands in the code region. `tools/emi.py` already
+   parses the format; `tools/disc_ls.py` extracts files. Beware: `disc_ls.py`
+   extracts whole files, and the set is 259 MB — consider reading just the
+   first 2 KB (header + TOC) per file.
+2. **Code-test each candidate.** Not every zero-fill destination is code.
+   `AREA004.EMI` section 8 at `0x80104000` has **zero** `jr $ra` and zero
+   prologues — it is data. The cheap discriminator used so far is `jr $ra`
+   (`0x03E00008`) and `addiu sp,sp,-N` (`0x27BDxxxx` with bit 15 set) counts.
+3. **Start with band 1.** `GAME.EMI` section 0 goes to `0x80196800`, 227,556
+   bytes, one occupant, and it is where field-play interpretation concentrates.
+   Feed it to Layer B (`game.toml [[overlays]]` +
+   `psxrecomp/tools/compile_overlays.py`), which wants
+   `(load_addr, bytes, seeds)` — the TOC gives the first two.
+4. **Band 2 is the hard one, and it is optional at first.** `0x801D0C00` is a
+   swap slot shared by `SHOP` / `STATUS` / `BATTLE` / `START`. Pre-compiling
+   more than one occupant means the runtime must register *and unregister* by
+   mode — get it wrong and it is OV-1 in
+   `psxrecomp/docs/overlay-status.md` (stale registration, wrong native code,
+   Tomba's blue screen). Prove band 1 first.
+
+Expectation management: `overlay-status.md` records that Tomba's first result
+was **correctness only**, near-0% native, because one overlay is not coverage.
+Do not promise a speed win from step 3 alone.
+
+## Traps paid for today — do not re-pay them
+
+- **PowerShell has no inline env-var prefix.** `VAR=x cmd` is a parse error.
+  Use `$env:VAR = "0"` then `.\path\to.exe`. The framework docs are bash.
+- **The "crashes" were the starvation watchdog**, not the game.
+  `starvation_ring.c` calls `exit(2)` after 4 s without an emu-thread
+  heartbeat. Signature: `reason: atexit` with `exit_origin: "unknown"` (the
+  tagged paths are `tcp_quit` / `sdl_window_close`). Disable with
+  `PSX_STARVATION_TIMEOUT_US=0`.
+- **Two ~87 MB freeze dumps are written at EVERY boot**, at frame ~328, from a
+  `slow_frames` then `hard_freeze` false positive. ~160 MB per launch. Prune
+  `build-dbg/psx_freeze_dump_*.json` between sessions.
+- **Savestates refuse in overlay-heavy code, by design.**
+  `psx_irq_resume_context_snapshot_safe()` is `g_cosim_dirty_pump_site == 0`
+  (`interrupts.c:629`) — an interrupt taken inside the dirty-RAM interpreter is
+  never snapshot-safe. Retrying does not help; it tracks the *interrupt path*,
+  not the aggregate ratio. **Use in-game memory-card saves** to preserve
+  progress. Savestates *do* survive a rebuild (verified).
+- **`tools/playsession.py state load` is broken** — it exceeds the I/O thread's
+  30 s bound (`emu busy or frozen`) and leaves the listener dead. The in-game
+  **X** key also kills the process; **Enter/Start** works. Load in-game, then
+  read RAM over TCP.
+- **In-game savestate slot N is file `slotN-1`.** Established from write
+  timestamps, see [`SAVESTATES.md`](SAVESTATES.md).
+- **Seeding is a dead end, proven three ways.** Extending
+  `seeds/ghidra_funcs.txt` from 523 to 868 gave a **byte-identical generate**;
+  seeding interior PCs produced aliases into a parent compiled from zero bytes;
+  and the session profile shows static EXE code with **`entries = 0`**, so the
+  interpreter never *enters* static code at all. Do not revisit this.
+- **A generate that changes the shard count needs a CMake reconfigure**, or the
+  link fails with undefined `func_*`. The generated source list is captured at
+  configure time.
+- **Keep the `psxrecomp` submodule on the pin.** It had floated to `a91884a4`;
+  it is back at `f24b7e5d`. Reset with
+  `git submodule update --init --recursive psxrecomp`.
+- Earlier retracted-in-place diagnoses, left visible in `STATUS.md` so they are
+  not re-derived: overlays as the cause of a *crash* (there was no crash),
+  savestate load as the cause of the freeze dumps, and the seed list as the
+  interpretation bottleneck.
+
+## Tooling added today
+
+| Tool | Use |
 |---|---|
-| `0x80150598` | dialogue-box renderer (contains lead `0x80150770`) |
-| `0x8015096C` | dialogue-box stepper (contains lead `0x80150DB0`) |
-| `0x8015AD34` | `byte *draw(short x, short y, byte *str)` — menu/immediate path |
-| `0x80151F4C` | font-atlas mapper — 21-glyph rows, 12 px cells |
-| `0x8014F6BC` | glyph blitter wrapper → `0x8014F708` |
+| `tools/harvest_interp_pcs.py` | Against a live run: interpreted/native ratio plus proven interpreted entry PCs, written to `analysis/observed_interp_pcs.json` |
+| `tools/verify_msgtable.py` | Walks the message table on a running game |
+| `tools/export_seeds.py` | Analyser to seeds merge. **Kept only for the record — its result was null.** |
 
-The three leads were `lw` instructions *inside* functions, not entries.
-Resolving their containers is what cracked it.
+Existing and still useful: `tools/emi.py` (parse/extract `.EMI`),
+`tools/disc_ls.py` (list/extract the ISO9660 tree), `tools/disasm_exe.py`.
 
-`0x80010004` holds an **offset from `0x80010000`** to a `u16` message-offset
-table. With `W = *(u32 *)0x80010004`:
+## Open questions
 
-```
-base   = 0x80010000 + W
-string = base + *(u16 *)(base + 2 * index)
-```
+- **`0x801CEEDC`** accounted for 91 M interpreted instructions at boot but lies
+  *past* the end of `GAME.EMI` section 0 (`0x801CE0E4`). Which overlay owns it?
+- **211 of 8,694 dispatch addresses are zero-fill**, from 18 of 523 seeds (all
+  `low` confidence). Those are registered native entries compiled from nothing.
+  Dirty-RAM invalidation masks them today; audit before trusting native
+  dispatch in that range.
+- **Text paths not yet seen live:** a shop, an equipment menu, and battle text.
+  Each is a sub-minute check against a running game with
+  `tools/verify_msgtable.py` and a screenshot.
+- **Translation still needs** variable-width glyph advance (the JP interpreter
+  hard-codes 12 px) and a line-break policy; mine `SLUS_004.22` rather than
+  inventing one. And menus/items/name entry are a **separate text pool** from
+  the `.EMI` area script.
 
-Control code `8` + one index byte is a message reference. **That is the
-translation interception point** — where a message number becomes a string
-pointer — not the glyph blitter.
+## Environment
 
-Corroborated independently: across the EN/FR/DE PAL releases the `0x80010000`
-`.EMI` section is replaced wholesale (93.4% of bytes) and is the only section
-that changes size, while audio/images/geometry stay byte-identical. Capcom grew
-it freely per language, so **a translation is not limited to the JP byte
-budget**. No Western EXE is an address-compatible donor, and none of them
-contain runtime language support — each language was a separate build on its own
-SKU. See [`regional-builds.md`](regional-builds.md).
-
-### Next, in order
-
-1. **Confirm the formula on a live run** (the framework's evidence rule). Break
-   at `0x80150770`, read `*(u32 *)0x80010004`, walk the table, check the pointer
-   lands on the text that is on screen.
-2. **Settle variable-width advance — start by mining the US build.** The JP
-   interpreter advances a hard-coded 12 px per glyph; English at fixed pitch
-   will not read. Capcom's own Latin-script build had to solve this, so read the
-   answer out of `SLUS_004.22` rather than inventing one: import it as a second
-   Ghidra program (Raw Binary, `MIPS:LE:32:default`, base `0x80096000`) and find
-   its equivalent of `0x8015AD34`. **Its addresses will not match JP** — it needs
-   its own analysis pass. Open question is whether it uses proportional advance
-   or keeps the 12 px cell with narrower art.
-3. **Line-break policy.** Code `0x01` is authored into the JP script, so English
-   needs re-authored breaks or a word-wrap pass. The US/EU script sections are
-   the reference for how Capcom handled it.
-4. **Name the five functions in `symbols.toml`**, then
-   `python tools/sync_symbols.py` (never hand-edit `psx_symbols.h`).
-
-## Task 1 — Ghidra: DONE, and how to re-enter it
-
-Fully stood up on 2026-08-30. Nothing to redo.
-
-| Piece | Where |
-|---|---|
-| Ghidra 12.1.3 | `D:\Utilities\ghidra_12.1.3_PUBLIC` |
-| GhidraMCP 6.0.0 | installed to `<ghidra>\Ghidra\Extensions\GhidraMCP` |
-| ghidra-mcp bridge | `C:\Users\kerok\Documents\GitHub\ghidra-mcp`, pinned to tag **`v6.0.0`** |
-| `uv` 0.12.7 | `C:\Users\kerok\.local\bin` |
-| `pyghidra` 3.1.0 + `jpype1` | installed into Anaconda from Ghidra's bundled wheels (offline) |
-| Ghidra project | `D:\Utilities\GhidraProjects\BoF3` — **outside the repo on purpose**, it embeds disc-derived code |
-| `.mcp.json` | repo root, paths corrected; already covered by `.gitignore:77` |
-
-### Import parameters that matter
-
-Raw Binary, `MIPS:LE:32:default`, base **`0x80093000`**. That is
-`t_addr 0x80093800` minus the 0x800 PS-EXE header, so the header absorbs itself
-and every text address lands at its true runtime address. Entry `0x8014AA0C`.
-
-### Running a Ghidra script headlessly
-
-```bash
-python -m pyghidra.ghidra_launch --install-dir "D:/Utilities/ghidra_12.1.3_PUBLIC" ghidra.app.util.headless.AnalyzeHeadless "D:/Utilities/GhidraProjects" BoF3 -process SLPS_009.90 -noanalysis -readOnly -scriptPath <dir> -postScript <script.py>
-```
-
-Drop `-noanalysis -readOnly` when the script should persist changes.
-
-### Ghidra traps, already paid for
-
-1. **`analyzeHeadless.bat` cannot run `.py` scripts** — *"Ghidra was not started
-   with PyGhidra. Python is not available."* Use the
-   `python -m pyghidra.ghidra_launch` form above. This is the one that will cost
-   an hour if forgotten.
-2. **The bridge on `main` is v7.0.0 and unreleased**, with a breaking 272→251
-   tool consolidation that does not match the 6.0.0 jar. The checkout is pinned
-   to `v6.0.0`; leave it pinned unless the jar is upgraded too.
-3. **Version-match is looser than feared.** GhidraMCP declared `12.1.2`; Ghidra
-   is `12.1.3`. A one-line edit to `extension.properties` was enough — no need
-   to chase down 12.1.2.
-4. **The upstream `.mcp.json` carries the author's hardcoded path**
-   (`c:/Users/benam/...`). The repo-root copy is already repointed.
-5. **`psxrecomp_import.py` under-seeds on a raw-binary import.** `createFunction`
-   returns `None` on undisassembled bytes, so it seeded 276 of 1026 directly.
-   Auto-analysis then filled the rest — the program has 1025 functions and
-   `tools/ghidra_seed.py` confirms 1023/1026 present. If a future re-import
-   comes up short, run `tools/ghidra_seed.py` (it disassembles first, and
-   deliberately refuses to force-disassemble large `low`-confidence
-   `leaf|orphan` spans, which are data misread as code).
-6. **`0x80010000` is not in the imported memory block** (`80093000`-`801F6FFF`).
-   References to the script buffer will not resolve in the listing until a block
-   is added for low RAM.
-
-## Task 2 — soak
-
-The game has never been played past the opening. Crashes, hangs and wrong
-output are all useful, and area transitions are the interesting moments because
-that is when `.EMI` files load.
-
-Run the instrumented tree so a hang can be inspected **live** rather than
-post-mortem:
-
-```bash
-cd build-dbg && ./BreathOfFire3_Recompiled.exe --debug-port 4370
-```
-
-```bash
-python tools/playsession.py status
-```
-
-If something breaks, **leave the process running** — attaching to the debug
-server beats a post-mortem.
-
-## What Kevin can most usefully produce
-
-**A savestate sitting on an open dialogue box.** This is now a *verification*
-instrument rather than a discovery one — the engine is identified, and what is
-needed is a live run to confirm the message-table formula (step 1 above): read
-`*(u32 *)0x80010004`, walk the `u16` table, and check the resulting pointer
-lands on the text visibly on screen.
-
-After that: an item/equipment menu and a shop (both should route through
-`0x8015AD34`, the immediate path), battle text, and the name-entry screen.
-Ordinary field-gameplay states are low value.
-
-```bash
-python tools/playsession.py state save 1
-python tools/playsession.py state load 1
-```
-
-Files land in `saves/openbios/state_8014AA0C_slotNN.pst` (+ `.thumb`).
-
-**Untested caveat:** whether states survive a rebuild of `build-dbg`. The format
-almost certainly embeds runtime layout, so a rebuild may invalidate them. Verify
-before building a large library — a handful of well-chosen states first.
-
-## Traps that already cost time — do not re-pay them
-
-- **A Release build cannot be inspected at all.** `PSX_DEBUG_TOOLS` defaults
-  **off** for Release, compiling out the TCP debug server; `--debug-port` is
-  silently inert. This caused the retracted wait-loop misdiagnosis. Use
-  `build-dbg` (`-DPSX_DEBUG_TOOLS=ON`) for anything diagnostic.
-- **`--headless` + `--renderer opengl` screenshots black** — no GL context. Use
-  `--renderer software` for captures.
-- **The command is `gpu_state`, not `gpu`.**
-- **Do not enable `PSX_XLATE_CAPTURE=1` for a playthrough.** Proven to yield
-  nothing for this title, and it costs 26–35% throughput.
-- **The framework's "capture is always-on" docs are stale** (F-3). The code
-  default is off.
-
-## Repo state at handoff
-
-Uncommitted, nothing staged:
-
-```
- M CLAUDE.md
- M README.md
- M docs/LOCALIZATION.md
- M docs/README.md
- M docs/STATUS.md
-?? docs/HANDOFF.md          this file
-?? docs/TEXT_ENGINE.md      the text engine — the main result of 2026-08-30
-?? docs/regional-builds.md  JP/US/EN/FR/DE comparison; confirms the script section
-?? tools/ghidra_seed.py     second-pass Ghidra function seeder (see trap 5 above)
-?? toolchain/               not created by this work
-```
-
-No disc data is in the repo. The Ghidra project lives at
-`D:\Utilities\GhidraProjects\BoF3`, deliberately outside the repo, because it
-embeds the boot EXE. Extracted `.EMI` sections stayed in the scratchpad;
-`build-dbg/` and its screenshots are gitignored.
-
-## External material this depends on
-
-- **`D:\BoFIII`** — prior decode work: the 435/435 character table,
-  `decode_text.py`, and an 11,491-line slot-aligned JP/EN corpus. Reuse it;
-  do not redo it. Caveats in [`LOCALIZATION.md`](LOCALIZATION.md) §4.2.
-- **`BreathOfFire3EnglishRecomp/`** — a **local-only donor** repo for the
-  official English script, to be retired once a disc-derived translation path
-  works. Do not publish it, and do not invest in its build health, submodule
-  pins, or CI. Its `psxrecomp` gitlink floated to master and its `disc =` is an
-  absolute path; neither matters unless it is ever actually built.
-- **`isos/`** (gitignored) now holds five releases: Japan, USA, Europe/English,
-  France and Germany. The three PAL discs are what proved the script section and
-  the byte-budget freedom — keep them, they are the reference for any
-  localization question. See [`regional-builds.md`](regional-builds.md).
-- The `.EMI` format comes from the community data doc cited in
-  [`LOCALIZATION.md`](LOCALIZATION.md) §4.
+- `python`, not `python3`.
+- MSYS2 toolchain is **not** on PATH by default:
+  `export PATH="/c/msys64/mingw64/bin:$PATH"` (GCC 16.2.0, CMake 4.4.2,
+  Ninja 1.13.2, ccache).
+- Build: `./psxrecomp/tools/ci/build_emitters.sh`, then
+  `python psxrecomp/psxrecomp_cli.py generate --config game.toml
+  --project-root . --disc "isos/Breath of Fire III (Japan).cue"`, then
+  `cmake --build build-dbg --target psx-runtime`.
+- `build-dbg` is the diagnosis tree (`-DPSX_DEBUG_TOOLS=ON`). A Release build
+  has no debug server and cannot be inspected at all.
+- Ghidra project at `D:\Utilities\GhidraProjects\BoF3` (1025 functions),
+  deliberately outside the repo. `analyzeHeadless.bat` cannot run `.py` —
+  use `python -m pyghidra.ghidra_launch`.
+- Prior decode work at `D:\BoFIII`: character table plus `decode_text.py`,
+  reused by `tools/verify_msgtable.py`. Open the JSON as UTF-8.
