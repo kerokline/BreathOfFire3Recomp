@@ -39,9 +39,12 @@ Built on [psxrecomp](https://github.com/mstan/psxrecomp) and
 
 ## Status
 
-**Pre-alpha — boots and renders, not playable through yet.** The game reaches
-its title screen, accepts input, and plays its opening prologue with text
-drawing correctly. It has not been played end to end.
+**Pre-alpha — playable into the game, not playable through yet.** The game
+boots, renders, plays audio, accepts input, and has been played past the
+opening prologue into the mines with area transitions, the name-entry screen
+and in-game memory-card saves all working. It has not been played end to end,
+and the reason is known: most of its code lives in runtime-loaded overlays that
+are not statically recompiled (see [`docs/OVERLAYS.md`](docs/OVERLAYS.md)).
 
 What works:
 
@@ -54,15 +57,32 @@ What works:
 - [x] **Renders.** Title screen and opening prologue, ~1.2M GPU draw commands,
       double-buffered, 3D geometry submitting
 - [x] **Input.** Start advances the title screen; the buffer flip engages
-- [x] **Savestates.** Save and load, round-trip verified on the LLE backend
+- [x] **Savestates.** Save and load, round-trip verified on the LLE backend,
+      and confirmed to survive a rebuild. They *refuse* in overlay-heavy code —
+      an interrupt taken inside the dirty-RAM interpreter is never
+      snapshot-safe — so use in-game memory-card saves to preserve progress
+- [x] **Audio.** Music and sound effects play
+- [x] **Memory cards.** In-game saves write a 128 KB card through the SIO path
+- [x] **Played past the opening.** Prologue → mines → area transitions, name
+      entry, and menus, with the debug server attached throughout
+- [x] **Text engine identified and confirmed on a live run** — the message
+      table walks correctly on both block shapes
+      ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md))
 
 What does not work yet:
 
-- [ ] Not played past the opening — no soak coverage of real gameplay
-- [ ] Overlay discovery and loading
-- [ ] Audio, video output, save/memcard verification
-- [ ] JP→EN runtime string translation — the script has been located on disc
-      (see below), but the runtime cannot yet identify which code draws text
+- [ ] **Overlay capture and compilation — the main remaining work.** 81.6% of
+      the boot EXE's text segment is zero-fill that overlays load into at
+      runtime, and a measured play session put **93.6% of interpreted
+      instructions** in that space. Static recompilation reaches only ~268 KB
+      of real code by construction. This gates performance, savestates and
+      probably a lot of correctness ([`docs/OVERLAYS.md`](docs/OVERLAYS.md))
+- [ ] No end-to-end playthrough, and no soak past the early game
+- [ ] JP→EN runtime string translation — the script is located, the engine is
+      identified and the lookup confirmed live; what remains is variable-width
+      glyph advance, line-break policy, and applying translated text
+- [ ] Menus, items and name entry are a **separate** text pool from the `.EMI`
+      area script — translating only the script leaves them in Japanese
 
 ### A correction worth recording
 
@@ -335,6 +355,9 @@ recomp-ui belong upstream in their own repositories, not as local patches.
 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | Next-session handoff — what to pick up, and the traps already paid for |
 | [`docs/BRINGUP.md`](docs/BRINGUP.md) | Boot/soak log — what runs, where it stops, what was fixed |
 | [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) | JP→EN: where the script lives on disc, the `.EMI` container, what blocks applying a translation |
+| [`docs/OVERLAYS.md`](docs/OVERLAYS.md) | Why most of this game is not statically recompiled, and what follows from it |
+| [`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md) | The message interpreter, renderer and glyph path, confirmed live |
+| [`docs/SAVESTATES.md`](docs/SAVESTATES.md) | What each savestate slot holds, and why saves sometimes refuse |
 | [`docs/INVENTORY.md`](docs/INVENTORY.md) | What is actually in this repo |
 | [`docs/README.md`](docs/README.md) | Documentation conventions |
 | `CLAUDE.md` | Session bootstrap for AI agents working in this repo |
