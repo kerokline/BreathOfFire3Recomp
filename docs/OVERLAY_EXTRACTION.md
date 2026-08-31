@@ -457,6 +457,29 @@ global tax, and **two bands is the best measured configuration.**
 
 ## 9. Band 3 (PLCHAR) — compiled, neutral, and it exposed a dispatch bug
 
+> **RESOLVED 2026-08-31 — and the original diagnosis below was wrong.**
+> `0x801CEEDC` is an **interior** address (a mid-function store `sb v0,0x3BB0($at)`,
+> in `static_discovery_entry_pcs` of **zero** occupants), not a function start.
+> The "it is a real `case` in `psx_overlay_dispatch`" claim below conflated the
+> 184 interior CPS `case ...: goto block_` resume labels with a real dispatch
+> registration. On the band-3 build it was measured on, `0x801CEEDC` was **not a
+> registered key**, so the dispatcher returned via the **address-miss** path —
+> which touches neither `variant_misses` nor `crc_misses`, exactly the zeros seen.
+> There was no bypass of the line-2796 call site.
+>
+> The Axis B feedback loop fixed it: observed with `entries > 0` →
+> `extract_overlays.py` added it as a `dispatch_entry_pc` →
+> `compile_overlays.py` emitted an **alias entry**
+> (`ov_..._alias_body_801CED1C(cpu, 0x801CEEDC)`, jumping into the middle of host
+> `func_801CED1C`). The current all-bands build registers it
+> (`psx_ov_entries[] = { 0x801CEEDCu, 12870, 6 }`, in `psx_ov_hash_addr[]`).
+> **Measured on the fresh build in a live boss fight (savestate slot 4, attacks
+> executing): `0x801CEEDC` interprets 0 instructions and the entire PLCHAR band
+> is 0% of interpreted work (was 60.5%).** Since the old build proved the
+> function is invoked in combat, zero interp = native dispatch. The prose below
+> is kept for the record; do not act on its "unresolved / needs instrumentation"
+> conclusion.
+
 Tried after §8, as the cheap targeted alternative to all-bands: two bands plus
 `0x801CE400` only. 21 captures, 498,424 bytes, **21/21 shards built, 0 audit
 failures**. Dispatch cases 10,547 → **11,963 (+13%)**, exe 76.1 → 81.6 MB.

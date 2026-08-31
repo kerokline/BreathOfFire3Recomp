@@ -7,6 +7,19 @@ actually stands. Update this rather than `CLAUDE.md`. Durable findings graduate
 into their own `docs/` file (see [`README.md`](README.md)); this stays a short
 "where we are, what's next".
 
+> **2026-08-31 session close.** (1) **§9 `0x801CEEDC` is RESOLVED** — it was an
+> unregistered *interior* address that address-missed to the interpreter (not a
+> control-flow bypass); the observed→alias pipeline registered it and it runs
+> native in live combat (PLCHAR band 60.5%→0% interpreted). (2) **First full
+> Axis B iteration landed** — a content-rich boss savestate was harvested and
+> the battle overlay's hot interior points (`0x801E6C60`, was the 14.2 M-insn #1
+> sink) went native. Observed set now **956 distinct PCs / 18,842 dispatch
+> entries**; the loop is proven and converging (325→56→20→6 new PCs/session).
+> (3) **Pipeline fixed** — `harvest_interp_pcs.py` now *unions* across sessions
+> (was overwriting + seeding the dead lane). (4) **New tooling** —
+> `tools/enrich_pcs.py` (identity / boundary / disasm / reach / `--group`
+> subsystem breakdown). Full detail in [`HANDOFF.md`](HANDOFF.md).
+
 ## Where we are
 
 **Most of Breath of Fire III is overlays (measured 2026-08-30).** The boot EXE
@@ -195,16 +208,32 @@ Headlines:
 
 ## Next up
 
-1. **Close the coverage gaps in bands 1 and 2 first.** This is the low-risk
-   half: 37 interpreted PCs inside band 1 (13.7 M instructions) and 7 inside
-   band 2, all reachable only through dynamic dispatch and therefore invisible
-   to the static call-edge walk. Feed the observed PCs from
-   `analysis/band2_interp.json` back as extra roots and recompile — it raises no
-   register/unregister question at all.
+1. **Axis B — close the coverage gaps inside compiled bands.** Now the main
+   remaining band work, and deferred to a clean session. 37 interpreted PCs
+   inside band 1 (13.7 M instructions) and 7 inside band 2, all reachable only
+   through dynamic dispatch and therefore invisible to the static call-edge
+   walk. Play → `harvest_interp_pcs.py` → re-run `extract_overlays.py` (which
+   reads `analysis/observed_interp_pcs.json` by default) → recompile all bands.
+   Self-improving, and it converges when a session stops producing new entered
+   PCs. **A play session is the only blocking input.**
 
-2. **Blocked: more bands.** Tried and reverted — see above and
-   `OVERLAY_EXTRACTION.md` §8. Needs the upstream dispatch fixes first.
-   Retained for when they land:
+   This is where runtime capture genuinely beats disc extraction, and the two
+   are not rivals: **bytes from the disc, entry points from play** — which is
+   already what the pipeline does (5,540 static roots plus 10,109 observed-PC
+   attributions from 443 unique entered PCs). Reading bytes tells you where code
+   *is*, never where a function *starts* when nothing statically calls it. Full
+   framing in [`HANDOFF.md`](HANDOFF.md).
+
+2. **A concise, persuasive writeup of the static compile path and dispatch
+   map**, for the wider ecosystem team who have only seen the capture-based
+   bringup. Draft published (private artifact, "Overlays Without Capture");
+   parked because it frames capture and disc extraction as either/or, which the
+   decomposition above supersedes.
+
+3. **DONE — more bands.** All ten are compiled and are the current
+   configuration; the upstream dispatch fixes landed (`OVERLAY_EXTRACTION.md`
+   §10-§12). The note below is kept because its *safety* reasoning is still
+   correct and worth not re-deriving:
    `0x801CE400`, `0x801D0C00` and `0x801EEC00` hold multiple distinct occupants
    at one address. **This needs no new safety mechanism** — compile every
    occupant, and `compile_overlays.py` emits them as CRC-guarded variants under

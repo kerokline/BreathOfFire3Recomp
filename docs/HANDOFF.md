@@ -1,6 +1,8 @@
 # Handoff — next session
 
-**Status:** IN PROGRESS (updated 2026-08-31, end of the overlay-dispatch session)
+**Status:** IN PROGRESS (updated 2026-08-31, end of the Axis-B / §9 / enrichment
+session — §9 resolved, first full Axis B iteration landed, PC-enrichment tooling
+added)
 
 Read [`STATUS.md`](STATUS.md) for where the project stands and
 [`OVERLAYS.md`](OVERLAYS.md) for the finding the next task rests on. This file
@@ -16,9 +18,14 @@ on a live run** — that work is done. **Most of BoF3's code lives in overlays**
 93.6% of interpreted instructions in that space). **All ten bands are now
 compiled in and are the current configuration**, after a three-step upstream fix
 to overlay dispatch that overturned the earlier "do not compile all bands"
-result. Combat runs native. What is left is not band coverage but the §9
-dispatch bypass, the coverage gaps *inside* bands, and pushing the framework
-fixes upstream.
+result. Combat runs native. **§9 is resolved** (2026-08-31 — it was an
+unregistered *interior* address, fixed for free by the observed→alias pipeline),
+and the **first full Axis B iteration landed**: a content-rich boss savestate was
+harvested, and the battle overlay's hot interior points (`0x801E6C60` etc.) went
+native, exactly as PLCHAR/§9 did. What is left is pushing the framework fixes
+upstream, the **tier-1/2 runtime enrichment** (record resident-occupant + reach
+per PC — see the enrichment section), and continued Axis B coverage as new game
+content is played (the loop is proven and converging — 325→56→20→6 new PCs).
 
 ## Where the overlay work stands
 
@@ -29,8 +36,13 @@ code lands in exactly **ten** RAM bands totalling **405 unique sections /
 3.61 MB**, and `GAME.EMI` §0 (`0x80196800`, the field engine) is compiled into
 the runtime and linked. On a live run the overlay dispatcher logged
 **603,391 content checks with 603,391 hits and zero CRC misses**, and band 1
-recorded **zero** interpreted PCs against 558 before. No capture, no
-`[runtime] overlay_cache`, no DLL loader — that path stays inert.
+recorded **zero** interpreted PCs against 558 before.
+
+**The overlay *bytes* come from the disc, never from capture** — no
+`[runtime] overlay_cache`, no DLL loader; that path stays inert. Entry *points*
+are a different matter: the pipeline already blends statically derived roots
+with PCs observed on a live run, and deepening that is Axis B. See "capture and
+disc extraction are not rivals" below.
 
 ## Band 2 is done — battle engine, `0x80093800`
 
@@ -48,6 +60,160 @@ run, so **the whole set must always be recompiled together** — compiling one
 band alone silently drops every other.
 
 ## The next task — start here
+
+> **2026-08-31 update.** The Axis B loop below is now **proven end-to-end and
+> converging**, and the current build already banks one content-rich iteration.
+> The remaining threads, in priority order:
+>
+> 1. **The current build is all-bands + boss coverage** — `overlay_captures_all.json`
+>    has **18,842 dispatch entries** from **956 observed distinct PCs (850
+>    entered)**; `generated/overlays_static.c` is built from it and linked into
+>    `build-dbg`. `analysis/` is gitignored, so a fresh checkout regenerates.
+> 2. **Continued Axis B** as *new* game content is played (further than the intro
+>    boss). The loop is mechanical; the one blocking input is a play session
+>    reaching new content. Convergence on already-seen content is confirmed
+>    (325→56→20→6 new PCs), so repetition is spent — new areas/characters/battles
+>    are what still add.
+> 3. **Tier-1/2 runtime enrichment** (see the new enrichment section below) — the
+>    highest-value *tooling* investment; the mixed bands prove its need.
+> 4. **Two residual battle interior points** — `0x801D1014` / `0x801E739C` still
+>    interpret (down ~30× from pre-rebuild); the loop's next layer would peel them.
+> 5. The **persuasive writeup** (thread 2 below, still parked) and the **upstream
+>    PR** to `mstan/psxrecomp`.
+
+### 1. Axis B — the loop (mechanical, proven, converging)
+
+A compiled band is not a fully native band: interior entry points reached only
+by dynamic dispatch are invisible to the static call-edge walk, so they
+address-miss to the interpreter *inside* a compiled band. The observed→alias
+pipeline fixes them. This session proved it end-to-end — the intro-boss harvest
+took the battle overlay's hot interior points (`0x801E6C60`, was 14.2 M interp
+insns/#1 sink) **native**, the same mechanism that resolved §9's `0x801CEEDC`.
+
+The loop is mechanical and self-improving:
+
+1. Play a live `build-dbg` session covering as much as possible.
+2. `python tools/harvest_interp_pcs.py` — **unions** this session's entered PCs
+   into `analysis/observed_interp_pcs.json` as a distinct set (one row per PC,
+   no duplicates), and reports how many are newly seen.
+3. Re-run `tools/extract_overlays.py "isos/…Japan.cue"
+   --out analysis/overlay_captures_all.json` (it reads the observed file by
+   default via `--observed`) → `analysis/overlay_captures_all.json`.
+4. Recompile all bands and rebuild.
+5. Re-measure. Repeat until a session stops producing new entered PCs.
+
+**It needs a play session to harvest against — that is the only blocking
+input.** Everything after step 2 is mechanical.
+
+**The observed set accumulates across sessions — union only, never replace.**
+Two play sessions enter almost *disjoint* PC sets (measured 2026-08-31: two
+sessions shared only 323 of ~17,500 PCs), because which `.EMI` area is resident
+decides which addresses bucket to a band. So each session covers areas the last
+did not, and overwriting would throw that away. `harvest_interp_pcs.py` now
+unions distinctly, so the set only grows and `extract` reproduces full coverage
+from the observed file with no manual capture merge. (This is why band-level
+attribution inflating one PC into many is harmless: duplicates are collapsed in
+the observed file and re-derived per band at extract time.)
+
+### 1b. Enrichment — understanding what the captured PCs *are*
+
+New this session: [`tools/enrich_pcs.py`](../tools/enrich_pcs.py) turns a bare
+observed PC into an explained one, joining data we already have:
+
+- **Identity** — reads the live band bytes and byte-matches them to the resident
+  `.EMI` occupant (so `0x801CEEDC` → "`PLP27A` resident").
+- **Boundary** — FUNCTION-START (prologue, or preceded by `jr ra`) vs INTERIOR,
+  plus whether the PC is a static root or observed-only. This is how §9 was
+  finally understood: `0x801CEEDC` is INTERIOR, `static_root_in=0`.
+- **Semantics** — a disassembly window and the outgoing `jal` targets ("linked
+  calls" — the subsystem edges).
+- **Reach** — callers + args + frame span from the live `dirty_block_log` ring
+  (4 M-entry, filterable by target). A **native** PC shows **0 ring hits** (the
+  ring logs interp only), a free cross-check that a fix took.
+- `--group` — offline interp-weighted **subsystem breakdown** by band+family
+  (PLCHAR / BATTLE / SCENARIO / field / boss / kernel), the first cut at the
+  "these calls are one subsystem" clustering.
+
+**The offline slice is done; the durable upgrade is tier-1/2 in the runtime.**
+The reach data only reaches as far back as the ring, and mixed bands
+(`0x801D0C00` = BATTLE+ETC+SCENARIO+WORLD) can't be resolved to an occupant
+offline. Recording, *per PC at entry time*, the **resident-occupant CRC**
+(tier 1) and a **transfer-type histogram** (call/jalr/jr/branch/irq-resume,
+tier 2) in `DirtyRamPcEntry` (`dirty_ram_interp.c`, emitted via
+`dirty_ram_stats.per_pc`) makes both durable and session-long. Tier 2 is the one
+that would have diagnosed §9 in minutes instead of an afternoon. This is a
+framework change on the `fix/static-overlay-residency-signal` branch. Endgame
+(per the user): once calls are grouped by shared caller/callee, "contextually
+bound / philosophically linked" subsystems fall out — the unit for modding,
+performance, and extensibility.
+
+### 2. A short persuasive writeup of the static compile path and dispatch map
+
+**In progress, parked mid-request.** Audience is the other people working on
+the wider psxrecomp ecosystem, who have only seen the capture-based bringup
+used for Tomba / MMX6 / Ape Escape. The goal is a concise, persuasive,
+layman-readable explanation of what this title does differently and why.
+
+A first draft is published as a private artifact:
+<https://claude.ai/code/artifact/37f5d9d1-64c9-4db6-bb65-aad75e0ab4f4>
+("Overlays Without Capture"). It covers the normal capture path, why capture
+was the wrong tool here, what the `.EMI` TOC gives us instead, the three-tool
+compile path, the dispatch map, the frozen-gate bug, and the measured result.
+
+**What it still needs**, and why it was parked: the draft frames static
+extraction against capture as an either/or. That framing is wrong — see the
+next section. Rework it around the decomposition before circulating.
+
+One unverified claim to check before it goes out: it asserts Tomba's
+scatter-load format as the reason disc extraction cannot work there. That comes
+from [`OVERLAYS.md`](OVERLAYS.md) §5 citing
+`psxrecomp/docs/overlay-discovery.md`, and was **not** independently verified
+against the Tomba project.
+
+### The framing both threads share: capture and disc extraction are not rivals
+
+Established by inspection on 2026-08-31, and it reframes Axis B. **Capture
+supplies two separable things, and they have opposite value here:**
+
+| | disc extraction | runtime capture |
+|---|---|---|
+| **the bytes** | **wins decisively** — complete by construction, deterministic, reviewable, shippable, no playtime | strictly worse here; carries every objection (privacy, non-determinism, playtime-bound coverage) |
+| **the entry points** | cannot see anything reached only by indirect dispatch | **wins decisively** — an executed PC with `entries > 0` is empirical proof of a callable boundary |
+
+So the right architecture is **bytes from the disc, entry points from play** —
+and *that is already what the pipeline does.* The current all-bands captures
+carry **5,540** static call-graph roots plus **10,109** observed-PC attributions
+(from 443 unique entered PCs), across 333 of 338 captures.
+
+Note the asymmetry in risk: every objection to capture attaches to the *bytes*.
+Entry points are a list of integers — no disc content, diffable, and purely
+additive, since a bad one is rejected by the compiler's own validation. Axis B
+is therefore capture's unique benefit at almost none of its cost.
+
+Two known weaknesses in the current hybrid:
+
+- **~~The observed set is a single session~~ — FIXED 2026-08-31.** It used to be
+  a single session (443 entered PCs, 2026-08-30), the direct cause of the
+  remaining gaps. `harvest_interp_pcs.py` now unions each session into a distinct
+  accumulated `observed_interp_pcs.json`; the current set is **874 distinct PCs
+  (768 entered)** from two sessions, and it only grows. The prior tool overwrote
+  the file *and* appended to the dead seed lane — both removed.
+- **Attribution is band-level, not occupant-level.** An observed PC is attached
+  to *every* occupant of its address band — which is why the distinct entered
+  PCs become ~17,854 attributions. Harmless (validation filters them) but it
+  inflates seed counts and cannot tell you which of 181 area scripts actually
+  ran an address.
+
+**One case where capture's bytes would still win, even here.** If the game ever
+patches or relocates overlay code *after* load, the disc bytes will not match
+RAM, every variant will fail the checksum, and that address falls to the
+interpreter silently — it looks like an ordinary miss. No evidence of this so
+far (compiled bands run at ~100% hit rates and every CRC miss observed is
+explained as a non-resident tenant). **The diagnostic:** a band where *every*
+variant consistently misses means the disc bytes are not what reaches RAM, and
+that band specifically would need captured bytes.
+
+---
 
 **The upstream dispatch fix is DONE — all three steps.** Full evidence in
 [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §10-§12.
@@ -89,39 +255,69 @@ Headline numbers, all headless VSync throughput on identical protocols:
 Note the third row: **without the memo, all-bands is slower than three bands at
 boot.** Both steps 2 and 3 are load-bearing for the all-bands result.
 
-### The two decisions left on this work
+### Shipping state — resolved 2026-08-31
 
-1. **Push the branch and bump the parent gitlink.** The gitlink still points at
-   `f24b7e5d`, so a fresh checkout does NOT get any of this. The branch is
-   local-only — push it to `origin` (`kerokline/psxrecomp`) before bumping, or
-   the gitlink will reference a commit nobody else has. A PR to
-   `mstan/psxrecomp` is the eventual home; all three commits are framework-level
-   fixes with no BoF3-specific content.
-2. **The parent repo has never been committed** for any of this session's work,
-   and it also still carries the previous session's uncommitted changes.
+The branch is pushed and the pin is bumped, so a fresh checkout gets all of
+this:
+
+- `psxrecomp` branch `fix/static-overlay-residency-signal` is on `origin`
+  (`kerokline/psxrecomp`) at `70153175`.
+- The parent gitlink now points at `70153175`, committed as `63954d8`
+  ("Add static overlay extraction tooling/docs").
+
+**Remaining:** a PR to `mstan/psxrecomp`. All three commits are framework-level
+with no BoF3-specific content. They land in a sensible order — `aa6fa2c9` is the
+correctness fix and the prerequisite; `69d783f5` and `70153175` are the
+performance pair and are **load-bearing together**, since without the memo the
+all-bands build is slower than three bands at boot. Worth saying explicitly if
+anyone asks whether the third commit is really needed.
 
 **Do not assume the whole transition problem is solved.** The stall is much
-cheaper but not eliminated, and the §9 bypass below is untouched.
+cheaper but not eliminated. The §9 bypass below is now **resolved**.
 
-### Still open, and NOT explained by any of the above
+### §9 `0x801CEEDC` — RESOLVED 2026-08-31 (it was never a control-flow bypass)
 
-**A compiled dispatch entry is not being dispatched.** `0x801CEEDC` (~45% of all interpreted work, 417 K
-instructions per entry) was compiled as band 3 and verified to be a real `case`
-in `psx_overlay_dispatch` — and it is *still interpreted*, 85.9 M instructions
-over 206 entries, while `static_variant_misses` and `static_crc_misses` are both
-0. The gate never failed; it was never consulted. The only call site is
-`dirty_ram_interp.c:2795` in `dirty_ram_dispatch_inner()`. Full writeup:
+**The diagnosis was wrong, and the observed-PC feedback loop fixed it for
+free.** `0x801CEEDC` is **not** a function start — it is a mid-function store
+(`sb v0,0x3BB0($at)`) inside a PLCHAR routine, in `static_discovery_entry_pcs`
+of **zero** occupants. §9's "it is a real `case` in `psx_overlay_dispatch`"
+mistook the **184 interior CPS `case ...: goto block_` resume labels** (inside
+function bodies) for a real dispatch registration. In the band-3-era build it
+was measured on, `0x801CEEDC` was **not a registered dispatch key**, so
+`psx_overlay_dispatch(0x801CEEDC)` returned via the **address-miss** path (empty
+slot) — which touches neither `variant_misses` nor `crc_misses`. That is why
+those two counters read 0; "never failed the CRC" was misread as "never
+consulted." There was no bypass of the line-2796 call site.
+
+**The fix came from the Axis B pipeline itself.** Because `0x801CEEDC` was
+*observed* with `entries > 0`, `extract_overlays.py` added it as a
+`dispatch_entry_pc`, and `compile_overlays.py` emitted an **alias entry** —
+`ov_..._alias_body_801CED1C(cpu, 0x801CEEDC)`, i.e. an independently dispatchable
+key that jumps into the middle of host function `func_801CED1C`. In the current
+all-bands build it is registered (`psx_ov_entries[] = { 0x801CEEDCu, 12870, 6 }`,
+6 variants) and lives in `psx_ov_hash_addr[]`.
+
+**Measured on the fresh build, in a live boss fight (savestate slot 4, PLCHAR
+resident, attacks executing):** `0x801CEEDC` interprets **0** instructions
+(+0 entries, +0 insns over the whole fight), and the *entire* PLCHAR band
+`0x801CE400` — which was **60.5%** of interpreted work in the band-3 profile —
+is now **0%**. Since the old build proved the function *is* invoked in combat
+(206 entries), zero interpreted work means it dispatches native. Full evidence:
 [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §9.
 
-Until this is understood, **compiling a band does not guarantee its hot code
-runs native**, which undercuts band-adding as a strategy independently of the
-dispatch-cost problem in §8. Instrument that call site — log the addresses it is
-consulted for — and find out how `0x801CEEDC` is entered without passing it.
+**The general lesson:** an interior address reached only by dynamic dispatch is
+invisible to the static call-edge walk, so it is never a registered key and
+address-misses to the interpreter — *even inside a compiled band*. This is the
+Axis B gap, and the observed→alias mechanism is its general fix. The same signature
+is live right now for `BATTLE.EMI` interior points in band `0x801D0C00`
+(`0x801E6C60` = 14.2 M interp insns, the current top interpreted PC) — harvested
+2026-08-31, will go native on the next rebuild by the identical mechanism.
 
-**Never infer success from `static_hits`.** Band 3 looked perfect by every
-counter (chk/hit 1.00, 0 variant misses, 0 CRC misses) while its entire purpose
-went unachieved. Verify per-PC with `tools/harvest_interp_pcs.py` after every
-band addition.
+**Still true, and load-bearing:** **never infer success from `static_hits`.**
+Band 3 looked perfect by every aggregate counter (chk/hit 1.00, 0 variant
+misses, 0 CRC misses) while `0x801CEEDC` ran fully interpreted. Verify per-PC
+with `tools/harvest_interp_pcs.py` after every rebuild — that is exactly how this
+was caught and confirmed.
 
 Axis A (more bands) was blocked on the §8 dispatch cost. **That blocker is
 gone** — steps 1-3 removed both of its costs and all ten bands are now
@@ -183,10 +379,33 @@ the slow screens.
 
 ### Axis A2 — the battle-transition slowdown itself
 
-Still unfixed, and still caused by `0x801D0C00` (29.9% of interpreted work),
-`0x801EEC00` (20.1%) and `0x801CE400` (9.1%) being uncompiled. But compiling
-them costs more than it saves today — see above. This waits on the upstream
-dispatch fix.
+> **Corrected 2026-08-31.** The earlier version of this section said
+> `0x801D0C00`, `0x801EEC00` and `0x801CE400` were *uncompiled* and that
+> compiling them "waits on the upstream dispatch fix." Both claims are now
+> stale — they described the three-band build. **All three are among the ten
+> bands and all three are compiled in the current all-bands build** (verified:
+> their entry PCs — e.g. `0x801EECD4`/`0x801EEEE0`, `0x801D112C`/`0x801D0C04`,
+> `0x801CE448`/`0x801CEEDC` — are present in `generated/overlays_static.c`).
+> Do not re-add them as "missing bands."
+
+Still unfixed, but **not** because these regions are uncompiled. They are
+compiled. What remains during a battle transition is two things, neither of
+which is a missing band:
+
+1. **Entry-point coverage *inside* those bands (Axis B).** A compiled band is
+   not a fully native band. The battle-transition hot code surfaces to the
+   interpreter at boundaries the static call-edge walk never named (jump-table /
+   function-pointer targets), so it runs interpreted despite the band being
+   compiled. This is the coverage layer, not the region layer — see Axis B.
+2. **The §9 dispatch bypass.** `0x801CEEDC` (band `0x801CE400`) is compiled
+   *and* is a real `case` in `psx_overlay_dispatch`, yet is still interpreted
+   because the gate is never consulted. That is a routing defect, independent of
+   coverage. See "Still open" above and `OVERLAY_EXTRACTION.md` §9.
+
+**There are no more regions to capture.** The `.EMI` TOC survey is exhaustive
+over the disc; the ten bands are all the RAM-bound code destinations that exist.
+"All bands" is complete at the region *and* section (bytes) layer — the only
+incompleteness left is entry points within bands (Axis B) plus §9.
 
 ### Axis B — coverage gaps inside bands already compiled
 
@@ -197,17 +416,39 @@ are only reached through dynamic dispatch. Band 2 has the same gap at 7 PCs.
 
 A compiled band is not a fully native band. `tools/harvest_interp_pcs.py`
 against a live session is what finds these; feeding the observed PCs back as
-extra roots and recompiling should be cheap. This is orthogonal to Axis A —
-Axis A adds *bands*, Axis B deepens coverage *within* a band — and neither
-blocks the other.
+extra roots and recompiling should be cheap. Axis A added *bands* and is now
+closed; Axis B deepens coverage *within* a band.
+
+**Axis B is now the main remaining band work — see "The next task" above** for
+the loop, the blocking input (a play session), and the reason this is capture's
+one genuine advantage over disc extraction. The mechanism is already wired:
+`extract_overlays.py --observed` defaults to reading
+`analysis/observed_interp_pcs.json`, and only PCs with `entries > 0` are passed
+on, because a PC the interpreter merely fell *through* is not evidence of a
+callable boundary.
+
+**Why static extraction cannot close this on its own:** reading disc bytes
+tells you where code is, not where a function *starts*. Anything reached only
+through a jump table or function pointer is invisible to a call-edge scan.
+Band 1 is the proof — it compiled clean, audited perfectly, and still had 37
+entries nobody could derive statically.
+
+This does **not** contradict `FUNCTION_DISCOVERY` rule 1 ("no executed-PC
+feedback"), which governs the *analyser*. The feedback here happens at the
+overlay layer instead, which is why it is legitimate.
 
 ## Traps paid for — do not re-pay them
 
-- **The all-bands generate exits with code 2, and that is correct.** 335 of 338
-  shards build; the three failures are the known `UNSUPPORTED_INSTRUCTION` cases
-  at `0x800C1800` (BIN/BOSS, x2) and `0x801F2C00` (AREA038) — data walked as
-  code. The output file is written and is correct. Automation must not treat
-  exit 2 as fatal without checking *which* shards failed.
+- **The all-bands generate exits with code 2, and that is correct.** A handful
+  of shards fail audit as `UNSUPPORTED_INSTRUCTION` — data walked as code. The
+  core three are `0x800C1800` (BIN/BOSS, x2) and `0x801F2C00` (AREA038); as the
+  observed set grows, a *new* observed entry PC can walk into a data region and
+  add one more (2026-08-31: `0x801EEC00` crc AA2E2918, 1 unsupported → 4 total).
+  **The count is expected to drift with the observed set — do not read a higher
+  number as a regression.** Each failure just drops that one occupant to the
+  interpreter; the rest of its band compiles. The output file is written and is
+  correct. Automation must not treat exit 2 as fatal — check *which* shards
+  failed and that the failure class is `UNSUPPORTED_INSTRUCTION`, not something new.
 - **Measure dispatch changes on a variant-heavy workload, not just a hit-heavy
   one — they disagree in sign.** The resident-occupant memo measured neutral to
   slightly *negative* on a savestate-loaded combat workload (chains already
@@ -366,13 +607,15 @@ blocks the other.
   `_shallow.json` (96). `analysis/` is **gitignored** — a fresh checkout must
   regenerate them with `emi_survey.py` then `extract_overlays.py` before it can
   build overlays. Note the all-bands generate takes ~13 min and the build ~7.
-- **Three shards fail the audit as `UNSUPPORTED_INSTRUCTION`, and that is
+- **The core audit failures are `UNSUPPORTED_INSTRUCTION`, and that is
   correct.** Two in `BIN/BOSS` at `0x800C1800`, one in `BIN/WORLD01/AREA038` at
   `0x801F2C00`. Decoding the words gives `0xFFFFFFFF`, `0xFFFF0601`, and functs
   `0x30`/`0x32`/`0x01` — TGE/TLT/MOVCI, MIPS II/IV encodings the R3000A does not
   have. **This is data being walked as code**, not a recompiler opcode gap: a
   static root ran into a jump table or fill. The audit refusing them is the
-  right outcome; those occupants fall to the interpreter.
+  right outcome; those occupants fall to the interpreter. Expect the *set* to
+  grow by one occupant at a time as observed entries expand into new bands (see
+  the exit-code-2 trap above) — same class, same correct outcome.
 - **`overlay_loader_status` is the measurement that matters**, not the
   interpreted/native ratio. `static_checks` / `static_hits` / `static_crc_misses`
   say whether the compiled overlay is actually being used and whether the disc
@@ -390,11 +633,12 @@ blocks the other.
 
 | Tool | Use |
 |---|---|
-| `tools/harvest_interp_pcs.py` | Against a live run: interpreted/native ratio plus proven interpreted entry PCs, written to `analysis/observed_interp_pcs.json` |
+| `tools/harvest_interp_pcs.py` | Against a live run: interpreted/native ratio plus proven interpreted entry PCs, **unioned** (distinct, no duplicates) into the accumulated `analysis/observed_interp_pcs.json`. Downstream is `extract_overlays.py --observed`, **not** the seed lane — the old seed-append was a proven dead end and is removed. |
 | `tools/verify_msgtable.py` | Walks the message table on a running game |
 | `tools/export_seeds.py` | Analyser to seeds merge. **Kept only for the record — its result was null.** |
 | `tools/emi_survey.py` | Walks every `.EMI` on the disc, reads each TOC, hashes **every** section and code-tests the RAM-bound ones → `analysis/emi_sections.json`. Run it per region to diff discs. |
 | `tools/extract_overlays.py` | Turns survey rows into `overlay_captures.json` with statically derived seeds — the input to `psxrecomp/tools/compile_overlays.py` |
+| `tools/enrich_pcs.py` | **Understand** an observed PC: resident `.EMI` occupant (live RAM byte-match), FUNCTION-START vs INTERIOR, disassembly window, outgoing `jal` targets ("linked calls"), and callers from the live `dirty_block_log` ring. `--group` gives an offline interp-weighted **subsystem breakdown** by band+family. Native PCs show **0 ring hits** (the ring logs interp only) — a free cross-check that a fix took. |
 
 Existing and still useful: `tools/emi.py` (parse/extract `.EMI`),
 `tools/disc_ls.py` (list/extract the ISO9660 tree), `tools/disasm_exe.py`.
