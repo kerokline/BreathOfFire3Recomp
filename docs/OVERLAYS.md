@@ -86,11 +86,69 @@ Two experiments confirm it:
   stale-registration failure mode in `psxrecomp/docs/overlay-status.md` sitting
   armed. Worth auditing before native dispatch is trusted in that range.
 
-## 5. What to do
+## 5. The overlays are statically extractable — capture is NOT required
 
-The framework already has the shape of the answer in
-`psxrecomp/docs/overlay-discovery.md` and `overlay-status.md`: capture overlay
-bytes at CD-DMA time, compile them, register them. Two cautions:
+**This is the important finding, and it contradicts the framework's default
+advice for a good reason.** `psxrecomp/docs/overlay-discovery.md` argues that
+disc extraction "does not work", but that argument is **Tomba-specific**: Tomba
+uses a scatter-load format where overlay bytes exist nowhere contiguously on
+disc. Breath of Fire III does not. Its `.EMI` containers carry a TOC that states
+each section's **RAM destination**, and the sections are contiguous.
+
+`BIN/ETC/GAME.EMI` — the field engine:
+
+| Section | Destination | Size |
+|---|---|---|
+| 0 | `0x80196800` | 227,556 |
+| 1 | `0x801D0C00` | 4,274 |
+
+Section 0 spans `0x80196800`-`0x801CE0E4` and is unambiguously MIPS code:
+**681 `jr $ra`** and **572 `addiu sp,sp,-N` prologues** across 56,889 words. The
+PCs harvested from the live session disassemble correctly inside it —
+`0x801970B4` is `lw v0,0x44(v0) / jr ra / sb zero,4(v0)`, a textbook function
+tail. It exactly covers the zero-fill run `0x80196801`-`0x801CE400` mapped in §1.
+
+### The layout: two bands
+
+| Band | Occupants | Nature |
+|---|---|---|
+| `0x80196800` | `GAME.EMI` §0 (227 KB) | the field engine — effectively persistent |
+| `0x801D0C00` | `SHOP.EMI` (87 KB), `STATUS.EMI` (118 KB), `BATTLE.EMI` (118 KB), `START.EMI` (118 KB) | a **swap slot**, mutually exclusive by game mode |
+
+Area files (`BIN/WORLDnn/AREAnnn.EMI`) carry their own sections — e.g.
+`AREA004.EMI` targets `0x800D3800`, `0x800E3800`, `0x80104000`, `0x801F2C00`
+and the `0x80010000` script. Note that not every zero-fill destination is code:
+`AREA004.EMI` §8 at `0x80104000` has **zero** `jr $ra` and zero prologues — it
+is data. Each candidate section must be code-tested before it is compiled.
+
+### What this changes
+
+- **No runtime capture, and no `[runtime] overlay_cache`.** The risky Layer A
+  DLL cache can stay off, and the OV-1 stale-registration path stays unused.
+- **No playtime needed for discovery.** All 880 `.EMI` files can be enumerated
+  offline; coverage is complete by construction rather than limited to what a
+  session happened to touch.
+- **Deterministic and reviewable** — the overlay set becomes a build input, not
+  a recording.
+
+### The hard part that remains
+
+Band 2 is one address range holding four different modules at different times.
+Pre-compiling all four means the runtime must register and *unregister* by
+mode; getting that wrong is precisely OV-1 (stale registration → wrong native
+code → the Tomba blue screen). Band 1 is the easy, high-value start: one
+occupant, 227 KB, and it is where the field-play interpretation is concentrated.
+
+Still unresolved: `0x801CEEDC` — the address that accounted for 91 M
+interpreted instructions at boot — lies **past** the end of `GAME.EMI` §0
+(`0x801CE0E4`), so it belongs to some other overlay not yet identified.
+
+## 6. What to do
+
+Prefer the **static extraction** route in §5 over DMA-time capture. The
+framework's Layer B (`game.toml [[overlays]]` + `compile_overlays.py`) is the
+right consumer — it wants `(load_addr, bytes, seeds)`, and the `.EMI` TOC
+supplies the first two directly. Two cautions on the framework docs:
 
 1. That work is described on branch `feat/overlay-jit-cache`. This repo is
    pinned to `f24b7e5d`. **Confirm what the pin actually carries** before
