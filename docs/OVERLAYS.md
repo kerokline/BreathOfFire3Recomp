@@ -1,6 +1,10 @@
 # Overlays — why most of this game is not statically recompiled
 
-**Status:** IN PROGRESS (evidence gathered 2026-08-30)
+**Status:** DONE as analysis (evidence gathered 2026-08-30). The plan in §5-§6
+has been **executed and proven** — see
+[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) for the ten-band overlay map,
+the extraction pipeline, and the live measurements. This document remains the
+evidence for *why* overlays dominate; that one is the *how*.
 
 Breath of Fire III keeps the great majority of its code in runtime-loaded
 overlays. Static recompilation reaches only a minority of the game by
@@ -139,11 +143,21 @@ mode; getting that wrong is precisely OV-1 (stale registration → wrong native
 code → the Tomba blue screen). Band 1 is the easy, high-value start: one
 occupant, 227 KB, and it is where the field-play interpretation is concentrated.
 
-Still unresolved: `0x801CEEDC` — the address that accounted for 91 M
-interpreted instructions at boot — lies **past** the end of `GAME.EMI` §0
-(`0x801CE0E4`), so it belongs to some other overlay not yet identified.
+**Resolved:** `0x801CEEDC` — the address that accounted for 91 M interpreted
+instructions at boot — lies past the end of `GAME.EMI` §0 (`0x801CE0E4`)
+because it belongs to the **next band down, `0x801CE400`**, whose sole
+occupants are the 19 `BIN/PLCHAR/PLPnnn.EMI` §0 player-character modules
+(max extent `0x801D0ACC`). See `OVERLAY_EXTRACTION.md` §1.
 
-## 6. What to do
+## 6. What to do — done, and what it turned into
+
+**This section is history now: the static-extraction route was taken and it
+worked.** Band 1 is compiled and native, `static_crc_misses` is 0 over 603,391
+runtime checks, and neither `[runtime] overlay_cache` nor the DLL loader is
+used. The two cautions below were both borne out — the pin does carry
+`compile_overlays.py` and it accepted a synthesised capture file unchanged, and
+the first result is indeed correctness rather than speed. Read
+[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) for what to do next.
 
 Prefer the **static extraction** route in §5 over DMA-time capture. The
 framework's Layer B (`game.toml [[overlays]]` + `compile_overlays.py`) is the

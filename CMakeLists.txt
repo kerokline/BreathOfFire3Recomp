@@ -33,6 +33,12 @@ psxrecomp_add_game_runtime(psx-runtime
     MAX_PLAYERS 1
     LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/launcher_assets/img/boxart.tga"
     APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
+    # Layer B: overlays statically extracted from the disc's .EMI containers
+    # (docs/OVERLAYS.md). Forwarded through UNPARSED_ARGUMENTS to
+    # psxrecomp_add_runtime_target, so it must NOT follow a multi-value keyword
+    # such as GEN_FULL_GLOB -- cmake_parse_arguments would swallow it into that
+    # list and PSX_HAS_OVERLAY_DISPATCH would silently stay undefined.
+    GAME_OVERLAY_STATIC_C "${CMAKE_CURRENT_SOURCE_DIR}/generated/overlays_static.c"
     GEN_MARKER "generated/SLPS_009.90_dispatch.c"
     GEN_FULL_GLOB "generated/SLPS_009.90_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"

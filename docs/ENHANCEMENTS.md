@@ -150,6 +150,112 @@ outside this repo is the right scratch space.
 
 ---
 
+## E2 — Pause / hold-frame and frame advance
+
+**Kind:** upstream framework change (host loop + one Vulkan present fix).
+**Requested:** 2026-08-30. **Status:** designed, not built.
+
+Goal: hold the image still so on-screen text can be read. BoF3 has scenes with
+no in-game pause and dialogue that advances faster than it can be read, which
+matters during localization review as much as during play.
+
+### What exists today
+
+There is **no dedicated pause hotkey, no frame advance, and no slow-motion.**
+There is a turbo (speed-up) path but no fractional speed control.
+
+There *are* two host-level guest freezes, both built for other features, and
+both proving the mechanism this item needs:
+
+| Hotkey | Feature | Loop | Overlay |
+|---|---|---|---|
+| **F7** (pad select+R1) | Save-state slot menu | `savestate_menu_host_pause_loop()` [`main.cpp:6111`](../psxrecomp/runtime/src/main.cpp) | Full slot panel — **covers the image** |
+| **F8** (pad select+R3) | Rewind filmstrip | `rewind_host_pause_loop()` [`main.cpp:6070`](../psxrecomp/runtime/src/main.cpp) | Bottom filmstrip — mostly clear |
+
+Both are modal `while (...) { SDL_PollEvent; ...; SDL_Delay(8); }` loops entered
+from inside the vblank present body ([`main.cpp:6424`](../psxrecomp/runtime/src/main.cpp)),
+so the guest is genuinely halted mid-vblank rather than throttled. The
+save-state one is commented *"Freeze guest in vblank present while the
+save-state slot menu is open"* — that is already the feature, minus a UI that
+gets out of the way.
+
+Keyboard defaults are registered in
+[`host_keymap.c`](../psxrecomp/runtime/src/host_keymap.c) as
+`HOST_KEYMAP_REWIND` (F8) and `HOST_KEYMAP_SAVE_STATE_MENU` (F7); pad binds are
+`[hotkeys] hotkey_pad_rewind` / `hotkey_pad_save_state_menu`
+(`config_loader.h:1231`). A pause action would be a third `HOST_KEYMAP_*` entry
+in that enum, which is the cheap part.
+
+**Workaround until then:** F8 rewind is the better of the two — the filmstrip
+obscures least, and it scrubs. It is **off by default** and snapshots only every
+15 frames, so it cannot hold a specific frame of text as shipped. Enable
+`[video] rewind = true` and lower `rewind_interval` (accepts 1/4/8/12/15);
+`rewind_depth` is 50–200. Each snap is ~3.5 MB (2 MB RAM + 1 MB VRAM + 512 KB
+SPU RAM), so interval 4 / depth 200 buys ~13 s of scrollback at ~700 MB, and
+interval 1 / depth 200 gives frame-exact scrubbing over only ~3.3 s. Env
+`PSX_REWIND`, `PSX_REWIND_INTERVAL`, `PSX_REWIND_DEPTH` outrank the UI
+([`psx_rewind.h`](../psxrecomp/runtime/include/psx_rewind.h)).
+
+### The defect this would have to fix first
+
+`rewind_pause_present()` ([`main.cpp:6049`](../psxrecomp/runtime/src/main.cpp))
+is what both loops call to keep the window alive while frozen, and it does not
+behave the same on all three backends:
+
+- **OpenGL** — `gl_renderer_present_hold_last()`: re-presents the held frame.
+- **Software** — re-copies the `s_sw_hold_*` texture: held frame.
+- **Vulkan** — `vk_renderer_present_blank()`, which
+  `vkCmdClearColorImage`s the swapchain to **black**
+  ([`gpu_vk_renderer.c:1715`](../psxrecomp/runtime/src/gpu_vk_renderer.c)).
+
+So on Vulkan the existing freezes show a black screen, not the paused image.
+That is tolerable for a slot menu drawn over the top; it is fatal for a feature
+whose entire purpose is *looking at the frozen frame*. A hold-frame pause
+requires a real Vulkan hold-last present first. BoF3 ships `renderer = "opengl"`
+(`game.toml:59`), so this does not block the title — but it blocks calling the
+feature done upstream.
+
+### Design
+
+1. **Hold-frame pause** — a third pause loop, structurally the same as the two
+   above, with no panel: hold the last frame, draw only a small OSD marker via
+   the existing `host_osd_push()`. New `HOST_KEYMAP_PAUSE` action plus a pad
+   bind alongside the other two.
+2. **Frame advance** — while paused, one keypress runs exactly one vblank and
+   re-freezes. This is the part that does *not* fall out of the existing loops:
+   they hold the guest outside the scheduler, and stepping means re-entering it
+   for a single quantum and coming back. Expect that to be where the real work
+   is, and treat the netplay/rollback paths as out of scope (rewind already
+   disables itself under `psx_netplay_active()`).
+3. **Audio** — the existing loops leave the audio path untouched across an
+   8 ms-polled freeze. Whatever a long pause does to the SPU sink needs to be
+   checked rather than assumed; a pause held for a minute is not a case those
+   two features exercise.
+4. **Input guard** — both existing loops call `savestate_input_guard_arm()` on
+   exit to swallow the still-held key so it does not bleed into the guest. A
+   pause loop needs the same, and the tap-to-pause/tap-to-resume pattern makes
+   it more likely to matter, not less.
+
+### Acceptance
+
+- Paused frame is the actual last frame on **all three backends** (the Vulkan
+  fix above), verified by comparing the held present against the pre-pause
+  frame.
+- Frame advance steps exactly one vblank — verified against the frame counter,
+  not by eye.
+- Resume is clean: no input bleed, no dropped or duplicated guest frame.
+- A multi-minute pause resumes without audio artifacts.
+- Off-path when unused: with the hotkey never pressed, guest timing is
+  unchanged.
+
+### Sequencing
+
+Cheaper than E1 and more useful during bringup, but it is still an upstream PR
+(`mstan/psxrecomp`) followed by a gitlink bump. The Vulkan hold-last fix is
+independently worth upstreaming and could go first as its own change.
+
+---
+
 ## Backlog — ideas, not designs
 
 Recorded so they are not re-derived. None has been costed or validated for
