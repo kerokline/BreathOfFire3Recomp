@@ -131,18 +131,109 @@ A contiguous block of globals drives the dialogue box:
 | `0x801490BC`/`BE` | origin (margin) x/y |
 | `0x80145F05` | current speaker/character index (for control code 3) |
 
+## Live confirmation — 2026-08-30 (the formula holds, the base does not)
+
+**Verified on a running build-dbg session, name-entry screen.** The
+`base + u16[base + 2*index]` formula is confirmed. One correction: the block
+base is **not** the constant `0x80010000`.
+
+Method: the game was parked on the name-entry screen, the on-screen string
+`名前を決めずにはじめるとリュウになります` was encoded with the `D:\BoFIII`
+character table and located in a full 2 MB `read_ram` dump, then the formula was
+applied to the enclosing block. Reproduce with `tools/verify_msgtable.py`.
+
+### What the live machine showed
+
+| Observation | Value |
+|---|---|
+| `0x80010000` – `0x80013FFF` | **all zeros** — no area script loaded on this screen |
+| Live text block | `0x80014000` – `0x80017628` (13,864 bytes) |
+| On-screen string found at | `0x80014A86`, in a NUL-terminated pool |
+| `*(u32 *)0x80014000` | `8` — a count, not part of the formula |
+| `*(u32 *)0x80014004` | `0x0000125C` = **W**, exactly as the static model predicts |
+| Table base `0x80014000 + W` | `0x8001525C` |
+
+Walking `u16[base + 2*i]` from that base decodes as clean, coherent item
+descriptions — `HPを20回復します`, `戦闘不能の人をなおします`,
+`使用者の攻撃力を上げます` — 17 of the first 24 slots landing on well-formed
+text. That is the external comparative the formula was missing.
+
+### The correction
+
+`0x80010000` is **one section destination, not the base**. The `+4 = W` header
+and the `u16` offset table are properties of *the block*, wherever it is loaded:
+
+```
+block  = <destination of the .EMI section that is currently loaded>
+W      = *(u32 *)(block + 4)
+base   = block + W
+string = base + *(u16 *)(base + 2 * index)
+```
+
+Area dialogue lands at `0x80010000`; the system/UI/item pool observed here lands
+at `0x80014000`. Any interception must take the block base from the caller, not
+assume a constant. **No word anywhere in the 2 MB dump equals `0x80014000`,
+`0x8001525C`, or their physical forms** — the base is materialised from a
+`lui`/`ori` immediate at each call site, so each text category has its own
+hard-coded base in code. That is consistent with `TEXT_ENGINE`'s static read of
+a hard-coded `0x80010000`; it just is not the only one.
+
+### Two incidental findings that matter for translation
+
+1. **Latin letters and digits may be raw ASCII — unconfirmed.** In the item
+   pool `HP` decodes as `<48><50>` and `20` as `<32><30>`, which reads as
+   literal ASCII. **Do not rely on this yet:** the area script uses `<3e>` and
+   `<40>` heavily at sentence boundaries, and those are ASCII `>` and `@`, so
+   the same byte range is plainly also carrying control codes. Whether the
+   engine disambiguates by context or the decoder's control range is simply
+   wrong needs settling against `0x8015AD34` before any encoder is written.
+2. **Name-entry text is not in the area script.** It lives in the
+   `0x80014000` pool alongside config strings (`コンフィグを終了します`,
+   `設定を初期化します`) and item descriptions. A translation that only
+   replaces the `0x80010000` `.EMI` section will leave menus, items and
+   name entry in Japanese.
+
+### Area script confirmed too — and the two blocks have different layouts
+
+A second live capture, in the opening mine area, had an area script loaded at
+`0x80010000` (1,124 bytes). Walking it decodes as the prologue dialogue between
+**モーグ** and **ギリー** — `ぴくりとも動かない。`, `へんじがない。`,
+`ど、ドラゴンか…？` — **16 of the first 16 slots** land on well-formed text.
+
+But the header differs. For the area block the `u16` table starts at
+**offset 0**; there is no `W`. `*(u32 *)0x80010004` there reads `0x023E021F`,
+which is simply table entries 2 and 3 — **reading it as `W` is wrong for area
+scripts.** The static model conflated the two block shapes.
+
+### The model, as the live machine actually behaves
+
+```
+string = table_base + *(u16 *)(table_base + 2 * index)
+```
+
+`table_base` is what the engine is handed, and it is derived per block shape:
+
+| Block | Loaded at | `table_base` |
+|---|---|---|
+| Area script (`.EMI` section) | `0x80010000` | the section destination itself — table at +0 |
+| System / UI / item pool | `0x80014000` | `0x80014000 + *(u32 *)0x80014004` (`W = 0x125C`) |
+
+So the indexed-lookup half of `TEXT_ENGINE`'s finding is correct and now
+externally confirmed twice. The `0x80010004` half is not: that address is a `W`
+header only in the header-bearing block shape, and the area script does not have
+one. **An interception must take `table_base` from the caller.**
+
 ## What this unblocks and what is still open
 
 Unblocks [`LOCALIZATION.md`](LOCALIZATION.md) §4.3.
 
 Still open, in order:
 
-1. **Confirm the message-table formula against a live run.** The *location*
-   `0x80010000` is now corroborated externally by cross-language `.EMI` diffing
-   ([`regional-builds.md`](regional-builds.md)), but the `base + u16[2*index]`
-   formula itself is still only static evidence. Break at `0x80150770`, read
-   `*(u32 *)0x80010004`, walk the `u16` table and check the pointer lands on
-   text that matches what is on screen.
+1. ~~**Confirm the message-table formula against a live run.**~~ **DONE
+   2026-08-30** — confirmed against the `0x80014000` system/item block; see
+   *Live confirmation* above. The formula holds; the base is per-section, not
+   the constant `0x80010000`. Confirmed against **both** block shapes — the
+   `0x80014000` system/item pool and the `0x80010000` area script.
 2. **Variable-width text.** The advance is a hard-coded 12 px. English at fixed
    12 px will be unreadable at dialogue length, so proportional advance is a
    change to the interpreter, not just the data.
