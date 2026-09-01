@@ -239,7 +239,23 @@ that is the long pole. `ccache` makes subsequent rebuilds much cheaper.
 
 ### Run
 
-The build produces `build-release/BreathOfFire3_Recompiled.exe`.
+The build produces the launch binary `BreathOfFire3_Recompiled` (Windows appends
+`.exe`; Linux and macOS use the bare name). This is the executable inside each
+OS release archive, so it is what a launcher runs after install:
+
+<!-- retcomm-launch-binaries -->
+| OS | Release archive | Launch binary |
+|---|---|---|
+| Windows | `bof3-<version>-windows-x64.zip` | `BreathOfFire3_Recompiled.exe` |
+| Linux | `bof3-<version>-linux-x64.zip` | `BreathOfFire3_Recompiled` |
+| macOS (Apple Silicon) | `bof3-<version>-macos-arm64.zip` | `BreathOfFire3_Recompiled` |
+| macOS (Intel) | `bof3-<version>-macos-x64.zip` | `BreathOfFire3_Recompiled` |
+<!-- /retcomm-launch-binaries -->
+
+The `bof3-` prefix and per-OS `<artifact>` tags come from
+`scripts/package_setup_release.sh` (`--zip-prefix bof3`) and the release
+workflow matrix (`.github/workflows/release.yml`); `<version>` is the release
+tag.
 
 ```bash
 cd build-release
