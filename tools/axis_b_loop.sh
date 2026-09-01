@@ -126,6 +126,15 @@ python tools/extract_overlays.py "$CUE" --out "$CAPTURES" \
   || die "extract_overlays failed"
 [ -f "$CAPTURES" ] || die "extract produced no $CAPTURES"
 
+# extract_overlays rebuilds $CAPTURES from .EMI sections only, so it drops the
+# LOGO.EXE overlay (a separate PS-EXE at 0x801CE000, the opening/Capcom logo
+# player — root-caused 2026-09-01). Re-merge it every run or the compiled logo
+# player silently reverts to interpreted (~19fps Capcom lag). Idempotent.
+say "phase 3a — merge LOGO.EXE overlay into captures"
+python tools/extract_logo_overlay.py "$CUE" \
+  --out analysis/logo_capture.json --append-to "$CAPTURES" \
+  || die "extract_logo_overlay failed"
+
 # ---- phase 3b: refresh the overlay catalog (sidecar) ------------------------
 # Pure derived view over captures + observed + survey; a full OVERWRITE is
 # correct because the cross-session accumulation already lives in the observed

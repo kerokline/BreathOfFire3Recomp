@@ -4,6 +4,14 @@
 one-command script proven end-to-end, a second play session banked 239 new PCs,
 the overlay catalog sidecar landed, and the rebuild is verified healthy)
 
+> **2026-09-01 — Capcom-logo lag FIXED.** It was never dispatcher overhead: the
+> opening logos run from `LOGO/LOGO.EXE`, a standalone PS-EXE at `0x801CE000` the
+> `.EMI` pipeline never captured, so it ran 100% interpreted. Compiled it as a
+> static overlay (new `tools/extract_logo_overlay.py`; merged into
+> `overlay_captures_all.json`, re-merged by `axis_b_loop.sh` phase 3a). Present
+> fps 19→~30, interp 20× down, `0x801CEEDC` native. See the "Pre-existing slow
+> screens" trap below and [`STATUS.md`](STATUS.md) for the full write-up.
+
 > **2026-09-01 evening session.** (1) **The Axis B loop is now scripted and
 > proven end-to-end** — [`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh) runs
 > harvest → extract → **catalog** → codegen-hash → compile → build in one shot,
@@ -686,18 +694,25 @@ overlay layer instead, which is why it is legitimate.
   occupant bands therefore need **no** register/unregister work — compile all
   occupants and let the gate choose. A session that reads "swap slot" as "must
   solve OV-1 first" will burn itself on a problem this design does not have.
-- **Pre-existing slow screens, NOT overlay regressions.** Current read
-  (user, 2026-09-01, all-bands build): **Capcom logo still ~10-20 fps** (the
-  worst offender, unchanged); **world map ~50 fps**; **memory-card screen
-  transitions / reads / writes ~50 fps** — improved from the earlier ~20 fps but
-  not gone, now in the same tier as the world map. Nobody has investigated any of
-  them. Savestate repro anchors from that session: **slot 08 = world map, slot 09
-  = save/memcard screen, slot 10 = just before a merchant transition** (in-game
-  slot N is file `slotN-1`; slot 10 doubles as a shop-text capture point). They
-  are the largest user-visible slowdowns outside battle transitions, and a
-  separate problem from overlay coverage — though the attribution path is the
-  same: load the slot, `harvest_interp_pcs.py` + the `overlay_catalog.json` heat
-  ranking against the live moment.
+- **Pre-existing slow screens.** Current read (user, 2026-09-01, all-bands
+  build): **world map ~50 fps**; **memory-card screen transitions / reads /
+  writes ~50 fps** — improved from the earlier ~20 fps but not gone, now in the
+  same tier as the world map. Savestate repro anchors: **slot 08 = world map,
+  slot 09 = save/memcard screen, slot 10 = just before a merchant transition**
+  (in-game slot N is file `slotN-1`; slot 10 doubles as a shop-text capture
+  point). Attribution path: load the slot, `harvest_interp_pcs.py` + the
+  `overlay_catalog.json` heat ranking against the live moment.
+  - **The Capcom logo (was ~10-20 fps, "the worst offender") is FIXED (2026-09-01).**
+    It was NOT dispatch cost — the opening logos run from `LOGO/LOGO.EXE`, a
+    standalone 120 KB PS-EXE at `0x801CE000` that the `.EMI` pipeline never
+    captured, so it ran 100% interpreted. Compiled it as a static overlay
+    (`tools/extract_logo_overlay.py` → capture in `overlay_captures_all.json`,
+    re-merged by `axis_b_loop.sh` phase 3a). Now `0x801CEEDC` runs native, Capcom
+    interp dropped 20×, present fps 19→steady ~30 (now pacing-limited by the
+    `CAPCOM30.STR` FMV/CD stream, not CPU). Full detail: [`STATUS.md`](STATUS.md)
+    2026-09-01 note + log. **Repro is trivial:** launch headless, no input —
+    Capcom is the first screen; measure with the host `frame` counter (the BIOS
+    VSync counter at `0x8018603C` is frozen during the intro).
 - **Frame-number comparisons across runs are invalid.** Boot phases do not line
   up between launches, so "frames 96-346 was the Capcom screen last time" is not
   sound — an early revision of this session's notes drew a wrong conclusion that
