@@ -2,6 +2,45 @@
 
 **Status:** IN PROGRESS (last verified 2026-09-01, evening)
 
+> **2026-09-01 — Capcom-logo lag FIXED (root-caused + compiled).** The opening/
+> Capcom logo sequence runs from **`LOGO/LOGO.EXE`** — a standalone 120 KB PS-EXE
+> loaded to **`0x801CE000`** (text 0x1D800, entry 0x801CE724), NOT an `.EMI`
+> overlay. The `.EMI` extraction pipeline never captured it, so it ran **100%
+> interpreted** (~19 present-fps, native dispatch ≈0, one PC `0x801CEEDC` = 84.5%
+> of all interp work / 91 M insns). **This corrects the earlier "Capcom slow =
+> dispatcher overhead" theory** (below): it was never dispatch *cost* — it was a
+> whole uncompiled executable. The RAM overlap with the PLCHAR/battle bands
+> (which reuse `0x801CE400+` later) only *camouflaged* it as a CRC-missing PLCHAR
+> band. **Fix:** new tool [`tools/extract_logo_overlay.py`](../tools/extract_logo_overlay.py)
+> synthesizes a `static-emi-v1` capture from the disc EXE (same jal+prologue
+> discovery as `extract_overlays.py`, no external analyzer); `compile_overlays.py`
+> compiles it natively like any overlay (1609→1656 funcs, 0 new audit fails); the
+> CRC gate handles the RAM overlap. **Result:** `0x801CEEDC` fully native (gone
+> from the profile), Capcom interp 5.0M/s→0.25M/s (20×), cumulative interp
+> 107.8M→16.3M, present fps **19→steady ~30**, wall-time ~22s→~14s, no visual/boot
+> regression. The residual ~30fps is now **pacing-limited** (CPU idle during the
+> intro — FMV/CD streaming of `CAPCOM30.STR`), not CPU-limited. Durability: LOGO
+> merged into `analysis/overlay_captures_all.json` and re-merged every run by
+> `axis_b_loop.sh` phase 3a (extract_overlays rebuilds that file from `.EMI` only
+> and would otherwise drop it). Pass-2 (harvest LOGO-resident interiors →
+> `logo_observed.json`) landed the 10 jump-table interior entries.
+>
+> **The residual interior "whack-a-mole" is root-caused and generalized.** LOGO
+> dispatches per-frame effect handlers through **function-pointer tables** that
+> are zero in the image and populated at runtime (`lw v0,0(sN); jalr ra,v0`) — the
+> static walk can't see the targets, so each pass makes the last handler native
+> and the interpreter entry just shifts to the next unregistered `jalr` target.
+> Traced via the caller ring → dispatcher (`0x801CF980`, walks a 7-slot table at
+> `0x801D9CA4`). **Key rule:** a compiled static *root* is NOT automatically
+> reachable by `jalr` — a function-pointer call needs the address registered as a
+> *dispatch* entry too (`0x801D22EC` was a compiled root yet still interpreted).
+> New [`tools/harvest_logo_handlers.py`](../tools/harvest_logo_handlers.py)
+> generalizes the fix: statically locate the fn-ptr dispatch tables (forward
+> const-prop), read them from a live LOGO-resident session, callable-boundary
+> filter, emit every handler at once (found 12 tables → 18 real handlers, 26
+> data-array false positives dropped). Rebuilt with all 18 registered. This
+> pattern recurs in any title with effect/handler tables.
+
 > **2026-09-01 evening session.** The **Axis B loop is now a one-command script**
 > ([`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh): harvest → extract →
 > catalog → codegen-hash → compile → build) and is **proven end-to-end**. A
@@ -470,3 +509,4 @@ Open, non-blocking:
 | 2026-08-31 | **O(1) overlay dispatch (step 2 of the upstream fix).** Replaced the sparse `switch` in `generate_overlay_dispatch` with a compile-time open-addressed hash table (`psxrecomp` `69d783f5`). Headless A/B, identical captures/savestate/protocol: throughput 106.5 -> 113.2 emulated fps (+6.3%), p1 93.9 -> 105.2; at the transition 63.9 -> 131.3 fps while absorbing twice the address-miss rate. Behaviour verified identical (same address sets, hashes agree across all 524,288 word-aligned addresses, zero false hits). Also established that the on-disk build was **three-band**, not two, and that headless savestate load works. [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §11. |
 | 2026-08-31 | **All ten overlay bands reinstated as the configuration.** Step 3 of the upstream dispatch fix — a resident-occupant memo (`psxrecomp` `70153175`) — cut chk/hit 1.479 -> 1.069 and wasted gate calls 4.5x on the all-bands build, worth **+33% throughput** at boot (99.0 -> 131.4 emulated fps). With steps 1-2 this overturns §8: all-bands now beats three-band on both workloads measured. Also recorded the workload trap — the memo measures neutral-to-negative on a hit-heavy savestate run and +33% on a variant-heavy boot run, so dispatch changes must be measured on both. [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §12. |
 | 2026-09-01 | **Framework synced; both submodules bumped; verified booting.** Merged upstream `mstan/master` into fork branch `fix/static-overlay-residency-signal` (`psxrecomp` `70153175`→`ecc0de16`, clean, 0 conflicts — upstream never touched our two files) and pushed it to `origin`. Bumped `recomp-ui` `8c30e004`→`4eda654` (required: merged psxrecomp uses the multi-disc launcher ABI). Upstream PR **held as draft** — fork is now a living integration branch. Full rebuild (emitters→generate→overlays→psx-runtime) verified: headless boot clean, overlays native at **~99.6% steady-state hit rate**, `gen_fastpath` ~96%, misses frozen post-load, `aborts` 0 — CD-ROM/DMA merge did not perturb the residency signal (`aa6fa2c9`). Two gotchas paid: regenerate `overlay_codegen_hash.h` (target `psxrecomp_codegen_hash`) BEFORE compiling overlays or the stale-recompiler guard fires; recomp-ui must move in lockstep with a psxrecomp master sync. Non-blocking: pre-merge `.pst` savestates load `last_ok: 0` (merge reworked `savestate.c`). [`HANDOFF.md`](HANDOFF.md) → "Shipping state". |
+| 2026-09-01 | **Capcom-logo lag root-caused and FIXED.** The opening logo runs from `LOGO/LOGO.EXE` — a standalone 120 KB PS-EXE at `0x801CE000` (not an `.EMI` overlay), which the extraction pipeline never captured, so it ran 100% interpreted (~19 present-fps; `0x801CEEDC` = 91 M insns / 84.5% of interp). Headless is the trivial repro (Capcom is the first screen). Identified by decomposing the phase (interp 5M/s, native ≈0, `frame` counter for fps since the BIOS VSync counter freezes during the intro), reading live bytes (matched no `.EMI` occupant), and a 20-byte disc signature search (one hit → `LOGO/LOGO.EXE`, PS-EXE header t_addr=0x801CE000/t_size=0x1D800/entry=0x801CE724). Fixed by compiling it as a static overlay: new [`tools/extract_logo_overlay.py`](../tools/extract_logo_overlay.py) → `static-emi-v1` capture, merged into `overlay_captures_all.json` (+ `axis_b_loop.sh` phase 3a re-merge). **Result: `0x801CEEDC` native, Capcom interp 20× down (5.0M→0.25M/s), present fps 19→steady ~30, no regression.** ~30 is now pacing-limited (idle CPU; `CAPCOM30.STR` FMV/CD streaming), not CPU-limited. Pass-2 harvested the 10 jump-table interior entries (`analysis/logo_observed.json`). Compares to MMX4/5/6 which absorb their logo EXE automatically via the runtime-capture path (`overlay_cache=true`) we keep off. |

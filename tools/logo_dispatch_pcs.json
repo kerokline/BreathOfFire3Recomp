@@ -1,0 +1,92 @@
+[
+ {
+  "pc": "0x001CE724",
+  "entries": 1,
+  "insns": 6830
+ },
+ {
+  "pc": "0x001CECA4",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001CF2F8",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001CF860",
+  "entries": 451,
+  "insns": 44198
+ },
+ {
+  "pc": "0x001CF980",
+  "entries": 4403,
+  "insns": 2551990
+ },
+ {
+  "pc": "0x001CFB04",
+  "entries": 1,
+  "insns": 1000000
+ },
+ {
+  "pc": "0x001CFCC0",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001CFD10",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001D1AA8",
+  "entries": 984,
+  "insns": 427657
+ },
+ {
+  "pc": "0x001D1B54",
+  "entries": 6,
+  "insns": 420
+ },
+ {
+  "pc": "0x001D2214",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001D22EC",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001D61A0",
+  "entries": 223,
+  "insns": 698591
+ },
+ {
+  "pc": "0x001D791C",
+  "entries": 1,
+  "insns": 1
+ },
+ {
+  "pc": "0x001D7C3C",
+  "entries": 451,
+  "insns": 38786
+ },
+ {
+  "pc": "0x001D7CA4",
+  "entries": 5834,
+  "insns": 75391
+ },
+ {
+  "pc": "0x001D7D88",
+  "entries": 1,
+  "insns": 15
+ },
+ {
+  "pc": "0x001EB430",
+  "entries": 1,
+  "insns": 1
+ }
+]
