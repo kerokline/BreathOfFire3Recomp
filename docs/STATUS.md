@@ -1,6 +1,22 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-09-01)
+**Status:** IN PROGRESS (last verified 2026-09-01, evening)
+
+> **2026-09-01 evening session.** The **Axis B loop is now a one-command script**
+> ([`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh): harvest → extract →
+> catalog → codegen-hash → compile → build) and is **proven end-to-end**. A
+> second play session **banked 239 new PCs** (world map, shops, save/memcard
+> screens) → observed set **1195 distinct PCs (1080 entered)**, up from 956/850;
+> the new interpreted sinks are SCENARIO band `0x801F6C00` (67 M, doubled) and
+> mixed BATTLE band `0x801D0C00` (124 M). Added the **overlay catalog sidecar**
+> ([`tools/overlay_catalog.py`](../tools/overlay_catalog.py) →
+> `analysis/overlay_catalog.json`): family/subsystem, band membership +
+> co-residency, root provenance, honestly-attributed heat. Rebuilt and
+> **verified healthy** (headless: 99.29% native dispatch, crc_misses Δ0, 152.9
+> emu fps). Benign audit-failure count drifted 4 → 6 (expected). **Pending:** the
+> per-PC re-measure confirming those 239 went native needs a play session
+> re-exercising that content. Perf: world map + memcard ~50 fps, Capcom still
+> ~10-20 fps (savestate anchors slot 08/09/10 — see [`HANDOFF.md`](HANDOFF.md)).
 
 > **2026-09-01 session.** Synced the framework: merged upstream `mstan/master`
 > into our fork branch `fix/static-overlay-residency-signal` (`psxrecomp` now

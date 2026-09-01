@@ -1,8 +1,26 @@
 # Handoff — next session
 
-**Status:** IN PROGRESS (updated 2026-08-31, end of the Axis-B / §9 / enrichment
-session — §9 resolved, first full Axis B iteration landed, PC-enrichment tooling
-added)
+**Status:** IN PROGRESS (updated 2026-09-01 evening — the Axis B loop is now a
+one-command script proven end-to-end, a second play session banked 239 new PCs,
+the overlay catalog sidecar landed, and the rebuild is verified healthy)
+
+> **2026-09-01 evening session.** (1) **The Axis B loop is now scripted and
+> proven end-to-end** — [`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh) runs
+> harvest → extract → **catalog** → codegen-hash → compile → build in one shot,
+> with the exit-2 `UNSUPPORTED_INSTRUCTION` handling built in. (2) **A second
+> play session banked 239 new PCs** (world map, shops, save/memcard screens),
+> taking the observed set to **1195 distinct PCs (1080 entered)** — the big new
+> interpreted sinks are SCENARIO band `0x801F6C00` (67 M, doubled) and the mixed
+> BATTLE band `0x801D0C00` (124 M). (3) **Overlay catalog sidecar** —
+> [`tools/overlay_catalog.py`](../tools/overlay_catalog.py) →
+> `analysis/overlay_catalog.json`: family tag, band membership + co-residency,
+> root provenance, and honestly-attributed heat (band-level for multi-occupant
+> bands, occupant-level only for single-occupant ones). (4) **Rebuild verified
+> healthy** — headless free-run boots clean, 99.29% native dispatch, crc_misses
+> Δ0, 152.9 emu fps. (5) **Benign audit-failure count drifted 4 → 6** exactly as
+> predicted (see the exit-code-2 trap). **Still pending:** the per-PC re-measure
+> that confirms the 239 went native needs a play session that re-exercises that
+> content (world map / shop / save / battle) — the loop's one manual input.
 
 Read [`STATUS.md`](STATUS.md) for where the project stands and
 [`OVERLAYS.md`](OVERLAYS.md) for the finding the next task rests on. This file
@@ -511,14 +529,21 @@ overlay layer instead, which is why it is legitimate.
 
 - **The all-bands generate exits with code 2, and that is correct.** A handful
   of shards fail audit as `UNSUPPORTED_INSTRUCTION` — data walked as code. The
-  core three are `0x800C1800` (BIN/BOSS, x2) and `0x801F2C00` (AREA038); as the
-  observed set grows, a *new* observed entry PC can walk into a data region and
-  add one more (2026-08-31: `0x801EEC00` crc AA2E2918, 1 unsupported → 4 total).
-  **The count is expected to drift with the observed set — do not read a higher
-  number as a regression.** Each failure just drops that one occupant to the
-  interpreter; the rest of its band compiles. The output file is written and is
-  correct. Automation must not treat exit 2 as fatal — check *which* shards
-  failed and that the failure class is `UNSUPPORTED_INSTRUCTION`, not something new.
+  set drifts *up* one occupant at a time as the observed set grows into new data
+  regions: `0x800C1800` (BIN/BOSS) started at ×2, `0x801F2C00` (AREA) at ×1,
+  `0x801EEC00` added 1 (→4 total on 2026-08-31), and the 2026-09-01 evening
+  session's 239 new PCs took it to **6 total** (`0x800C1800` ×3, `0x801F2C00`
+  ×2, `0x801EEC00` ×1). **Do not read a higher number as a regression.** Each
+  failure just drops that one occupant to the interpreter; the rest of its band
+  compiles. The output file is written and is correct.
+- **The failure-class token is `[audit]`, and "unsupported" is in the DETAIL,
+  not the class.** A shard failure prints `SHARD FAIL [audit] overlay 0x… crc …:
+  0 unknown_bad, N unsupported`. There is **no** literal `[UNSUPPORTED_INSTRUCTION]`
+  bracket — an early `axis_b_loop.sh` classifier grepped for one and false-flagged
+  all six benign failures as a regression (2026-09-01, cost a wasted abort before
+  the build). The correct discriminator: **benign iff class is `[audit]` AND the
+  detail is `0 unknown_bad, N unsupported`**; a real regression is any other
+  class, or `unknown_bad > 0`. `axis_b_loop.sh` now matches on that shape.
 - **Measure dispatch changes on a variant-heavy workload, not just a hit-heavy
   one — they disagree in sign.** The resident-occupant memo measured neutral to
   slightly *negative* on a savestate-loaded combat workload (chains already
@@ -661,11 +686,18 @@ overlay layer instead, which is why it is legitimate.
   occupant bands therefore need **no** register/unregister work — compile all
   occupants and let the gate choose. A session that reads "swap slot" as "must
   solve OV-1 first" will burn itself on a problem this design does not have.
-- **Pre-existing slow screens, NOT overlay regressions.** The Capcom logo runs
-  at ~18 fps (0.30x) and memory-card reads at ~20 fps **in the two-band build**,
-  i.e. in the best configuration we have. Nobody has investigated either. They
-  are the largest user-visible slowdowns outside battle transitions, and they
-  are a separate problem from overlay coverage.
+- **Pre-existing slow screens, NOT overlay regressions.** Current read
+  (user, 2026-09-01, all-bands build): **Capcom logo still ~10-20 fps** (the
+  worst offender, unchanged); **world map ~50 fps**; **memory-card screen
+  transitions / reads / writes ~50 fps** — improved from the earlier ~20 fps but
+  not gone, now in the same tier as the world map. Nobody has investigated any of
+  them. Savestate repro anchors from that session: **slot 08 = world map, slot 09
+  = save/memcard screen, slot 10 = just before a merchant transition** (in-game
+  slot N is file `slotN-1`; slot 10 doubles as a shop-text capture point). They
+  are the largest user-visible slowdowns outside battle transitions, and a
+  separate problem from overlay coverage — though the attribution path is the
+  same: load the slot, `harvest_interp_pcs.py` + the `overlay_catalog.json` heat
+  ranking against the live moment.
 - **Frame-number comparisons across runs are invalid.** Boot phases do not line
   up between launches, so "frames 96-346 was the Capcom screen last time" is not
   sound — an early revision of this session's notes drew a wrong conclusion that
@@ -709,6 +741,8 @@ overlay layer instead, which is why it is legitimate.
 | `tools/emi_survey.py` | Walks every `.EMI` on the disc, reads each TOC, hashes **every** section and code-tests the RAM-bound ones → `analysis/emi_sections.json`. Run it per region to diff discs. |
 | `tools/extract_overlays.py` | Turns survey rows into `overlay_captures.json` with statically derived seeds — the input to `psxrecomp/tools/compile_overlays.py` |
 | `tools/enrich_pcs.py` | **Understand** an observed PC: resident `.EMI` occupant (live RAM byte-match), FUNCTION-START vs INTERIOR, disassembly window, outgoing `jal` targets ("linked calls"), and callers from the live `dirty_block_log` ring. `--group` gives an offline interp-weighted **subsystem breakdown** by band+family. Native PCs show **0 ring hits** (the ring logs interp only) — a free cross-check that a fix took. |
+| `tools/axis_b_loop.sh` | **The Axis B loop, in one command.** Runs harvest → extract → catalog → codegen-hash → compile → build against a live session (default port 4370). Gates on 0-new-PCs (rebuild only when the session added something; `--force` overrides), tolerates the expected exit-2 `[audit]`/`0 unknown_bad` shard failures and *only* those, and refuses to link a running exe. `--harvest-only` to just check the delta; `--skip-harvest` to rebuild from the observed set as-is. |
+| `tools/overlay_catalog.py` | **Catalog the overlays.** Pure offline join over captures + observed + survey → `analysis/overlay_catalog.json` (schema `overlay-catalog-v1`). Per overlay: family/subsystem, band membership + co-residency siblings, root provenance (JAL/PROLOGUE/OBSERVED), and interp **heat** attributed honestly — band-level for multi-occupant bands (the documented attribution limit), occupant-level only for single-occupant ones. **Overwrite, not merge:** the cross-session union lives upstream in `observed_interp_pcs.json`; the catalog re-derives off it. |
 
 Existing and still useful: `tools/emi.py` (parse/extract `.EMI`),
 `tools/disc_ls.py` (list/extract the ISO9660 tree), `tools/disasm_exe.py`.

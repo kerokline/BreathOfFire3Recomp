@@ -41,10 +41,18 @@ Built on [psxrecomp](https://github.com/mstan/psxrecomp) and
 
 **Pre-alpha — playable into the game, not playable through yet.** The game
 boots, renders, plays audio, accepts input, and has been played past the
-opening prologue into the mines with area transitions, the name-entry screen
-and in-game memory-card saves all working. It has not been played end to end,
-and the reason is known: most of its code lives in runtime-loaded overlays that
-are not statically recompiled (see [`docs/OVERLAYS.md`](docs/OVERLAYS.md)).
+opening prologue and intro boss into the world map, shops and save screens, with
+area transitions, name entry, menus, combat and in-game memory-card saves all
+working. It has not been played end to end.
+
+Most of the game's code lives in runtime-loaded overlays, and **those overlays
+are now statically recompiled** — all ten RAM bands are compiled in and dispatch
+natively at ~99% hit rates, extracted deterministically from the disc rather
+than captured at runtime (see [`docs/OVERLAYS.md`](docs/OVERLAYS.md)). What
+remains is *coverage inside* those bands — interior entry points reached only by
+dynamic dispatch, which the static call-graph walk can't see, are fed back from
+live play and recompiled (the "Axis B" loop). That, plus per-title enhancement,
+is the main remaining engineering work.
 
 What works:
 
@@ -57,10 +65,16 @@ What works:
 - [x] **Renders.** Title screen and opening prologue, ~1.2M GPU draw commands,
       double-buffered, 3D geometry submitting
 - [x] **Input.** Start advances the title screen; the buffer flip engages
-- [x] **Savestates.** Save and load, round-trip verified on the LLE backend,
-      and confirmed to survive a rebuild. They *refuse* in overlay-heavy code —
-      an interrupt taken inside the dirty-RAM interpreter is never
-      snapshot-safe — so use in-game memory-card saves to preserve progress
+- [x] **Overlays compiled.** All ten RAM bands (405 unique code sections,
+      3.6 MB) are extracted from the disc and compiled in, dispatching natively —
+      a live battle logged 904,076 content checks with zero CRC misses, and combat
+      runs native. Entry-point coverage *inside* the bands grows from live play
+      (the Axis B loop)
+- [x] **Savestates.** Save and load, round-trip verified on the LLE backend, and
+      confirmed to survive a rebuild. In-game slot saving now works, including in
+      combat; savestate *files* can still refuse in overlay-heavy code (an
+      interrupt taken inside the dirty-RAM interpreter is never snapshot-safe), so
+      in-game memory-card saves remain the reliable way to preserve progress
 - [x] **Audio.** Music and sound effects play
 - [x] **Memory cards.** In-game saves write a 128 KB card through the SIO path
 - [x] **Played past the opening.** Prologue → mines → area transitions, name
@@ -71,13 +85,15 @@ What works:
 
 What does not work yet:
 
-- [ ] **Overlay capture and compilation — the main remaining work.** 81.6% of
-      the boot EXE's text segment is zero-fill that overlays load into at
-      runtime, and a measured play session put **93.6% of interpreted
-      instructions** in that space. Static recompilation reaches only ~268 KB
-      of real code by construction. This gates performance, savestates and
-      probably a lot of correctness ([`docs/OVERLAYS.md`](docs/OVERLAYS.md))
-- [ ] No end-to-end playthrough, and no soak past the early game
+- [ ] **Overlay entry-point coverage — the main remaining work.** The overlay
+      *bands* are compiled (above), but a compiled band is not a fully native
+      band: interior entry points reached only by dynamic dispatch are invisible
+      to the static call-graph walk, so they fall to the interpreter until live
+      play surfaces them and they are recompiled. This coverage loop is proven
+      and converging; deepening it (and eventually per-occupant attribution)
+      still gates performance on some screens ([`docs/OVERLAYS.md`](docs/OVERLAYS.md))
+- [ ] No end-to-end playthrough, and no soak past the early game. A few screens
+      still run slow (Capcom logo, world map, memory-card) — uninvestigated
 - [ ] JP→EN runtime string translation — the script is located, the engine is
       identified and the lookup confirmed live; what remains is variable-width
       glyph advance, line-break policy, and applying translated text
@@ -111,10 +127,14 @@ address is `0x80010000`, a selector that resolves unambiguously across all 880
 This matters because it means translation work aligns by file and slot rather
 than by address. Details in [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md).
 
-The open problem is not extracting text but *applying* it: the framework's
-substitution hook expects a string pointer in an argument register at a call
-boundary, and this game does not pass text that way. Identifying the text-draw
-code is the next task.
+The open problem is not extracting text but *applying* it. The message engine —
+interpreter, renderer and glyph path — is now **identified and confirmed on a
+live run** ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md)); the framework's
+substitution hook does not fit it, because this game does not pass a string
+pointer in an argument register at a call boundary. What remains is variable-width
+glyph advance (the JP interpreter hard-codes 12 px), a line-break policy, applying
+translated text, and a **separate** text pool for menus/items/name-entry that the
+area-script path does not cover.
 
 Current state, evidence, and next actions live in
 [`docs/STATUS.md`](docs/STATUS.md), [`docs/BRINGUP.md`](docs/BRINGUP.md), and
@@ -355,7 +375,7 @@ recomp-ui belong upstream in their own repositories, not as local patches.
 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | Next-session handoff — what to pick up, and the traps already paid for |
 | [`docs/BRINGUP.md`](docs/BRINGUP.md) | Boot/soak log — what runs, where it stops, what was fixed |
 | [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) | JP→EN: where the script lives on disc, the `.EMI` container, what blocks applying a translation |
-| [`docs/OVERLAYS.md`](docs/OVERLAYS.md) | Why most of this game is not statically recompiled, and what follows from it |
+| [`docs/OVERLAYS.md`](docs/OVERLAYS.md) | Why most of this game is overlays, how they're extracted from the disc and compiled, and the coverage work that remains |
 | [`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md) | The message interpreter, renderer and glyph path, confirmed live |
 | [`docs/SAVESTATES.md`](docs/SAVESTATES.md) | What each savestate slot holds, and why saves sometimes refuse |
 | [`docs/INVENTORY.md`](docs/INVENTORY.md) | What is actually in this repo |
@@ -373,14 +393,15 @@ The highest-value contributions right now, in order:
 1. **Play it and find where it breaks.** The game boots and renders but has
    never been played through. Crashes, hangs, and wrong output are all useful.
    Use a `build-dbg` tree so the run can be inspected live rather than
-   post-mortem, and say roughly which frame and which area.
-2. **Find the text-draw code.** The blocker for localization: identify which
-   functions render on-screen text. The framework's substitution hook expects a
-   string pointer in an argument register at a call boundary and this game does
-   not pass text that way, so a new approach is needed — reads of the script
-   buffer at `0x80010000` are not visible to the existing MMIO read tracer.
-3. **Overlay archaeology.** BoF3 streams overlays from disc; mapping them is
-   the next milestone.
+   post-mortem, and say roughly which frame and which area. Playing *new* content
+   also directly advances overlay coverage — a live session is the one manual
+   input the Axis B loop needs.
+2. **Apply the translation.** The message engine is identified and confirmed
+   live; what remains is variable-width glyph advance, a line-break policy,
+   applying translated text, and the separate menus/items/name-entry text pool.
+3. **Deepen overlay coverage.** The ten overlay bands are compiled; the open work
+   is interior entry points reached only by dynamic dispatch (Axis B) and
+   per-occupant attribution inside multi-tenant bands.
 4. **Reverse engineering.** Identify functions and record them in
    `symbols.toml` with the rationale for how they were identified.
 
