@@ -29,8 +29,11 @@ codegen_setup.c/.h   setup-wizard host wiring
 CMakeLists.txt       psxrecomp_add_game_runtime(psx-runtime …)
 disc/                staged boot EXE (gitignored)
 docs/                title-owned notes  ← put agent documents here
-psxrecomp/           SUBMODULE @ f24b7e5d — framework (read-only)
-recomp-ui/           SUBMODULE @ 8c30e004 — launcher (read-only)
+psxrecomp/           SUBMODULE @ ecc0de16 — framework (read-only); fork branch
+                     fix/static-overlay-residency-signal = upstream master + our
+                     3 overlay-dispatch commits, kept synced (see HANDOFF)
+recomp-ui/           SUBMODULE @ 4eda654 — launcher (read-only); moves in lockstep
+                     with a psxrecomp master sync (multi-disc launcher ABI)
 ```
 
 ## Workflow

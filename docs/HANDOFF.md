@@ -78,8 +78,10 @@ band alone silently drops every other.
 >    highest-value *tooling* investment; the mixed bands prove its need.
 > 4. **Two residual battle interior points** — `0x801D1014` / `0x801E739C` still
 >    interpret (down ~30× from pre-rebuild); the loop's next layer would peel them.
-> 5. The **persuasive writeup** (thread 2 below, still parked) and the **upstream
->    PR** to `mstan/psxrecomp`.
+> 5. **DONE / held.** The **persuasive writeup** (thread 2) is reworked and
+>    republished (2026-08-31), and the **upstream PR is held as a draft** — the
+>    fork is now a living integration branch synced with upstream master
+>    (2026-09-01), verified booting. See "Shipping state" below.
 
 ### 1. Axis B — the loop (mechanical, proven, converging)
 
@@ -149,26 +151,41 @@ performance, and extensibility.
 
 ### 2. A short persuasive writeup of the static compile path and dispatch map
 
-**In progress, parked mid-request.** Audience is the other people working on
-the wider psxrecomp ecosystem, who have only seen the capture-based bringup
-used for Tomba / MMX6 / Ape Escape. The goal is a concise, persuasive,
+**DONE — reworked and republished 2026-08-31.** Audience is the other people
+working on the wider psxrecomp ecosystem, who have only seen the capture-based
+bringup used for Tomba / MMX6 / Ape Escape. The goal is a concise, persuasive,
 layman-readable explanation of what this title does differently and why.
 
-A first draft is published as a private artifact:
+Published as a private artifact (same URL, updated in place):
 <https://claude.ai/code/artifact/37f5d9d1-64c9-4db6-bb65-aad75e0ab4f4>
-("Overlays Without Capture"). It covers the normal capture path, why capture
-was the wrong tool here, what the `.EMI` TOC gives us instead, the three-tool
-compile path, the dispatch map, the frozen-gate bug, and the measured result.
+— **retitled "The Disc Ships the Map"** (the old title "Overlays Without
+Capture" contradicted the corrected framing, since entry points legitimately
+*do* come from play). It covers the normal capture path, the bytes/entry-points
+decomposition, the disc's inherent grouping, the three-tool compile path, the
+dispatch map, the frozen-gate bug, the measured result, and what transfers to
+other titles.
 
-**What it still needs**, and why it was parked: the draft frames static
-extraction against capture as an either/or. That framing is wrong — see the
-next section. Rework it around the decomposition before circulating.
+**The two parked blockers are resolved:**
 
-One unverified claim to check before it goes out: it asserts Tomba's
-scatter-load format as the reason disc extraction cannot work there. That comes
-from [`OVERLAYS.md`](OVERLAYS.md) §5 citing
-`psxrecomp/docs/overlay-discovery.md`, and was **not** independently verified
-against the Tomba project.
+- **Reframed off the either/or.** The spine is now the decomposition from the
+  next section — capture bundles *bytes* and *entry points*, which have opposite
+  value here — plus the user's sharper thesis: for an EMI-styled RPG the disc
+  ships the game's *own grouping* (named/typed `.EMI` containers → graphics vs
+  sound vs logic vs area script), and that grouping is trivial to read but a
+  research project to reconstruct from an address-keyed capture bucket. That
+  grouping is the unit for the enrichment/subsystem-clustering endgame.
+- **The stale §9 claim is gone.** The old "Still open" section said `0x801CEEDC`
+  "is still being interpreted"; §9 is resolved, so that bullet was removed.
+
+The one **unverified** claim was softened rather than verified: the draft now
+says Tomba *reportedly* uses a scatter-load format "per the framework's own
+notes; we haven't verified it against that project," instead of asserting it as
+fact. If anyone wants it stated flatly, verify against the Tomba project first
+([`OVERLAYS.md`](OVERLAYS.md) §5 / `psxrecomp/docs/overlay-discovery.md`).
+
+**Remaining in thread 5:** the upstream PR is **held as a draft** by decision
+(2026-09-01) — see "Shipping state" below for the living-integration-branch
+workflow that replaced "merge it upstream."
 
 ### The framing both threads share: capture and disc extraction are not rivals
 
@@ -255,22 +272,75 @@ Headline numbers, all headless VSync throughput on identical protocols:
 Note the third row: **without the memo, all-bands is slower than three bands at
 boot.** Both steps 2 and 3 are load-bearing for the all-bands result.
 
-### Shipping state — resolved 2026-08-31
+### Shipping state — updated 2026-09-01 (fork is now a living integration branch)
 
-The branch is pushed and the pin is bumped, so a fresh checkout gets all of
-this:
+**Decision (2026-09-01):** the upstream PR is **held as a draft, not merged** —
+we would rather fix any snag in-tree than round-trip through framework review.
+So `fix/static-overlay-residency-signal` is now a **living integration branch**:
+it carries our three commits *and* tracks upstream `mstan/master`, and we keep
+pulling master into it as work continues. The proof-of-process goal is a full
+BoF3 decompile with the `.EMI` subsystems intact — see the writeup thread above.
 
-- `psxrecomp` branch `fix/static-overlay-residency-signal` is on `origin`
-  (`kerokline/psxrecomp`) at `70153175`.
-- The parent gitlink now points at `70153175`, committed as `63954d8`
-  ("Add static overlay extraction tooling/docs").
+Current pins (both submodules bumped 2026-09-01, verified booting):
 
-**Remaining:** a PR to `mstan/psxrecomp`. All three commits are framework-level
-with no BoF3-specific content. They land in a sensible order — `aa6fa2c9` is the
-correctness fix and the prerequisite; `69d783f5` and `70153175` are the
-performance pair and are **load-bearing together**, since without the memo the
-all-bands build is slower than three bands at boot. Worth saying explicitly if
-anyone asks whether the third commit is really needed.
+- `psxrecomp` branch `fix/static-overlay-residency-signal` on `origin`
+  (`kerokline/psxrecomp`) at **`ecc0de16`** = upstream `master` merged over our
+  three commits (`aa6fa2c9`, `69d783f5`, `70153175`). 3 ahead / 0 behind
+  upstream at merge time.
+- `recomp-ui` bumped `8c30e004` → **`4eda654`** (upstream `mstan/master` tip) —
+  **required**, because the merged psxrecomp `main.cpp` uses the multi-disc
+  launcher API (`RecompLauncherCGameInfo.discs/num_discs`,
+  `RecompLauncherCSettings.disc_index`) that lives in recomp-ui. The two
+  submodules must move together.
+
+**The draft PR still stands** for eventual upstream consideration: all three of
+our commits are framework-level with no BoF3 content, landing in order
+(`aa6fa2c9` correctness prerequisite; `69d783f5`+`70153175` the load-bearing
+performance pair). Blast radius is the static-overlay path only — verified
+per-hunk (the DLL-loader capture path Tomba/MMX6/Ape Escape use is untouched).
+
+#### Keeping the fork current — the recipe (conflict-free so far)
+
+```bash
+git -C psxrecomp fetch upstream
+git -C psxrecomp checkout fix/static-overlay-residency-signal
+git -C psxrecomp merge --no-edit upstream/master
+# then bump recomp-ui to a matching upstream tip if the launcher ABI moved
+```
+
+Stays clean as long as upstream keeps clear of `overlay_loader.c` and
+`generate_overlay_dispatch()` in `compile_overlays.py` — our only two touched
+files. A conflict there lands in code you know.
+
+#### Two gotchas the 2026-09-01 sync paid for — do not re-pay
+
+- **After any framework bump, regenerate `overlay_codegen_hash.h` BEFORE
+  compiling overlays.** The stale-recompiler guard (`verify_recompiler_matches_tag`)
+  compares the recompiler's baked codegen hash against
+  `psxrecomp/runtime/include/overlay_codegen_hash.h`. That header is regenerated
+  by a **runtime** build step (`cmake --build build-dbg --target
+  psxrecomp_codegen_hash`), so the correct order is: build emitters → base
+  generate → **build the `psxrecomp_codegen_hash` target** → compile overlays →
+  build `psx-runtime`. Compiling overlays first trips `FATAL: STALE RECOMPILER
+  BINARY` (the guard doing its job, not a bug).
+- **recomp-ui must be bumped in lockstep** with a psxrecomp master sync whenever
+  the launcher ABI changes (as it did with `feat/multi-disc-launcher`). Symptom
+  if you forget: the runtime build fails compiling `psxrecomp/runtime/src/main.cpp`
+  with `RecompLauncherCGameInfo has no member 'discs'` etc.
+
+#### Verified booting on the merged tree (2026-09-01)
+
+Full rebuild (emitters → generate → overlays, all ten bands → `psx-runtime`)
+succeeded, `BreathOfFire3_Recompiled.exe` produced. Headless free-run boots
+clean, VSync advances, and overlays dispatch **native at ~99.6% steady-state hit
+rate** once content loads (checks +104,317 / hits +103,934 in a late window),
+`gen_fastpath` ~96%, miss counters frozen after load, `aborts` 0. **The merged
+CD-ROM/DMA changes did not perturb the residency signal** (`aa6fa2c9`).
+Follow-up, non-blocking: a slot-4 savestate load returned `last_ok: 0` — the
+merge changed `savestate.c` (+123 lines, "fix savestates at dirty boundaries")
+and the existing `.pst` files predate it, so cross-merge savestate
+compatibility needs its own check. In-game/memory-card saves remain the reliable
+path.
 
 **Do not assume the whole transition problem is solved.** The stall is much
 cheaper but not eliminated. The §9 bypass below is now **resolved**.

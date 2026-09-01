@@ -1,6 +1,19 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-08-31)
+**Status:** IN PROGRESS (last verified 2026-09-01)
+
+> **2026-09-01 session.** Synced the framework: merged upstream `mstan/master`
+> into our fork branch `fix/static-overlay-residency-signal` (`psxrecomp` now
+> `ecc0de16` = our 3 commits + 77 upstream), and bumped `recomp-ui` `8c30e004`
+> → `4eda654` (**required** — the merged psxrecomp uses the multi-disc launcher
+> API that lives in recomp-ui). **Upstream PR held as a draft by decision** — the
+> fork is a living integration branch we keep pulling master into; the
+> proof-of-process is a full BoF3 decompile with subsystems intact. Full rebuild
+> **verified booting**: overlays dispatch native at ~99.6% steady-state hit rate,
+> residency signal intact — the CD-ROM/DMA merge did not regress it. Two sync
+> gotchas + the recipe are in [`HANDOFF.md`](HANDOFF.md) → "Shipping state".
+> Non-blocking follow-up: pre-merge savestates load with `last_ok: 0` (merge
+> reworked `savestate.c`).
 
 Living status doc — the one place a new session learns where the project
 actually stands. Update this rather than `CLAUDE.md`. Durable findings graduate
@@ -440,3 +453,4 @@ Open, non-blocking:
 | 2026-08-31 | **The static overlay path had no residency signal.** `overlay_page_gen` only advances for pages armed via `overlay_watch_set_range`, whose only callers were in the inert DLL loader — so the CRC gate was consulted once per variant per process and cached negatives were permanent. Armed the watch on the cold path (`psxrecomp` `aa6fa2c9`, branch `fix/static-overlay-residency-signal`, off the pin `f24b7e5d`; parent gitlink NOT bumped). Verified live: 99.93% gen fastpath, gate re-fires only on real load events, no false invalidation. Also **measured** §8's previously-inferred cost mechanism — the transition stall is the address-miss fall-through at ~264,000 lookups/sec, 49x the field baseline. [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §10. |
 | 2026-08-31 | **O(1) overlay dispatch (step 2 of the upstream fix).** Replaced the sparse `switch` in `generate_overlay_dispatch` with a compile-time open-addressed hash table (`psxrecomp` `69d783f5`). Headless A/B, identical captures/savestate/protocol: throughput 106.5 -> 113.2 emulated fps (+6.3%), p1 93.9 -> 105.2; at the transition 63.9 -> 131.3 fps while absorbing twice the address-miss rate. Behaviour verified identical (same address sets, hashes agree across all 524,288 word-aligned addresses, zero false hits). Also established that the on-disk build was **three-band**, not two, and that headless savestate load works. [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §11. |
 | 2026-08-31 | **All ten overlay bands reinstated as the configuration.** Step 3 of the upstream dispatch fix — a resident-occupant memo (`psxrecomp` `70153175`) — cut chk/hit 1.479 -> 1.069 and wasted gate calls 4.5x on the all-bands build, worth **+33% throughput** at boot (99.0 -> 131.4 emulated fps). With steps 1-2 this overturns §8: all-bands now beats three-band on both workloads measured. Also recorded the workload trap — the memo measures neutral-to-negative on a hit-heavy savestate run and +33% on a variant-heavy boot run, so dispatch changes must be measured on both. [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §12. |
+| 2026-09-01 | **Framework synced; both submodules bumped; verified booting.** Merged upstream `mstan/master` into fork branch `fix/static-overlay-residency-signal` (`psxrecomp` `70153175`→`ecc0de16`, clean, 0 conflicts — upstream never touched our two files) and pushed it to `origin`. Bumped `recomp-ui` `8c30e004`→`4eda654` (required: merged psxrecomp uses the multi-disc launcher ABI). Upstream PR **held as draft** — fork is now a living integration branch. Full rebuild (emitters→generate→overlays→psx-runtime) verified: headless boot clean, overlays native at **~99.6% steady-state hit rate**, `gen_fastpath` ~96%, misses frozen post-load, `aborts` 0 — CD-ROM/DMA merge did not perturb the residency signal (`aa6fa2c9`). Two gotchas paid: regenerate `overlay_codegen_hash.h` (target `psxrecomp_codegen_hash`) BEFORE compiling overlays or the stale-recompiler guard fires; recomp-ui must move in lockstep with a psxrecomp master sync. Non-blocking: pre-merge `.pst` savestates load `last_ok: 0` (merge reworked `savestate.c`). [`HANDOFF.md`](HANDOFF.md) → "Shipping state". |
