@@ -82,6 +82,11 @@ What works:
 - [x] **Text engine identified and confirmed on a live run** — the message
       table walks correctly on both block shapes
       ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md))
+- [x] **Full speed.** Capcom logo, world map and memory-card screens hold 60 fps
+      with clean audio on an optimised build (2026-09-01), after two framework
+      fixes that are now merged upstream
+- [x] **CRT scanlines** as an optional, off-by-default present-time effect
+      (framework feature; the launcher toggle is pending upstream)
 
 What does not work yet:
 
@@ -92,55 +97,32 @@ What does not work yet:
       play surfaces them and they are recompiled. This coverage loop is proven
       and converging; deepening it (and eventually per-occupant attribution)
       still gates performance on some screens ([`docs/OVERLAYS.md`](docs/OVERLAYS.md))
-- [ ] No end-to-end playthrough, and no soak past the early game. A few screens
-      still run slow (Capcom logo, world map, memory-card) — uninvestigated
+- [ ] No end-to-end playthrough, and no soak past the early game. (The
+      screens that used to run slow — Capcom logo, world map, memory-card — hold
+      60 fps as of 2026-09-01 after two framework fixes, both merged upstream)
 - [ ] JP→EN runtime string translation — the script is located, the engine is
       identified and the lookup confirmed live; what remains is variable-width
       glyph advance, line-break policy, and applying translated text
 - [ ] Menus, items and name entry are a **separate** text pool from the `.EMI`
       area script — translating only the script leaves them in Japanese
 
-### A correction worth recording
-
-Earlier revisions of this file reported that boot "parks in a wait loop" before
-rendering, with a stalled CD-ROM read as the leading hypothesis. **That was
-wrong and is retracted.** The two pinned program counters are `DrawOTag()` and
-`VSync()` — a healthy render loop, not a stall.
-
-The game had been drawing its title screen all along. What hid it: Release
-builds compile with `PSX_DEBUG_TOOLS=OFF`, which strips the TCP debug server, so
-there was no way to look at the screen and the diagnosis rested on inference
-from a heartbeat file. Building with `-DPSX_DEBUG_TOOLS=ON` and capturing a
-frame settled it in minutes.
-
-Two traps that cost time, recorded so they don't cost it again: `--headless`
-with the OpenGL renderer screenshots **black** (there is no GL context — use
-`--renderer software`), and the debug command is `gpu_state`, not `gpu`.
-
 ### Localization research
 
 The Japanese script does **not** live in the boot executable. It sits in
-per-area `.EMI` container sections — specifically the section whose destination
-address is `0x80010000`, a selector that resolves unambiguously across all 880
-`.EMI` files on the disc. The script is loaded into RAM by CD-ROM DMA.
-
-This matters because it means translation work aligns by file and slot rather
-than by address. Details in [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md).
-
-The open problem is not extracting text but *applying* it. The message engine —
-interpreter, renderer and glyph path — is now **identified and confirmed on a
-live run** ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md)); the framework's
-substitution hook does not fit it, because this game does not pass a string
-pointer in an argument register at a call boundary. What remains is variable-width
-glyph advance (the JP interpreter hard-codes 12 px), a line-break policy, applying
-translated text, and a **separate** text pool for menus/items/name-entry that the
-area-script path does not cover.
+per-area `.EMI` container sections — the section whose destination address is
+`0x80010000` — and reaches RAM by CD-ROM DMA, so translation aligns by file and
+slot rather than by address. The message engine is identified and confirmed
+live ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md)); the whole translation
+surface (area script, a separate menu/item pool, a string table inside
+`GAME.EMI`, and 37 language-bearing images) is enumerated in
+[`docs/regional-builds.md`](docs/regional-builds.md). What remains is applying
+it: variable-width glyph advance, a line-break policy, and the hook at the
+message-table lookup ([`docs/LOCALIZATION.md`](docs/LOCALIZATION.md)).
 
 Current state, evidence, and next actions live in
-[`docs/STATUS.md`](docs/STATUS.md), [`docs/BRINGUP.md`](docs/BRINGUP.md), and
-[`docs/LOCALIZATION.md`](docs/LOCALIZATION.md). Claims in those docs cite the
-trace or run that established them — that is the project's standard, inherited
-from the framework.
+[`docs/STATUS.md`](docs/STATUS.md) and [`docs/HANDOFF.md`](docs/HANDOFF.md).
+Claims in those docs cite the trace or run that established them — that is the
+project's standard, inherited from the framework.
 
 ## Requirements
 
@@ -237,6 +219,35 @@ against the detected project root, so it works from any checkout and from
 Generating takes a while — it emits ~2.5M lines of C, and the first compile of
 that is the long pole. `ccache` makes subsequent rebuilds much cheaper.
 
+#### Compile the overlays (do not skip this)
+
+Most of this game's code is in runtime-loaded `.EMI` overlays, not the boot
+EXE. They are extracted from your disc and compiled as a second generated
+source, `generated/overlays_static.c`. **If that file is absent, CMake silently
+builds a runtime without overlay dispatch** — it runs, but ~90% interpreted and
+far below full speed. Run this between `generate` and the CMake build:
+
+```bash
+python tools/emi_survey.py "isos/Breath of Fire III (Japan).cue" --out analysis/emi_sections.json
+python tools/extract_overlays.py "isos/Breath of Fire III (Japan).cue" --out analysis/overlay_captures_all.json
+python tools/extract_logo_overlay.py "isos/Breath of Fire III (Japan).cue" \
+  --out analysis/logo_capture.json --append-to analysis/overlay_captures_all.json
+cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release --target psxrecomp_codegen_hash     # must precede the overlay compile
+python psxrecomp/tools/compile_overlays.py --static --force --cps \
+  --captures analysis/overlay_captures_all.json --game-toml game.toml \
+  --recompiler build-recompiler/psxrecomp-game.exe \
+  --runtime-include psxrecomp/runtime/include --out-dir generated \
+  --gcc /c/msys64/mingw64/bin/gcc.exe
+cmake -S . -B build-release      # re-run configure so the new source is picked up
+```
+
+The overlay compile exits 2 with a handful of `SHARD FAIL [audit] … 0 unknown_bad,
+N unsupported` lines. That is expected (data being walked as code; those
+occupants fall to the interpreter). Any other failure class is a real problem.
+`tools/axis_b_loop.sh` wraps all of this for later rebuilds; the full story is
+in [`docs/HANDOFF.md`](docs/HANDOFF.md).
+
 ### Run
 
 The build produces the launch binary `BreathOfFire3_Recompiled` (Windows appends
@@ -278,14 +289,21 @@ executable.
 > **A Release build cannot be inspected.** `PSX_DEBUG_TOOLS` defaults **off**
 > for Release, which compiles out the TCP debug server entirely — `--debug-port`
 > is silently inert and the heartbeat file is your only diagnostic. This cost a
-> misdiagnosis once already (see [Status](#status)).
+> misdiagnosis once already ([`docs/BRINGUP.md`](docs/BRINGUP.md), Boot 001).
 
-For anything diagnostic, build a second tree with the tools enabled:
+For anything diagnostic, build a second tree with the tools enabled. The one
+that both plays at full speed and can be inspected is RelWithDebInfo:
 
 ```bash
-cmake -S . -B build-dbg -G Ninja -DCMAKE_BUILD_TYPE=Release -DPSX_DEBUG_TOOLS=ON
-cmake --build build-dbg --target psx-runtime
+cmake -S . -B build-relprof -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+      -DPSX_DEBUG_TOOLS=ON -DPSX_STATIC_RUNTIME=ON
+cmake --build build-relprof --target psx-runtime
 ```
+
+`PSX_STATIC_RUNTIME` defaults off outside Release; without it the exe loads
+whatever `libstdc++-6.dll` is first on `PATH` and can die at startup. A
+`-DCMAKE_BUILD_TYPE=Debug` tree (`build-dbg`) is useful for stepping but is too
+slow (-O0) to judge performance by.
 
 That build serves a JSON debug server (default port 4370) offering screenshots,
 GPU state, RAM reads, write tracing, input injection and savestates.
@@ -298,7 +316,10 @@ python tools/playsession.py state save 1    # savestate slot 1
 ```
 
 Screenshots require `--renderer software`; with OpenGL in headless there is no
-GL context and captures come back black.
+GL context and captures come back black. The GPU inspection command is
+`gpu_state`, not `gpu`. Debug-tool builds also carry a starvation watchdog that
+exits after a 4 s emu-thread stall (savestate writes and disc seeks can trip
+it); set `PSX_STARVATION_TIMEOUT_US=0` when playing.
 
 <!-- retcomm-readme-launcher -->
 ## RetComM Launcher
@@ -335,14 +356,16 @@ seeds/                 ghidra_funcs.txt — recompilation seed targets
 codegen_setup.c/.h     setup-wizard host wiring
 CMakeLists.txt         psxrecomp_add_game_runtime(psx-runtime …)
 catalog_identity.json  marketing + ROM identity for launcher catalogs
-docs/                  title-owned notes — STATUS, BRINGUP, LOCALIZATION
-tools/                 sync_symbols.py, plus disc/EMI/disasm/session helpers
+docs/                  title-owned notes — index in docs/README.md
+tools/                 sync_symbols.py, the overlay coverage loop, disc/EMI/disasm/session helpers
 isos/                  your legal dump          (gitignored, never committed)
 disc/                  staged boot EXE          (gitignored)
-generated/             recompiled C output      (gitignored)
+analysis/              EMI survey, observed PCs, overlay captures (gitignored, regenerated)
+generated/             recompiled C output + overlays_static.c (gitignored)
 build-recompiler/      emitter binaries         (gitignored)
 build-release/         native runtime           (gitignored)
-build-dbg/             runtime + debug server   (gitignored, -DPSX_DEBUG_TOOLS=ON)
+build-relprof/         runtime + debug server, full speed (gitignored, RelWithDebInfo)
+build-dbg/             runtime + debug server, -O0   (gitignored, Debug)
 psxrecomp/             SUBMODULE — framework    (read-only here)
 recomp-ui/             SUBMODULE — launcher     (read-only here)
 ```
@@ -356,10 +379,16 @@ recomp-ui/             SUBMODULE — launcher     (read-only here)
    OpenBIOS is recompiled the same way. `strict = true` means anything the
    translator cannot faithfully express **aborts loudly** rather than emitting
    a stub.
-3. **Native build.** The generated C is compiled and linked against the
+3. **Overlays.** The `.EMI` containers on the disc declare where each section
+   loads in RAM. Every code section is extracted, translated the same way, and
+   registered as a CRC-guarded native variant: at runtime the live bytes are
+   hashed before a call is allowed, so whichever overlay is resident wins and
+   a non-resident one falls back to the interpreter. Entry points the static
+   call-graph walk cannot see are fed back from live play.
+4. **Native build.** The generated C is compiled and linked against the
    framework runtime — which simulates the GPU, SPU, CD-ROM, DMA, timers, and
    interrupt controller — plus the recomp-ui launcher.
-4. **Run.** The result is a native executable that mounts your disc, verifies
+5. **Run.** The result is a native executable that mounts your disc, verifies
    it, and executes the game's own translated code.
 
 ## Symbols
@@ -391,11 +420,14 @@ recomp-ui belong upstream in their own repositories, not as local patches.
 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | Next-session handoff — what to pick up, and the traps already paid for |
 | [`docs/BRINGUP.md`](docs/BRINGUP.md) | Boot/soak log — what runs, where it stops, what was fixed |
 | [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) | JP→EN: where the script lives on disc, the `.EMI` container, what blocks applying a translation |
-| [`docs/OVERLAYS.md`](docs/OVERLAYS.md) | Why most of this game is overlays, how they're extracted from the disc and compiled, and the coverage work that remains |
+| [`docs/OVERLAYS.md`](docs/OVERLAYS.md) | Why most of this game is overlays, and the `.EMI` finding that makes them extractable from the disc |
+| [`docs/OVERLAY_EXTRACTION.md`](docs/OVERLAY_EXTRACTION.md) | The ten-band overlay map, the extraction/compile pipeline, and the measured dispatch results |
 | [`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md) | The message interpreter, renderer and glyph path, confirmed live |
+| [`docs/regional-builds.md`](docs/regional-builds.md) | JP/US/EN/FR/DE comparison — where every localized byte lives |
 | [`docs/SAVESTATES.md`](docs/SAVESTATES.md) | What each savestate slot holds, and why saves sometimes refuse |
+| [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md) | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance, backlog |
 | [`docs/INVENTORY.md`](docs/INVENTORY.md) | What is actually in this repo |
-| [`docs/README.md`](docs/README.md) | Documentation conventions |
+| [`docs/README.md`](docs/README.md) | Documentation index and conventions |
 | `CLAUDE.md` | Session bootstrap for AI agents working in this repo |
 
 Framework reference lives in `psxrecomp/docs/` — `GAME_PROJECT_SETUP.md`,
@@ -406,12 +438,12 @@ Framework reference lives in `psxrecomp/docs/` — `GAME_PROJECT_SETUP.md`,
 
 The highest-value contributions right now, in order:
 
-1. **Play it and find where it breaks.** The game boots and renders but has
+1. **Play it and find where it breaks.** The game runs at full speed but has
    never been played through. Crashes, hangs, and wrong output are all useful.
-   Use a `build-dbg` tree so the run can be inspected live rather than
-   post-mortem, and say roughly which frame and which area. Playing *new* content
-   also directly advances overlay coverage — a live session is the one manual
-   input the Axis B loop needs.
+   Use a debug-tools tree (`build-relprof`) so the run can be inspected live
+   rather than post-mortem, and say which screen and which area. Playing *new*
+   content also directly advances overlay coverage — a live session is the one
+   manual input the Axis B loop needs.
 2. **Apply the translation.** The message engine is identified and confirmed
    live; what remains is variable-width glyph advance, a line-break policy,
    applying translated text, and the separate menus/items/name-entry text pool.

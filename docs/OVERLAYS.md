@@ -72,7 +72,9 @@ Two experiments confirm it:
 
 ## 4. Consequences already observed
 
-- **Savestates refuse.** `savestate_poll` needs
+- **Savestates refuse** *(as measured 2026-08-30, before the bands were
+  compiled; in-game slot saving works now, including in combat, and this is
+  rare)*. `savestate_poll` needs
   `psx_irq_resume_context_snapshot_safe()`, which is
   `g_cosim_dirty_pump_site == 0` (`interrupts.c:629`). An interrupt taken inside
   the dirty-RAM interpreter can never be snapshotted. Interrupt entries arrive
@@ -135,13 +137,16 @@ is data. Each candidate section must be code-tested before it is compiled.
 - **Deterministic and reviewable** — the overlay set becomes a build input, not
   a recording.
 
-### The hard part that remains
+### The hard part that remained — and turned out not to be hard
 
-Band 2 is one address range holding four different modules at different times.
-Pre-compiling all four means the runtime must register and *unregister* by
-mode; getting that wrong is precisely OV-1 (stale registration → wrong native
-code → the Tomba blue screen). Band 1 is the easy, high-value start: one
-occupant, 227 KB, and it is where the field-play interpretation is concentrated.
+*(Written 2026-08-30; superseded.)* Band 2 is one address range holding four
+different modules at different times, and this section originally assumed the
+runtime would have to register and *unregister* by mode, risking OV-1. It does
+not: `compile_overlays.py` emits every occupant as a CRC-guarded variant under
+one dispatch entry, and the content check *is* the dispatch condition, so the
+resident occupant wins and a non-resident one simply misses. Multi-occupant
+bands need no register/unregister mechanism —
+[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §7 and §10.
 
 **Resolved:** `0x801CEEDC` — the address that accounted for 91 M interpreted
 instructions at boot — lies past the end of `GAME.EMI` §0 (`0x801CE0E4`)

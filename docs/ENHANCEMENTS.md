@@ -1,17 +1,18 @@
 # BoF3 enhancements — post-faithfulness work
 
-**Status:** IN PROGRESS (established 2026-08-30) — *design only, nothing
-implemented.* No item here is scheduled. This file exists so ideas raised
-during bringup are recorded with their real cost instead of being re-derived
-later.
+**Status:** IN PROGRESS (established 2026-08-30; E1 shipped upstream
+2026-09-01). E2 and the backlog are design only, nothing scheduled. This file
+exists so ideas raised during bringup are recorded with their real cost instead
+of being re-derived later.
 
 ## The gate
 
 Framework rule (`psxrecomp/CLAUDE.md`, inherited via `/CLAUDE.md`): **no
 per-game hacks during foundation work.** Enhancements become legitimate only
-after the faithful core is proven. BoF3 is not there — see
-[`STATUS.md`](STATUS.md). Nothing in this file should be started before the
-title boots and soaks clean.
+after the faithful core is proven. BoF3 plays at full speed but has not been
+soaked end to end — see [`STATUS.md`](STATUS.md). E1 was acceptable early
+because it is a *framework* presentation feature, off by default, with no
+per-title code.
 
 A second constraint shapes every item below: `psxrecomp/` and `recomp-ui/` are
 **read-only submodules**. Anything that needs runtime or renderer code is an
@@ -20,30 +21,30 @@ cannot be done from inside this repo. That distinction is the difference
 between a config edit and a multi-backend shader PR, so each item names which
 it is.
 
-**Verified against** psxrecomp `a91884a4` (the checked-out submodule tree; note
-the committed gitlink is `f24b7e5d` — re-verify the line numbers below if that
-gap has since been closed).
+Line numbers below were taken against psxrecomp `a91884a4` (2026-08-30) and
+have drifted; re-verify before citing.
 
 ---
 
 ## E1 — CRT scanlines / display filter
 
-**Kind:** upstream framework change (GL + Vulkan + SW present paths).
-**Requested:** 2026-08-30. **Status:** designed, not built.
+**Kind:** upstream framework change (GL present path + launcher).
+**Requested:** 2026-08-30. **Status:** **SHIPPED upstream.** The runtime side
+(present-time scanline post-process, `[video]` settings persistence) merged as
+[mstan/psxrecomp#290](https://github.com/mstan/psxrecomp/pull/290) on
+2026-09-01 and is in the current pin. The launcher side (Scanlines toggle +
+strength on the PSX Display card) is
+[mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42), open; the
+`recomp-ui` submodule is pinned to the fork branch carrying it until then.
+The design notes below are kept as the record of what was built and why.
 
 Goal: reproduce the horizontal line structure a CRT gave PSX output, as a
 presentation-only effect. Guest rendering is untouched; this is a pass over the
 finished display image on its way to the window.
 
-### What exists today
+### Where it hooks in
 
-Nothing. A tree-wide grep for `scanline` / `crt` / post-process over
-`psxrecomp/` returns only rasterizer vocabulary (`gpu_sw_renderer.c` triangle
-fills), per-scanline VRAM dirty tracking (`gpu_vram_dirty.h`), and FMV depth24
-row conversion. There is no post-processing stage of any kind.
-
-What *does* exist is the hook the effect belongs in. The GL present is a
-full-screen fragment shader, `PRESENT_FS` at
+The GL present is a full-screen fragment shader, `PRESENT_FS` at
 [`gpu_gl_renderer.c:877`](../psxrecomp/runtime/src/gpu_gl_renderer.c), which
 already carries the shape a scanline term needs:
 
@@ -267,7 +268,7 @@ BoF3, and none should be read as planned.
 | PGXP (geometry precision) | builtin mod | `psx.enhancement.pgxp` exists. Needs per-title validation — BoF3's mixed 2D/3D presentation is exactly where PGXP artifacts show up. |
 | Widescreen | upstream + per-title | Framework has `WIDESCREEN.md` and native-wide GL support, but per-title UI grouping work is real. BoF3's 2D field maps make this a poor early candidate. |
 | Bezel artwork | config only | `psx.presentation.bezel` ships today; the 4:3 pillarbox margins are where it applies. The one item here needing no code at all. |
-| Overlay DLL cache for speed | config + capture work | `[runtime] overlay_cache`. Correctness-only benefit upstream so far (see `psxrecomp/docs/overlay-status.md`); speed needs broad overlay coverage, and BoF3 has no overlay map yet. |
+| Overlay DLL cache for speed | — | **Not applicable.** BoF3's overlays are compiled statically from the disc (all ten bands + `LOGO.EXE`, ~99% native dispatch); `[runtime] overlay_cache` stays off by design. See [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md). |
 
 Enhancements that touch **text rendering** are deliberately excluded here — the
 JP→EN work in [`LOCALIZATION.md`](LOCALIZATION.md) and

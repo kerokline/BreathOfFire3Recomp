@@ -1,7 +1,8 @@
 # Regional builds — what the EU/FR/DE discs prove
 
-**Status:** IN PROGRESS (established 2026-08-30; extended the same day with a
-complete JP-US section census - see *The complete census* below)
+**Status:** STABLE (established 2026-08-30; extended the same day with a
+complete JP-US section census - see *The complete census* below. The *Still
+open* items at the end are unanswered, not unverified)
 
 Five releases were compared: JP, US, and the three PAL SKUs. The question was
 whether any Western release contains reusable multi-language machinery, and

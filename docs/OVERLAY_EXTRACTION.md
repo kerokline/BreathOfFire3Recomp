@@ -543,8 +543,9 @@ of the transition slowdowns — that hypothesis was tested and rejected.
 ## 10. The static path had no residency signal — fixed 2026-08-31
 
 **Status:** fixed upstream, verified on a live run. `psxrecomp` commit
-`aa6fa2c9` on branch `fix/static-overlay-residency-signal`, branched from the
-pin `f24b7e5d`. The parent gitlink is deliberately NOT bumped yet.
+`aa6fa2c9`, originally on fork branch `fix/static-overlay-residency-signal` off
+the then-pin `f24b7e5d`; **merged into `mstan/master` via #289 on 2026-09-01**
+together with §11 and §12, and the title now pins upstream master directly.
 
 ### The defect
 

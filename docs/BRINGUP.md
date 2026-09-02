@@ -1,6 +1,8 @@
 # Bringup — boot / soak log
 
-**Status:** IN PROGRESS (last verified 2026-08-30)
+**Status:** STABLE as a log (last entry 2026-08-30). Later bringup milestones —
+overlays, 60 fps, framework fixes — are dated rows in the
+[`STATUS.md`](STATUS.md) Log rather than new Boot entries here.
 
 What runs, where it stops, what was fixed. One entry per boot attempt that
 taught us something. Companion to [`STATUS.md`](STATUS.md), which stays short.
