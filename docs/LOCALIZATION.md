@@ -1,10 +1,13 @@
 # Localization — JP→EN for SLPS-00990
 
-**Status:** IN PROGRESS (last verified 2026-08-30, revised same day)
+**Status:** IN PROGRESS (last verified 2026-08-30; next-actions and §3
+refreshed 2026-09-01)
 
-> §4.2c and §4.3 were superseded in part on 2026-08-30 — the text engine is
-> identified. Read [`TEXT_ENGINE.md`](TEXT_ENGINE.md) and
-> [`regional-builds.md`](regional-builds.md) before acting on this file.
+> §1's "text-draw PC census" and §4.2c/§4.3 were superseded on 2026-08-30 — the
+> text engine is identified and confirmed live. Read
+> [`TEXT_ENGINE.md`](TEXT_ENGINE.md) and [`regional-builds.md`](regional-builds.md)
+> before acting on this file. Section numbering (1, 2, 4, 3) is kept as-is
+> because other docs cite §4.2 / §4.2b / §4.3.
 
 Scope: what it will actually take to run the Japanese release in English, and
 whether the official US release (SLUS-00422) can supply the script. Companion
@@ -314,26 +317,25 @@ Item 3 is the real risk, not the script extraction.
 `psxrecomp/tools/new_project_layout/setup_project.sh` (no generate, no build, no
 GitHub). It probed cleanly: SLUS-00422, 2 tracks, 526 seeds, boot EXE extracted.
 
-Two things about it need a deliberate decision before it is built:
-
-- **Its `psxrecomp` gitlink floated to `master` HEAD (`47bda817`)**, while this
-  repo is pinned at `f24b7e5d`. Root `CLAUDE.md` says never float on master.
-  Results from the two repos are not comparable until the pins agree — decide
-  whether to pin the English repo back to `f24b7e5d` or bump both.
-- **`game.toml disc =` is an absolute machine-local path** into this repo's
-  `isos/`. This repo already learned that lesson (2026-08-29 log entry). It
-  needs a repo-relative path plus the dump moved into its own `isos/`, or it is
-  not portable to another checkout.
+**Decision (2026-08-31): it is a donor, not a second title.** It exists
+locally only, to read the US disc's `.EMI` sections and EXE (proportional
+advance, line breaking) against, and is retired once a disc-derived translation
+works in this repo. It is never generated, built or published; its floated
+`psxrecomp` gitlink and absolute `disc =` path do not matter for that use.
 
 ## Next actions
 
-1. **Text-draw PC census on the JP build.** Establish which PCs render the
-   prologue text and how the string reaches them (buffer vs VRAM blit vs disc
-   overlay). Everything else depends on this.
-2. **Report F-3 and F-4 upstream** (stale "always-on" doc; Shift-JIS validator
+1. ~~Text-draw PC census.~~ **Done** — [`TEXT_ENGINE.md`](TEXT_ENGINE.md).
+2. **Settle whether Latin/digit bytes are raw ASCII** against `0x8015AD34`
+   before writing any encoder (`TEXT_ENGINE.md` → incidental findings).
+3. **Variable-width advance and line-break policy** — mine `SLUS_004.22`
+   (second Ghidra program, Raw Binary, `MIPS:LE:32:default`, base `0x80096000`)
+   for Capcom's own answer rather than inventing one.
+4. **The apply hook** at the message-table lookup, taking `table_base` from the
+   caller (two block shapes). Then `translations/bof3.toml`, keyed by the raw
+   JP bytes as they sit in guest RAM.
+5. **Report F-3 and F-4 upstream** (stale "always-on" doc; Shift-JIS validator
    accepting kernel instruction words).
-3. **Settle the English repo's submodule pin and disc path** before generating.
-4. Only then author `translations/bof3.toml`.
 
 ## Framework observations (upstream, `mstan/psxrecomp`)
 

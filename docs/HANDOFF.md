@@ -1,113 +1,25 @@
 # Handoff — next session
 
-**Status:** IN PROGRESS (updated 2026-09-01 evening — the Axis B loop is now a
-one-command script proven end-to-end, a second play session banked 239 new PCs,
-the overlay catalog sidecar landed, and the rebuild is verified healthy)
+**Status:** IN PROGRESS (rewritten 2026-09-01 night after the framework pin
+returned to upstream master; the dated banner history this file used to carry
+is in the [`STATUS.md`](STATUS.md) Log)
 
-> **2026-09-01 — Capcom-logo lag FIXED.** It was never dispatcher overhead: the
-> opening logos run from `LOGO/LOGO.EXE`, a standalone PS-EXE at `0x801CE000` the
-> `.EMI` pipeline never captured, so it ran 100% interpreted. Compiled it as a
-> static overlay (new `tools/extract_logo_overlay.py`; merged into
-> `overlay_captures_all.json`, re-merged by `axis_b_loop.sh` phase 3a). Present
-> fps 19→~30, interp 20× down, `0x801CEEDC` native. See the "Pre-existing slow
-> screens" trap below and [`STATUS.md`](STATUS.md) for the full write-up.
-
-> **2026-09-01 evening session.** (1) **The Axis B loop is now scripted and
-> proven end-to-end** — [`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh) runs
-> harvest → extract → **catalog** → codegen-hash → compile → build in one shot,
-> with the exit-2 `UNSUPPORTED_INSTRUCTION` handling built in. (2) **A second
-> play session banked 239 new PCs** (world map, shops, save/memcard screens),
-> taking the observed set to **1195 distinct PCs (1080 entered)** — the big new
-> interpreted sinks are SCENARIO band `0x801F6C00` (67 M, doubled) and the mixed
-> BATTLE band `0x801D0C00` (124 M). (3) **Overlay catalog sidecar** —
-> [`tools/overlay_catalog.py`](../tools/overlay_catalog.py) →
-> `analysis/overlay_catalog.json`: family tag, band membership + co-residency,
-> root provenance, and honestly-attributed heat (band-level for multi-occupant
-> bands, occupant-level only for single-occupant ones). (4) **Rebuild verified
-> healthy** — headless free-run boots clean, 99.29% native dispatch, crc_misses
-> Δ0, 152.9 emu fps. (5) **Benign audit-failure count drifted 4 → 6** exactly as
-> predicted (see the exit-code-2 trap). **Still pending:** the per-PC re-measure
-> that confirms the 239 went native needs a play session that re-exercises that
-> content (world map / shop / save / battle) — the loop's one manual input.
-
-Read [`STATUS.md`](STATUS.md) for where the project stands and
-[`OVERLAYS.md`](OVERLAYS.md) for the finding the next task rests on. This file
-is what to pick up and the traps already paid for.
+Read [`STATUS.md`](STATUS.md) for where the project stands. This file is what
+to pick up, how to build against the current pin, and the traps already paid
+for. It points at evidence rather than restating it.
 
 ## Where things stand in one paragraph
 
-The game **plays**. It boots, renders, has audio, takes input, writes memory
-cards, and has been played past the prologue into the mines with area
-transitions, name entry and menus. The **text engine is identified and confirmed
-on a live run** — that work is done. **Most of BoF3's code lives in overlays**
-(81.6% of the boot EXE's text segment is zero-fill, and a measured session put
-93.6% of interpreted instructions in that space). **All ten bands are now
-compiled in and are the current configuration**, after a three-step upstream fix
-to overlay dispatch that overturned the earlier "do not compile all bands"
-result. Combat runs native. **§9 is resolved** (2026-08-31 — it was an
-unregistered *interior* address, fixed for free by the observed→alias pipeline),
-and the **first full Axis B iteration landed**: a content-rich boss savestate was
-harvested, and the battle overlay's hot interior points (`0x801E6C60` etc.) went
-native, exactly as PLCHAR/§9 did. What is left is pushing the framework fixes
-upstream, the **tier-1/2 runtime enrichment** (record resident-occupant + reach
-per PC — see the enrichment section), and continued Axis B coverage as new game
-content is played (the loop is proven and converging — 325→56→20→6 new PCs).
+The game **plays at 60 fps** on `build-relprof` (Capcom logo, world map,
+memory-card screens all user-verified 2026-09-01 with clean audio). All ten
+overlay bands plus `LOGO/LOGO.EXE` are compiled from the disc and dispatch
+~99% native. Every framework fix this title needed is **merged upstream** and
+`psxrecomp` is pinned to plain `mstan/master` (`1bf70960`); `recomp-ui` waits
+on one launcher PR. The text engine is identified and confirmed live. What is
+left: Axis B coverage inside the bands as new content is played, the tier-1/2
+runtime enrichment, and the translation apply path.
 
-## Where the overlay work stands
-
-**Static extraction works, and all ten bands are compiled.** See
-[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) for the full evidence. In
-short: all 880 `.EMI` files are enumerated (`analysis/emi_sections.json`), the
-code lands in exactly **ten** RAM bands totalling **405 unique sections /
-3.61 MB**, and `GAME.EMI` §0 (`0x80196800`, the field engine) is compiled into
-the runtime and linked. On a live run the overlay dispatcher logged
-**603,391 content checks with 603,391 hits and zero CRC misses**, and band 1
-recorded **zero** interpreted PCs against 558 before.
-
-**The overlay *bytes* come from the disc, never from capture** — no
-`[runtime] overlay_cache`, no DLL loader; that path stays inert. Entry *points*
-are a different matter: the pipeline already blends statically derived roots
-with PCs observed on a live run, and deepening that is Axis B. See "capture and
-disc extraction are not rivals" below.
-
-## Band 2 is done — battle engine, `0x80093800`
-
-Compiled and verified in combat on 2026-08-30. 303 static roots in, **303
-functions out**, `unknown_excluded: 0`, `Unknown/bad targets: 0`. On a live run
-with a real battle: `static_checks` 904,076 = `static_hits` 904,076,
-`static_crc_misses` **0**, aborts and dispatch misses 0. The band carries
-**0.0%** of interpreted work (17,053 instructions in 7 stray PCs). Full evidence
-in [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §5b.
-
-All bands live in one `generated/overlays_static.c`, now built from
-`analysis/overlay_captures_all.json` (**all ten bands, current since
-2026-08-31** — see §12). `compile_overlays.py --static` writes a single file per
-run, so **the whole set must always be recompiled together** — compiling one
-band alone silently drops every other.
-
-## The next task — start here
-
-> **2026-08-31 update.** The Axis B loop below is now **proven end-to-end and
-> converging**, and the current build already banks one content-rich iteration.
-> The remaining threads, in priority order:
->
-> 1. **The current build is all-bands + boss coverage** — `overlay_captures_all.json`
->    has **18,842 dispatch entries** from **956 observed distinct PCs (850
->    entered)**; `generated/overlays_static.c` is built from it and linked into
->    `build-dbg`. `analysis/` is gitignored, so a fresh checkout regenerates.
-> 2. **Continued Axis B** as *new* game content is played (further than the intro
->    boss). The loop is mechanical; the one blocking input is a play session
->    reaching new content. Convergence on already-seen content is confirmed
->    (325→56→20→6 new PCs), so repetition is spent — new areas/characters/battles
->    are what still add.
-> 3. **Tier-1/2 runtime enrichment** (see the new enrichment section below) — the
->    highest-value *tooling* investment; the mixed bands prove its need.
-> 4. **Two residual battle interior points** — `0x801D1014` / `0x801E739C` still
->    interpret (down ~30× from pre-rebuild); the loop's next layer would peel them.
-> 5. **DONE / held.** The **persuasive writeup** (thread 2) is reworked and
->    republished (2026-08-31), and the **upstream PR is held as a draft** — the
->    fork is now a living integration branch synced with upstream master
->    (2026-09-01), verified booting. See "Shipping state" below.
+## Start here
 
 ### 1. Axis B — the loop (mechanical, proven, converging)
 
@@ -338,474 +250,264 @@ per-hunk (the DLL-loader capture path Tomba/MMX6/Ape Escape use is untouched).
 #### Keeping the fork current — the recipe (conflict-free so far)
 
 ```bash
-git -C psxrecomp fetch upstream
-git -C psxrecomp checkout fix/static-overlay-residency-signal
-git -C psxrecomp merge --no-edit upstream/master
-# then bump recomp-ui to a matching upstream tip if the launcher ABI moved
+# game running: BreathOfFire3_Recompiled.exe --game game.toml --no-launcher --debug-port 4370
+tools/axis_b_loop.sh            # harvest → extract → LOGO merge → catalog → codegen hash → compile → build-dbg
+tools/axis_b_loop.sh --skip-harvest   # rebuild from the observed set as-is
 ```
 
-Stays clean as long as upstream keeps clear of `overlay_loader.c` and
-`generate_overlay_dispatch()` in `compile_overlays.py` — our only two touched
-files. A conflict there lands in code you know.
+Phases, for when you need to run one by hand:
 
-#### Two gotchas the 2026-09-01 sync paid for — do not re-pay
+1. Play a live session on a debug-tools build covering **new** content.
+2. `python tools/harvest_interp_pcs.py` — **unions** the session's entered PCs
+   into `analysis/observed_interp_pcs.json` (distinct, never replaced).
+3. `python tools/extract_overlays.py "isos/…Japan.cue" --out analysis/overlay_captures_all.json`
+   then `python tools/extract_logo_overlay.py … --append-to` the same file
+   (extract rebuilds from `.EMI` only and would drop LOGO).
+4. `cmake --build build-dbg --target psxrecomp_codegen_hash` (must precede the
+   overlay compile after any framework change).
+5. `python psxrecomp/tools/compile_overlays.py --static --force --cps …` — all
+   bands, one `generated/overlays_static.c`. Exit 2 with `[audit]`
+   `0 unknown_bad, N unsupported` failures is the expected outcome.
+6. Build `psx-runtime`; re-measure per PC with `harvest_interp_pcs.py`.
 
-- **After any framework bump, regenerate `overlay_codegen_hash.h` BEFORE
-  compiling overlays.** The stale-recompiler guard (`verify_recompiler_matches_tag`)
-  compares the recompiler's baked codegen hash against
-  `psxrecomp/runtime/include/overlay_codegen_hash.h`. That header is regenerated
-  by a **runtime** build step (`cmake --build build-dbg --target
-  psxrecomp_codegen_hash`), so the correct order is: build emitters → base
-  generate → **build the `psxrecomp_codegen_hash` target** → compile overlays →
-  build `psx-runtime`. Compiling overlays first trips `FATAL: STALE RECOMPILER
-  BINARY` (the guard doing its job, not a bug).
-- **recomp-ui must be bumped in lockstep** with a psxrecomp master sync whenever
-  the launcher ABI changes (as it did with `feat/multi-disc-launcher`). Symptom
-  if you forget: the runtime build fails compiling `psxrecomp/runtime/src/main.cpp`
-  with `RecompLauncherCGameInfo has no member 'discs'` etc.
+**It needs a play session reaching new content — that is the only blocking
+input.** Replaying seen content converges to ~0 new PCs (325→56→20→6). The
+observed set accumulates across sessions because two sessions enter almost
+disjoint PC sets (which `.EMI` is resident decides what buckets to a band).
 
-#### Verified booting on the merged tree (2026-09-01)
+**Pending right now:** the 239 PCs from the world-map / shop / save-screen
+session are compiled in but not re-measured. Remaining interpreted sinks:
+SCENARIO band `0x801F6C00`, mixed BATTLE band `0x801D0C00`, and two residual
+battle interior points `0x801D1014` / `0x801E739C`.
 
-Full rebuild (emitters → generate → overlays, all ten bands → `psx-runtime`)
-succeeded, `BreathOfFire3_Recompiled.exe` produced. Headless free-run boots
-clean, VSync advances, and overlays dispatch **native at ~99.6% steady-state hit
-rate** once content loads (checks +104,317 / hits +103,934 in a late window),
-`gen_fastpath` ~96%, miss counters frozen after load, `aborts` 0. **The merged
-CD-ROM/DMA changes did not perturb the residency signal** (`aa6fa2c9`).
-Follow-up, non-blocking: a slot-4 savestate load returned `last_ok: 0` — the
-merge changed `savestate.c` (+123 lines, "fix savestates at dirty boundaries")
-and the existing `.pst` files predate it, so cross-merge savestate
-compatibility needs its own check. In-game/memory-card saves remain the reliable
-path.
+**Function-pointer tables need a registered dispatch entry, not just a
+compiled root.** LOGO dispatches per-frame effect handlers through tables that
+are zero in the image and populated at runtime (`lw v0,0(sN); jalr ra,v0`). A
+compiled static *root* is not reachable by `jalr` unless its address is also a
+dispatch entry (`0x801D22EC` was compiled and still interpreted).
+[`tools/harvest_logo_handlers.py`](../tools/harvest_logo_handlers.py) locates
+such tables statically, reads them from a live session, and emits every handler
+at once. The pattern recurs in any title with effect/handler tables.
 
-**Do not assume the whole transition problem is solved.** The stall is much
-cheaper but not eliminated. The §9 bypass below is now **resolved**.
+### 2. Enrichment — understanding what the captured PCs are
 
-### §9 `0x801CEEDC` — RESOLVED 2026-08-31 (it was never a control-flow bypass)
+[`tools/enrich_pcs.py`](../tools/enrich_pcs.py) explains an observed PC
+offline: resident `.EMI` occupant (live byte-match), FUNCTION-START vs
+INTERIOR, a disassembly window with outgoing `jal` targets, callers from the
+live `dirty_block_log` ring (a native PC shows **0 ring hits** — a free check
+that a fix took), and `--group` for an interp-weighted subsystem breakdown.
+[`tools/overlay_catalog.py`](../tools/overlay_catalog.py) is the offline
+sidecar (`analysis/overlay_catalog.json`): family, band co-residency, root
+provenance, honestly-attributed heat.
 
-**The diagnosis was wrong, and the observed-PC feedback loop fixed it for
-free.** `0x801CEEDC` is **not** a function start — it is a mid-function store
-(`sb v0,0x3BB0($at)`) inside a PLCHAR routine, in `static_discovery_entry_pcs`
-of **zero** occupants. §9's "it is a real `case` in `psx_overlay_dispatch`"
-mistook the **184 interior CPS `case ...: goto block_` resume labels** (inside
-function bodies) for a real dispatch registration. In the band-3-era build it
-was measured on, `0x801CEEDC` was **not a registered dispatch key**, so
-`psx_overlay_dispatch(0x801CEEDC)` returned via the **address-miss** path (empty
-slot) — which touches neither `variant_misses` nor `crc_misses`. That is why
-those two counters read 0; "never failed the CRC" was misread as "never
-consulted." There was no bypass of the line-2796 call site.
+**The durable upgrade is tier-1/2 in the runtime**: record, per PC at entry
+time, the resident-occupant CRC (tier 1) and a transfer-type histogram
+(call/jalr/jr/branch/irq-resume, tier 2) in `DirtyRamPcEntry`
+(`dirty_ram_interp.c`, emitted via `dirty_ram_stats.per_pc`). Mixed bands
+(`0x801D0C00` = BATTLE+ETC+SCENARIO+WORLD) cannot be resolved to an occupant
+offline; tier 2 would have diagnosed §9 in minutes. This is now an ordinary
+upstream `psxrecomp` PR — there is no fork branch to carry it. Endgame: once
+calls are grouped by shared caller/callee, the `.EMI`-shaped subsystems fall
+out — the unit for modding, performance and extensibility.
 
-**The fix came from the Axis B pipeline itself.** Because `0x801CEEDC` was
-*observed* with `entries > 0`, `extract_overlays.py` added it as a
-`dispatch_entry_pc`, and `compile_overlays.py` emitted an **alias entry** —
-`ov_..._alias_body_801CED1C(cpu, 0x801CEEDC)`, i.e. an independently dispatchable
-key that jumps into the middle of host function `func_801CED1C`. In the current
-all-bands build it is registered (`psx_ov_entries[] = { 0x801CEEDCu, 12870, 6 }`,
-6 variants) and lives in `psx_ov_hash_addr[]`.
+### 3. Translation
 
-**Measured on the fresh build, in a live boss fight (savestate slot 4, PLCHAR
-resident, attacks executing):** `0x801CEEDC` interprets **0** instructions
-(+0 entries, +0 insns over the whole fight), and the *entire* PLCHAR band
-`0x801CE400` — which was **60.5%** of interpreted work in the band-3 profile —
-is now **0%**. Since the old build proved the function *is* invoked in combat
-(206 entries), zero interpreted work means it dispatches native. Full evidence:
-[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §9.
+The engine and the interception point are known ([`TEXT_ENGINE.md`](TEXT_ENGINE.md)).
+In order: settle whether Latin/digit bytes are raw ASCII (read `0x8015AD34`),
+variable-width glyph advance (the JP interpreter hard-codes 12 px — mine
+`SLUS_004.22` for Capcom's own answer), line-break policy, then the apply hook
+at the message-table lookup. Menus/items/name entry are a **separate** pool at
+`0x80014000`. The prior decode work at `D:\BoFIII` supplies the character table
+and 11,491 aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
 
-**The general lesson:** an interior address reached only by dynamic dispatch is
-invisible to the static call-edge walk, so it is never a registered key and
-address-misses to the interpreter — *even inside a compiled band*. This is the
-Axis B gap, and the observed→alias mechanism is its general fix. The same signature
-is live right now for `BATTLE.EMI` interior points in band `0x801D0C00`
-(`0x801E6C60` = 14.2 M interp insns, the current top interpreted PC) — harvested
-2026-08-31, will go native on the next rebuild by the identical mechanism.
+## Building against the pin
 
-**Still true, and load-bearing:** **never infer success from `static_hits`.**
-Band 3 looked perfect by every aggregate counter (chk/hit 1.00, 0 variant
-misses, 0 CRC misses) while `0x801CEEDC` ran fully interpreted. Verify per-PC
-with `tools/harvest_interp_pcs.py` after every rebuild — that is exactly how this
-was caught and confirmed.
+```bash
+export PATH="/c/msys64/mingw64/bin:$PATH"          # or cc1 crashes silently
+./psxrecomp/tools/ci/build_emitters.sh              # → build-recompiler/
+python psxrecomp/psxrecomp_cli.py generate --config game.toml --project-root . \
+    --disc "isos/Breath of Fire III (Japan).cue"   # base EXE + BIOS → generated/
+cmake -S . -B build-dbg                              # reconfigure if the shard count changed
+cmake --build build-dbg --target psxrecomp_codegen_hash   # BEFORE compiling overlays
+tools/axis_b_loop.sh --skip-harvest                  # overlays + build-dbg
+cmake --build build-relprof --target psx-runtime     # the play/measure tree
+```
 
-Axis A (more bands) was blocked on the §8 dispatch cost. **That blocker is
-gone** — steps 1-3 removed both of its costs and all ten bands are now
-compiled, so Axis A is complete. Axis B (coverage *inside* bands) is untouched
-and is now the main band-related work left.
+Tree configs are in [`STATUS.md`](STATUS.md) → Build trees. `build-relprof` is
+RelWithDebInfo + `PSX_DEBUG_TOOLS=ON` + **`PSX_STATIC_RUNTIME=ON`** (defaults
+OFF there; the dynamic exe dies on a stale PATH `libstdc++-6.dll`).
 
-### Axis A — CLOSED, all ten bands are compiled
+Order matters, and each of these cost a session once:
 
-> **Superseded 2026-08-31.** The table and reasoning below describe the old
-> dispatch design and are kept only so the result is not re-derived. All ten
-> bands now build and outperform three bands; see §12. Do not act on the
-> recommendation in this subsection.
+- **Regenerate `overlay_codegen_hash.h` before compiling overlays** after any
+  framework change. The stale-recompiler guard compares the recompiler's baked
+  hash against `psxrecomp/runtime/include/overlay_codegen_hash.h`, which a
+  *runtime* build step writes. Overlays first trips `FATAL: STALE RECOMPILER
+  BINARY` — the guard working, not a bug.
+- **A generate that changes the shard count needs a CMake reconfigure**, or the
+  link fails with undefined `func_*`.
+- **recomp-ui moves in lockstep** with a psxrecomp bump when the launcher ABI
+  changes (`RecompLauncherCGameInfo.discs` etc.). Symptom: `main.cpp` fails to
+  compile with "has no member".
+- **`--cps` is required** when compiling overlays (the runtime is a CPS build).
+- **`GAME_OVERLAY_STATIC_C` must not follow a multi-value CMake keyword** in
+  `CMakeLists.txt` — keep it after `APP_ICON`
+  ([`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §4).
+- **All bands compile together.** `compile_overlays.py --static` writes one
+  file per run; compiling one band alone silently drops the rest.
+- `analysis/` is gitignored. A fresh checkout regenerates it with
+  `emi_survey.py` → `extract_overlays.py` (+ `extract_logo_overlay.py`) before
+  overlays can build. All-bands compile ~13 min, build ~7.
 
-**All ten bands were compiled and reverted on 2026-08-30. That revert has since
-been undone.** Full evidence in
-[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §8 and §12. Compiling was
-always fast and correct; the problem was dispatch cost, now fixed.
+## Pins and branches
 
-| Build | Captures | Dispatch cases | Capcom screen | Memcard read |
-|---|---:|---:|---:|---:|
-| Two-band (current *at the time*) | 2 | 10,547 | ~18 fps | ~20 fps |
-| Shallow (8 bands) | 96 | 29,500 | ~9 fps | ~9 fps |
-| All bands | 338 | 39,036 | ~5 fps | ~5 fps |
+- `psxrecomp` **`1bf70960` = upstream `mstan/master`.** No fork commits. Bump
+  by fetching upstream, fast-forwarding the submodule's `master`, and
+  committing the gitlink — never float.
+- `recomp-ui` **`fda07fe`** = fork `kerokline/recomp-ui` branch
+  `feat/present-scanlines` = upstream `4eda654` + the launcher Scanlines toggle.
+  Pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42);
+  pin back to upstream when it merges.
+- Fork branches on `kerokline/psxrecomp` that are now history:
+  `fix/static-overlay-residency-signal`, `feat/present-scanlines`,
+  `perf/spu-sample-event-gate` (all merged), `integrate/scanlines` (local
+  integration build, obsolete). `fix/vblank-cadence-pacing` still holds the
+  **walk-HLE prototype** `d725af45` (`PSX_HLE_INTRP_WALK=1`, 170 lines in
+  `dirty_ram_interp.c` / `debug_server.c`): not needed for any current fix, kept
+  because its callback-dispatch mechanics are proven
+  ([`vblank-pacing-bug.md`](vblank-pacing-bug.md) → Prototype lessons).
+- `framework_pins.txt` is informational; the gitlinks are authoritative.
 
-Two independent costs, both measured:
+## Capture and disc extraction are not rivals
 
-1. **Deep variant chains.** The memory-card screen hit **41.25 checks per
-   hit** — 4.4 M *failed* variant checks per 2 s — because the resident
-   occupant sat ~41 deep in `0x801EEC00` (128 occupants) or `0x801F2C00`
-   (114). Cutting those two bands fixed it (41.25 → 4.28 chk/hit, 430x less
-   check volume).
-2. **Total compiled volume, which is the bigger cost.** Frame rate tracks
-   dispatch-case count, *not* chain depth — the shallow build caps chains at 35
-   and still lost half the frame rate. And `static_hits` is **0** on those
-   screens: no overlay code is running, so we pay for compiled code that never
-   executes. `psx_overlay_dispatch` is consulted ~92,500x/sec at boot and is a
-   switch over tens of thousands of sparse cases.
+Capture supplies two separable things with opposite value here. **The bytes**:
+disc extraction wins decisively — complete by construction, deterministic,
+reviewable, no playtime. **The entry points**: runtime observation wins — an
+executed PC with `entries > 0` is empirical proof of a callable boundary, and
+nothing reached only by indirect dispatch is visible statically. So the
+architecture is *bytes from the disc, entry points from play*, and that is what
+the pipeline does. Every objection to capture (privacy, non-determinism,
+coverage bound by playtime) attaches to the bytes; entry points are a list of
+integers, diffable and additive, and a bad one is rejected by the compiler's own
+validation.
 
-**The unblocking work is upstream in `psxrecomp`, and it is the same insight
-both times: the runtime already knows which overlay just loaded, and throws
-that away.** On hardware the game CD-reads a file to a fixed address and
-`jal`s straight into it — no lookup, because identity is implicit in control
-flow. Two fixes:
+One case where captured bytes would still win: if the game ever patches or
+relocates overlay code *after* load, every variant of that band would miss the
+CRC and fall to the interpreter silently. No evidence of this so far; the
+diagnostic is a band where every variant consistently misses.
 
-- **Memoize the resident variant per band.** Page generations are already
-  tracked (`overlay_watch_pagegen_sum`); a generation change *is* the load
-  event. Clear the memo, walk once to identify the new occupant, remember it.
-  Every later call becomes one CRC check. Kills cost 1.
-- **O(1) address lookup** instead of one monolithic switch. Kills cost 2.
-
-Until those land, **two bands is the best measured configuration** and band
-count is capped. Adding a third band is not obviously worth it — measure the
-Capcom screen and a memcard read before and after, and revert if they regress.
-
-**Do NOT re-try these dead ends:** raising `STATIC_MATCH_CACHE_CAP`
-(`overlay_loader.c:560`) — `static_rehashes` stayed **0** throughout, the cache
-never saturated; and page-faulting/binary size — working set was flat during
-the slow screens.
-
-### Axis A2 — the battle-transition slowdown itself
-
-> **Corrected 2026-08-31.** The earlier version of this section said
-> `0x801D0C00`, `0x801EEC00` and `0x801CE400` were *uncompiled* and that
-> compiling them "waits on the upstream dispatch fix." Both claims are now
-> stale — they described the three-band build. **All three are among the ten
-> bands and all three are compiled in the current all-bands build** (verified:
-> their entry PCs — e.g. `0x801EECD4`/`0x801EEEE0`, `0x801D112C`/`0x801D0C04`,
-> `0x801CE448`/`0x801CEEDC` — are present in `generated/overlays_static.c`).
-> Do not re-add them as "missing bands."
-
-Still unfixed, but **not** because these regions are uncompiled. They are
-compiled. What remains during a battle transition is two things, neither of
-which is a missing band:
-
-1. **Entry-point coverage *inside* those bands (Axis B).** A compiled band is
-   not a fully native band. The battle-transition hot code surfaces to the
-   interpreter at boundaries the static call-edge walk never named (jump-table /
-   function-pointer targets), so it runs interpreted despite the band being
-   compiled. This is the coverage layer, not the region layer — see Axis B.
-2. **The §9 dispatch bypass.** `0x801CEEDC` (band `0x801CE400`) is compiled
-   *and* is a real `case` in `psx_overlay_dispatch`, yet is still interpreted
-   because the gate is never consulted. That is a routing defect, independent of
-   coverage. See "Still open" above and `OVERLAY_EXTRACTION.md` §9.
-
-**There are no more regions to capture.** The `.EMI` TOC survey is exhaustive
-over the disc; the ten bands are all the RAM-bound code destinations that exist.
-"All bands" is complete at the region *and* section (bytes) layer — the only
-incompleteness left is entry points within bands (Axis B) plus §9.
-
-### Axis B — coverage gaps inside bands already compiled
-
-**13,682,184 interpreted instructions across 37 PCs sit inside band 1**, which
-was recorded as having zero. That zero was true for a boot-and-idle run; a real
-play session reaches entries the static call-edge walk never saw, because they
-are only reached through dynamic dispatch. Band 2 has the same gap at 7 PCs.
-
-A compiled band is not a fully native band. `tools/harvest_interp_pcs.py`
-against a live session is what finds these; feeding the observed PCs back as
-extra roots and recompiling should be cheap. Axis A added *bands* and is now
-closed; Axis B deepens coverage *within* a band.
-
-**Axis B is now the main remaining band work — see "The next task" above** for
-the loop, the blocking input (a play session), and the reason this is capture's
-one genuine advantage over disc extraction. The mechanism is already wired:
-`extract_overlays.py --observed` defaults to reading
-`analysis/observed_interp_pcs.json`, and only PCs with `entries > 0` are passed
-on, because a PC the interpreter merely fell *through* is not evidence of a
-callable boundary.
-
-**Why static extraction cannot close this on its own:** reading disc bytes
-tells you where code is, not where a function *starts*. Anything reached only
-through a jump table or function pointer is invisible to a call-edge scan.
-Band 1 is the proof — it compiled clean, audited perfectly, and still had 37
-entries nobody could derive statically.
-
-This does **not** contradict `FUNCTION_DISCOVERY` rule 1 ("no executed-PC
-feedback"), which governs the *analyser*. The feedback here happens at the
-overlay layer instead, which is why it is legitimate.
+The persuasive writeup for the wider ecosystem ("The Disc Ships the Map") is a
+private artifact:
+<https://claude.ai/code/artifact/37f5d9d1-64c9-4db6-bb65-aad75e0ab4f4>.
 
 ## Traps paid for — do not re-pay them
 
-- **The all-bands generate exits with code 2, and that is correct.** A handful
-  of shards fail audit as `UNSUPPORTED_INSTRUCTION` — data walked as code. The
-  set drifts *up* one occupant at a time as the observed set grows into new data
-  regions: `0x800C1800` (BIN/BOSS) started at ×2, `0x801F2C00` (AREA) at ×1,
-  `0x801EEC00` added 1 (→4 total on 2026-08-31), and the 2026-09-01 evening
-  session's 239 new PCs took it to **6 total** (`0x800C1800` ×3, `0x801F2C00`
-  ×2, `0x801EEC00` ×1). **Do not read a higher number as a regression.** Each
-  failure just drops that one occupant to the interpreter; the rest of its band
-  compiles. The output file is written and is correct.
-- **The failure-class token is `[audit]`, and "unsupported" is in the DETAIL,
-  not the class.** A shard failure prints `SHARD FAIL [audit] overlay 0x… crc …:
-  0 unknown_bad, N unsupported`. There is **no** literal `[UNSUPPORTED_INSTRUCTION]`
-  bracket — an early `axis_b_loop.sh` classifier grepped for one and false-flagged
-  all six benign failures as a regression (2026-09-01, cost a wasted abort before
-  the build). The correct discriminator: **benign iff class is `[audit]` AND the
-  detail is `0 unknown_bad, N unsupported`**; a real regression is any other
-  class, or `unknown_bad > 0`. `axis_b_loop.sh` now matches on that shape.
-- **Measure dispatch changes on a variant-heavy workload, not just a hit-heavy
-  one — they disagree in sign.** The resident-occupant memo measured neutral to
-  slightly *negative* on a savestate-loaded combat workload (chains already
-  1.019-1.055 deep, nothing to shorten) and **+33%** on boot (chains 1.479).
-  An early reading of the first table concluded the memo was not a win. It was
-  the wrong workload. `tools/headless_ab.py` runs the savestate workload; the
-  boot workload is the same harness with the savestate step skipped.
+Measurement:
 
-- **The build on disk was NOT the two-band configuration**, despite §8 and
-  `STATUS.md` both saying two bands "is what is built". It was the §9
-  **three-band** build (11,913 dispatch addresses / 12,522 variants). Every
-  measurement taken on 2026-08-31 is therefore three-band. Check before
-  trusting any claim about which bands are live:
-  `grep -o "ov_00[0-9A-F]\{6\}_" generated/overlays_static.c | sort -u`
-- **`savestate load` over TCP DOES work headless** — the trap below saying it is
-  broken applies to the windowed path. Under
-  `--headless --no-launcher --game game.toml` it returns immediately with
-  `last_ok=1` and the listener stays alive. This is what makes the A/B harness
-  (`tools/headless_ab.py`) possible.
-- **`frame_perf` is unavailable headless** ("no frame_perf samples — GL timer
-  queries unavailable"). Use the VSync counter at `0x8018603C` via `read_ram`
-  and compute emulated frames per wall second. Headless is *uncapped*, so this
-  is a better dispatch-cost metric than fps — it is not clamped at 60.
-- **A generator/runtime hash mismatch would fail silently.** If
-  `psx_ov_hash_slot` in the emitted C ever diverges from the Python that built
-  the table, every lookup misses, everything falls to the interpreter, and the
-  game still *runs* — just slowly. Any change to that hash must be re-verified
-  across the whole address space; §11 has the check.
+- **Never infer success from `static_hits` or any aggregate counter.** Band 3
+  looked perfect by every aggregate while `0x801CEEDC` ran fully interpreted.
+  Verify per PC with `tools/harvest_interp_pcs.py` after every rebuild.
+- **`overlay_loader_status` is the measurement that matters** —
+  `static_checks` / `static_hits` / `static_crc_misses` — not the
+  interpreted/native ratio, which is workload-dependent.
+- **Measure dispatch changes on both a variant-heavy (boot) and a hit-heavy
+  (savestate) workload** — they disagree in sign. `tools/headless_ab.py`.
+- **`frame_perf` fps is a rolling 256-frame average** and smears stalls; use
+  `all.total_ms_max` for anything stall-shaped. `frame_perf` is unavailable
+  headless — use the VSync counter at `0x8018603C` via `read_ram`, and note the
+  BIOS VSync counter is **frozen during the intro FMV** (use the host `frame`
+  counter there).
+- **Frame-number comparisons across runs are invalid** — boot phases do not
+  line up. Anchor performance claims to a named screen.
+- **Profile the Capcom FMV on a clean boot only.** The mid-FMV savestates
+  resume *past* the FMV. `tools/fmv_bench.py` does this.
+- **Guest-side counters cannot see host-side overhead.** The FMV fix came from
+  gdb stack sampling of the emu thread, after two wrong guest-side theses.
+  `phase_profile` mislabels static-overlay code entered from the dirty
+  dispatcher as "interp".
+- **Headless is uncapped**, so emulated frames per wall second is a better
+  dispatch-cost metric than fps.
 
-- **`static_crc_misses: 0` was never evidence of a healthy gate.** Before
-  `aa6fa2c9` the gate short-circuited on a frozen page generation, so a zero
-  there meant "never re-evaluated", not "always matched". Any pre-2026-08-31
-  measurement of that counter says nothing about content validation. Same
-  applies to a flat `static_rehashes`.
-- **The launcher is the default.** `BreathOfFire3_Recompiled.exe --debug-port N`
-  alone sits at `main() entered` with no debug server, waiting on a GUI click.
-  Use `--game game.toml --no-launcher --debug-port 4370`.
-- **`playsession.send()` takes a dict, not a string.** `send({"cmd":
-  "overlay_loader_status"})`. A bare string returns `unknown command`, which
-  reads like a missing feature rather than a caller error.
-- **`frame_perf` fps is a rolling 256-frame average** — ~4.3 s at 60 fps, so it
-  *smears transient stalls*. A sub-second dip to 20 fps shows up as a mild
-  average. Use `all.total_ms_max` (a rolling max over the same window) for
-  anything stall-shaped. An early revision of the §10 notes nearly claimed a
-  transition improvement off the averaged number.
-- **The submodule floated off the pin again**, this time to `47bda817` (two
-  commits past `f24b7e5d`: a savestate fix and the multi-disc launcher merge).
-  Both are on `upstream/master`, so nothing is lost by resetting. Check
-  `git submodule status psxrecomp` for a leading `+` before trusting any
-  measurement baseline.
+Pipeline:
 
-- **PowerShell has no inline env-var prefix.** `VAR=x cmd` is a parse error.
-  Use `$env:VAR = "0"` then `.\path\to.exe`. The framework docs are bash.
-- **The "crashes" were the starvation watchdog**, not the game.
-  `starvation_ring.c` calls `exit(2)` after 4 s without an emu-thread
-  heartbeat. Signature: `reason: atexit` with `exit_origin: "unknown"` (the
-  tagged paths are `tcp_quit` / `sdl_window_close`). Disable with
-  `PSX_STARVATION_TIMEOUT_US=0`.
-- **Two ~87 MB freeze dumps are written at EVERY boot**, at frame ~328, from a
-  `slow_frames` then `hard_freeze` false positive. ~160 MB per launch. Prune
-  `build-dbg/psx_freeze_dump_*.json` between sessions.
-- **Savestates: in-game slot saving now works, including in combat.**
-  User-reported on 2026-08-30 with bands 1+2 compiled, and used successfully to
-  hold a mid-battle position for measurement. This softens the earlier trap
-  below but does not delete it — the refusal mechanism is still in the code and
-  nobody has re-derived why it stopped firing. Plausible reading: two compiled
-  bands mean fewer interrupts land inside the dirty-RAM interpreter, so the
-  snapshot-safe gate passes more often. **Unverified — do not state it as
-  fact.** The mechanism: `psx_irq_resume_context_snapshot_safe()` is
-  `g_cosim_dirty_pump_site == 0` (`interrupts.c:629`); an interrupt taken inside
-  the dirty-RAM interpreter is never snapshot-safe, and retrying does not help
-  because it tracks the *interrupt path*, not the aggregate ratio. In-game
-  memory-card saves remain the reliable fallback. Savestates *do* survive a
-  rebuild (verified).
-- **`tools/playsession.py state load` is broken** — it exceeds the I/O thread's
-  30 s bound (`emu busy or frozen`) and leaves the listener dead. The in-game
-  **X** key also kills the process; **Enter/Start** works. Load in-game, then
-  read RAM over TCP.
-- **In-game savestate slot N is file `slotN-1`.** Established from write
-  timestamps, see [`SAVESTATES.md`](SAVESTATES.md).
-- **Seeding is a dead end, proven three ways.** Extending
-  `seeds/ghidra_funcs.txt` from 523 to 868 gave a **byte-identical generate**;
-  seeding interior PCs produced aliases into a parent compiled from zero bytes;
-  and the session profile shows static EXE code with **`entries = 0`**, so the
-  interpreter never *enters* static code at all. Do not revisit this.
-- **A generate that changes the shard count needs a CMake reconfigure**, or the
-  link fails with undefined `func_*`. The generated source list is captured at
-  configure time.
-- **`GAME_OVERLAY_STATIC_C` must not follow a multi-value CMake keyword.**
-  Placed after `GEN_FULL_GLOB`, `cmake_parse_arguments` swallows it into that
-  glob list: the file still compiles, but `PSX_HAS_OVERLAY_DISPATCH` is never
-  defined and the link fails with hundreds of undefined
-  `psx_overlay_static_code_matches`. Keep it after `APP_ICON`. Full writeup in
-  [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) §4.
-- **`--cps` is required when compiling overlays.**
-  `generated/SLPS_009.90_dispatch.c` sets `g_psx_cps_mode = 1`, so the runtime
-  is a CPS build; omitting the flag produces mismatched overlay code.
-- **Do not seed the `GAME.EMI` §0 header pointer table.** Its 26 in-region
-  entries are chained jump-table cases, not function starts — 0 of 26 have a
-  prologue or a preceding `jr $ra`. The framework would classify them
-  `FUNCTION_POINTER_TARGET`, which is exempt from the boundary gate, so they
-  would truncate their hosts. `OVERLAY_EXTRACTION.md` §2 has the disassembly.
-- **Compare discs by content hash, not by size.** A JP↔US size diff finds 368
-  changed sections; hashing finds **972**. The 502 same-size/different-bytes
-  type-0 sections and all 37 language-bearing images are invisible to a size
-  comparison. `emi_survey.py` now hashes every section for this reason.
-- **Section destinations are region-specific.** 1,096 sections move between the
-  JP and US discs, in systematic blocks (+0x8000, +0x6000, +0x3000). The
-  existing "select by destination, never by index" rule needs the companion:
-  destinations only mean something *within* one region. `0x80010000` (the area
-  script) is the one address that does not move.
-- **`harvest_interp_pcs.py` writes PCs as *physical* addresses.** The JSON has
-  `"pc": "0x001D7524"`; the console report prints `0x801D7524`. Mask with
-  `(pc & 0x1FFFFFFF) | 0x80000000` before bucketing against band destinations,
-  or every PC silently falls out as "unmapped".
-- **Band 2's compiled region is `0x80093800`–`0x800B4003`.** An earlier handoff
-  said to check up to `0x800C1800`; that overshoots by ~56 KB and `0x800C1800`
-  is a *different* band (7,676 bytes, 35 occupants).
-- **A band that compiled clean is not a band that is fully native.** Static
-  discovery yields the statically reachable call graph only. Band 1 shows 37
-  interpreted PCs *inside* it on a real play session despite a clean compile and
-  an earlier measured zero. Always re-measure with a live session, not a boot.
-- **The static-match CRC cache is not a performance problem.** 903,517 of
-  904,076 checks took the page-generation fastpath; 559 needed a re-hash. Do not
-  go optimising `psx_overlay_static_code_matches` — measure first.
-- **OV-1 does not apply to the static overlay path. Do not build an
-  unregistration mechanism for it.** OV-1 in
-  `psxrecomp/docs/overlay-status.md` is a defect in the **DLL loader**
-  (`[runtime] overlay_cache`): it registered 88 functions once, never
-  re-evaluated them, and when the game reused `0x800E7000` for other content it
-  dispatched into stale native code — the blue screen. **That loader is inert
-  here** (`registered`/`loads`/`invalidations` are all 0). The static path is
-  content-addressed at *every* dispatch: `compile_overlays.py`
-  (`generate_overlay_dispatch`, ~line 2315) emits one `case` per address with
-  each occupant as a CRC-guarded variant, and
-  `psx_overlay_static_code_matches()` hashes the live RAM bytes before the call
-  is allowed. The CRC gate *is* the dispatch condition, so stale code cannot
-  run; a non-resident variant simply misses and the address falls to the
-  interpreter. `static_variant_misses` exists to count exactly this. Multi-
-  occupant bands therefore need **no** register/unregister work — compile all
-  occupants and let the gate choose. A session that reads "swap slot" as "must
-  solve OV-1 first" will burn itself on a problem this design does not have.
-- **Pre-existing slow screens.** Current read (user, 2026-09-01, all-bands
-  build): **world map ~50 fps**; **memory-card screen transitions / reads /
-  writes ~50 fps** — improved from the earlier ~20 fps but not gone, now in the
-  same tier as the world map. Savestate repro anchors: **slot 08 = world map,
-  slot 09 = save/memcard screen, slot 10 = just before a merchant transition**
-  (in-game slot N is file `slotN-1`; slot 10 doubles as a shop-text capture
-  point). Attribution path: load the slot, `harvest_interp_pcs.py` + the
-  `overlay_catalog.json` heat ranking against the live moment.
-  - **The Capcom logo (was ~10-20 fps, "the worst offender") is FIXED (2026-09-01).**
-    It was NOT dispatch cost — the opening logos run from `LOGO/LOGO.EXE`, a
-    standalone 120 KB PS-EXE at `0x801CE000` that the `.EMI` pipeline never
-    captured, so it ran 100% interpreted. Compiled it as a static overlay
-    (`tools/extract_logo_overlay.py` → capture in `overlay_captures_all.json`,
-    re-merged by `axis_b_loop.sh` phase 3a). Now `0x801CEEDC` runs native, Capcom
-    interp dropped 20×, present fps 19→steady ~30 (now pacing-limited by the
-    `CAPCOM30.STR` FMV/CD stream, not CPU). Full detail: [`STATUS.md`](STATUS.md)
-    2026-09-01 note + log. **Repro is trivial:** launch headless, no input —
-    Capcom is the first screen; measure with the host `frame` counter (the BIOS
-    VSync counter at `0x8018603C` is frozen during the intro).
-- **Frame-number comparisons across runs are invalid.** Boot phases do not line
-  up between launches, so "frames 96-346 was the Capcom screen last time" is not
-  sound — an early revision of this session's notes drew a wrong conclusion that
-  way. Anchor performance claims to a named screen the user is actually looking
-  at, not to a frame index.
-- **All capture files are retained**, so any overlay configuration rebuilds:
-  `analysis/overlay_captures_all.json` (338 captures, all ten bands,
-  **current**), `_3band.json` (21), `_band1_battle.json` (2), `_band1.json` (1),
-  `_shallow.json` (96). `analysis/` is **gitignored** — a fresh checkout must
-  regenerate them with `emi_survey.py` then `extract_overlays.py` before it can
-  build overlays. Note the all-bands generate takes ~13 min and the build ~7.
-- **The core audit failures are `UNSUPPORTED_INSTRUCTION`, and that is
-  correct.** Two in `BIN/BOSS` at `0x800C1800`, one in `BIN/WORLD01/AREA038` at
-  `0x801F2C00`. Decoding the words gives `0xFFFFFFFF`, `0xFFFF0601`, and functs
-  `0x30`/`0x32`/`0x01` — TGE/TLT/MOVCI, MIPS II/IV encodings the R3000A does not
-  have. **This is data being walked as code**, not a recompiler opcode gap: a
-  static root ran into a jump table or fill. The audit refusing them is the
-  right outcome; those occupants fall to the interpreter. Expect the *set* to
-  grow by one occupant at a time as observed entries expand into new bands (see
-  the exit-code-2 trap above) — same class, same correct outcome.
-- **`overlay_loader_status` is the measurement that matters**, not the
-  interpreted/native ratio. `static_checks` / `static_hits` / `static_crc_misses`
-  say whether the compiled overlay is actually being used and whether the disc
-  bytes still match RAM. The aggregate ratio is workload-dependent and is not
-  comparable across sessions.
-- **Keep the `psxrecomp` submodule on the pin.** It had floated to `a91884a4`;
-  it is back at `f24b7e5d`. Reset with
-  `git submodule update --init --recursive psxrecomp`.
-- Earlier retracted-in-place diagnoses, left visible in `STATUS.md` so they are
-  not re-derived: overlays as the cause of a *crash* (there was no crash),
-  savestate load as the cause of the freeze dumps, and the seed list as the
-  interpretation bottleneck.
+- **The all-bands compile exits 2, and that is correct.** Benign iff class is
+  `[audit]` and the detail is `0 unknown_bad, N unsupported` (data walked as
+  code — TGE/TLT/MOVCI words the R3000A lacks). The count drifts up one
+  occupant at a time as the observed set grows (4 → 6 → **7** on 2026-09-01).
+  Anything else is a real regression. `axis_b_loop.sh` matches on that shape.
+- **`harvest_interp_pcs.py` writes PCs as physical addresses.** Mask with
+  `(pc & 0x1FFFFFFF) | 0x80000000` before bucketing, or everything is "unmapped".
+- **Do not seed the `GAME.EMI` §0 header pointer table** — chained jump-table
+  cases, not function starts; they would truncate their hosts.
+- **Seeding the boot EXE is a dead end, proven three ways** — byte-identical
+  generate at 523 vs 868 seeds; interior seeds alias into zero-fill parents;
+  static code has `entries = 0` ([`OVERLAYS.md`](OVERLAYS.md) §3).
+- **Compare discs by content hash, not size** (972 vs 368 changed sections),
+  and **section destinations are region-specific** — select by destination
+  *within* a region ([`regional-builds.md`](regional-builds.md)).
+- **Band 2's compiled region is `0x80093800`–`0x800B4003`**; `0x800C1800` is a
+  different band.
+- **OV-1 does not apply to the static path.** The CRC gate *is* the dispatch
+  condition, so stale code cannot run; multi-occupant bands need no
+  register/unregister mechanism. The DLL loader that has the OV-1 defect is
+  inert here.
+- **Do not build residency detection for the relocated BIOS handler by
+  matching ROM bytes.** OpenBIOS rebuilds the exception handler in RAM at boot
+  (diverges from the ROM image at `0x27DC`), so no ROM-compiled function can be
+  entered at `0x27AC`. Also not needed — that handler was never the FMV cost.
 
-## Tooling added today
+Runtime:
+
+- **The "crashes" are the starvation watchdog** (`exit(2)` after 4 s,
+  `exit_origin: "unknown"`). `PSX_STARVATION_TIMEOUT_US=0`.
+- **Two ~87 MB freeze dumps at every boot.** Prune them.
+- **The launcher is the default.** Use `--game game.toml --no-launcher
+  --debug-port 4370`, or the exe sits waiting for a GUI click.
+- **PowerShell has no inline env-var prefix**; use `$env:VAR = "x"` then run.
+  Git Bash env prefixes do not reliably reach the native child either — run the
+  exe from PowerShell.
+- **`playsession.send()` takes a dict**, not a string.
+- **In-game savestate slot N is file `slotN-1`.** Load with Enter/Start; the
+  windowed TCP `state load` wedges the listener (it works headless). Savestates
+  survive a rebuild, but a `savestate.c` rework once made old files load
+  `last_ok: 0` — re-save rather than investigate; every anchor is minutes from
+  boot ([`SAVESTATES.md`](SAVESTATES.md)).
+- **Kernel-RAM `jalr` targets can fail-fast** once (`0x00002934`, not
+  reproduced) — [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md).
+
+## Tooling
 
 | Tool | Use |
 |---|---|
-| `tools/harvest_interp_pcs.py` | Against a live run: interpreted/native ratio plus proven interpreted entry PCs, **unioned** (distinct, no duplicates) into the accumulated `analysis/observed_interp_pcs.json`. Downstream is `extract_overlays.py --observed`, **not** the seed lane — the old seed-append was a proven dead end and is removed. |
-| `tools/verify_msgtable.py` | Walks the message table on a running game |
-| `tools/export_seeds.py` | Analyser to seeds merge. **Kept only for the record — its result was null.** |
-| `tools/emi_survey.py` | Walks every `.EMI` on the disc, reads each TOC, hashes **every** section and code-tests the RAM-bound ones → `analysis/emi_sections.json`. Run it per region to diff discs. |
-| `tools/extract_overlays.py` | Turns survey rows into `overlay_captures.json` with statically derived seeds — the input to `psxrecomp/tools/compile_overlays.py` |
-| `tools/enrich_pcs.py` | **Understand** an observed PC: resident `.EMI` occupant (live RAM byte-match), FUNCTION-START vs INTERIOR, disassembly window, outgoing `jal` targets ("linked calls"), and callers from the live `dirty_block_log` ring. `--group` gives an offline interp-weighted **subsystem breakdown** by band+family. Native PCs show **0 ring hits** (the ring logs interp only) — a free cross-check that a fix took. |
-| `tools/axis_b_loop.sh` | **The Axis B loop, in one command.** Runs harvest → extract → catalog → codegen-hash → compile → build against a live session (default port 4370). Gates on 0-new-PCs (rebuild only when the session added something; `--force` overrides), tolerates the expected exit-2 `[audit]`/`0 unknown_bad` shard failures and *only* those, and refuses to link a running exe. `--harvest-only` to just check the delta; `--skip-harvest` to rebuild from the observed set as-is. |
-| `tools/overlay_catalog.py` | **Catalog the overlays.** Pure offline join over captures + observed + survey → `analysis/overlay_catalog.json` (schema `overlay-catalog-v1`). Per overlay: family/subsystem, band membership + co-residency siblings, root provenance (JAL/PROLOGUE/OBSERVED), and interp **heat** attributed honestly — band-level for multi-occupant bands (the documented attribution limit), occupant-level only for single-occupant ones. **Overwrite, not merge:** the cross-session union lives upstream in `observed_interp_pcs.json`; the catalog re-derives off it. |
-
-Existing and still useful: `tools/emi.py` (parse/extract `.EMI`),
-`tools/disc_ls.py` (list/extract the ISO9660 tree), `tools/disasm_exe.py`.
+| `tools/axis_b_loop.sh` | **The Axis B loop in one command** (harvest → extract → LOGO merge → catalog → hash → compile → build). Gates on 0 new PCs (`--force`), tolerates only the benign exit-2 shape, refuses to link a running exe. `--harvest-only`, `--skip-harvest`, `--skip-hash`. |
+| `tools/harvest_interp_pcs.py` | Live run → interpreted/native ratio + proven interpreted entry PCs, **unioned** into `analysis/observed_interp_pcs.json`. |
+| `tools/extract_overlays.py` | `.EMI` survey → `overlay_captures_all.json` with static roots + observed entries. Reads the observed file by default. |
+| `tools/extract_logo_overlay.py` | `LOGO/LOGO.EXE` (a PS-EXE at `0x801CE000`) → `static-emi-v1` capture; `--append-to` the all-bands file. |
+| `tools/harvest_logo_handlers.py` | Locate runtime-populated function-pointer tables statically, read them live, emit every handler as a dispatch entry. |
+| `tools/enrich_pcs.py` | Explain an observed PC: occupant, boundary, disassembly, linked calls, callers; `--group` subsystem breakdown. |
+| `tools/overlay_catalog.py` | Offline catalog sidecar → `analysis/overlay_catalog.json` (overwrite, not merge). |
+| `tools/emi_survey.py` | Walk every `.EMI`, hash every section, code-test RAM-bound ones → `analysis/emi_sections.json`. Per region. |
+| `tools/fmv_bench.py` | Clean-boot headless FMV benchmark (vblank/present window) with optional gdb sampling of the emu thread. |
+| `tools/headless_ab.py` | Headless A/B on a savestate workload (skip the load step for the boot workload). |
+| `tools/verify_msgtable.py` | Walk the message table on a running game. |
+| `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
+| `tools/emi.py`, `tools/disc_ls.py`, `tools/disasm_exe.py` | Parse/extract `.EMI`; list the ISO9660 tree; disassemble the boot EXE with MMIO naming. |
+| `tools/export_seeds.py`, `tools/ghidra_seed.py` | Kept for the record — the seed experiments were null. |
 
 ## Open questions
 
-- **Where all the text lives is now settled** — four `.EMI` locations, none in
-  the boot EXE, plus 37 language-bearing image sections. Full census in
-  [`regional-builds.md`](regional-builds.md). Two things it left open: what the
-  ~15 KB string table inside `GAME.EMI` section 0 actually contains (nobody has
-  read it), and why `DEMO.EMI` section 5 ships the JP image on the PAL English
-  disc but a distinct one on the US disc.
-- **211 of 8,694 dispatch addresses are zero-fill**, from 18 of 523 seeds (all
-  `low` confidence). Those are registered native entries compiled from nothing.
-  Dirty-RAM invalidation masks them today; audit before trusting native
-  dispatch in that range.
-- **Text paths not yet seen live:** a shop, an equipment menu, and battle text.
-  Each is a sub-minute check against a running game with
-  `tools/verify_msgtable.py` and a screenshot.
-- **Translation still needs** variable-width glyph advance (the JP interpreter
-  hard-codes 12 px) and a line-break policy; mine `SLUS_004.22` rather than
-  inventing one. And menus/items/name entry are a **separate text pool** from
-  the `.EMI` area script.
+- The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.
+- Why `DEMO.EMI` §5 ships the JP image on the PAL English disc.
+- Whether the Western builds use proportional glyph advance.
+- **211 of 8,694 dispatch addresses are zero-fill** (18 `low` seeds) —
+  registered native entries compiled from nothing; dirty-RAM invalidation masks
+  them today.
+- Text paths not yet seen live: a shop, an equipment menu, battle text.
 
 ## Environment
 
-- `python`, not `python3`.
-- MSYS2 toolchain is **not** on PATH by default:
-  `export PATH="/c/msys64/mingw64/bin:$PATH"` (GCC 16.2.0, CMake 4.4.2,
-  Ninja 1.13.2, ccache).
-- Build: `./psxrecomp/tools/ci/build_emitters.sh`, then
-  `python psxrecomp/psxrecomp_cli.py generate --config game.toml
-  --project-root . --disc "isos/Breath of Fire III (Japan).cue"`, then
-  `cmake --build build-dbg --target psx-runtime`.
-- `build-dbg` is the diagnosis tree (`-DPSX_DEBUG_TOOLS=ON`). A Release build
-  has no debug server and cannot be inspected at all.
-- Ghidra project at `D:\Utilities\GhidraProjects\BoF3` (1025 functions),
-  deliberately outside the repo. `analyzeHeadless.bat` cannot run `.py` —
-  use `python -m pyghidra.ghidra_launch`.
-- Prior decode work at `D:\BoFIII`: character table plus `decode_text.py`,
-  reused by `tools/verify_msgtable.py`. Open the JSON as UTF-8.
+See [`STATUS.md`](STATUS.md) → Environment. Short form: `python` not
+`python3`; prepend `/c/msys64/mingw64/bin`; run the exe from PowerShell with
+`$env:`; Ghidra project at `D:\Utilities\GhidraProjects\BoF3`
+(`analyzeHeadless.bat` cannot run `.py` — use `python -m pyghidra.ghidra_launch`);
+prior decode work at `D:\BoFIII` (open the JSON as UTF-8).
