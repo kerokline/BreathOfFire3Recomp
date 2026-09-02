@@ -10,11 +10,18 @@
 # The phases, straight from docs/HANDOFF.md "The next task":
 #   2. harvest   — union this session's proven interpreted entry PCs into
 #                  analysis/observed_interp_pcs.json; report how many are NEW.
+#   2a. residency — area_poller.py harvest: snapshot the resident AREA script +
+#                  drain the overlay native ring into analysis/area_timeline.jsonl
+#                  (name evidence; see docs/NAME_MAP.md). One-shot — for a full
+#                  per-area timeline run `area_poller.py watch` DURING play.
 #   3. extract   — rebuild analysis/overlay_captures_all.json from the observed set.
 #   4. hash      — regenerate overlay_codegen_hash.h BEFORE compiling overlays
 #                  (skippable with --skip-hash when there was no framework bump).
 #   5a. compile  — compile ALL bands together into generated/overlays_static.c.
 #   5b. build    — rebuild the psx-runtime target.
+#   6. maps      — refresh names/ sidecar from the new catalog and regenerate
+#                  docs/subsystem_map.html (runs on every non-harvest-only path,
+#                  including --skip-harvest).
 #
 # Convergence caveat (HANDOFF): repetition of already-seen content adds ~0 new
 # PCs. If harvest reports 0 new, the rebuild is wasted work, so this script stops
@@ -74,6 +81,7 @@ done
 # Run from repo root regardless of where the script was invoked.
 cd "$(dirname "$0")/.."
 export PATH="$MSYS_BIN:$PATH"
+export PYTHONIOENCODING=utf-8   # tool banners use non-cp1252 glyphs
 
 say() { printf '\n\033[1;36m=== %s ===\033[0m\n' "$*"; }
 die() { printf '\n\033[1;31mFATAL: %s\033[0m\n' "$*" >&2; exit 1; }
@@ -98,6 +106,10 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
   python tools/harvest_interp_pcs.py --port "$PORT" | tee "$HARVEST_LOG" \
     || die "harvest failed — is the game still running with --debug-port $PORT?"
 
+  # Residency evidence for names/ (NAME_MAP.md). Off the build path: never fatal.
+  say "phase 2a — residency snapshot (area + native ring → analysis/area_timeline.jsonl)"
+  python tools/area_poller.py harvest --port "$PORT"     || echo "WARN: area_poller harvest failed — continuing (names evidence only)"
+
   # Parse "..., N new this session ..." to decide whether a rebuild is worth it.
   NEW_PCS="$(grep -oE '[0-9]+ new this session' "$HARVEST_LOG" | grep -oE '^[0-9]+' | head -1 || true)"
   rm -f "$HARVEST_LOG"
@@ -105,6 +117,8 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
 
   if [ "$HARVEST_ONLY" -eq 1 ]; then
     say "harvest-only: done ($NEW_PCS new PCs). Stopping before extract."
+    echo "For a per-area timeline next session, run DURING play:"
+    echo "  python tools/area_poller.py watch --port $PORT"
     exit 0
   fi
 
@@ -199,6 +213,15 @@ say "phase 5b/5 — build psx-runtime"
 cmake --build "$BUILD_DIR" --target psx-runtime \
   || die "psx-runtime build failed. If it failed at LINK with undefined func_*, the shard count changed and $BUILD_DIR needs a CMake reconfigure."
 
+# ---- phase 6: names sidecar + subsystem map ---------------------------------
+# Derived views over the refreshed catalog. name_map init is a MERGE (hand edits
+# survive); subsystem_map is a full regenerate. Off the build path: never fatal.
+say "phase 6 — refresh names/ sidecar + docs/subsystem_map.html"
+MAPS_OK=1
+python tools/name_map.py init && python tools/name_map.py check   || { echo "WARN: name_map init/check failed"; MAPS_OK=0; }
+python tools/subsystem_map.py   || { echo "WARN: subsystem_map failed"; MAPS_OK=0; }
+[ "$MAPS_OK" -eq 1 ] || echo "WARN: maps not refreshed — rerun phase 6 by hand (docs/NAME_MAP.md)"
+
 # ---- housekeeping -----------------------------------------------------------
 if [ "$PRUNE" -eq 1 ]; then
   say "pruning freeze dumps"
@@ -209,6 +232,7 @@ say "DONE"
 echo "new PCs banked this session : $NEW_PCS"
 echo "captures                    : $CAPTURES"
 echo "overlay source              : $OVERLAY_C"
+echo "subsystem map               : docs/subsystem_map.html (refreshed=$MAPS_OK)"
 echo
 echo "Next: relaunch build-dbg and RE-MEASURE per-PC —"
 echo "  BreathOfFire3_Recompiled.exe --game game.toml --no-launcher --debug-port $PORT"

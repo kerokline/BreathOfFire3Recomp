@@ -1,0 +1,8 @@
+# names/functions.toml — human names for overlay-resident functions.
+# Boot-EXE functions belong in ../symbols.toml (PSX_FN_* path), not here.
+#
+#   overlay:  md5 from names/overlays.toml  (or "boot" is REJECTED — use symbols.toml)
+#   pc:       function entry inside that overlay's resident image
+#   args:     parameter names in a0..a3 order, e.g. ["location", "actor"]
+#   status:   unnamed | hypothesis | evidence | verified
+#   evidence: which trace / string / data-doc citation backs the name

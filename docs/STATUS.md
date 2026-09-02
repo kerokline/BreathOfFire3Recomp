@@ -2,6 +2,28 @@
 
 **Status:** IN PROGRESS (last verified 2026-09-01, evening)
 
+> **2026-09-01 late — readability track opened: name sidecar + subsystem map.**
+> Human names now live outside the regenerated C: `names/overlays.toml` (alias /
+> role / status / evidence per overlay, keyed by section **md5**, not PC — bands
+> overlap) and `names/functions.toml` ((md5, pc) per overlay function; boot-EXE
+> names stay in `symbols.toml`). [`tools/name_map.py`](../tools/name_map.py)
+> seeds/merges/validates them; [`tools/subsystem_map.py`](../tools/subsystem_map.py)
+> renders [`docs/subsystem_map.html`](subsystem_map.html) — bands → overlays →
+> 29 036 overlay functions (roots, spans, in-overlay jal edges, honest heat) +
+> the 1 026 boot-EXE functions, searchable by name/alias/PC/md5, no bytes
+> embedded. Coverage: 2 overlays `evidence`, 204 `hypothesis` (filename-derived),
+> 133 `unnamed` (all AREA/COMMU), 0 overlay functions. Routes to earn names
+> (resident script block + screenshot → areas, Psy-Q signatures → boot EXE,
+> differential traces → Attack/Battle_Init) are in [`NAME_MAP.md`](NAME_MAP.md).
+> Evidence gathering: [`tools/area_poller.py`](../tools/area_poller.py) —
+> `watch` during play (identifies the resident AREA with certainty by hashing
+> the `0x80010000` script block against `emi_sections.json`, screenshots each
+> change, drains the overlay native ring), `harvest` once at end of session
+> (now `axis_b_loop.sh` phase 2a, incl. `--harvest-only`), `summarize --apply`
+> to write sightings as `evidence`. `axis_b_loop.sh` phase 6 refreshes `names/`
+> + the map on every rebuild path. Verified against a mock debug server only —
+> first live run pending.
+
 > **2026-09-01 — Capcom-logo lag FIXED (root-caused + compiled).** The opening/
 > Capcom logo sequence runs from **`LOGO/LOGO.EXE`** — a standalone 120 KB PS-EXE
 > loaded to **`0x801CE000`** (text 0x1D800, entry 0x801CE724), NOT an `.EMI`

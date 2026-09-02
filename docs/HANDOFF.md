@@ -175,6 +175,16 @@ framework change on the `fix/static-overlay-residency-signal` branch. Endgame
 bound / philosophically linked" subsystems fall out — the unit for modding,
 performance, and extensibility.
 
+
+**2026-09-01 late — the readability sidecar exists.** The "name the subsystems"
+endgame above now has a home: `names/overlays.toml` + `names/functions.toml`
+(keyed by section md5 + pc), `tools/name_map.py` (init/check/stats) and
+`tools/subsystem_map.py` → `docs/subsystem_map.html`. Read
+[`NAME_MAP.md`](NAME_MAP.md) for the schema, the status/evidence rule, and the
+ordered routes to earn names. Regenerate the map after every Axis-B pass
+(catalog changes) and after editing `names/`. First name-earning task queued:
+banner-string → `AREAnnn` alias join (route 1 in NAME_MAP.md).
+
 ### 2. A short persuasive writeup of the static compile path and dispatch map
 
 **DONE — reworked and republished 2026-08-31.** Audience is the other people

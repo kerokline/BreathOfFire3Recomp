@@ -1,0 +1,140 @@
+# Name map — making the recompiled code human-readable
+
+**Status:** IN PROGRESS (last verified 2026-09-01)
+
+The generated C is `func_XXXXXXXX` (boot EXE) and `<overlay>_func_XXXXXXXX`
+(overlays) and is regenerated on every Axis-B pass, so it cannot carry names.
+Names live in a **sidecar** that tooling re-applies, and a **browsable map**
+renders the sidecar over the catalog. The long-term goal — generated C that
+reads `Battle_Init(location, actor)` — is the framework's reserved
+"friendly-name promotion" (`psxrecomp/docs/SYMBOLS.md`); this sidecar is the
+input it will consume. Nothing here touches the submodules.
+
+## Files
+
+| File | What | Key |
+|---|---|---|
+| `names/overlays.toml` | alias / role / status / evidence per overlay | `md5` of the section bytes |
+| `names/functions.toml` | name / args / ret / status / evidence per overlay function | (`overlay` md5, `pc`) |
+| `symbols.toml` | boot-EXE function names (framework `PSX_FN_*` path) | `pc` |
+| `docs/subsystem_map.html` | generated map: bands → overlays → functions, boot EXE, search | — |
+
+**Why md5, not PC.** Eleven bands share load addresses across 339 overlays. A
+PC names a slot; (md5, pc) names a function. `analysis/overlay_catalog.json`
+carries the same md5 as `content_md5`, so the join is exact and survives
+re-extraction.
+
+## Tools
+
+```bash
+python tools/name_map.py init      # merge new catalog overlays into names/overlays.toml (never overwrites hand edits)
+python tools/name_map.py check     # md5s exist, statuses valid, alias implies status != unnamed
+python tools/name_map.py stats     # coverage
+python tools/subsystem_map.py      # regenerate docs/subsystem_map.html
+```
+
+The map is a pure offline join (catalog + captures + observed PCs +
+functions.tsv/edges.json + names). It embeds **no overlay bytes and no
+disassembly** — addresses, sizes, hashes, edge counts, names only — so it is
+committable although `analysis/` is not. Regenerate it after `axis_b_loop.sh`
+(the catalog changes) or after editing `names/`.
+
+Serve it locally with `.claude/launch.json` → `docs-static`
+(`python -m http.server 8765 -d docs`) or open the file directly.
+
+## Status vocabulary
+
+| status | meaning |
+|---|---|
+| `unnamed` | seeded, nobody has looked |
+| `hypothesis` | name proposed from filename / directory / pattern; no runtime evidence |
+| `evidence` | backed by a trace, a rendered string, a data-doc citation, or a documented finding |
+| `verified` | evidence confirmed by a second independent route |
+
+The `evidence` field says *how* — which trace, which string, which doc. An
+alias without evidence stays `hypothesis`. This is the docs/README.md
+evidence rule applied to names.
+
+## What is named today (2026-09-01)
+
+- **evidence (2):** `LOGO.EXE` = Capcom logo intro (STATUS.md 2026-09-01
+  root-cause); `BATTLE` @ `0x801D0C00` = Battle game-mode (community data doc
+  ch. 2: game-mode executables load at `0x801D0C00`, BATTLE.EMI named there).
+- **hypothesis (204):** filename-derived — `SHOP`/`START`/`GAME` game-modes,
+  `BATL_END`/`BATL_OVR`, `SCENAnn` scenario banks, `BOSSnnn`, `MAGICnnn`,
+  `PLPxyz` party sets. The PLP suffix reading (member-id triple) is a guess.
+- **unnamed (133):** every `AREAnnn`, all `COMMUnn`, `BATE`, `SHISU`,
+  `SISYOU`, the second BATTLE/AREA030/GAME/SHOP images, `SCE1xEFn`.
+- **functions:** none beyond `BootEntry` in symbols.toml.
+
+## Gathering evidence — savestates vs. live commands
+
+Savestates are anchors, not data; the data comes from the debug server while
+the game runs (`--debug-port 4370`, debug-tools build). Two tools:
+
+- **During play:** `python tools/area_poller.py watch` polls every 0.5 s. It
+  identifies the resident area with certainty by hashing the script block at
+  `0x80010000` (every AREA file has exactly one such section; md5 from
+  `emi_sections.json`), takes a screenshot to `analysis/area_shots/` on each
+  change so the on-screen location can be read back, and drains the runtime's
+  overlay native ring (body CRC + frame) incrementally. Output:
+  `analysis/area_timeline.jsonl`, append-only.
+- **End of session:** `axis_b_loop.sh` phase 2a runs `area_poller.py harvest`
+  (also in `--harvest-only`): one snapshot of the resident area plus the whole
+  native ring (16 384 most recent activations). It cannot recover areas walked
+  through earlier once the ring wrapped; that is what `watch` is for.
+- **Offline:** `area_poller.py summarize --apply` writes the sighting (md5,
+  frame, session, shot path) as `evidence` into `names/overlays.toml` for every
+  code overlay of each seen AREA file. Alias and status stay for a human: read
+  the shot, type the alias, set `status = "evidence"`.
+- `axis_b_loop.sh` phase 6 (every non-harvest-only path, including
+  `--skip-harvest`) then re-merges `names/` and regenerates the map.
+
+Savestates earn their keep for **differential** questions (Attack vs Defend):
+two runs must start identical. Note the caller ring logs interpreted transfers
+only, so a native-side trace (`overlay_native_ring` is body-level, not
+call-level) is the open question before a differential tracer is worth writing.
+
+## How names get earned — the routes, in the order to run them
+
+1. **Resident script block + screenshot → area aliases.** `area_poller.py
+   watch` (above). The always-on string capture ring described in
+   `STRING_TRANSLATION.md` is **not in the current code** (LOCALIZATION.md §1),
+   so the banner is read from the screenshot, not from a string log. Offline
+   cross-check: the per-EMI dialogue corpus in `D:\BoFIII\_claude_work` names
+   speakers and places per section.
+2. **Psy-Q signatures → boot-EXE library names.** The boot EXE links libgpu /
+   libspu / libcd. FLIRT-style byte signatures name hundreds of functions at
+   once and expose which game functions are thin wrappers. Lands in
+   `symbols.toml` via the Ghidra round-trip (`ghidra-mcp` is connected).
+3. **Differential traces → behavior classes.** "Does Attack always enter the
+   same way": load the battle-menu savestate, press Attack, record the entry
+   sequence from the caller ring; reload, press Defend, record again; the set
+   difference is the Attack path. Intersect the first N entries across five
+   battles for `Battle_Init`. The ring/args/frame data `enrich_pcs.py` reads
+   is sufficient; the tool is not written yet.
+4. **Data anchors.** Functions writing documented RAM structures (party
+   stats, inventory — community data doc) name themselves by effect.
+5. **Message-table anchors.** Functions referencing a message index whose
+   decoded string is a menu label are that menu's handler (`verify_msgtable.py`).
+
+Then cluster: community detection over in-overlay jal edges + ring callers
+gives subsystems; name twenty clusters before a thousand functions (the
+HANDOFF §1b endgame).
+
+## Traps
+
+- **Heat attribution.** Per-function `interp insns` in the map is populated
+  only for single-occupant bands. In a mixed band (`0x801D0C00`,
+  `0x801F2C00`, `0x801EEC00`, `0x800C1800`) a PC cannot be attributed to an
+  occupant offline — the map says "band-shared" rather than guess. The
+  durable fix is the tier-1 resident-CRC runtime capture (HANDOFF §1b).
+- **Span is an upper bound.** A function's `span` runs to the next discovered
+  root, so a root followed by a data blob (e.g. `0x801DCD40` in LOGO, span
+  59 KB) absorbs the blob's observed PCs. Treat a huge span with heat as
+  "undiscovered roots or data in here", not as a hot function.
+- **Edges are in-overlay `jal` only.** Calls into the boot EXE, other bands,
+  and function-pointer dispatch are invisible; see
+  `harvest_logo_handlers.py` for the `jalr`-table case.
+- **`symbols.toml` keeps its own status words** (`guessed`, …) — the map
+  shows them as-is; `name_map.py check` validates only `names/`.

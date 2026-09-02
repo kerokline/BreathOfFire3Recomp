@@ -1,0 +1,3397 @@
+# names/overlays.toml — human names for the .EMI overlays (see tools/name_map.py).
+# Keyed by md5 of the section bytes, NOT by load address (bands overlap).
+# Edit alias / role / status / evidence by hand. `name`, `family`, `source`
+# are seeded from analysis/overlay_catalog.json and are informational.
+#
+#   status:   unnamed | hypothesis | evidence | verified
+#   evidence: how the alias was established (trace, rendered string, data doc)
+
+[[overlay]]
+md5 = "1c2f128ae2677b9891dc0b5f4d8cb8ab"
+name = "LOGO.EXE"
+family = "LOGO.EXE"
+source = "LOGO/LOGO.EXE#0"
+alias = "Capcom logo intro"
+role = "plays the opening logo (CAPCOM30.STR) before the boot EXE takes over"
+status = "evidence"
+evidence = "STATUS.md 2026-09-01: LOGO/LOGO.EXE is a standalone PS-EXE at 0x801CE000 running the Capcom logo; profiled + compiled as overlay"
+
+[[overlay]]
+md5 = "27015df09cf24a6ac6e52ae375418aa4"
+name = "AREA030"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA030.EMI#4"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "da030ff3b5d7ac775f98eb265a7605f1"
+name = "BATE"
+family = "ETC"
+source = "BIN/ETC/BATE.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "8a80230efd4a882da0558fde6eb0badb"
+name = "BATTLE"
+family = "BATTLE"
+source = "BIN/BATTLE/BATTLE.EMI#3"
+alias = "Battle game-mode"
+role = "battle game-mode executable (command menu, turn loop, result)"
+status = "evidence"
+evidence = "community data doc ch.2 (GameMode executable): mode overlays load at 0x801D0C00; BATTLE.EMI named there"
+
+[[overlay]]
+md5 = "c72ce23ef757ece852594e98b155231f"
+name = "COMMU01"
+family = "ETC"
+source = "BIN/ETC/COMMU01.EMI#7"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5434a7fa67f831392b66916713763e7a"
+name = "COMMU02"
+family = "ETC"
+source = "BIN/ETC/COMMU02.EMI#8"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a19ae306bb597709fd24f9b921cf9a9e"
+name = "COMMU03"
+family = "ETC"
+source = "BIN/ETC/COMMU03.EMI#6"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c0f72f49c32b74cf9c48fc16e251af5b"
+name = "COMMU04"
+family = "ETC"
+source = "BIN/ETC/COMMU04.EMI#6"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1d8bf929c12155d48d4b2f95abaa6b61"
+name = "COMMU05"
+family = "ETC"
+source = "BIN/ETC/COMMU05.EMI#7"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "093aeda4e126251379f570db9e7d7dd6"
+name = "GAME"
+family = "ETC"
+source = "BIN/ETC/GAME.EMI#1"
+alias = "Field game-mode (small)"
+role = ""
+status = "hypothesis"
+evidence = "filename + game-mode load address; the 227 KB GAME at 0x80196800 is the large sibling"
+
+[[overlay]]
+md5 = "4e5ec177870b0558b93cf7c3132be2eb"
+name = "SCE10EFF"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE10EFF.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e5812cdd35b1051df5c675cc5e469b0c"
+name = "SCE15EF0"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF0.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0299ce792013ac404fb6bef278cdb622"
+name = "SCE15EF1"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF1.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4103714bedfaad82a005e87d90cea6bd"
+name = "SCE15EF2"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF2.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "be65339b39dc21a6775962fbd256d95a"
+name = "SCE15EF3"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF3.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "9fcb452d0bab313487a85ff6b9b48614"
+name = "SHISU"
+family = "ETC"
+source = "BIN/ETC/SHISU.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "62002f85ca149fec9f16aa97ef43b742"
+name = "SHOP"
+family = "ETC"
+source = "BIN/ETC/SHOP.EMI#0"
+alias = "Shop game-mode"
+role = "shop/merchant game-mode executable"
+status = "hypothesis"
+evidence = "community data doc ch.2 (GameMode executable): mode overlays load at 0x801D0C00 lists a Shop mode; filename + load address match, not yet traced"
+
+[[overlay]]
+md5 = "7041d0047eb18d5b813f7c5ba464e52e"
+name = "SISYOU"
+family = "ETC"
+source = "BIN/ETC/SISYOU.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b8cc1561528b84ba16fe96074dfee289"
+name = "START"
+family = "ETC"
+source = "BIN/ETC/START.EMI#8"
+alias = "Title/start game-mode"
+role = "title screen / new-continue selection"
+status = "hypothesis"
+evidence = "filename + game-mode load address; not yet traced"
+
+[[overlay]]
+md5 = "321aa9282fa723b23cb60b4ebc8f521a"
+name = "PLP012"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP012.EMI#0"
+alias = "Party character set 012"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+name = "PLP015"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP015.EMI#0"
+alias = "Party character set 015"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "16f3eeb0c1f42cc2b814273370b44808"
+name = "PLP016"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP016.EMI#0"
+alias = "Party character set 016"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "efcff88fae3c88f97e72eb2e00bb693c"
+name = "PLP025"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP025.EMI#0"
+alias = "Party character set 025"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "56e3a59e9592a594ea992ab9f856d05e"
+name = "PLP026"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP026.EMI#0"
+alias = "Party character set 026"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "33b6ed74993e71f5f3a11f40f843225e"
+name = "PLP034"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP034.EMI#0"
+alias = "Party character set 034"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "85919909d6a752d16d2eb0c9d7889aa5"
+name = "PLP056"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP056.EMI#0"
+alias = "Party character set 056"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "bd5ef483761a7b81df3308d584c34f27"
+name = "PLP247"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP247.EMI#0"
+alias = "Party character set 247"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "2111ad9a20d950100562b3a17b746f85"
+name = "PLP257"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP257.EMI#0"
+alias = "Party character set 257"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "5432c32c9d84b621596cccf067878ad1"
+name = "PLP267"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP267.EMI#0"
+alias = "Party character set 267"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "06a0c510d5236f9c69ac7d8de408a88e"
+name = "PLP278"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP278.EMI#0"
+alias = "Party character set 278"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "f43849f8afde26e95dc5e7ea997efc6b"
+name = "PLP27A"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP27A.EMI#0"
+alias = "Party character set 27A"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "64e806173b36aef3271c08391fa66c77"
+name = "PLP349"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP349.EMI#0"
+alias = "Party character set 349"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "b0028e26b252d55bb3dda758a3771d30"
+name = "PLP457"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP457.EMI#0"
+alias = "Party character set 457"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "65fd224bce57c8919ebd8033bf8a2df7"
+name = "PLP467"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP467.EMI#0"
+alias = "Party character set 467"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "fa09d2b7614daeb7597cca9e01e777bd"
+name = "PLP478"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP478.EMI#0"
+alias = "Party character set 478"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "fcac575ac75b255d6525bacc20e9adcd"
+name = "PLP567"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP567.EMI#0"
+alias = "Party character set 567"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "4ae07a74677a1267a2fe4931aebebb18"
+name = "PLP578"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP578.EMI#0"
+alias = "Party character set 578"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "147814366a039d7bbdde7cc664829b2a"
+name = "PLP678"
+family = "PLCHAR"
+source = "BIN/PLCHAR/PLP678.EMI#0"
+alias = "Party character set 678"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+name = "SCENA00"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA00.EMI#0"
+alias = "Scenario event bank 00"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "d7e923b666efaece317d5fc94e33ebfc"
+name = "SCENA01"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA01.EMI#0"
+alias = "Scenario event bank 01"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "cd7e05d1bf4141dafda08d2fb1090120"
+name = "SCENA02"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA02.EMI#0"
+alias = "Scenario event bank 02"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "dcddb013d0d9246c4b8ba9f51ced0f10"
+name = "SCENA03"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA03.EMI#0"
+alias = "Scenario event bank 03"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "ac8acba8076b0780a5df001905df0d02"
+name = "SCENA04"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA04.EMI#0"
+alias = "Scenario event bank 04"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "e6e359fa28a36e8a0c399ac39a65dba4"
+name = "SCENA05"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA05.EMI#0"
+alias = "Scenario event bank 05"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "664ae1eb073ca402804fb014c3c899b4"
+name = "SCENA06"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA06.EMI#0"
+alias = "Scenario event bank 06"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "689a99bc8f508b8c0fe70affad6b5d46"
+name = "SCENA07"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA07.EMI#0"
+alias = "Scenario event bank 07"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "613d940f615be93f7ce69dad10e6b481"
+name = "SCENA08"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA08.EMI#0"
+alias = "Scenario event bank 08"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "468ed8c8f9338e7f4fa9d2253c261b71"
+name = "SCENA09"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA09.EMI#0"
+alias = "Scenario event bank 09"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "5154bf3736ee9dc4025a2294791340e6"
+name = "SCENA10"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA10.EMI#0"
+alias = "Scenario event bank 10"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "f914e1fa6e98bb04797ae2d2756b83b8"
+name = "SCENA11"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA11.EMI#0"
+alias = "Scenario event bank 11"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "b78b99356bc3493402e6cded780be507"
+name = "SCENA12"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA12.EMI#0"
+alias = "Scenario event bank 12"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "8be14198d4c2bb71d423562549eb58ac"
+name = "SCENA13"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA13.EMI#0"
+alias = "Scenario event bank 13"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "040d2fe72c14f568c75e144085cf04de"
+name = "SCENA14"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA14.EMI#0"
+alias = "Scenario event bank 14"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "194920760ffb770e2249a1cc08b638ae"
+name = "SCENA15"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA15.EMI#0"
+alias = "Scenario event bank 15"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "d9e4564d18798a552777d29c2cb3cb71"
+name = "SCENA16"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA16.EMI#0"
+alias = "Scenario event bank 16"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "8a1ff74a3ada097cb9346004f3b02795"
+name = "SCENA17"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA17.EMI#0"
+alias = "Scenario event bank 17"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "319f5b33d9ea6f479a73e1d31c930dfe"
+name = "SCENA18"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA18.EMI#0"
+alias = "Scenario event bank 18"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "f1891520079774f0ebf167615ff3a18e"
+name = "SCENA19"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCENA19.EMI#0"
+alias = "Scenario event bank 19"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/SCENARIO + numbered filename; SCENARIO band 0x801F6C00 per HANDOFF"
+
+[[overlay]]
+md5 = "9d00fd19af78fbe9c0a411ef3ae2a810"
+name = "GAME"
+family = "ETC"
+source = "BIN/ETC/GAME.EMI#0"
+alias = "Field/map core (large)"
+role = "largest single overlay; likely the map-exploration mode body"
+status = "hypothesis"
+evidence = "filename + size; not yet traced"
+
+[[overlay]]
+md5 = "a401e4cbb492e3b682d8058d4b76925e"
+name = "AREA007"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA007.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "ac6072f7ec0288b3f34490bdbf17d1f6"
+name = "AREA008"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA008.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "23374eb0ecb938aee58755a871570d76"
+name = "AREA015"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA015.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b1146950a430dbc021facf3b58b60d77"
+name = "AREA016"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA016.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0cfe91c7778e8a34ef3d308f8886295a"
+name = "AREA019"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA019.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a6f5fa972edde10774d904d73a864a7f"
+name = "AREA024"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA024.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4565833f032909eabaa3198a505f8d3b"
+name = "AREA026"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA026.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "d6bbcff3dd423a10012d0ce4a4305501"
+name = "AREA027"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA027.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "6acb5d7d9c00a32b8554d99759838ba2"
+name = "AREA028"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA028.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1870dd69ca009c240756d523fa724956"
+name = "AREA032"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA032.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b2bb1b052c80c906084fae061aadac32"
+name = "AREA033"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA033.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c66e6aacb75a949ed45fe40e5af1bc6a"
+name = "AREA036"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA036.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b1de15082380835b01839b97c5599282"
+name = "AREA037"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA037.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5ed6a5f0663cb3fddff4309e3f94a2e8"
+name = "AREA038"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA038.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4a6d44982d61d7a0c7d2b621171426c3"
+name = "AREA039"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA039.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a1236eb6e8f3a6d659b5c6addbc3a9d7"
+name = "AREA040"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA040.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a6671addeaf3916c1b2cec859b150b29"
+name = "AREA041"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA041.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "d2861023c166f9d581f2d8c682136c1c"
+name = "AREA042"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA042.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "3e7bfbbe54e08510884f83f7e728c4e9"
+name = "AREA043"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA043.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "d0bc11d867c5f8232f8c62155db0bb16"
+name = "AREA044"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA044.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a6dd23cc1eb317c3ffa6622b158cf94e"
+name = "AREA045"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA045.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "547193030362bd36340f08ec18d13a65"
+name = "AREA046"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA046.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "65f93c199896ee4ac4b104e2412c9544"
+name = "AREA047"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA047.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f326326e519d3a403d88292aa6e91825"
+name = "AREA048"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA048.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4d3b4974fafeb6c54007daddd6847d42"
+name = "AREA049"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA049.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "3ff7fd3ab33b893965b9b453a73fe692"
+name = "AREA052"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA052.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "22704ffea9bbde78bcad988e5480a4d0"
+name = "AREA056"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA056.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f98644f3f42fca0caddcb18b1c738af1"
+name = "AREA057"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA057.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f3ce91c7857763a91dd0944b0813ba49"
+name = "AREA059"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA059.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4413882680c18c7193266eb29ad3477c"
+name = "AREA065"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA065.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "659384883b05a2506d057b415ae18ae7"
+name = "AREA067"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA067.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0f97a1b874ff8f4535725a5641f50283"
+name = "AREA068"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA068.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4188211aaeb88809550eb07f988f7d80"
+name = "AREA075"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA075.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0c4fe24f11bc35cef8b48b8e2d727d56"
+name = "AREA077"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA077.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "72576aa10acf23f1f2d30f8d4f9dbd54"
+name = "AREA080"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA080.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "6c4636a83971a7102e21d8a4070b21e7"
+name = "AREA082"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA082.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "11ae030794853af065a76de93c1fc39e"
+name = "AREA085"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA085.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "31cc0e988b1c8c310ac9917df36d4700"
+name = "AREA086"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA086.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "739659f2410dfe2e06413de94b83972c"
+name = "AREA087"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA087.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e9da08ed444101dc63938ddd7c19b01f"
+name = "AREA088"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA088.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "9a7215369685c1518433c70f123ed37a"
+name = "AREA091"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA091.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e2722c64fb2fb0fea9225815bb12d08c"
+name = "AREA092"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA092.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "ab9f88a3dba57093e172cd7ca7567614"
+name = "AREA094"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA094.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0084048c22c2965e4288919146da3cb9"
+name = "AREA095"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA095.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "eed051848fd95a76cbdb3ac5cb19b0a6"
+name = "AREA096"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA096.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5e548f8e0236b3f121005a9a3897cf7b"
+name = "AREA098"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA098.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "214a2a31a4d70283c21090c0a744a6b2"
+name = "AREA099"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA099.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5a8dddab135192608d96eea1e60dc0d7"
+name = "AREA100"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA100.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "9429329d3f15c5897b4065d9309eea57"
+name = "AREA102"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA102.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "868762102bad748034b8cb545381429c"
+name = "AREA103"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA103.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f1a44745bd3e6b045f39d8489b9d90db"
+name = "AREA104"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA104.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "6df723c847ef4b5af8359cb26dbd5c24"
+name = "AREA105"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA105.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "caf425f126708675c0393621f5bb96e3"
+name = "AREA106"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA106.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "870dc8d694e156dbca1e19b77c4a169d"
+name = "AREA107"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA107.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5c94f03574e4ce5472b9ff11c7f53565"
+name = "AREA108"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA108.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+name = "AREA111"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA111.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "7a39c49e9e3b8744d9b6143d07faa53d"
+name = "AREA112"
+family = "WORLD02"
+source = "BIN/WORLD02/AREA112.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f39c0852d9a71dab313b66f2df651978"
+name = "AREA114"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA114.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "97871478a8e71fa7efbc23278f743453"
+name = "AREA115"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA115.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c599b1ad8ac458eb6d7983dd679eed6b"
+name = "AREA116"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA116.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+name = "AREA117"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA117.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4718624b8be614844fdd02e0de33912c"
+name = "AREA118"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA118.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "d037afdc7580e9e1f83189f0b1f569e5"
+name = "AREA119"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA119.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "dd390275845a3c270e9bb4aaac63732b"
+name = "AREA120"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA120.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+name = "AREA121"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA121.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "7155a43fc3374d250051415fd0e6f729"
+name = "AREA125"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA125.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "95c18be58ee47ef175e60f3893666ae5"
+name = "AREA128"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA128.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a8696699e32d42923e0a2ff2413da6d2"
+name = "AREA130"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA130.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "2f2b67d24192700b839ca98919cd8e11"
+name = "AREA131"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA131.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a4ed478c50cb629a31d4a0b2e999ef4f"
+name = "AREA132"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA132.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "bfe44d49c5bd765302a7044b0e0b49c9"
+name = "AREA134"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA134.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "72b1985ab8b794fa918064dc94be653b"
+name = "AREA135"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA135.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f20a6436a5911018a22fda9cd1760395"
+name = "AREA136"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA136.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "fb322fb56f335a8a689427f1b821b4c5"
+name = "AREA139"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA139.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e8787d95f92e3231a1b24c126d83df41"
+name = "AREA140"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA140.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "47a02f7959f6ab5cf25a403e979e98d7"
+name = "AREA141"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA141.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0a3273e106a02ba264146bf334a57e38"
+name = "AREA142"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA142.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "90cfe7bfc1bb4ba3eb0e220e245b8466"
+name = "AREA143"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA143.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "fe93cd94cf9312973ac44c090f3855d9"
+name = "AREA144"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA144.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c91a0720c33c614c2816669952a6e6f9"
+name = "AREA145"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA145.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "62746ab25bdc754b9d7c699f3949d38b"
+name = "AREA146"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA146.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0c9cc0ab9d572fd017bd6d3676aa14f5"
+name = "AREA147"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA147.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1f7b8ee8c2fef799d7595cb18a21904f"
+name = "AREA148"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA148.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "20bcbeece137db9ee9a99ae47fd26fad"
+name = "AREA149"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA149.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "cecb75900acb61eec85d37dee3df0145"
+name = "AREA151"
+family = "WORLD03"
+source = "BIN/WORLD03/AREA151.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "8f384cab7689c1d190084a57f9cd9cd0"
+name = "AREA152"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA152.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "464a32aa62bd5791147650142d7726e7"
+name = "AREA157"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA157.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "65f3a778dc40fc5575e9f7ca6d9ef7f6"
+name = "AREA158"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA158.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e3e8bcffad6ec4c827bb6abeb9e6ab46"
+name = "AREA160"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA160.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a8cf5daa64f7ec58603fd1687fc3ecb5"
+name = "AREA161"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA161.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "18253554c10b96d4498895db69cb0d7b"
+name = "AREA162"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA162.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "7542a68bafd724a8f7c482ef67382458"
+name = "AREA163"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA163.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "098d0403764516a657db1723b4b3807a"
+name = "AREA164"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA164.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "ee5a9f8c793d1ee9cca9afec00ff766a"
+name = "AREA165"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA165.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "58aa8ce72d793530f46b1b6e307ea265"
+name = "AREA166"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA166.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "7f93c130bef5107da19117c08b7c76fa"
+name = "AREA167"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA167.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f8f4554b2035da0cd3917aca54ea4a7c"
+name = "AREA168"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA168.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c4cc80526826b4ab5e56c5cdc1793021"
+name = "AREA169"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA169.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "38486ae1f3849c3b95d9bb3c9cf4fc57"
+name = "AREA170"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA170.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f781951e1547be3aad2475abb78cfa49"
+name = "AREA171"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA171.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "ed114a840729d347c0321c5ddd02315d"
+name = "AREA172"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA172.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e42dcfe0fda5d15d494769fcf2e00108"
+name = "AREA173"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA173.EMI#14"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "efa22d8507628aecdb02340cdc4ee628"
+name = "AREA174"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA174.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "48227cae36317ec9a2d2977b8bc61637"
+name = "AREA175"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA175.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c750d5ea5fc23dd1cc9ac9d5982fc250"
+name = "AREA185"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA185.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c787edb8467971090693a7656ff25dd5"
+name = "AREA188"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA188.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b880f46307b087de746ab744f0855e2e"
+name = "AREA189"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA189.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1091d89f83dee0c857234a7ebc103caa"
+name = "AREA191"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA191.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f0cc0f32ebbf5e4e8507373d9fab8b27"
+name = "AREA192"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA192.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "99de4571d7d7d81ed95f80bd00c8afca"
+name = "AREA193"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA193.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c12e05caf5dc11750a3257c9505e22dc"
+name = "AREA196"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA196.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c9567658ba06ceab4ed59d6eb35aabde"
+name = "AREA197"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA197.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "6174a167ed48b49d41903900417d72c7"
+name = "AREA198"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA198.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1bc2c2fde99e9d09e7263bdd6b531fbb"
+name = "AREA199"
+family = "WORLD04"
+source = "BIN/WORLD04/AREA199.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "18ce968c71203c73e1230e19ebd640db"
+name = "BATL_END"
+family = "BATTLE"
+source = "BIN/BATTLE/BATL_END.EMI#0"
+alias = "Battle end sequence"
+role = ""
+status = "hypothesis"
+evidence = "filename (BATL_END) in BIN/BATTLE; not yet traced"
+
+[[overlay]]
+md5 = "cacd180904988b6ff8f59de7eb68e018"
+name = "BATL_OVR"
+family = "BATTLE"
+source = "BIN/BATTLE/BATL_OVR.EMI#0"
+alias = "Battle game-over"
+role = ""
+status = "hypothesis"
+evidence = "filename (BATL_OVR) in BIN/BATTLE; not yet traced"
+
+[[overlay]]
+md5 = "fa8223c27cdf4c99aec0a84da5cf12d9"
+name = "COMMU00"
+family = "ETC"
+source = "BIN/ETC/COMMU00.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "76152e6e1aa93fa80113bad5977b81f5"
+name = "MAGIC001"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC001.EMI#0"
+alias = "Battle magic effect 001"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "fec2fdf734d69c6a02813b19cd2a7fc4"
+name = "MAGIC002"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC002.EMI#0"
+alias = "Battle magic effect 002"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "49ad39290802fdd19ea4dd3c083fb90c"
+name = "MAGIC003"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC003.EMI#3"
+alias = "Battle magic effect 003"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "995dbefa1d320a8a185d7f80a61275c4"
+name = "MAGIC004"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC004.EMI#3"
+alias = "Battle magic effect 004"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "90f0182fdb7700e5ed23c48e18d621a9"
+name = "MAGIC006"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC006.EMI#3"
+alias = "Battle magic effect 006"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a1c5f2f68b154071346f12ee8aeced49"
+name = "MAGIC008"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC008.EMI#0"
+alias = "Battle magic effect 008"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b9a65a2b7d17b9dd21bcc65e35b973b5"
+name = "MAGIC009"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC009.EMI#3"
+alias = "Battle magic effect 009"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "cbe4575fedfd94164a4d84dffac1b1e3"
+name = "MAGIC010"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC010.EMI#0"
+alias = "Battle magic effect 010"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b5fb99d05085cad8a318f0b76dd9af2d"
+name = "MAGIC012"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC012.EMI#0"
+alias = "Battle magic effect 012"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "5f5441433b4ccf5e5f3380e2bf3f0316"
+name = "MAGIC013"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC013.EMI#3"
+alias = "Battle magic effect 013"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ce0e10a4336beef5b72840497746b8b5"
+name = "MAGIC015"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC015.EMI#0"
+alias = "Battle magic effect 015"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "1e32c9ff8aac3e42d1d5ee99950e7050"
+name = "MAGIC017"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC017.EMI#3"
+alias = "Battle magic effect 017"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "f168a5242e4729af0f5f6752b52e2908"
+name = "MAGIC020"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC020.EMI#3"
+alias = "Battle magic effect 020"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6d140b36f225074b5f0baf4894cd755e"
+name = "MAGIC021"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC021.EMI#3"
+alias = "Battle magic effect 021"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6b37d2d379d209fe471dc7b22666ec00"
+name = "MAGIC038"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC038.EMI#3"
+alias = "Battle magic effect 038"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "8d9cc182c2d069ba40e217c63f272016"
+name = "MAGIC039"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC039.EMI#3"
+alias = "Battle magic effect 039"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "f7006983f07c5373a8d0909635f98dfc"
+name = "MAGIC040"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC040.EMI#3"
+alias = "Battle magic effect 040"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "198524f487c67a0bcc04ee4bec742b64"
+name = "MAGIC041"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC041.EMI#3"
+alias = "Battle magic effect 041"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "4de9567b699cb39b3915a686359825f0"
+name = "MAGIC042"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC042.EMI#3"
+alias = "Battle magic effect 042"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "639fdce0ba6951f0de96d2d73590c9fa"
+name = "MAGIC043"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC043.EMI#3"
+alias = "Battle magic effect 043"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "cd6a65f3dc86569ed22babf7e31117a7"
+name = "MAGIC044"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC044.EMI#3"
+alias = "Battle magic effect 044"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "485c0336ecbafb10f0a8bc3c0a138c23"
+name = "MAGIC045"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC045.EMI#0"
+alias = "Battle magic effect 045"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "534e52e7e317a59d807342aed6a932f2"
+name = "MAGIC046"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC046.EMI#3"
+alias = "Battle magic effect 046"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ee74c68bf53e5930015e1148039e0676"
+name = "MAGIC048"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC048.EMI#3"
+alias = "Battle magic effect 048"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "9dfde857fbfcd17b8c27916ccd86a2ef"
+name = "MAGIC050"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC050.EMI#3"
+alias = "Battle magic effect 050"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "bcee8841d466f64cc2f4c3c712b8d1fc"
+name = "MAGIC052"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC052.EMI#3"
+alias = "Battle magic effect 052"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "72bc7be8cbcc3956cca1af4389d8f57d"
+name = "MAGIC053"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC053.EMI#3"
+alias = "Battle magic effect 053"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "f0151eaeae01426b3127e49f69b87ee0"
+name = "MAGIC054"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC054.EMI#3"
+alias = "Battle magic effect 054"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6bdc2d45ec1fa395bd629ef862948813"
+name = "MAGIC055"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC055.EMI#3"
+alias = "Battle magic effect 055"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3f0893a5fa7b3c356d4500e65bcce519"
+name = "MAGIC056"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC056.EMI#3"
+alias = "Battle magic effect 056"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "fa5c4c7162bcf1f47ab6200b39ee8161"
+name = "MAGIC057"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC057.EMI#3"
+alias = "Battle magic effect 057"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "666e578dac4c852ce4956e2aee4aa118"
+name = "MAGIC058"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC058.EMI#3"
+alias = "Battle magic effect 058"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ec739b611831c16e0da81cd71e2ac171"
+name = "MAGIC059"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC059.EMI#3"
+alias = "Battle magic effect 059"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "197a8ed0c829edcb87eddd8b282f3733"
+name = "MAGIC060"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC060.EMI#0"
+alias = "Battle magic effect 060"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a0737054983c5d3c5d4be55146ffe51b"
+name = "MAGIC062"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC062.EMI#3"
+alias = "Battle magic effect 062"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6638dcb8ac11259c9896019058cb4e62"
+name = "MAGIC063"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC063.EMI#3"
+alias = "Battle magic effect 063"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "01d2522615b2707cc578978a83141f67"
+name = "MAGIC064"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC064.EMI#3"
+alias = "Battle magic effect 064"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "9ad40d9e42e5282e6136f8d7a98913c3"
+name = "MAGIC065"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC065.EMI#0"
+alias = "Battle magic effect 065"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "42c40f1b85520e502a1a317fe3634987"
+name = "MAGIC066"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC066.EMI#3"
+alias = "Battle magic effect 066"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b84fcd08dd28e5e341dd802bad82438d"
+name = "MAGIC067"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC067.EMI#3"
+alias = "Battle magic effect 067"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "8a282f5fe17e60e389ea96aa4c9b5e67"
+name = "MAGIC068"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC068.EMI#3"
+alias = "Battle magic effect 068"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c39f0a09914873fc3e73d8b1300dc381"
+name = "MAGIC069"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC069.EMI#3"
+alias = "Battle magic effect 069"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c33cfc4d1c1a74eabce7c31996ea0ec6"
+name = "MAGIC070"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC070.EMI#3"
+alias = "Battle magic effect 070"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "bdb70023060265d6052ac855e473b412"
+name = "MAGIC071"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC071.EMI#3"
+alias = "Battle magic effect 071"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ec8538b676104310d7ce74fe35a045d7"
+name = "MAGIC072"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC072.EMI#3"
+alias = "Battle magic effect 072"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "bf2be76e6be1211a00262b14d26ffd92"
+name = "MAGIC073"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC073.EMI#3"
+alias = "Battle magic effect 073"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c3ba2129b8bc4f3ca605429e64ad9972"
+name = "MAGIC074"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC074.EMI#3"
+alias = "Battle magic effect 074"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "aefacfd076129591d644dd00a3b651ef"
+name = "MAGIC075"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC075.EMI#3"
+alias = "Battle magic effect 075"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a224f4411f8c106564a750a631559e33"
+name = "MAGIC076"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC076.EMI#3"
+alias = "Battle magic effect 076"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "81aa3136c747af2add85076b0c9b18f7"
+name = "MAGIC078"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC078.EMI#3"
+alias = "Battle magic effect 078"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "18bdd21a00ab17c6b8d6144efe1342f3"
+name = "MAGIC079"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC079.EMI#3"
+alias = "Battle magic effect 079"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3c56e1f6af05c5c2c8598cee9a0afec7"
+name = "MAGIC080"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC080.EMI#0"
+alias = "Battle magic effect 080"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c32a4c3e5481515ed74a612a837df74e"
+name = "MAGIC081"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC081.EMI#3"
+alias = "Battle magic effect 081"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b48a0774c7bea3199e8d3cfc6f03708b"
+name = "MAGIC082"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC082.EMI#3"
+alias = "Battle magic effect 082"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "5f9de7c641828fc516e36aedb2081069"
+name = "MAGIC083"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC083.EMI#3"
+alias = "Battle magic effect 083"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c2714c0bb1856c6c651ca7ab016528ef"
+name = "MAGIC086"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC086.EMI#3"
+alias = "Battle magic effect 086"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "257b96595dfe29533203082199577beb"
+name = "MAGIC087"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC087.EMI#3"
+alias = "Battle magic effect 087"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6c01ecf75456229f4937d152e2cdf8f5"
+name = "MAGIC088"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC088.EMI#3"
+alias = "Battle magic effect 088"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "04b565fa78f0a34af68d67e98ecfa620"
+name = "MAGIC091"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC091.EMI#3"
+alias = "Battle magic effect 091"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b543c72c3a00a16f33032368515b2bcf"
+name = "MAGIC092"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC092.EMI#3"
+alias = "Battle magic effect 092"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a8fe11958296416435ecd19567f6c382"
+name = "MAGIC093"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC093.EMI#3"
+alias = "Battle magic effect 093"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "68c20bab1c66fada5f73f7239480a6fb"
+name = "MAGIC094"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC094.EMI#3"
+alias = "Battle magic effect 094"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "5afd774e508fd6ddb7e78fb2dda173ce"
+name = "MAGIC095"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC095.EMI#3"
+alias = "Battle magic effect 095"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "2e9ba91fb7396540b8273ff2ea7c26f0"
+name = "MAGIC096"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC096.EMI#3"
+alias = "Battle magic effect 096"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b8f20b056aefdb79753571a38d4d0c81"
+name = "MAGIC097"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC097.EMI#3"
+alias = "Battle magic effect 097"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3c7e3400d7ca410538150a0b14ccdc5e"
+name = "MAGIC098"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC098.EMI#3"
+alias = "Battle magic effect 098"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "68805d028c8dca541f4b855db2f055ac"
+name = "MAGIC099"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC099.EMI#3"
+alias = "Battle magic effect 099"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "33569cd4ed32da8d40485261f6d064ae"
+name = "MAGIC100"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC100.EMI#3"
+alias = "Battle magic effect 100"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "d862e3feca5c3ea5c6a012dc2df6f1af"
+name = "MAGIC101"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC101.EMI#3"
+alias = "Battle magic effect 101"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ad944490ce465373fe7b84bab785961c"
+name = "MAGIC102"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC102.EMI#3"
+alias = "Battle magic effect 102"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b52cb176c3b24098a206da988d8f1b3e"
+name = "MAGIC103"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC103.EMI#3"
+alias = "Battle magic effect 103"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "612c1e44bbadf07dc2cdf853f25dcf63"
+name = "MAGIC104"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC104.EMI#3"
+alias = "Battle magic effect 104"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "15ddc7171d841cc08b310c419a4e2c55"
+name = "MAGIC105"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC105.EMI#3"
+alias = "Battle magic effect 105"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ef147fab2145ffc76ab7dd0ccb6a583a"
+name = "MAGIC106"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC106.EMI#3"
+alias = "Battle magic effect 106"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "df60ed334f2e655dfb53fee92e2c0f82"
+name = "MAGIC107"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC107.EMI#3"
+alias = "Battle magic effect 107"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "4e8841df45b825f011421d462d9d693f"
+name = "MAGIC108"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC108.EMI#3"
+alias = "Battle magic effect 108"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "97f6d77234924a4c9c4b0c40c75473e6"
+name = "MAGIC109"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC109.EMI#3"
+alias = "Battle magic effect 109"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "bf5b65ec3ca8d8ce99e121b93f158e3c"
+name = "MAGIC110"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC110.EMI#3"
+alias = "Battle magic effect 110"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a17a35b7344c7a4fe8888318623ac7b5"
+name = "MAGIC111"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC111.EMI#3"
+alias = "Battle magic effect 111"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "7ec2038422163549c9b3f5dc6bffd05f"
+name = "MAGIC113"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC113.EMI#3"
+alias = "Battle magic effect 113"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "9bfe9b4f6fc143802b3b1defd404646d"
+name = "MAGIC114"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC114.EMI#3"
+alias = "Battle magic effect 114"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ed9e42e51597d4fb60a94641c6984019"
+name = "MAGIC115"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC115.EMI#3"
+alias = "Battle magic effect 115"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "e12c0077a01b74e00efe0dc18530596c"
+name = "MAGIC116"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC116.EMI#3"
+alias = "Battle magic effect 116"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "4d8e1d00bf50105b387fc52f8fd08e67"
+name = "MAGIC117"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC117.EMI#0"
+alias = "Battle magic effect 117"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3d8ffff8b6d7c361875b35b507128fe8"
+name = "MAGIC118"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC118.EMI#3"
+alias = "Battle magic effect 118"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "475473eaa1d0cd5dab9f88274d8004c4"
+name = "MAGIC120"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC120.EMI#3"
+alias = "Battle magic effect 120"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "bcd8f84cb5fb542b547d896ccd657909"
+name = "MAGIC121"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC121.EMI#3"
+alias = "Battle magic effect 121"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "0f200fd61a74639635b9c371f0d35b4a"
+name = "MAGIC122"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC122.EMI#3"
+alias = "Battle magic effect 122"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "b49a01584135efe7083efa4e1fbaca5a"
+name = "MAGIC123"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC123.EMI#3"
+alias = "Battle magic effect 123"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "e1a4656bf525d3fe094b87ddab90ca2e"
+name = "MAGIC124"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC124.EMI#3"
+alias = "Battle magic effect 124"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "078b955ad4d0891512429738bac3f03a"
+name = "MAGIC125"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC125.EMI#3"
+alias = "Battle magic effect 125"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "4e0b1025a99822a6eb876e3a8f3c38e9"
+name = "MAGIC126"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC126.EMI#3"
+alias = "Battle magic effect 126"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "1b45b4630f0a083bafc8d96ddf8af103"
+name = "MAGIC129"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC129.EMI#3"
+alias = "Battle magic effect 129"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "fa513fbfcaaa31c8df465b5657b67b3b"
+name = "MAGIC130"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC130.EMI#3"
+alias = "Battle magic effect 130"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c333c325dab14cb0c6e81c1e5bff416c"
+name = "MAGIC131"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC131.EMI#3"
+alias = "Battle magic effect 131"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "006046346887f2b3cb859d48faec1a99"
+name = "MAGIC132"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC132.EMI#3"
+alias = "Battle magic effect 132"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "985330a28c7615c8d62394b8f296b6d8"
+name = "MAGIC137"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC137.EMI#3"
+alias = "Battle magic effect 137"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "af1b508e0c99b257036e61b868e806e8"
+name = "MAGIC138"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC138.EMI#3"
+alias = "Battle magic effect 138"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "f4557ad84a764fe1e5b37760c3306887"
+name = "MAGIC143"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC143.EMI#3"
+alias = "Battle magic effect 143"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "8860046c08bfba57dbd1543350cd50b0"
+name = "MAGIC144"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC144.EMI#3"
+alias = "Battle magic effect 144"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "7a866db9ec5a40051c5f183a621bff99"
+name = "MAGIC145"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC145.EMI#3"
+alias = "Battle magic effect 145"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "dd8f9c58b525ac80471ccb177a4d0cac"
+name = "MAGIC146"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC146.EMI#3"
+alias = "Battle magic effect 146"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "33cf826749bc94f0186ac2d7d46e4f53"
+name = "MAGIC150"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC150.EMI#3"
+alias = "Battle magic effect 150"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "e1bf5661481a9629942bc8d7a97e0537"
+name = "MAGIC151"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC151.EMI#3"
+alias = "Battle magic effect 151"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "703d46ce456a52e7d24a82fdb1f88e12"
+name = "MAGIC154"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC154.EMI#3"
+alias = "Battle magic effect 154"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "71c6eb705ce4c8880a36391e4400d608"
+name = "MAGIC158"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC158.EMI#3"
+alias = "Battle magic effect 158"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "66238d2afe77cd4d82023d65e3ed2b05"
+name = "MAGIC159"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC159.EMI#3"
+alias = "Battle magic effect 159"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "d740b7cf7f31d0571844d59f804563f8"
+name = "MAGIC161"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC161.EMI#3"
+alias = "Battle magic effect 161"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "0666e45a67f9b40775c73aa7f64db93b"
+name = "MAGIC162"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC162.EMI#3"
+alias = "Battle magic effect 162"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "57def2e245e4b1ec1de1b1efebb64a39"
+name = "MAGIC166"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC166.EMI#3"
+alias = "Battle magic effect 166"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3d210dbc6aea41bf2a614e209ec29d01"
+name = "MAGIC167"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC167.EMI#3"
+alias = "Battle magic effect 167"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "da43dff0d55625f08ac9899dfa185ce9"
+name = "MAGIC168"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC168.EMI#3"
+alias = "Battle magic effect 168"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "a9abef67616430e44e513432c3d661cb"
+name = "MAGIC169"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC169.EMI#3"
+alias = "Battle magic effect 169"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "25baa0a5c8024f5ba46b451677c64e66"
+name = "MAGIC172"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC172.EMI#3"
+alias = "Battle magic effect 172"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "6e00cf4c20bf9391854479d963aa094e"
+name = "MAGIC173"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC173.EMI#3"
+alias = "Battle magic effect 173"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "e21cc53e93e35637e1a0a63b9af9dc5b"
+name = "MAGIC213"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC213.EMI#3"
+alias = "Battle magic effect 213"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "3670ab98a13f4788ba56a23079896417"
+name = "MAGIC216"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC216.EMI#0"
+alias = "Battle magic effect 216"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "254deae01dfcd1cec22b2e03fbb90b5c"
+name = "MAGIC218"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC218.EMI#3"
+alias = "Battle magic effect 218"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "13ed478c2f2d37eafbfb2ff4898f33be"
+name = "MAGIC219"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC219.EMI#3"
+alias = "Battle magic effect 219"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "ba2f762814c34b2d56de7eefd98d73b0"
+name = "MAGIC220"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC220.EMI#3"
+alias = "Battle magic effect 220"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "c04464acf61fb46063a6294b5df4e736"
+name = "MAGIC222"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC222.EMI#3"
+alias = "Battle magic effect 222"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "5986c69a900388ed74900cb97f9a28fb"
+name = "MAGIC223"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC223.EMI#3"
+alias = "Battle magic effect 223"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "4f4848ab03ec2519857ced361ac1ce1a"
+name = "MAGIC225"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC225.EMI#3"
+alias = "Battle magic effect 225"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "8247741283b0cde2e2bb6c152c370c6b"
+name = "MAGIC226"
+family = "BMAGIC"
+source = "BIN/BMAGIC/MAGIC226.EMI#3"
+alias = "Battle magic effect 226"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BMAGIC + numbered filename"
+
+[[overlay]]
+md5 = "af7a685c120fd0b148741ce08c7ac775"
+name = "SHOP"
+family = "ETC"
+source = "BIN/ETC/SHOP.EMI#8"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "fc08d4cc9be536680611df000cbd8b78"
+name = "BOSS001"
+family = "BOSS"
+source = "BIN/BOSS/BOSS001.EMI#13"
+alias = "Boss battle script 001"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "865425f06225ee1f2c349c5f9bf94cdc"
+name = "BOSS002"
+family = "BOSS"
+source = "BIN/BOSS/BOSS002.EMI#16"
+alias = "Boss battle script 002"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "45323c3f56b78e78ea7c42a0d7ae417d"
+name = "BOSS004"
+family = "BOSS"
+source = "BIN/BOSS/BOSS004.EMI#13"
+alias = "Boss battle script 004"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "21370918d10a1f82f3cd602cc8226426"
+name = "BOSS007"
+family = "BOSS"
+source = "BIN/BOSS/BOSS007.EMI#16"
+alias = "Boss battle script 007"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "ee573e355d0f141fb1a2d9b7661e088e"
+name = "BOSS008"
+family = "BOSS"
+source = "BIN/BOSS/BOSS008.EMI#16"
+alias = "Boss battle script 008"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "b528ab3f4cf2c9223fa0a3e016b3556f"
+name = "BOSS012"
+family = "BOSS"
+source = "BIN/BOSS/BOSS012.EMI#16"
+alias = "Boss battle script 012"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "88ae43dc409ef66358c3f8fae9f7192e"
+name = "BOSS013"
+family = "BOSS"
+source = "BIN/BOSS/BOSS013.EMI#16"
+alias = "Boss battle script 013"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "61fa0e949b0bacb2afc8426f7044d76b"
+name = "BOSS014"
+family = "BOSS"
+source = "BIN/BOSS/BOSS014.EMI#16"
+alias = "Boss battle script 014"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "4413d9db2da55e622092b0fe37c75164"
+name = "BOSS015"
+family = "BOSS"
+source = "BIN/BOSS/BOSS015.EMI#16"
+alias = "Boss battle script 015"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "c2948d4dde040eac8f5a7d1e16f0f8bf"
+name = "BOSS017"
+family = "BOSS"
+source = "BIN/BOSS/BOSS017.EMI#16"
+alias = "Boss battle script 017"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "e16536f21e3bf3f35d0280fab4245134"
+name = "BOSS018"
+family = "BOSS"
+source = "BIN/BOSS/BOSS018.EMI#16"
+alias = "Boss battle script 018"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "4ac89abdc7e506be23f7dc55cb659c78"
+name = "BOSS021"
+family = "BOSS"
+source = "BIN/BOSS/BOSS021.EMI#16"
+alias = "Boss battle script 021"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "fa20948b8a4c226a7cb98dc8f4e3db02"
+name = "BOSS022"
+family = "BOSS"
+source = "BIN/BOSS/BOSS022.EMI#13"
+alias = "Boss battle script 022"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "8387a99872b752cd5a377ddf53f289f2"
+name = "BOSS023"
+family = "BOSS"
+source = "BIN/BOSS/BOSS023.EMI#16"
+alias = "Boss battle script 023"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "2f0c4fc54246becd1f4940eb1f9cac8e"
+name = "BOSS024"
+family = "BOSS"
+source = "BIN/BOSS/BOSS024.EMI#16"
+alias = "Boss battle script 024"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "904cf27bb9f7bd988ccfeee4def41fd7"
+name = "BOSS025"
+family = "BOSS"
+source = "BIN/BOSS/BOSS025.EMI#13"
+alias = "Boss battle script 025"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "1e15c6a3f89962ee2c99950f61148760"
+name = "BOSS028"
+family = "BOSS"
+source = "BIN/BOSS/BOSS028.EMI#16"
+alias = "Boss battle script 028"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "8f4b7c9bbc6aa95cdc2eafab17a419d3"
+name = "BOSS029"
+family = "BOSS"
+source = "BIN/BOSS/BOSS029.EMI#16"
+alias = "Boss battle script 029"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "8cf64875971e1edf68e86050939b56b7"
+name = "BOSS030"
+family = "BOSS"
+source = "BIN/BOSS/BOSS030.EMI#16"
+alias = "Boss battle script 030"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "0ec052084eff2f6f884d084f34ed00c3"
+name = "BOSS031"
+family = "BOSS"
+source = "BIN/BOSS/BOSS031.EMI#13"
+alias = "Boss battle script 031"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "a41e92000b40f8f486aa146ef3229b0d"
+name = "BOSS032"
+family = "BOSS"
+source = "BIN/BOSS/BOSS032.EMI#16"
+alias = "Boss battle script 032"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "a7053573728fda2384a52ae6e5026400"
+name = "BOSS033"
+family = "BOSS"
+source = "BIN/BOSS/BOSS033.EMI#16"
+alias = "Boss battle script 033"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "f9a07b7ada9b9cb304844108bb735a63"
+name = "BOSS034"
+family = "BOSS"
+source = "BIN/BOSS/BOSS034.EMI#16"
+alias = "Boss battle script 034"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "c4198cf7908bf7d3ff274ddd1daddb01"
+name = "BOSS035"
+family = "BOSS"
+source = "BIN/BOSS/BOSS035.EMI#16"
+alias = "Boss battle script 035"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "fca2502e4076885fa9a3bdbffb6f8215"
+name = "BOSS036"
+family = "BOSS"
+source = "BIN/BOSS/BOSS036.EMI#16"
+alias = "Boss battle script 036"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "efa3e8258ba19105bad836c80fe32cf8"
+name = "BOSS037"
+family = "BOSS"
+source = "BIN/BOSS/BOSS037.EMI#16"
+alias = "Boss battle script 037"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "af4faad1814d8ef8e098603b84ed43c5"
+name = "BOSS038"
+family = "BOSS"
+source = "BIN/BOSS/BOSS038.EMI#16"
+alias = "Boss battle script 038"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "f8ef81120adba6d02e5b3634794b71e4"
+name = "BOSS040"
+family = "BOSS"
+source = "BIN/BOSS/BOSS040.EMI#16"
+alias = "Boss battle script 040"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "f4925bf90fa5e39c35ad8dde1b2a4081"
+name = "BOSS042"
+family = "BOSS"
+source = "BIN/BOSS/BOSS042.EMI#16"
+alias = "Boss battle script 042"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "600351f352bfcdd7646f8d3a8fc15b13"
+name = "BOSS049"
+family = "BOSS"
+source = "BIN/BOSS/BOSS049.EMI#16"
+alias = "Boss battle script 049"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "2cf14515dc97165bf78df4adb0c4960b"
+name = "BOSS050"
+family = "BOSS"
+source = "BIN/BOSS/BOSS050.EMI#16"
+alias = "Boss battle script 050"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "f9ec7fc579e667d0ba042898d2aace6a"
+name = "BOSS051"
+family = "BOSS"
+source = "BIN/BOSS/BOSS051.EMI#16"
+alias = "Boss battle script 051"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "77863593506545bc4d47c000ac37ab3e"
+name = "BOSS052"
+family = "BOSS"
+source = "BIN/BOSS/BOSS052.EMI#16"
+alias = "Boss battle script 052"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "5b362957c95ff002688a35eac083d556"
+name = "BOSS054"
+family = "BOSS"
+source = "BIN/BOSS/BOSS054.EMI#16"
+alias = "Boss battle script 054"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "afed891c124125641e8119cc9b96d5c2"
+name = "BOSS055"
+family = "BOSS"
+source = "BIN/BOSS/BOSS055.EMI#16"
+alias = "Boss battle script 055"
+role = ""
+status = "hypothesis"
+evidence = "directory BIN/BOSS + numbered filename; band 0x800C1800"
+
+[[overlay]]
+md5 = "4065db04716614f63106a242d5160285"
+name = "BATTLE"
+family = "BATTLE"
+source = "BIN/BATTLE/BATTLE.EMI#15"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "ca65f9ec2307e288763a7379df0e6145"
+name = "AREA030"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA030.EMI#5"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "f627a793acd1ca017aff85776474e347"
+name = "AREA049"
+family = "WORLD01"
+source = "BIN/WORLD01/AREA049.EMI#13"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
