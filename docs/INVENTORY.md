@@ -1,16 +1,19 @@
 # Repo inventory
 
-**Status:** STABLE (taken 2026-08-29, at commit `40185ff` "Initial New Project Layout scaffold")
+**Status:** STABLE (re-snapshotted 2026-09-01; the original 2026-08-29 snapshot
+at `40185ff` described a scaffold that had never been built)
 
-Snapshot of what exists in this repository so a new session doesn't have to
-re-derive it. Re-verify anything you're about to depend on.
+What exists in this repository so a new session doesn't have to re-derive it.
+Re-verify anything you're about to depend on.
 
 ## Provenance
 
-Scaffolded by psxrecomp's **New Project Layout** generator
+Scaffolded 2026-08-29 by psxrecomp's **New Project Layout** generator
 (`psxrecomp/tools/new_project_layout/setup_project.ps1`) against a legal
-Redump dump of *Breath of Fire III (Japan)*. Exactly one commit exists; no
-recompilation, build, or boot has happened yet in this repo.
+Redump dump of *Breath of Fire III (Japan)*. Since then: first boot 2026-08-29,
+playable 2026-08-30, all overlay bands compiled 2026-08-31, 60 fps and all
+framework PRs merged upstream 2026-09-01. History in [`STATUS.md`](STATUS.md) →
+Log.
 
 ## Title identity (from `disc_probe.json` / `catalog_identity.json`)
 
@@ -20,93 +23,77 @@ recompilation, build, or boot has happened yet in this repo.
 | Boot EXE | `SLPS_009.90` (staged at `disc/SLPS_009.90`, 1,458,176 bytes) |
 | Load address | `0x80093800` |
 | Entry PC | `0x8014AA0C` |
-| `.text` size | `0x00163800` |
+| `.text` size | `0x00163800` — 81.6% zero-fill that overlays load into |
 | Stack base | `0x801FFFF0` |
 | Data track | 479,812,704 bytes · md5 `cb8d17ce…` · sha1 `ee7b2031…` |
 | Tracks | 2 (multi-track cue required) |
 | Disc fingerprint | `2489523d…` (`psxrecomp-toc-v1`) |
 | Players | 1 (netplay auto-disabled) |
 
-`game.toml`'s `disc =` is **repo-relative** as of 2026-08-29:
-`isos/Breath of Fire III (Japan).cue`. TOML paths resolve against the detected
-project root — the nearest ancestor with `.git` / `.gitignore` /
-`CMakeLists.txt` (`psxrecomp/recompiler/src/config_loader.h:15`) — not the
-working directory, so it holds when the exe runs from `build-release/`.
-`/isos/` is gitignored, so the dump is never committed. (`[game].exe` was
-already relative on the same rule.) Superseded the original absolute
-machine-local path.
+`game.toml`'s `disc =` is **repo-relative**: `isos/Breath of Fire III (Japan).cue`.
+TOML paths resolve against the detected project root (nearest ancestor with
+`.git` / `.gitignore` / `CMakeLists.txt`), not the working directory, so it holds
+when the exe runs from a build tree. `/isos/` is gitignored.
 
 ## Top-level files
 
 | Path | Role |
 |---|---|
-| `CMakeLists.txt` | Calls `psxrecomp_add_game_runtime(psx-runtime …)`; `PSX_SETUP_WIZARD=ON`, recomp-ui on, netplay commented out. Stages `game.toml` / `game_options.toml` next to the exe post-build |
-| `game.toml` | Title config: identity, `[prepare_disc]` digests, `[recompiler]` (seeds → `generated/`, `strict = true`), `[runtime]`, `[localization]`, `[video]` (opengl, 4:3), `[controller]` (digital), `[netplay]` gates |
-| `game_options.toml` | Native in-game OPTION persistence. All-comment template; **untracked** |
-| `symbols.toml` | Progressive symbol map. One entry: `BootEntry` @ `0x8014AA0C`, `emit = false`, `status = "guessed"` |
-| `psx_symbols.h` | Generated from `symbols.toml` by `tools/sync_symbols.py`. **Do not hand-edit** |
-| `codegen_setup.c/.h` | Setup-wizard host config: display name, env var names (`BREATHOFFIRE3RECOMP_*`), gen marker `generated/SLPS_009.90_dispatch.c`, exe basename `BreathOfFire3_Recompiled` |
-| `catalog_identity.json` | Machine-readable identity + marketing + rom identity for the catalog / RetComM |
-| `disc_probe.json` | Full `probe_disc.py` dump the scaffold produced |
-| `framework_pins.txt` | UTF-16 snapshot of submodule SHAs. Informational — the **gitlinks are authoritative** |
+| `CMakeLists.txt` | `psxrecomp_add_game_runtime(psx-runtime …)`; `PSX_SETUP_WIZARD=ON`, recomp-ui on, netplay off. Passes `GAME_OVERLAY_STATIC_C` (keep it after `APP_ICON`). Stages `game.toml` / `game_options.toml` next to the exe |
+| `game.toml` | Title config: identity, `[prepare_disc]` digests, `[recompiler]` (`strict = true`), `[runtime]`, `[localization]` (`en` + `jp`), `[video]` (opengl, 4:3), `[controller]`, `[netplay]` |
+| `game_options.toml` | Native in-game OPTION persistence (all-comment template) |
+| `symbols.toml` → `psx_symbols.h` | Progressive symbol map via `tools/sync_symbols.py`. **Do not hand-edit the header.** Text-engine functions are still unnamed (see `TEXT_ENGINE.md`) |
+| `codegen_setup.c/.h` | Setup-wizard host config: display name, `BREATHOFFIRE3RECOMP_*` env names, gen marker `generated/SLPS_009.90_dispatch.c`, exe basename `BreathOfFire3_Recompiled` |
+| `catalog_identity.json`, `disc_probe.json` | Launcher/RetComM identity; full `probe_disc.py` dump |
+| `framework_pins.txt` | Informational snapshot of submodule SHAs — the **gitlinks are authoritative** |
+| `.mcp.json` | ghidra-mcp stdio bridge on `127.0.0.1:8089` (needs the Ghidra GUI running) |
 | `VERSION` | `0.1.0` |
-| `.gitignore` | Blocks `generated/`, `build*/`, `disc/`, `bios/`, all disc/memcard formats, `analysis/`, root `*.json` except catalog/probe |
-| `README.md` | Public-facing; quick start, symbols flow, RetComM launcher, legal |
+| `.gitignore` | Blocks `generated/`, `build*/`, `disc/`, `isos/`, `analysis/`, `saves/`, all disc/memcard formats, root `*.json` except catalog/probe |
+| `README.md` | Public-facing: status, setup, build, run, docs index, legal |
 
 ## Directories
 
 | Path | Contents |
 |---|---|
-| `disc/` | `SLPS_009.90` (staged boot EXE). Gitignored — the `.cue`/`.bin` live outside the repo |
-| `seeds/ghidra_funcs.txt` | 523 first-pass JAL targets + entry, scanned from the boot EXE. Overlay/runtime discoveries still need adding |
-| `tools/sync_symbols.py` | `symbols.toml` → `psx_symbols.h`; supports `--check` |
-| `scripts/package_setup_release.sh` | Thin wrapper over the framework's setup-host packager |
-| `mods/preloaded/packages/` | Empty (`.gitkeep`). Preloaded mod packages ship here |
-| `launcher_assets/img/` | `boxart.png` / `boxart.tga` + `BOXART_SOURCE.txt` |
-| `assets/` | Default app icon (`psxrecomp.ico/.png/.svg`) |
-| `.github/workflows/release.yml` | Setup-host multi-platform release workflow (host-only; never ships `generated/`) |
-| `psxrecomp/` | **Submodule** @ `f24b7e5d` (`v0.3.2-alpha-45`) — recompiler, runtime, CLI, docs |
-| `recomp-ui/` | **Submodule** @ `8c30e004` — launcher UI |
+| `docs/` | Title-owned notes — index in [`README.md`](README.md) |
+| `tools/` | The Axis B loop and its phases, `.EMI`/disc/disasm helpers, debug-server wrappers, benchmarks — table in [`HANDOFF.md`](HANDOFF.md) → Tooling |
+| `seeds/ghidra_funcs.txt` | 523 first-pass JAL targets + entry. Extending it is a proven null result; overlay entry points go through `analysis/observed_interp_pcs.json` instead |
+| `scripts/package_setup_release.sh` | Thin wrapper over the framework's setup-host packager (`--zip-prefix bof3`) |
+| `mods/preloaded/packages/` | Empty (`.gitkeep`) |
+| `launcher_assets/img/` | `boxart.png` / `.tga` + `BOXART_SOURCE.txt` |
+| `assets/` | Default app icon |
+| `.github/workflows/release.yml` | Setup-host multi-platform release workflow (never ships `generated/`) |
+| `psxrecomp/` | **Submodule** @ `1bf70960` = upstream `mstan/master` |
+| `recomp-ui/` | **Submodule** @ `fda07fe` = fork `feat/present-scanlines` (upstream `4eda654` + launcher Scanlines toggle; PR mstan/recomp-ui#42 open) |
 
-Absent (expected — all generated/build products): `generated/`, `build-release/`,
-`translations/`, `saves/`, `bios/`.
+Gitignored, present on this machine (regenerate on a fresh checkout):
 
-## Working-tree state at snapshot
+| Path | Contents |
+|---|---|
+| `isos/` | JP dump plus US / EU / FR / DE dumps used for the regional comparison |
+| `disc/SLPS_009.90` | Staged boot EXE |
+| `generated/` | Base EXE + BIOS shards (39 files) and `overlays_static.c` (all ten bands + LOGO) |
+| `analysis/` | `emi_sections.json` (survey), `observed_interp_pcs.json` (cross-session union — **the one file that accumulates**), `overlay_captures_all.json`, `logo_capture.json`, `overlay_catalog.json`, `functions.tsv`, plus historical capture sets |
+| `build-recompiler/`, `build-dbg/`, `build-relprof/`, `build-release/` | See [`STATUS.md`](STATUS.md) → Build trees |
+| `saves/openbios/` | Savestates `state_8014AA0C_slotNN.pst` — index in [`SAVESTATES.md`](SAVESTATES.md); `card1.mcd` memory card |
 
-- `game.toml` modified vs. `40185ff`: adds the `[localization]` block
-  (`language = "en"`; `en` + `jp` in the dropdown).
-- `game_options.toml` untracked (all-comment template).
+## Local environment
 
-Together these mark the intent to run this Japanese release in English via the
-framework's runtime string-translation path — see
-`psxrecomp/docs/STRING_TRANSLATION.md`.
+Machine state, not repo state. Installed and verified: MSYS2 MinGW-w64 at
+`C:\msys64` (GCC 16.2.0 · Clang 22.1.8 · CMake 4.4.2 · Ninja 1.13.2 · ccache
+4.14 · SDL3 3.4.14 · SDL2 2.32.10 · Python 3.14.7) · JDK 21 · Ghidra 12.1.3 +
+GhidraMCP 6.0.0 (project `D:\Utilities\GhidraProjects\BoF3`) · `gh` 2.98.0 at
+`C:\Program Files\GitHub CLI` (not on PATH; authenticated as `kerokline`).
 
-## Local environment (updated 2026-08-29, after toolchain install)
-
-Machine state, not repo state. The build toolchain gap recorded in the original
-snapshot has since been **resolved** — MSYS2 MinGW-w64 is installed at
-`C:\msys64` and proven by a full 169-target emitter build. Setup steps live in
-[`../README.md`](../README.md#development-environment); current status in
-[`STATUS.md`](STATUS.md).
-
-Installed: GCC 16.2.0 · Clang 22.1.8 · CMake 4.4.2 · Ninja 1.13.2 ·
-ccache 4.14 · SDL3 3.4.14 · SDL2 2.32.10 · JDK 21.0.12.
-
-Still absent: `gh`, and Ghidra / GhidraMCP (optional — see `STATUS.md`).
-
-**Python is the sharp edge on this box.** Which interpreter answers depends
-entirely on the shell, so pin it before trusting a command:
+**Python is the sharp edge.** Which interpreter answers depends on the shell:
 
 | Shell | `python` | `python3` |
 |---|---|---|
-| Git Bash / PowerShell (no prepend) | Anaconda 3.13.9 | Microsoft Store **stub** — prints "Python was not found", exits 9009 |
-| With `/c/msys64/mingw64/bin` prepended | mingw64 3.14.7 | mingw64 3.14.7 ✅ |
-| MSYS2 `usr/bin` shell (`C:\msys64\usr\bin\bash.exe`) | absent | absent |
+| Git Bash / PowerShell (no prepend) | Anaconda 3.13.9 | Microsoft Store **stub** — "Python was not found", exit 9009 |
+| With `/c/msys64/mingw64/bin` prepended | mingw64 3.14.7 | mingw64 3.14.7 |
+| MSYS2 `usr/bin` shell | absent | absent |
 
-CMake independently selected a *fourth* interpreter for its own use —
-`…\Programs\Python\Python312\python.exe` (3.12.6).
-
-Correcting the original snapshot: `python3` **does** resolve without the
-prepend, but to the Store alias stub — which is worse than absent, because
-scripts detect it as present and then fail with a confusing message. Prepending
-`/c/msys64/mingw64/bin` fixes both spellings and is the recommended shell setup.
+CMake independently picks `…\Programs\Python\Python312\python.exe` for its own
+use. Prepending `/c/msys64/mingw64/bin` is the recommended shell setup; it also
+supplies the compiler, without which `cc1` crashes silently. Prior text-decode
+work (character table, decoder, aligned JP/EN corpus) lives at `D:\BoFIII`.

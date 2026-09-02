@@ -1,10 +1,11 @@
 # BoF3 text engine — the message interpreter, renderer and glyph path
 
-**Status:** IN PROGRESS (established 2026-08-30)
+**Status:** STABLE (established and confirmed live 2026-08-30; the open items
+at the end are translation work, not engine identification)
 
-This resolves the blocker recorded in [`HANDOFF.md`](HANDOFF.md): *"nothing can
-identify which code draws text."* It is now identified. Three entry points, one
-shared control-code vocabulary, one glyph blitter.
+This resolved the localization blocker *"nothing can identify which code draws
+text."* Three entry points, one shared control-code vocabulary, one glyph
+blitter.
 
 ## How it was established
 

@@ -13,26 +13,42 @@ belong to *this game*, not to the framework.
 | `recomp-ui/docs/` | Launcher submodule | Read-only reference |
 | `/CLAUDE.md` | This repo | Session bootstrap — keep it short and current |
 
-`HANDOFF.md` is the next-session entry point: what to pick up, in order, and
-the traps already paid for. It points at evidence rather than restating it.
+## Index
 
-`STATUS.md` is the living status doc — where the project stands, what's in
-flight, what's blocked. It is the first thing a new session reads after
-`CLAUDE.md`, and the file that gets updated as work lands. `CLAUDE.md` stays
-rules-and-shape only.
+Read in this order at session start: `STATUS.md`, `HANDOFF.md`, then whatever
+the task touches.
+
+| Doc | Kind | Contents |
+|---|---|---|
+| [`STATUS.md`](STATUS.md) | living | Where the project stands, what's in flight, what's next, and the dated Log. Update this as work lands |
+| [`HANDOFF.md`](HANDOFF.md) | living | What to pick up, how to build against the current pin, traps already paid for, the tooling table |
+| [`INVENTORY.md`](INVENTORY.md) | snapshot | What is in the repo and on this machine |
+| [`OVERLAYS.md`](OVERLAYS.md) | evidence | *Why* most of the game is overlays, why seeding cannot substitute, and the `.EMI` TOC finding that made disc extraction possible |
+| [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) | evidence | *How*: the ten-band map, extraction, compilation, build wiring, and the numbered measurement sections (§5–§12) other docs cite — including the three upstream dispatch fixes and the all-bands result |
+| [`BRINGUP.md`](BRINGUP.md) | log | Boot 001/002 (first boot, the retracted "wait loop"), and framework observations F-1 / F-2 |
+| [`TEXT_ENGINE.md`](TEXT_ENGINE.md) | evidence | The message interpreter, renderer, glyph path, control codes, and the per-block message-table formula confirmed live |
+| [`LOCALIZATION.md`](LOCALIZATION.md) | plan + evidence | JP→EN: the capture-pipeline findings (F-3 / F-4), the `.EMI` container format, the `0x80010000` selector, prior decode work at `D:\BoFIII` |
+| [`regional-builds.md`](regional-builds.md) | evidence | JP/US/EN/FR/DE comparison: no runtime language support, no address-compatible donor, the full section census, the four text locations and 37 language-bearing images |
+| [`SAVESTATES.md`](SAVESTATES.md) | index | What each savestate slot holds; the in-game-vs-file off-by-one |
+| [`ENHANCEMENTS.md`](ENHANCEMENTS.md) | plan | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance (designed), costed backlog |
+| [`vblank-pacing-bug.md`](vblank-pacing-bug.md) | investigation | The Capcom FMV slowdown: root cause (SPU snapshot gate), fix, and the two wrong theses |
+| [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md) | investigation | One unreproduced fail-fast into kernel RAM on a savestate resume |
 
 ## Conventions
 
 - **One document per concern.** A doc is a durable artifact, not a chat log.
   If a finding is worth keeping, it gets a file; if it isn't, it doesn't.
-- **Filenames:** `UPPER_SNAKE.md` for standing references
-  (`OVERLAY_STATUS.md`), `lower-kebab.md` for narrow investigations
-  (`text-draw-pc-census.md`).
+- **No dated banners stacked on top of living docs.** When something changes,
+  update the sections and add a `STATUS.md` Log row. A doc that needs a
+  correction gets the correction *in place* with a date; superseded material is
+  condensed to what a reader needs to not re-derive it, not preserved verbatim.
+- **Filenames:** `UPPER_SNAKE.md` for standing references, `lower-kebab.md`
+  for narrow investigations.
 - **Status header.** Every doc opens with a status line so a new session knows
   whether to trust it:
 
   ```markdown
-  **Status:** IN PROGRESS | STABLE | SUPERSEDED by [X](X.md) | STALE (last verified YYYY-MM-DD)
+  **Status:** IN PROGRESS | STABLE | DONE | RESOLVED | SUPERSEDED by [X](X.md) | STALE (last verified YYYY-MM-DD)
   ```
 
 - **Absolute dates.** Write `2026-08-29`, never "last week".
@@ -45,17 +61,3 @@ rules-and-shape only.
 - **Never commit disc data.** No `.bin`/`.cue`/`.iso` excerpts, no ripped
   assets, no BIOS bytes — not even inline in a markdown file. `.gitignore`
   blocks the files; it can't block a paste.
-
-## Suggested docs as work begins
-
-Create these when the work actually starts — empty stubs are noise:
-
-| File | Contents |
-|---|---|
-| `BRINGUP.md` | Boot/soak log: what runs, where it dies, what was fixed |
-| `OVERLAY_STATUS.md` | BoF3 overlay map — discovered overlays, load addresses, seed gaps |
-| `SYMBOLS_NOTES.md` | Rationale behind `symbols.toml` entries; how each was identified |
-| `LOCALIZATION.md` | JP→EN string translation: capture inventory, text-draw PC census, font work |
-| `TEXT_ENGINE.md` | **Exists.** The message interpreter, renderer and glyph path — control codes, the `0x80010004` message-index formula, interpreter state block |
-| `regional-builds.md` | **Exists.** JP/US/EN/FR/DE comparison — no runtime language support, no address-compatible donor, and the `.EMI` evidence isolating the script section |
-| `ENHANCEMENTS.md` | **Exists.** Post-faithfulness work, gated behind bringup: CRT scanlines (designed, needs an upstream psxrecomp PR), plus a costed backlog |

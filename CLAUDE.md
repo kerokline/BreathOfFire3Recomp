@@ -29,11 +29,12 @@ codegen_setup.c/.h   setup-wizard host wiring
 CMakeLists.txt       psxrecomp_add_game_runtime(psx-runtime …)
 disc/                staged boot EXE (gitignored)
 docs/                title-owned notes  ← put agent documents here
-psxrecomp/           SUBMODULE @ ecc0de16 — framework (read-only); fork branch
-                     fix/static-overlay-residency-signal = upstream master + our
-                     3 overlay-dispatch commits, kept synced (see HANDOFF)
-recomp-ui/           SUBMODULE @ 4eda654 — launcher (read-only); moves in lockstep
-                     with a psxrecomp master sync (multi-disc launcher ABI)
+psxrecomp/           SUBMODULE @ 1bf70960 = upstream mstan/master (read-only);
+                     all of this title's framework fixes are merged upstream
+recomp-ui/           SUBMODULE @ fda07fe — launcher (read-only); fork branch
+                     feat/present-scanlines = upstream 4eda654 + Scanlines toggle,
+                     pending mstan/recomp-ui#42. Moves in lockstep with a
+                     psxrecomp bump when the launcher ABI changes
 ```
 
 ## Workflow
@@ -57,11 +58,14 @@ python tools/sync_symbols.py
 
 - **Use `python`, not `python3`.** `python3` does not resolve here; `python` is
   Anaconda 3.13.9. Framework docs say `python3` — translate as you go.
-- `cmake`, `ninja`, a C/C++ toolchain, and `gh` are **not on PATH**. A local
-  build needs MSYS2 MinGW-w64 or MSVC plus CMake ≥ 3.20 first
-  (see `psxrecomp/docs/BUILDING.md`).
+- The toolchain is installed but **not on PATH**: prepend
+  `/c/msys64/mingw64/bin` (GCC, CMake, Ninja) in every build shell, or `cc1`
+  crashes silently. `gh` is at `C:\Program Files\GitHub CLI`, authenticated.
 - Windows: both a PowerShell tool and a Git Bash tool are available. The
-  framework's `.sh` scripts want bash.
+  framework's `.sh` scripts want bash; run the game exe from PowerShell with
+  `$env:VAR = "x"` for environment variables.
+- Play/measure on `build-relprof` (RelWithDebInfo + debug tools +
+  `PSX_STATIC_RUNTIME=ON`); `build-dbg` is -O0 and cannot judge performance.
 
 ## Inherited rules
 
