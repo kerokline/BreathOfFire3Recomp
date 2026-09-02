@@ -1,6 +1,98 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-09-01, night)
+**Status:** IN PROGRESS (last verified 2026-09-01, evening)
+
+> **2026-09-01 late — readability track opened: name sidecar + subsystem map.**
+> Human names now live outside the regenerated C: `names/overlays.toml` (alias /
+> role / status / evidence per overlay, keyed by section **md5**, not PC — bands
+> overlap) and `names/functions.toml` ((md5, pc) per overlay function; boot-EXE
+> names stay in `symbols.toml`). [`tools/name_map.py`](../tools/name_map.py)
+> seeds/merges/validates them; [`tools/subsystem_map.py`](../tools/subsystem_map.py)
+> renders [`docs/subsystem_map.html`](subsystem_map.html) — bands → overlays →
+> 29 036 overlay functions (roots, spans, in-overlay jal edges, honest heat) +
+> the 1 026 boot-EXE functions, searchable by name/alias/PC/md5, no bytes
+> embedded. Coverage: 2 overlays `evidence`, 204 `hypothesis` (filename-derived),
+> 133 `unnamed` (all AREA/COMMU), 0 overlay functions. Routes to earn names
+> (resident script block + screenshot → areas, Psy-Q signatures → boot EXE,
+> differential traces → Attack/Battle_Init) are in [`NAME_MAP.md`](NAME_MAP.md).
+> Evidence gathering: [`tools/area_poller.py`](../tools/area_poller.py) —
+> `watch` during play (identifies the resident AREA with certainty by hashing
+> the `0x80010000` script block against `emi_sections.json`, screenshots each
+> change, drains the overlay native ring), `harvest` once at end of session
+> (now `axis_b_loop.sh` phase 2a, incl. `--harvest-only`), `summarize --apply`
+> to write sightings as `evidence`. `axis_b_loop.sh` phase 6 refreshes `names/`
+> + the map on every rebuild path. First live run done 2026-09-01: 6 WORLD00 areas identified
+> (AREA001/002/006/009/024/031); transition shots were black → fixed with a
+> settled-shot delay; native-ring parse fixed (nested `ring`) — it is a per-call
+> native trace, which unblocks the differential tracer.
+
+> **2026-09-01 — Capcom-logo lag FIXED (root-caused + compiled).** The opening/
+> Capcom logo sequence runs from **`LOGO/LOGO.EXE`** — a standalone 120 KB PS-EXE
+> loaded to **`0x801CE000`** (text 0x1D800, entry 0x801CE724), NOT an `.EMI`
+> overlay. The `.EMI` extraction pipeline never captured it, so it ran **100%
+> interpreted** (~19 present-fps, native dispatch ≈0, one PC `0x801CEEDC` = 84.5%
+> of all interp work / 91 M insns). **This corrects the earlier "Capcom slow =
+> dispatcher overhead" theory** (below): it was never dispatch *cost* — it was a
+> whole uncompiled executable. The RAM overlap with the PLCHAR/battle bands
+> (which reuse `0x801CE400+` later) only *camouflaged* it as a CRC-missing PLCHAR
+> band. **Fix:** new tool [`tools/extract_logo_overlay.py`](../tools/extract_logo_overlay.py)
+> synthesizes a `static-emi-v1` capture from the disc EXE (same jal+prologue
+> discovery as `extract_overlays.py`, no external analyzer); `compile_overlays.py`
+> compiles it natively like any overlay (1609→1656 funcs, 0 new audit fails); the
+> CRC gate handles the RAM overlap. **Result:** `0x801CEEDC` fully native (gone
+> from the profile), Capcom interp 5.0M/s→0.25M/s (20×), cumulative interp
+> 107.8M→16.3M, present fps **19→steady ~30**, wall-time ~22s→~14s, no visual/boot
+> regression. The residual ~30fps is now **pacing-limited** (CPU idle during the
+> intro — FMV/CD streaming of `CAPCOM30.STR`), not CPU-limited. Durability: LOGO
+> merged into `analysis/overlay_captures_all.json` and re-merged every run by
+> `axis_b_loop.sh` phase 3a (extract_overlays rebuilds that file from `.EMI` only
+> and would otherwise drop it). Pass-2 (harvest LOGO-resident interiors →
+> `logo_observed.json`) landed the 10 jump-table interior entries.
+>
+> **The residual interior "whack-a-mole" is root-caused and generalized.** LOGO
+> dispatches per-frame effect handlers through **function-pointer tables** that
+> are zero in the image and populated at runtime (`lw v0,0(sN); jalr ra,v0`) — the
+> static walk can't see the targets, so each pass makes the last handler native
+> and the interpreter entry just shifts to the next unregistered `jalr` target.
+> Traced via the caller ring → dispatcher (`0x801CF980`, walks a 7-slot table at
+> `0x801D9CA4`). **Key rule:** a compiled static *root* is NOT automatically
+> reachable by `jalr` — a function-pointer call needs the address registered as a
+> *dispatch* entry too (`0x801D22EC` was a compiled root yet still interpreted).
+> New [`tools/harvest_logo_handlers.py`](../tools/harvest_logo_handlers.py)
+> generalizes the fix: statically locate the fn-ptr dispatch tables (forward
+> const-prop), read them from a live LOGO-resident session, callable-boundary
+> filter, emit every handler at once (found 12 tables → 18 real handlers, 26
+> data-array false positives dropped). Rebuilt with all 18 registered. This
+> pattern recurs in any title with effect/handler tables.
+
+> **2026-09-01 evening session.** The **Axis B loop is now a one-command script**
+> ([`tools/axis_b_loop.sh`](../tools/axis_b_loop.sh): harvest → extract →
+> catalog → codegen-hash → compile → build) and is **proven end-to-end**. A
+> second play session **banked 239 new PCs** (world map, shops, save/memcard
+> screens) → observed set **1195 distinct PCs (1080 entered)**, up from 956/850;
+> the new interpreted sinks are SCENARIO band `0x801F6C00` (67 M, doubled) and
+> mixed BATTLE band `0x801D0C00` (124 M). Added the **overlay catalog sidecar**
+> ([`tools/overlay_catalog.py`](../tools/overlay_catalog.py) →
+> `analysis/overlay_catalog.json`): family/subsystem, band membership +
+> co-residency, root provenance, honestly-attributed heat. Rebuilt and
+> **verified healthy** (headless: 99.29% native dispatch, crc_misses Δ0, 152.9
+> emu fps). Benign audit-failure count drifted 4 → 6 (expected). **Pending:** the
+> per-PC re-measure confirming those 239 went native needs a play session
+> re-exercising that content. Perf: world map + memcard ~50 fps, Capcom still
+> ~10-20 fps (savestate anchors slot 08/09/10 — see [`HANDOFF.md`](HANDOFF.md)).
+
+> **2026-09-01 session.** Synced the framework: merged upstream `mstan/master`
+> into our fork branch `fix/static-overlay-residency-signal` (`psxrecomp` now
+> `ecc0de16` = our 3 commits + 77 upstream), and bumped `recomp-ui` `8c30e004`
+> → `4eda654` (**required** — the merged psxrecomp uses the multi-disc launcher
+> API that lives in recomp-ui). **Upstream PR held as a draft by decision** — the
+> fork is a living integration branch we keep pulling master into; the
+> proof-of-process is a full BoF3 decompile with subsystems intact. Full rebuild
+> **verified booting**: overlays dispatch native at ~99.6% steady-state hit rate,
+> residency signal intact — the CD-ROM/DMA merge did not regress it. Two sync
+> gotchas + the recipe are in [`HANDOFF.md`](HANDOFF.md) → "Shipping state".
+> Non-blocking follow-up: pre-merge savestates load with `last_ok: 0` (merge
+> reworked `savestate.c`).
 
 Living status doc — the one place a new session learns where the project
 actually stands. Update this rather than `CLAUDE.md`. Durable findings graduate
