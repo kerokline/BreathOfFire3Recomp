@@ -21,8 +21,10 @@
 > change, drains the overlay native ring), `harvest` once at end of session
 > (now `axis_b_loop.sh` phase 2a, incl. `--harvest-only`), `summarize --apply`
 > to write sightings as `evidence`. `axis_b_loop.sh` phase 6 refreshes `names/`
-> + the map on every rebuild path. Verified against a mock debug server only —
-> first live run pending.
+> + the map on every rebuild path. First live run done 2026-09-01: 6 WORLD00 areas identified
+> (AREA001/002/006/009/024/031); transition shots were black → fixed with a
+> settled-shot delay; native-ring parse fixed (nested `ring`) — it is a per-call
+> native trace, which unblocks the differential tracer.
 
 > **2026-09-01 — Capcom-logo lag FIXED (root-caused + compiled).** The opening/
 > Capcom logo sequence runs from **`LOGO/LOGO.EXE`** — a standalone 120 KB PS-EXE

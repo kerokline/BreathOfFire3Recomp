@@ -91,9 +91,20 @@ the game runs (`--debug-port 4370`, debug-tools build). Two tools:
   `--skip-harvest`) then re-merges `names/` and regenerates the map.
 
 Savestates earn their keep for **differential** questions (Attack vs Defend):
-two runs must start identical. Note the caller ring logs interpreted transfers
-only, so a native-side trace (`overlay_native_ring` is body-level, not
-call-level) is the open question before a differential tracer is worth writing.
+two runs must start identical. The interpreter caller ring logs interpreted
+transfers only, but the runtime's `overlay_native_ring` is a **per-call native
+trace** (entry address, body CRC, frame; 16 384 slots, always on, in
+`overlay_loader.c`). It fills in well under a second when hot, so it is a
+window, not a history: the poller compresses it to one row per overlay body
+per area with a call count and the entry addresses seen. A differential tracer
+can drain it right after an input; that is now a tool, not a framework change.
+
+First live run (2026-09-01): six WORLD00 areas identified with certainty
+(AREA001/002/006/009/024/031) in one walk. Lesson paid for: the script block
+lands during the fade, so a screenshot at the change instant is black — the
+poller now shoots `--shot-delay` seconds later (default 4) once the area has
+settled. The native ring came back empty on that run because the response is
+nested under `ring`; fixed.
 
 ## How names get earned — the routes, in the order to run them
 
