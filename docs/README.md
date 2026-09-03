@@ -29,10 +29,17 @@ the task touches.
 | [`TEXT_ENGINE.md`](TEXT_ENGINE.md) | evidence | The message interpreter, renderer, glyph path, control codes, and the per-block message-table formula confirmed live |
 | [`LOCALIZATION.md`](LOCALIZATION.md) | plan + evidence | JP→EN: the capture-pipeline findings (F-3 / F-4), the `.EMI` container format, the `0x80010000` selector, prior decode work at `D:\BoFIII` |
 | [`regional-builds.md`](regional-builds.md) | evidence | JP/US/EN/FR/DE comparison: no runtime language support, no address-compatible donor, the full section census, the four text locations and 37 language-bearing images |
+| [`MEDNAFEN.md`](MEDNAFEN.md) | reference | Stock Mednafen in `./mednafen/` as an isolated oracle: what crosses over (memcards yes, savestates no), the card naming, and driving it with `tools/mednafen_ctl.py` |
 | [`SAVESTATES.md`](SAVESTATES.md) | index | What each savestate slot holds; the in-game-vs-file off-by-one |
+| [`NAME_MAP.md`](NAME_MAP.md) | plan + evidence | The readability track: `names/` sidecars (overlays / functions / areas), the status+evidence rule, the area poller, routes to earn names |
+| [`subsystem_map.html`](subsystem_map.html) | generated | Browsable map (bands → overlays → functions, boot EXE, areas). Regenerate with `tools/subsystem_map.py`; never hand-edit |
 | [`ENHANCEMENTS.md`](ENHANCEMENTS.md) | plan | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance (designed), costed backlog |
 | [`vblank-pacing-bug.md`](vblank-pacing-bug.md) | investigation | The Capcom FMV slowdown: root cause (SPU snapshot gate), fix, and the two wrong theses |
 | [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md) | investigation | One unreproduced fail-fast into kernel RAM on a savestate resume |
+| [`battle-icon-strip-rows.md`](battle-icon-strip-rows.md) | investigation | Enlarged command icon loses its top six texture rows: VRAM vs disc vs Beetle oracle, loss localised to the boot-time load of `FIRST.EMI` |
+| [`battle-depth-order.md`](battle-depth-order.md) | investigation | Sprites lunging behind the battle doorway: list order honoured, Beetle shows the same, game behaviour |
+| [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md) | investigation + proposal | build-dbg "crashes" were the starvation watchdog exiting on a cross-thread clock race and reporting itself as `atexit`; evidence, upstream diff, verification plan |
+| [`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md) | review + evidence | Cross-title check of upstream psxrecomp #302 (DMA2 linked-list cost 8+5 → 1+0): BoF3 A/B census, no regression, plus the hardware argument the PR is missing |
 
 ## Conventions
 

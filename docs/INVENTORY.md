@@ -63,7 +63,9 @@ when the exe runs from a build tree. `/isos/` is gitignored.
 | `launcher_assets/img/` | `boxart.png` / `.tga` + `BOXART_SOURCE.txt` |
 | `assets/` | Default app icon |
 | `.github/workflows/release.yml` | Setup-host multi-platform release workflow (never ships `generated/`) |
-| `psxrecomp/` | **Submodule** @ `1bf70960` = upstream `mstan/master` |
+| `names/` | Human-name sidecars: `overlays.toml` (339, keyed by section md5), `functions.toml` (overlay functions, keyed by md5+pc), `areas.toml` (15 sighted places, keyed by script-block md5). See `docs/NAME_MAP.md` |
+| `.claude/launch.json` | `docs-static`: `python -m http.server 8765 -d docs` to browse `docs/subsystem_map.html` |
+| `psxrecomp/` | **Submodule** @ `7ab698ca` = fork branch `perf/static-overlay-parallel` = upstream `mstan/master` `04d9184b` + parallel/split static compile (draft PR mstan/psxrecomp#296; re-pin to master when merged) |
 | `recomp-ui/` | **Submodule** @ `fda07fe` = fork `feat/present-scanlines` (upstream `4eda654` + launcher Scanlines toggle; PR mstan/recomp-ui#42 open) |
 
 Gitignored, present on this machine (regenerate on a fresh checkout):
@@ -72,7 +74,7 @@ Gitignored, present on this machine (regenerate on a fresh checkout):
 |---|---|
 | `isos/` | JP dump plus US / EU / FR / DE dumps used for the regional comparison |
 | `disc/SLPS_009.90` | Staged boot EXE |
-| `generated/` | Base EXE + BIOS shards (39 files) and `overlays_static.c` (all ten bands + LOGO) |
+| `generated/` | Base EXE + BIOS shards (39 files), `overlays_static.c` (overlay dispatcher) + `overlays_static_NNNN.c` (one unit per overlay, all ten bands + LOGO) |
 | `analysis/` | `emi_sections.json` (survey), `observed_interp_pcs.json` (cross-session union — **the one file that accumulates**), `overlay_captures_all.json`, `logo_capture.json`, `overlay_catalog.json`, `functions.tsv`, plus historical capture sets |
 | `build-recompiler/`, `build-dbg/`, `build-relprof/`, `build-release/` | See [`STATUS.md`](STATUS.md) → Build trees |
 | `saves/openbios/` | Savestates `state_8014AA0C_slotNN.pst` — index in [`SAVESTATES.md`](SAVESTATES.md); `card1.mcd` memory card |

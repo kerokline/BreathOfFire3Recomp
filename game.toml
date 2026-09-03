@@ -60,7 +60,12 @@ renderer = "opengl"
 aspect_ratio = "4:3"
 
 [controller]
+# SLPS-00990 predates the DualShock: its pad reader ignores a controller that
+# answers poll id 0x73 (analog). Verified 2026-09-02 on the world-map savestate:
+# Start opens the camp menu with a 0x41 pad and does nothing with 0x73. The
+# launcher defaults every gamepad seat to Analog, so lock every seat digital.
 default_mode = "digital"
+lock_mode = true
 
 # Online mount gate: digests + track count + optional TOC fingerprint
 # (see docs/NETPLAY.md).

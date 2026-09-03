@@ -15,9 +15,12 @@
 #                  (name evidence; see docs/NAME_MAP.md). One-shot — for a full
 #                  per-area timeline run `area_poller.py watch` DURING play.
 #   3. extract   — rebuild analysis/overlay_captures_all.json from the observed set.
+#   3c. close    — taskkill any running BreathOfFire3_Recompiled.exe (the link
+#                  in 5b fails while the game holds the exe open).
 #   4. hash      — regenerate overlay_codegen_hash.h BEFORE compiling overlays
 #                  (skippable with --skip-hash when there was no framework bump).
-#   5a. compile  — compile ALL bands together into generated/overlays_static.c.
+#   5a. compile  — compile ALL bands: generated/overlays_static.c (dispatcher) +
+#                  overlays_static_NNNN.c (one unit per overlay); process pool.
 #   5b. build    — rebuild the psx-runtime target.
 #   6. maps      — refresh names/ sidecar from the new catalog and regenerate
 #                  docs/subsystem_map.html (runs on every non-harvest-only path,
@@ -39,12 +42,15 @@ OBSERVED="analysis/observed_interp_pcs.json"
 CAPTURES="analysis/overlay_captures_all.json"
 OVERLAY_C="generated/overlays_static.c"
 RECOMPILER="build-recompiler/psxrecomp-game.exe"
+HARVEST_LAST="analysis/harvest_last.log"        # this run's harvest output
+HARVEST_HISTORY="analysis/harvest_sessions.log" # append-only, one block per run (analysis/ is gitignored)
 
 SKIP_HARVEST=0
 SKIP_HASH=0
 HARVEST_ONLY=0
 FORCE=0
 PRUNE=1
+INCLUDE_MIXED=0
 
 usage() {
   cat <<'EOF'
@@ -57,6 +63,7 @@ Usage: tools/axis_b_loop.sh [options]
   --skip-hash       skip the codegen-hash rebuild (only safe with no framework bump)
   --force           rebuild even when harvest reports 0 new PCs
   --no-prune        keep build-dbg freeze dumps (default: prune them at the end)
+  --include-mixed   also extract sections the EMI survey classed 'mixed' (experiment; HANDOFF open question)
   -h, --help        this text
 
 Run it with the game still live on --port. See docs/HANDOFF.md.
@@ -73,6 +80,7 @@ while [ $# -gt 0 ]; do
     --skip-hash)    SKIP_HASH=1; shift ;;
     --force)        FORCE=1; shift ;;
     --no-prune)     PRUNE=0; shift ;;
+    --include-mixed) INCLUDE_MIXED=1; shift ;;
     -h|--help)      usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage; exit 2 ;;
   esac
@@ -101,9 +109,9 @@ echo "ok — cue='$CUE' port=$PORT build=$BUILD_DIR"
 NEW_PCS="(skipped)"
 if [ "$SKIP_HARVEST" -eq 0 ]; then
   say "phase 2/5 — harvest (live session on port $PORT)"
-  HARVEST_LOG="$(mktemp)"
+  mkdir -p analysis
   # harvest talks to the running game; a dead listener here is a real error.
-  python tools/harvest_interp_pcs.py --port "$PORT" | tee "$HARVEST_LOG" \
+  python tools/harvest_interp_pcs.py --port "$PORT" | tee "$HARVEST_LAST" \
     || die "harvest failed — is the game still running with --debug-port $PORT?"
 
   # Residency evidence for names/ (NAME_MAP.md). Off the build path: never fatal.
@@ -111,8 +119,11 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
   python tools/area_poller.py harvest --port "$PORT"     || echo "WARN: area_poller harvest failed — continuing (names evidence only)"
 
   # Parse "..., N new this session ..." to decide whether a rebuild is worth it.
-  NEW_PCS="$(grep -oE '[0-9]+ new this session' "$HARVEST_LOG" | grep -oE '^[0-9]+' | head -1 || true)"
-  rm -f "$HARVEST_LOG"
+  # Keep every session's harvest on disk: the per-session "N new" count is
+  # otherwise unrecoverable (the observed file is a union).
+  { printf '\n===== %s  port=%s =====\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$PORT"
+    cat "$HARVEST_LAST"; } >> "$HARVEST_HISTORY"
+  NEW_PCS="$(grep -oE '[0-9]+ new this session' "$HARVEST_LAST" | grep -oE '^[0-9]+' | head -1 || true)"
   [ -n "$NEW_PCS" ] || NEW_PCS="?"
 
   if [ "$HARVEST_ONLY" -eq 1 ]; then
@@ -125,7 +136,7 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
   if [ "$NEW_PCS" = "0" ] && [ "$FORCE" -eq 0 ]; then
     say "0 new PCs — nothing to add"
     echo "This session covered only already-seen content, so a rebuild would be"
-    echo "wasted (~20 min). Play into NEW content and re-run, or pass --force to"
+    echo "wasted (~90 s on build-dbg). Play into NEW content and re-run, or pass --force to"
     echo "rebuild anyway. Observed set on disk is unchanged in substance."
     exit 0
   fi
@@ -135,8 +146,10 @@ fi
 [ -f "$OBSERVED" ] || die "observed file missing: $OBSERVED"
 
 # ---- phase 3: extract -------------------------------------------------------
-say "phase 3/5 — extract all bands from observed set"
-python tools/extract_overlays.py "$CUE" --out "$CAPTURES" \
+EXTRACT_ARGS=()
+[ "$INCLUDE_MIXED" -eq 1 ] && EXTRACT_ARGS+=(--include-mixed)
+say "phase 3/5 — extract all bands from observed set (include-mixed=$INCLUDE_MIXED)"
+python tools/extract_overlays.py "$CUE" --out "$CAPTURES" "${EXTRACT_ARGS[@]}" \
   || die "extract_overlays failed"
 [ -f "$CAPTURES" ] || die "extract produced no $CAPTURES"
 
@@ -156,6 +169,24 @@ python tools/extract_logo_overlay.py "$CUE" \
 say "phase 3b — refresh overlay catalog (sidecar)"
 python tools/overlay_catalog.py --top 10 \
   || echo "WARN: overlay_catalog refresh failed — continuing, sidecar is off the build path"
+
+# ---- phase 3c: close the game -----------------------------------------------
+# Harvest (phase 2) needed the game live; from here on the build needs it GONE:
+# a running BreathOfFire3_Recompiled.exe holds the file open, so the link in
+# phase 5b (and the staging that follows it) fails with a permission error.
+# Windows-only shape (tasklist/taskkill); on a system without them this is a no-op.
+GAME_EXE="BreathOfFire3_Recompiled.exe"
+if command -v tasklist >/dev/null 2>&1 && tasklist 2>/dev/null | grep -qi "$GAME_EXE"; then
+  say "phase 3c — closing running $GAME_EXE before the rebuild"
+  # Double slashes: Git Bash would otherwise turn /F and /IM into paths.
+  taskkill //F //IM "$GAME_EXE" >/dev/null 2>&1 || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    tasklist 2>/dev/null | grep -qi "$GAME_EXE" || break
+    sleep 1
+  done
+  tasklist 2>/dev/null | grep -qi "$GAME_EXE" && die "$GAME_EXE is still running — close it and re-run"
+  echo "closed."
+fi
 
 # ---- phase 4: codegen hash --------------------------------------------------
 # Must precede overlay compile, or the stale-recompiler guard trips FATAL. It is
@@ -229,7 +260,7 @@ if [ "$PRUNE" -eq 1 ]; then
 fi
 
 say "DONE"
-echo "new PCs banked this session : $NEW_PCS"
+echo "new PCs banked this session : $NEW_PCS  (log: $HARVEST_LAST, history: $HARVEST_HISTORY)"
 echo "captures                    : $CAPTURES"
 echo "overlay source              : $OVERLAY_C"
 echo "subsystem map               : docs/subsystem_map.html (refreshed=$MAPS_OK)"

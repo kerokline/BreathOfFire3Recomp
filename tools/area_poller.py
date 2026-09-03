@@ -14,9 +14,12 @@ Two ways to gather, one output file (analysis/area_timeline.jsonl, append-only):
            through earlier if the ring has wrapped -- that is what `watch` is for.
   summarize
            offline: per AREA file, when it was seen and which screenshot shows
-           it; `--apply` writes that as `evidence` into names/overlays.toml for
-           every code overlay of that file (alias/status are left for a human --
-           the alias is read off the screenshot, not guessed).
+           it; `--apply` upserts every sighted area into names/areas.toml
+           (file, script md5, sightings, shots; alias/status left for a human --
+           the alias is read off the screenshot, not guessed) and stamps the
+           sighting as `evidence` on any CODE overlay of that file in
+           names/overlays.toml. Most areas ship no code section, which is why
+           areas have their own sidecar.
 
 How the resident AREA is identified (no guessing, no band ambiguity): every
 AREAnnn.EMI has exactly one section whose destination is 0x80010000 -- the area's
@@ -27,6 +30,23 @@ file with certainty. Overlay bodies are identified by the runtime's own CRC
 (overlay_native_ring -> crc -> analysis/overlay_captures_all.json crc32).
 
     python tools/area_poller.py watch [--port 4370] [--interval 0.5] [--no-shots]
+                                      [--no-prompt] [--shots-always]
+                                      [--harvest-every 15]
+
+watch also runs tools/harvest_interp_pcs.py's union-save every --harvest-every
+minutes (0 disables) and once more on Ctrl-C, so the interpreted-PC coverage of
+a session survives the game dying before axis_b_loop.sh's end-of-run harvest
+(2026-09-02: a Windows Terminal crash took a 74-minute session with it). The
+query is read-only on the runtime; each pass appends a `harvest` row to the
+timeline with the new-PC count.
+
+watch consults names/areas.toml: an area that already has an alias is logged
+with that alias and NOT screenshotted again (--shots-always overrides). An
+unnamed area is screenshotted as before, then -- when stdin is a terminal and
+--no-prompt is not given -- the poller pauses and asks for its name; a non-empty
+answer is written to names/areas.toml at once (status = "evidence", the
+screenshot as evidence). Enter skips. The game keeps running during the pause;
+only polling stops.
     python tools/area_poller.py harvest [--port 4370]
     python tools/area_poller.py summarize [--apply]
 
@@ -42,6 +62,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import playsession as ps                                      # noqa: E402
+import harvest_interp_pcs as hp                               # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AN = os.path.join(ROOT, "analysis")
@@ -131,6 +152,43 @@ def shot(port, area_file, fr):
         return None
 
 
+def name_area_live(area, alias, session, fr, shot_path):
+    """Write a player-typed alias for `area` into names/areas.toml right now.
+    Merge, never overwrite: existing sightings/shots are kept, the new sighting
+    and shot are added, status becomes `evidence` (a human read it off the live
+    screen). Returns the refreshed file -> entry dict."""
+    import name_map as nm
+    existing = nm.load_area_names()
+    r = dict(existing.get(area["file"]) or {
+        "file": area["file"], "script_md5": area["md5"], "alias": "",
+        "status": "unnamed", "evidence": ""})
+    r["script_md5"] = r.get("script_md5") or area["md5"]
+    r["alias"] = alias
+    r["status"] = "evidence"
+    r["evidence"] = f"named live by player during session {session} at frame {fr}" + (
+        f"; shot {os.path.relpath(shot_path, ROOT).replace(chr(92), '/')}" if shot_path else "")
+    r["sightings"] = sorted(set(r.get("sightings", [])) | {f"{session}:f{fr}"})
+    if shot_path:
+        rel = os.path.relpath(shot_path, ROOT).replace("\\", "/")
+        r["shots"] = sorted(set(r.get("shots", [])) | {rel})
+    existing[area["file"]] = r
+    rows = sorted(existing.values(), key=lambda e: e["file"])
+    os.makedirs(nm.NAMES_DIR, exist_ok=True)
+    with open(nm.AREAS_TOML, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(nm._emit_table("area", rows, nm.AREAS_HEADER))
+    return existing
+
+
+def ask_area_name(area):
+    """Pause and ask the player for the on-screen place name. '' = skip.
+    Returns None when stdin is gone (prompting should then be disabled)."""
+    stem = os.path.splitext(os.path.basename(area["file"]))[0]
+    try:
+        return input(f"  name for {stem} (Enter to skip): ").strip()
+    except EOFError:
+        return None
+
+
 def overlay_rows(entries, crcs, session, seen_seq, area_crcs=None, area_file=None):
     """Native-ring entries -> timeline rows. The ring is one entry per native
     CALL, so rows are compressed to one per overlay BODY (crc) per area: the
@@ -163,16 +221,50 @@ def overlay_rows(entries, crcs, session, seen_seq, area_crcs=None, area_file=Non
     return rows
 
 
+def hp_observed():
+    """Absolute path of the observed-PC union file (harvest_interp_pcs.py's
+    default is cwd-relative; the poller may be started from anywhere)."""
+    return os.path.join(AN, "observed_interp_pcs.json")
+
+
 # ---------------------------------------------------------------- commands
 
 def cmd_watch(a):
     by_size = script_sections()
     crcs = crc_index()
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
+    import name_map as nm
+    names = nm.load_area_names()
+    prompting = (not a.no_prompt) and sys.stdin.isatty()
     print(f"watching port {a.port} every {a.interval}s -> {TIMELINE} (session {session}); Ctrl-C to stop")
     print(f"screenshots {a.shot_delay}s after each area change (the script block lands during the fade)")
+    print(f"{sum(1 for e in names.values() if e.get('alias'))} areas already named in names/areas.toml: "
+          + ("logged by alias, not re-shot" if not a.shots_always else "still screenshotted (--shots-always)"))
+    print("unnamed areas: " + ("you will be asked for a name after the shot (Enter skips)" if prompting
+                               else "no prompt (--no-prompt or stdin is not a terminal)"))
+    harvest_s = max(0.0, a.harvest_every) * 60.0
+    print("interp-PC harvest: " + (f"every {a.harvest_every:g} min and on Ctrl-C -> {hp_observed()}"
+                                   if harvest_s else "off (--harvest-every 0)"))
     last_area, seen_seq, n_rows = None, 0, 0
-    area_crcs, area_file, pending_shot = {}, None, None
+    area_crcs, area_file, pending_shot, pending_prompt = {}, None, None, None
+    next_harvest = time.time() + harvest_s if harvest_s else None
+
+    def do_harvest(fr, why):
+        """Union the live per-PC table into the observed file; never raises.
+        Returns the timeline row (or None on failure)."""
+        try:
+            r = hp.harvest(port=a.port, save_json=hp_observed(), quiet=True)
+        except Exception as e:
+            print(f"[f{fr}]   harvest ({why}) failed: {e}", file=sys.stderr)
+            return None
+        print(f"[f{fr}]   harvest ({why}): {r['new']} new PCs, observed set {r['after']} "
+              f"({r['entered']} entered)")
+        return {"session": session, "event": "harvest", "frame": fr, "why": why,
+                "t": dt.datetime.now().isoformat(timespec="seconds"),
+                "new": r["new"], "total": r["after"], "entered": r["entered"],
+                "interp": r["interp"], "native": r["native"]}
+
+    fr = 0
     try:
         while True:
             try:
@@ -191,25 +283,54 @@ def cmd_watch(a):
                        "t": dt.datetime.now().isoformat(timespec="seconds"),
                        **(area or {"file": None, "md5": None})}
                 rows.append(row)
-                print(f"[f{fr}] area -> {area_file or '(none / not an AREA script)'}")
-                pending_shot = (time.time() + a.shot_delay, key) if (area and not a.no_shots) else None
+                alias = (names.get(area["file"], {}).get("alias") or "") if area else ""
+                print(f"[f{fr}] area -> {area_file or '(none / not an AREA script)'}"
+                      + (f"  = {alias}" if alias else ("  (unnamed)" if area else "")))
+                want_shot = area and not a.no_shots and (a.shots_always or not alias)
+                pending_shot = (time.time() + a.shot_delay, key) if want_shot else None
+                # Ask once the shot is on disk (or, with --no-shots, after the same delay).
+                pending_prompt = (time.time() + a.shot_delay, key) if (
+                    area and prompting and not alias) else None
                 last_area = key
+            shot_path = None
             if pending_shot and time.time() >= pending_shot[0]:
                 if pending_shot[1] == key:
-                    path = shot(a.port, area["file"], fr)
+                    shot_path = shot(a.port, area["file"], fr)
                     rows.append({"session": session, "event": "shot", "frame": fr,
-                                 "file": area["file"], "md5": area["md5"], "shot": path})
-                    print(f"[f{fr}]   shot {path}")
+                                 "file": area["file"], "md5": area["md5"], "shot": shot_path})
+                    print(f"[f{fr}]   shot {shot_path}")
                 pending_shot = None
+            if pending_prompt and time.time() >= pending_prompt[0]:
+                if pending_prompt[1] == key:
+                    ans = ask_area_name(area)
+                    if ans is None:
+                        prompting = False
+                        print("  (stdin closed; prompting off for the rest of this session)")
+                    elif ans:
+                        names = name_area_live(area, ans, session, fr, shot_path)
+                        rows.append({"session": session, "event": "named", "frame": fr,
+                                     "file": area["file"], "md5": area["md5"], "alias": ans})
+                        print(f"  -> names/areas.toml: {os.path.basename(area['file'])} = {ans}")
+                pending_prompt = None
             rows += overlay_rows(ring, crcs, session, seen_seq, area_crcs, area_file)
             if ring:
                 seen_seq = max(seen_seq, max(int(e.get("seq", 0)) for e in ring))
+            if next_harvest and time.time() >= next_harvest:
+                row = do_harvest(fr, "timer")
+                if row:
+                    rows.append(row)
+                # A failed pass retries after a full interval, not every tick.
+                next_harvest = time.time() + harvest_s
             if rows:
                 append(rows)
                 n_rows += len(rows)
             time.sleep(a.interval)
     except KeyboardInterrupt:
         print(f"\nstopped: {n_rows} rows appended")
+        if harvest_s:
+            row = do_harvest(fr, "stop")
+            if row:
+                append([row])
     return 0
 
 
@@ -264,6 +385,47 @@ def cmd_summarize(a):
     if not a.apply:
         return 0
     import name_map as nm
+    # names/areas.toml: one row per sighted area, merged (hand fields kept).
+    existing = nm.load_area_names()
+    ov_by_src = {}
+    for ov in nm.load_overlay_names().values():
+        ov_by_src.setdefault(ov["source"].split("#")[0], []).append(ov)
+    area_rows = []
+    n_new = 0
+    for f, d in sorted(areas.items()):
+        if not d["sightings"]:
+            continue
+        r = existing.get(f)
+        if r is None:
+            r = {"file": f, "script_md5": d["md5"], "alias": "", "status": "unnamed",
+                 "evidence": ""}
+            n_new += 1
+        r = dict(r)
+        r["script_md5"] = r.get("script_md5") or d["md5"]
+        if not r.get("alias"):
+            # A human may already have aliased this file's CODE overlay in
+            # names/overlays.toml; the place name is the same. Carry it over
+            # once (status too), never the other way round.
+            for ov in ov_by_src.get(f, []):
+                if ov.get("alias"):
+                    r["alias"] = ov["alias"]
+                    r["status"] = ov.get("status", "hypothesis")
+                    r["evidence"] = (ov.get("evidence") or "") +                         " [alias carried from names/overlays.toml code overlay]"
+                    break
+        old_s = set(r.get("sightings", []))
+        r["sightings"] = sorted(old_s | {f"{s}:f{fr}" for s, fr in d["sightings"]})
+        shots = [os.path.relpath(p, ROOT).replace("\\", "/") for p in d["shots"]]
+        r["shots"] = sorted(set(r.get("shots", [])) | set(shots))
+        area_rows.append(r)
+    for f, r in existing.items():
+        if f not in areas:
+            area_rows.append(r)
+    area_rows.sort(key=lambda r: r["file"])
+    os.makedirs(nm.NAMES_DIR, exist_ok=True)
+    with open(nm.AREAS_TOML, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(nm._emit_table("area", area_rows, nm.AREAS_HEADER))
+    print(f"names/areas.toml: {len(area_rows)} areas ({n_new} new)")
+
     rows = nm._read(nm.OVERLAYS_TOML, "overlay")
     by_src = {}
     for r in rows:
@@ -281,8 +443,8 @@ def cmd_summarize(a):
                 n += 1
     with open(nm.OVERLAYS_TOML, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(nm._emit_table("overlay", rows, nm.OVERLAYS_HEADER))
-    print(f"applied evidence to {n} overlay entries (alias/status untouched -- read the shot, set alias, "
-          f"then status = \"evidence\")")
+    print(f"applied evidence to {n} code-overlay entries; areas without a code section "
+          f"live only in names/areas.toml (read the shot, set alias, then status = \"evidence\")")
     return 0
 
 
@@ -292,8 +454,15 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("watch"); p.add_argument("--port", type=int, default=4370)
     p.add_argument("--interval", type=float, default=0.5); p.add_argument("--no-shots", action="store_true")
+    p.add_argument("--no-prompt", action="store_true",
+                   help="never pause to ask for an unnamed area's name")
+    p.add_argument("--shots-always", action="store_true",
+                   help="screenshot every area change, even ones already named in names/areas.toml")
     p.add_argument("--shot-delay", type=float, default=4.0,
                    help="seconds after an area change before the screenshot (default 4)")
+    p.add_argument("--harvest-every", type=float, default=15.0, metavar="MIN",
+                   help="minutes between interp-PC harvests into analysis/observed_interp_pcs.json "
+                        "(also once on Ctrl-C); 0 disables (default 15)")
     p.set_defaults(fn=cmd_watch)
     p = sub.add_parser("harvest"); p.add_argument("--port", type=int, default=4370)
     p.add_argument("--no-shots", action="store_true"); p.set_defaults(fn=cmd_harvest)

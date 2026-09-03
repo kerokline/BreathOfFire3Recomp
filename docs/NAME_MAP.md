@@ -16,6 +16,7 @@ input it will consume. Nothing here touches the submodules.
 |---|---|---|
 | `names/overlays.toml` | alias / role / status / evidence per overlay | `md5` of the section bytes |
 | `names/functions.toml` | name / args / ret / status / evidence per overlay function | (`overlay` md5, `pc`) |
+| `names/areas.toml` | alias / status / evidence / sightings / shots per **area (place)** | area file + script-block md5 |
 | `symbols.toml` | boot-EXE function names (framework `PSX_FN_*` path) | `pc` |
 | `docs/subsystem_map.html` | generated map: bands → overlays → functions, boot EXE, search | — |
 
@@ -72,21 +73,38 @@ evidence rule applied to names.
 Savestates are anchors, not data; the data comes from the debug server while
 the game runs (`--debug-port 4370`, debug-tools build). Two tools:
 
-- **During play:** `python tools/area_poller.py watch` polls every 0.5 s. It
+- **During play:** `python tools/area_poller.py watch` polls every 0.5 s
+  and, since 2026-09-02, also unions the runtime's interpreted-PC table into
+  `analysis/observed_interp_pcs.json` every 15 min and on Ctrl-C
+  (`--harvest-every MIN`, 0 disables) so a session that dies before the
+  end-of-run harvest keeps its coverage. It
   identifies the resident area with certainty by hashing the script block at
   `0x80010000` (every AREA file has exactly one such section; md5 from
   `emi_sections.json`), takes a screenshot to `analysis/area_shots/` on each
   change so the on-screen location can be read back, and drains the runtime's
   overlay native ring (body CRC + frame) incrementally. Output:
-  `analysis/area_timeline.jsonl`, append-only.
+  `analysis/area_timeline.jsonl`, append-only. It reads `names/areas.toml`
+  first: an area that already has an alias is logged as `AREA001 = Dauna
+  Mines - Outside Entrance` and **not screenshotted again** (`--shots-always`
+  overrides). An unnamed area is shot, then the poller **pauses and asks for
+  the name** you can see on screen; a non-empty answer lands in
+  `names/areas.toml` immediately (`status = "evidence"`, the shot as
+  evidence) and as a `named` row in the timeline. Enter skips; `--no-prompt`
+  (or a non-terminal stdin) disables the pause. The game keeps running
+  while the poller waits.
 - **End of session:** `axis_b_loop.sh` phase 2a runs `area_poller.py harvest`
   (also in `--harvest-only`): one snapshot of the resident area plus the whole
   native ring (16 384 most recent activations). It cannot recover areas walked
   through earlier once the ring wrapped; that is what `watch` is for.
-- **Offline:** `area_poller.py summarize --apply` writes the sighting (md5,
-  frame, session, shot path) as `evidence` into `names/overlays.toml` for every
-  code overlay of each seen AREA file. Alias and status stay for a human: read
-  the shot, type the alias, set `status = "evidence"`.
+- **Offline:** `area_poller.py summarize --apply` upserts every sighted area
+  into `names/areas.toml` (sightings and shots merge; alias/status/evidence
+  are never overwritten) and stamps the sighting as `evidence` on any *code*
+  overlay of that file in `names/overlays.toml`. **An area is a place, not an
+  overlay**: 10 of the first 15 sighted areas ship no code section at all
+  (only data, assets, and a "mixed" section the extractor skips by default),
+  so they have no overlay entry to carry a name. That is why areas get their
+  own sidecar. Alias and status stay for a human: read the shot, type the
+  alias, set `status = "evidence"`. The map lists them under "Areas sighted".
 - `axis_b_loop.sh` phase 6 (every non-harvest-only path, including
   `--skip-harvest`) then re-merges `names/` and regenerates the map.
 

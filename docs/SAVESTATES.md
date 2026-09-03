@@ -21,10 +21,10 @@ the player to load one.
 
 | In-game | File | Written | Contents | Use |
 |---|---|---|---|---|
-| 1 | `slot00` | 2026-08-30 | Name-entry screen | Text: on-screen string at `0x80014A86` in the `0x80014000` system pool; `0x80010000` block empty. Verified live |
-| 2 | `slot01` | 2026-08-30 | Opening mine area, field | Text: area script loaded at `0x80010000` (1,124 B), decodes as the モーグ/ギリー prologue. Verified live |
-| 3 | `slot02` | 2026-08-30 | Dialogue box, first frame of a message | Player-reported |
-| 4 | `slot03` | 2026-08-30 | Same box advanced once — **carries a response prompt** (choice list, a distinct text path) | Player-reported |
+| 1 | `slot00` | 2026-09-03 | Title / boot-shaped scene (small OTs) | Re-saved during the PR #302 census; replaced the name-entry state |
+| 2 | `slot01` | 2026-09-03 | **Battle**, several turns and effects queued | DMA2 ordering-table anchor ([`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md)); replaced the opening-mine field state |
+| 3 | `slot02` | 2026-09-03 | **World map** | Largest ordering tables in the game (~1,000 nodes); replaced the dialogue-box state |
+| 4 | `slot03` | 2026-09-03 | **Merchant**, busy screen | Replaced the choice-prompt state |
 | 5 | `slot04` | 2026-08-31 | **Intro boss fight**, PLCHAR resident, attacks executing | Axis B / dispatch measurement anchor (`OVERLAY_EXTRACTION.md` §9, §11–§12; `tools/headless_ab.py`). Loaded with `last_ok: 0` once after the `savestate.c` rework — re-save if it misbehaves |
 | 6 | `slot05` | 2026-08-30 | Dialogue in an open box | Player-reported |
 | 7 | `slot06` | 2026-09-01 | Capcom logo, mid-FMV | **Resumes *past* the FMV** — useless for FMV profiling; use a clean boot (`tools/fmv_bench.py`) |

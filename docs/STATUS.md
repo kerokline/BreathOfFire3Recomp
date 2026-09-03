@@ -1,6 +1,20 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-09-01, evening)
+**Status:** IN PROGRESS (last verified 2026-09-02)
+
+> **2026-09-02 — static overlay compile is fast now (framework PR pending).**
+> `axis_b_loop.sh` on build-dbg: ~16 min → **90 s** (phase 5a 12 min → 20 s via
+> a process pool + a linear CPS resume-wrapper pass — cProfile showed 87 % of
+> 5a was `add_cps_resume_case` re-scanning a 19 MB string 7,386 times; phase 5b
+> 4 min → 69 s via one translation unit per overlay, 358 units, globbed by
+> `runtime.cmake`; **build-relprof 1016 s → 162 s** for the same rebuild). Outputs
+> byte-identical to the old path (diff -r), same
+> shard summary, headless boot 99.92 % static hits. Lives in `psxrecomp` fork
+> branch `perf/static-overlay-parallel` (`7ab698ca`, = upstream `04d9184b` +
+> 1); PR mstan/psxrecomp#296 held as a **draft until play-tested more**; pin back to
+> `mstan/master` when it merges. See HANDOFF "Shipping
+> state". The harvest log is now kept (`analysis/harvest_last.log`,
+> `harvest_sessions.log`).
 
 > **2026-09-01 late — readability track opened: name sidecar + subsystem map.**
 > Human names now live outside the regenerated C: `names/overlays.toml` (alias /
@@ -117,9 +131,10 @@ overlay residency signal, O(1) dispatch and resident-occupant memo
 that fixed the FMV slowdown
 ([#292](https://github.com/mstan/psxrecomp/pull/292)), and the earlier
 present-skip pacing fix ([#273](https://github.com/mstan/psxrecomp/pull/273)).
-`psxrecomp` is pinned at `1bf70960` (upstream master). `recomp-ui` stays on the
-fork branch `feat/present-scanlines` (`fda07fe` = upstream `4eda654` + the
-launcher Scanlines toggle) until
+`psxrecomp` is pinned at `adf54eaa` (`bof3/int-fast-forward` = fork
+`perf/static-overlay-parallel` + the fast-forward pad shortcut; see HANDOFF
+"Pins and branches"). `recomp-ui` is pinned at `a736d57` (`bof3/int-scanlines-master` = fork
+`feat/present-scanlines` `fda07fe` + upstream `master` `da80dc7`) until
 [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42) merges. The
 only fork-side psxrecomp work not upstream is the `PSX_HLE_INTRP_WALK` walk-HLE
 prototype (`d725af45` on `fix/vblank-cadence-pacing`), kept for its proven
@@ -208,10 +223,20 @@ pin on 2026-09-01 (see Log).
 
 ## Known issues, non-blocking
 
-- **Starvation watchdog `exit(2)`** after 4 s without an emu-thread heartbeat,
-  reported as `reason: atexit` / `exit_origin: "unknown"`. Debug-tree safety
-  net, not a game fault. Disable with `PSX_STARVATION_TIMEOUT_US=0` (PowerShell:
-  `$env:PSX_STARVATION_TIMEOUT_US = "0"` on its own line first).
+- **Starvation watchdog `exit(2)`**, reported as `reason: atexit` /
+  `exit_origin: "unknown"`. Debug-tree safety net, not a game fault. The
+  2026-09-02 15:01 trip (`build-dbg`, frame 5524, Glauss Mountain) fired with a
+  **402 µs-old heartbeat**: `starvation_watchdog_check` reads the clock before
+  the shared timestamp, and the debug-server IO thread stamps that timestamp
+  from `send_all_blocking`, so a send landing between the two reads wraps the
+  unsigned subtraction. Upstream patch drafted in
+  [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md)
+  (read heartbeat first, atomic store/load, exit-origin label); not yet filed.
+  **Disabled on this machine for debug testing**: `PSX_STARVATION_TIMEOUT_US=0`
+  is persisted as a user environment variable (`setx`), so launcher and shell
+  runs of every build tree inherit it. Not a config-file key — the runtime reads
+  only the env var. Re-enable with `setx PSX_STARVATION_TIMEOUT_US ""` if a
+  genuine emu-thread stall needs the SIO ring dump.
 - **Two ~87 MB freeze dumps at every boot** (frame ~328, `slow_frames` then
   `hard_freeze` false positive). Prune `build-*/psx_freeze_dump_*.json`;
   `axis_b_loop.sh` does this for `build-dbg`.
@@ -277,3 +302,11 @@ Ghidra GUI running. Prior text-decode work at `D:\BoFIII`.
 | 2026-09-01 | **Capcom-logo lag root-caused and FIXED.** The opening logo runs from `LOGO/LOGO.EXE` — a standalone 120 KB PS-EXE at `0x801CE000` (not an `.EMI` overlay), which the extraction pipeline never captured, so it ran 100% interpreted (~19 present-fps; `0x801CEEDC` = 91 M insns / 84.5% of interp). Headless is the trivial repro (Capcom is the first screen). Identified by decomposing the phase (interp 5M/s, native ≈0, `frame` counter for fps since the BIOS VSync counter freezes during the intro), reading live bytes (matched no `.EMI` occupant), and a 20-byte disc signature search (one hit → `LOGO/LOGO.EXE`, PS-EXE header t_addr=0x801CE000/t_size=0x1D800/entry=0x801CE724). Fixed by compiling it as a static overlay: new [`tools/extract_logo_overlay.py`](../tools/extract_logo_overlay.py) → `static-emi-v1` capture, merged into `overlay_captures_all.json` (+ `axis_b_loop.sh` phase 3a re-merge). **Result: `0x801CEEDC` native, Capcom interp 20× down (5.0M→0.25M/s), present fps 19→steady ~30, no regression.** ~30 is now pacing-limited (idle CPU; `CAPCOM30.STR` FMV/CD streaming), not CPU-limited. Pass-2 harvested the 10 jump-table interior entries (`analysis/logo_observed.json`). Compares to MMX4/5/6 which absorb their logo EXE automatically via the runtime-capture path (`overlay_cache=true`) we keep off. |
 | 2026-09-01 | **Capcom FMV slowdown root-caused and fixed in the framework.** Host gdb stack sampling on a clean boot found ~40% of emu-thread time building `SpuGlobalState` snapshots just to read one SPUCNT bit on every device-service gate. Fix: cheap `spu_ctrl_read()` gate, identical semantics — upstream [mstan/psxrecomp#292](https://github.com/mstan/psxrecomp/pull/292). Measured headless clean boot: build-dbg 28.5→~52 vblank/s; RelWithDebInfo 97.6/s uncapped (~1.6× realtime). **User-verified windowed on `build-relprof`: Capcom logo, world map and memcard all hold 60 fps with clean audio.** Two wrong theses on the way (present-rate pacing; the interpreted BIOS IRQ handler) are recorded in [`vblank-pacing-bug.md`](vblank-pacing-bug.md). New tool `tools/fmv_bench.py`. |
 | 2026-09-01 | **All psxrecomp PRs merged upstream; pin returned to `mstan/master`.** #289 (overlay dispatch trio), #290 (scanlines), #292 (SPU gate) merged; `psxrecomp` gitlink `ecc0de16` → **`1bf70960`** (upstream master, no fork commits). `recomp-ui` gitlink `4eda654` → `fda07fe` (fork `feat/present-scanlines`, pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42)). Full regenerate (emitters → generate → codegen hash → all overlay bands + LOGO → `build-dbg` and `build-relprof`). Benign audit-failure count 6 → 7 (`0x801EEC00` +1), expected shape. Smoke-tested headless on `build-relprof`: FMV 206 vblank/s uncapped (`fmv_bench.py`), overlay dispatch 98.3% hits with `crc_misses` frozen post-load, ~300 emu fps at the title. Docs cleaned for staleness: STATUS/HANDOFF/INVENTORY rewritten, vblank doc restructured around the fix, README index refreshed. |
+| 2026-09-02 | **Gamepad input dead in-game: root-caused, fixed in `game.toml`.** The launcher recognised an Xbox Series X pad and wrote its GUID to `settings.toml`, but recomp-ui's `apply_default_pad_mode_for_source` sets every gamepad seat to **Analog** (poll id `0x73`), overriding the title's `default_mode = "digital"`. SLPS-00990 predates the DualShock and its pad reader ignores a `0x73` pad. Verified by A/B on the world-map savestate (`slot07`, headless `build-dbg`): with `p1_mode = "digital"` an injected Start opens the camp menu; with `"analog"` the screen never changes. Fix: `[controller] lock_mode = true` (the framework's digital-only-title key, as used for X4 / Tomba 2) — the launcher hides the selector and the runtime clamps a stale `settings.toml` mode. Keyboard was unaffected because keyboard seats are always digital. |
+| 2026-09-02 | **Two battle rendering reports triaged.** (1) Enlarged command icon missing its top quarter: renderer is faithful (CPU mirror == GL FBO); the strip texture at VRAM (256..297, 480..503) has rows 480..485 zeroed, blocks 0-1 of `FIRST.EMI` section 6 lost exactly their first 384 bytes once at boot, Beetle savestate VRAM has all rows, so this is a runtime defect; the stage (CD read vs upload) awaits a watched relaunch. [`battle-icon-strip-rows.md`](battle-icon-strip-rows.md). (2) Rei drawn behind the house door during attacks: list order honoured; Beetle also phases attackers behind the door, so game behaviour. [`battle-depth-order.md`](battle-depth-order.md). |
+| 2026-09-02 | **Build-dbg "hard crash" root-caused to a false starvation-watchdog trip.** No Windows crash record; `build-dbg/psx_last_run_report.json` (reason `atexit`, exit_origin `unknown`) has `starvation_watchdog_check → exit(2)` on its native stack, while `starvation_dump.jsonl` shows the heartbeat only 402 µs stale and the heartbeat ring shows 60 fps to the last sample. Cause: cross-thread read race in the watchdog (IO-thread heartbeat newer than the pre-read clock → unsigned wrap). Watchdog disabled machine-wide for debug testing via persisted `PSX_STARVATION_TIMEOUT_US=0`; upstream patch (read order + exit-origin label) to follow. Known-issues entry updated. |
+| 2026-09-02 | **Second build-dbg exit of the day was a Windows Terminal crash, and it cost a 74-minute session's overlay harvest.** `WindowsTerminal.exe` faulted at 16:31:11 (`Windows.UI.Xaml.dll`, `0xc000027b`, first such event in 14 days); the game — a console-subsystem exe attached to that console — wrote `psx_last_run_report.json` four seconds later at frame 264564 with `reason: atexit` / `exit_origin: unknown` and no starvation dump (the persisted env var held). The runtime's `CTRL_CLOSE_EVENT` handler calls `exit(0)` without setting an origin — third unlabelled exit site, added to [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md). The interp-PC rings live only in the process, so that session's PCs are gone (area timeline survived). **Mitigation landed:** `area_poller.py watch` now calls `harvest_interp_pcs.harvest()` every 15 min and on Ctrl-C (`--harvest-every`), with an atomic temp+replace write of the observed file; `harvest_interp_pcs.py` refactored around that function (CLI unchanged). Unit-tested against a fake server. Launch tip: run the game under `conhost.exe …` so a Terminal crash cannot reach it. |
+| 2026-09-02 | **Fast-forward gets a controller host shortcut.** Turbo was keyboard-only (`[KeyMap] Turbo`, Tab). psxrecomp `feat/fast-forward-pad` (`2ae78109`, off upstream `22fbbfca`): third assist binding `Fast-forward`, default chord Select+L1 (`1528`), same `hotkey_pad_binding_down()` matcher as Rewind / Save states, threaded through every settings hop and persisted as `[hotkeys] fast_forward_pad`; guard test extended, README documents the chord. recomp-ui `feat/fast-forward-pad` (`6c7cd32`, off upstream `d8187a4`): the Controller page's Host Shortcuts grid drew only two actions, now every one the runtime advertises. Both cherry-picked onto local integration branches `bof3/int-fast-forward` (psxrecomp `adf54eaa`, recomp-ui `b4c8f51`) and the gitlinks moved there; syntax-checked against the real build flags, then both `build-relprof` and `build-dbg` rebuilt clean (ninja rc 0, 2026-09-02 20:15) with the new strings in the exe; not yet play-tested. Runtime PR opened: [mstan/psxrecomp#307](https://github.com/mstan/psxrecomp/pull/307); launcher PR [mstan/recomp-ui#47](https://github.com/mstan/recomp-ui/pull/47) conflicted on arrival: upstream #46 (`42c2870`) had already replaced the two-row grid with a three-column table over every binding, so #47 is redundant — close it; the local cherry-pick stays only until the pin returns to upstream master. |
+| 2026-09-02 | **recomp-ui pin moved to #42 + current upstream master.** New integration branch `bof3/int-scanlines-master` (`a736d57`) = `fda07fe` with `origin/master` `da80dc7` merged; one conflict in `recomp_launcher.h` where #42 and #46 both appended struct fields, resolved upstream-first (`virtual_stylus` before `scanlines`). Brings the NDS stylus work and the rewritten three-column Host Shortcuts grid, so Fast-forward shows on the Controller page without #47. Both `build-relprof` and `build-dbg` rebuilt clean (ninja rc 0, 2026-09-02 ~20:45); not yet play-tested. |
+| 2026-09-03 | **Mednafen oracle wired up.** Stock Mednafen 1.32.1 (Beetle's parent) in `./mednafen/` (gitignored) loads our disc and, since memcards are the same raw 128 KiB image on both sides, boots straight from `saves/card1.mcd` copied to its name; savestates do not cross. No scripting surface exists (`-remote` is a bare flag), so `tools/mednafen_ctl.py` injects scancodes from its own cfg bindings, guarded by a foreground-window check. Verified end to end: Start/Down/Circle reached the load screen listing all three saves, savestate slot round-trip, snapshot, clean quit. Traps: `MEDNAFEN_HOME`, Circle confirms on the JP release. [`MEDNAFEN.md`](MEDNAFEN.md). |
+| 2026-09-02 | **`tools/run_dbg.cmd` added** after a hand-typed `conhost.exe …` launch of build-dbg died at startup (report: `frame 0`, no guest code run, `reason: atexit`) with the error lost when the console closed. The exe launches fine from PowerShell and from `conhost.exe cmd /c …` here, so the cause is unknown; the script keeps stderr in `build-dbg/stderr.log` and holds the window open on failure so the next occurrence is readable. Verified: game up in 10 s via the script; bogus `--game` produces a readable log. |
