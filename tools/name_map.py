@@ -9,6 +9,11 @@ here, keyed so they survive re-extraction and band overlap:
                                      alias, role, status, evidence
   names/functions.toml  [[func]]     overlay (md5 | "boot"), pc, name, args,
                                      ret, status, evidence
+  names/areas.toml      [[area]]     file (BIN/WORLDnn/AREAnnn.EMI), script_md5,
+                                     alias, status, evidence, shots, sightings
+                                     -- an AREA is a place, not an overlay: most
+                                     areas ship no code section, so they need
+                                     their own key (tools/area_poller.py writes)
 
 Boot-EXE names stay in the root symbols.toml (the framework's PSX_FN_* path);
 functions.toml holds overlay-resident functions only. `load_names()` merges
@@ -44,6 +49,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAMES_DIR = os.path.join(ROOT, "names")
 OVERLAYS_TOML = os.path.join(NAMES_DIR, "overlays.toml")
 FUNCTIONS_TOML = os.path.join(NAMES_DIR, "functions.toml")
+AREAS_TOML = os.path.join(NAMES_DIR, "areas.toml")
 SYMBOLS_TOML = os.path.join(ROOT, "symbols.toml")
 CATALOG = os.path.join(ROOT, "analysis", "overlay_catalog.json")
 
@@ -103,7 +109,24 @@ FUNCTIONS_HEADER = """\
 """
 
 
+AREAS_HEADER = """# names/areas.toml — human names for AREA files (places), written by
+# tools/area_poller.py summarize --apply. Keyed by the area's script block
+# (the section whose dest is 0x80010000; md5 from analysis/emi_sections.json).
+# An area is a PLACE: most ship no code overlay, so they cannot live in
+# overlays.toml. Edit alias / status by hand; sightings and shots are
+# refreshed by the poller (never lost, never overwritten).
+#
+#   status:   unnamed | hypothesis | evidence | verified
+#   evidence: how the alias was established (which screenshot / session)
+"""
+
+
 # ---------------------------------------------------------------- loaders
+
+def load_area_names():
+    """area file -> entry dict."""
+    return {r["file"]: r for r in _read(AREAS_TOML, "area")}
+
 
 def load_overlay_names():
     """md5 -> entry dict."""
@@ -127,7 +150,8 @@ def load_function_names():
 
 
 def load_names():
-    return {"overlays": load_overlay_names(), "functions": load_function_names()}
+    return {"overlays": load_overlay_names(), "functions": load_function_names(),
+            "areas": load_area_names()}
 
 
 # ---------------------------------------------------------------- commands
@@ -191,6 +215,11 @@ def cmd_check(args):
             print(f"functions.toml: overlay {ov} unknown (pc 0x{pc:08X})"); bad += 1
         if e.get("status") not in STATUSES:
             print(f"functions.toml: 0x{pc:08X} bad status {e.get('status')!r}"); bad += 1
+    for f, e in load_area_names().items():
+        if e.get("status") not in STATUSES:
+            print(f"areas.toml: {f} bad status {e.get('status')!r}"); bad += 1
+        if e.get("alias") and e.get("status") == "unnamed":
+            print(f"areas.toml: {f} has alias but status=unnamed"); bad += 1
     print("ok" if not bad else f"{bad} problem(s)")
     return 1 if bad else 0
 
@@ -202,6 +231,9 @@ def cmd_stats(args):
     print("overlays:", dict(Counter(e.get("status", "unnamed") for e in ov.values())))
     print("functions:", dict(Counter(e.get("status", "unnamed") for e in fn.values())),
           f"({sum(1 for k in fn if k[0] == 'boot')} boot via symbols.toml)")
+    ar = load_area_names()
+    print("areas:", dict(Counter(e.get("status", "unnamed") for e in ar.values())),
+          f"({len(ar)} sighted)")
 
 
 def main():

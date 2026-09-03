@@ -79,3 +79,7 @@ starvation_dump.jsonl
 /*.png
 !/catalog_identity.json
 !/disc_probe.json
+
+# Mednafen oracle install (binary distribution + BIOS in firmware/ + local
+# config). Driven by tools/mednafen_ctl.py; never commit any of it.
+/mednafen/

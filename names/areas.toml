@@ -1,0 +1,234 @@
+# names/areas.toml — human names for AREA files (places), written by
+# tools/area_poller.py summarize --apply. Keyed by the area's script block
+# (the section whose dest is 0x80010000; md5 from analysis/emi_sections.json).
+# An area is a PLACE: most ship no code overlay, so they cannot live in
+# overlays.toml. Edit alias / status by hand; sightings and shots are
+# refreshed by the poller (never lost, never overwritten).
+#
+#   status:   unnamed | hypothesis | evidence | verified
+#   evidence: how the alias was established (which screenshot / session)
+
+[[area]]
+file = "BIN/WORLD00/AREA000.EMI"
+script_md5 = "3822f94d2cebeabc36311e562c9021e0"
+alias = "MacNeil Village - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 242812; shot analysis/area_shots/AREA000_f242812.png"
+sightings = ["20260902T151658:f242812"]
+shots = ["analysis/area_shots/AREA000_f242812.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA001.EMI"
+script_md5 = "e014528da35106b25fc1f06e277c1812"
+alias = "Dauna Mines - Outside Entrance"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260901T231848:f22804", "20260902T071817:f58859"]
+shots = ["analysis/area_shots/AREA001_f59119.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA002.EMI"
+script_md5 = "773475b6c20e411a6521d0be785ddcd8"
+alias = "Dauna Mine - Moss Dragon"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260901T231848:f18811", "20260902T071817:f54232"]
+shots = ["analysis/area_shots/AREA002_f54491.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA003.EMI"
+script_md5 = "44afc586432aadf0e519962a86045090"
+alias = "Cedar Woods Pond - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 183706; shot analysis/area_shots/AREA003_f183706.png"
+sightings = ["20260902T151658:f183706"]
+shots = ["analysis/area_shots/AREA003_f183706.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA004.EMI"
+script_md5 = "d6222d6f9889887eb070566830754747"
+alias = "Dauna Mine - Minecart"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260902T071817:f31994"]
+shots = ["analysis/area_shots/AREA004_f32251.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA005.EMI"
+script_md5 = "2db4ea9c727ce22e0501dbade26be4eb"
+alias = "Cedar Woods Treehouse - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 164719; shot analysis/area_shots/AREA005_f164719.png"
+sightings = ["20260902T151658:f164719"]
+shots = ["analysis/area_shots/AREA005_f164719.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA006.EMI"
+script_md5 = "1e479f6b379d817530f9580f88bfb1bb"
+alias = "Train Tracks / Cedar Woods Spring"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260901T231848:f24551", "20260902T071817:f60620"]
+shots = ["analysis/area_shots/AREA006_f60880.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA007.EMI"
+script_md5 = "13f2a1218ddf5e3ec8adfbc989965b79"
+alias = "MacNeil Village - Fall"
+status = "evidence"
+evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
+sightings = ["20260902T071817:f161502"]
+shots = ["analysis/area_shots/AREA007_f161762.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA008.EMI"
+script_md5 = "d30eb3c393c8e0345a66770e4b58636e"
+alias = "Cedar Woods Pond - Fall"
+status = "evidence"
+evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
+sightings = ["20260902T071817:f155636"]
+shots = ["analysis/area_shots/AREA008_f155892.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA009.EMI"
+script_md5 = "3a2dcbd9f08561e2bc4453e7b27dec9e"
+alias = "Cedar Woods - Fall"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260901T231848:f27239", "20260901T232612:f30509", "20260902T071817:f61887"]
+shots = ["analysis/area_shots/AREA009_f30509.png", "analysis/area_shots/AREA009_f62144.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA010.EMI"
+script_md5 = "8895b756edf4421dc1d1d2ed85cbbe64"
+alias = "Cedar Woods Treehouse - Fall"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260902T071817:f91162"]
+shots = ["analysis/area_shots/AREA010_f91419.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA013.EMI"
+script_md5 = "bfd7d9e6f5c4cd524c5ac2eee3e9d1c1"
+alias = "Farm Fields - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 230862; shot analysis/area_shots/AREA013_f230862.png"
+sightings = ["20260902T151658:f230862"]
+shots = ["analysis/area_shots/AREA013_f230862.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA014.EMI"
+script_md5 = "86308100ccbe9f1a02f176db88e0545e"
+alias = "Farm Fields - Fall"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260902T071817:f172958", "20260902T071817:f183882", "20260902T071817:f185490"]
+shots = ["analysis/area_shots/AREA014_f173216.png", "analysis/area_shots/AREA014_f184144.png", "analysis/area_shots/AREA014_f185744.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA016.EMI"
+script_md5 = "6800b4b11eed5d580bfcce9a78ca675c"
+alias = "World Map - Yraall Region - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 192463; shot analysis/area_shots/AREA016_f192463.png"
+sightings = ["20260902T151658:f192463"]
+shots = ["analysis/area_shots/AREA016_f192463.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA017.EMI"
+script_md5 = "83d61dad6af3dcabd23bdfd26fc01616"
+alias = "Farm - Outside Manor"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260902T071817:f181774", "20260902T071817:f184933"]
+shots = ["analysis/area_shots/AREA017_f182033.png", "analysis/area_shots/AREA017_f185196.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA019.EMI"
+script_md5 = "fb09b62fd2fdb63ffa32cc3f8ef53186"
+alias = "Yraall Highway"
+status = "evidence"
+evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
+sightings = ["20260902T071817:f188723"]
+shots = ["analysis/area_shots/AREA019_f188986.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA022.EMI"
+script_md5 = "ebd5f46f4759786e054de236aa7ba09b"
+alias = "Nu Cave"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 79133; shot analysis/area_shots/AREA022_f79133.png"
+sightings = ["20260902T151658:f79133"]
+shots = ["analysis/area_shots/AREA022_f79133.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA023.EMI"
+script_md5 = "6dd6f45b1a4c3a6ad162479ed65b87e3"
+alias = "Glauss Mountain"
+status = "evidence"
+evidence = "named live by player during session 20260902T150006 at frame 2375; shot analysis/area_shots/AREA023_f2375.png"
+sightings = ["20260902T150006:f2375"]
+shots = ["analysis/area_shots/AREA023_f2375.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA024.EMI"
+script_md5 = "5345311b11b10fda1f6c513c0784c71e"
+alias = "Dauna Mine - Ryu"
+status = "evidence"
+evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
+sightings = ["20260901T231848:f4809", "20260902T071817:f38212"]
+shots = ["analysis/area_shots/AREA024_f38466.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA030.EMI"
+script_md5 = "2353c89a9d75f671e7044e2e8514393e"
+alias = "Fishing"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 223290; shot analysis/area_shots/AREA030_f223290.png"
+sightings = ["20260902T151658:f223290"]
+shots = ["analysis/area_shots/AREA030_f223290.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA031.EMI"
+script_md5 = "9c1fb6aec0531ff02c1da35182430d71"
+alias = "Dauna Mine - Elevator"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260901T231848:f22239", "20260902T071817:f58272"]
+shots = ["analysis/area_shots/AREA031_f58533.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA033.EMI"
+script_md5 = "f1cc90100c803e377bd50d81f63a4a38"
+alias = "World Map - Yraall Region - Fall"
+status = "evidence"
+evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
+sightings = ["20260902T071817:f159977", "20260902T071817:f187331", "20260902T071817:f269775"]
+shots = ["analysis/area_shots/AREA033_f160235.png", "analysis/area_shots/AREA033_f187589.png", "analysis/area_shots/AREA033_f270037.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA061.EMI"
+script_md5 = "6c5873d3e7f224794867b5ae9c0289d0"
+alias = "Magus's Grove"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 225554; shot analysis/area_shots/AREA061_f225554.png"
+sightings = ["20260902T151658:f225554"]
+shots = ["analysis/area_shots/AREA061_f225554.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA090.EMI"
+script_md5 = "644f3c142ecf22ae41dc4ec85259673f"
+alias = "Camp"
+status = "evidence"
+evidence = "screenshot"
+sightings = ["20260902T071817:f270980", "20260902T082638:f276241"]
+shots = ["analysis/area_shots/AREA090_f271238.png", "analysis/area_shots/AREA090_f276241.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA095.EMI"
+script_md5 = "4c841ed8a16761da8b1cc77d26ba159d"
+alias = "Yraall ? - Spring"
+status = "evidence"
+evidence = "named live by player during session 20260902T151658 at frame 217329; shot analysis/area_shots/AREA095_f217329.png"
+sightings = ["20260902T151658:f217329"]
+shots = ["analysis/area_shots/AREA095_f217329.png"]

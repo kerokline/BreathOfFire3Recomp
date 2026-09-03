@@ -13,11 +13,17 @@ for. It points at evidence rather than restating it.
 The game **plays at 60 fps** on `build-relprof` (Capcom logo, world map,
 memory-card screens all user-verified 2026-09-01 with clean audio). All ten
 overlay bands plus `LOGO/LOGO.EXE` are compiled from the disc and dispatch
-~99% native. Every framework fix this title needed is **merged upstream** and
-`psxrecomp` is pinned to plain `mstan/master` (`1bf70960`); `recomp-ui` waits
-on one launcher PR. The text engine is identified and confirmed live. What is
-left: Axis B coverage inside the bands as new content is played, the tier-1/2
-runtime enrichment, and the translation apply path.
+~99% native. The Axis B loop now takes **90 s** instead of ~16 min (parallel
+static compile + split translation units, `psxrecomp` fork branch
+`perf/static-overlay-parallel` `7ab698ca`, draft PR mstan/psxrecomp#296 —
+play-test more, then request the merge and re-pin to `mstan/master`);
+`recomp-ui` waits on one launcher PR. The text engine is identified and
+confirmed live. A **readability track** is open: `names/` sidecars
+(overlays, functions, areas), `tools/area_poller.py` (which area is resident,
+with certainty, plus screenshots), and the browsable
+`docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
+coverage inside the bands as new content is played, naming areas off their
+screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
 
 ## Start here
 
@@ -93,9 +99,24 @@ endgame above now has a home: `names/overlays.toml` + `names/functions.toml`
 (keyed by section md5 + pc), `tools/name_map.py` (init/check/stats) and
 `tools/subsystem_map.py` → `docs/subsystem_map.html`. Read
 [`NAME_MAP.md`](NAME_MAP.md) for the schema, the status/evidence rule, and the
-ordered routes to earn names. Regenerate the map after every Axis-B pass
-(catalog changes) and after editing `names/`. First name-earning task queued:
-banner-string → `AREAnnn` alias join (route 1 in NAME_MAP.md).
+ordered routes to earn names. `axis_b_loop.sh` phase 6 regenerates the map on
+every rebuild path; after a `--harvest-only` session or a `names/` edit, run
+`name_map.py init` + `subsystem_map.py` by hand.
+
+**Area naming is live (route 1 in NAME_MAP.md), not a banner-string join** —
+there is no string-capture log in the current code. `tools/area_poller.py watch`
+runs during play: it identifies the resident `AREAnnn` with certainty by
+hashing the script block at `0x80010000` against `emi_sections.json`, takes a
+settled screenshot a few seconds after each change (the change-instant frame is
+black — the block lands during the fade), and compresses the runtime's per-call
+`overlay_native_ring` to one row per overlay body per area.
+`axis_b_loop.sh --harvest-only` runs the poller's one-shot `harvest` too. Both
+append to `analysis/area_timeline.jsonl`; gather as many sessions as you like,
+then `area_poller.py summarize --apply` writes sightings as `evidence` (never
+overwrites). The alias is read off the screenshot by a human and typed into
+`names/overlays.toml` with `status = "evidence"`. Seven WORLD00 areas sighted so
+far (AREA001/002/006/009/024/031 + one more), zero aliased — that is the next
+task.
 
 ### 2. A short persuasive writeup of the static compile path and dispatch map
 
@@ -220,7 +241,29 @@ Headline numbers, all headless VSync throughput on identical protocols:
 Note the third row: **without the memo, all-bands is slower than three bands at
 boot.** Both steps 2 and 3 are load-bearing for the all-bands result.
 
-### Shipping state — updated 2026-09-01 (fork is now a living integration branch)
+### Shipping state — updated 2026-09-02 (perf branch on the fork, PR pending)
+
+**2026-09-02:** `psxrecomp` is pinned to fork branch
+`perf/static-overlay-parallel` at **`7ab698ca`** = upstream `mstan/master`
+`04d9184b` (ABI v22 shim + shared release staging) + one commit: parallel
+static compile (`--jobs` process pool), linear CPS resume-wrapper pass, and
+split output (`overlays_static.c` dispatcher + `overlays_static_NNNN.c` per
+overlay, globbed by `runtime.cmake`). Measured on build-dbg: phase 5a 12 min →
+20 s, runtime build 4 min → 69 s, whole `axis_b_loop.sh --skip-harvest` ~16 min
+→ 90 s; **build-relprof `psx-runtime` 1016 s → 162 s** (one 303 MB unit vs 358
+units); shard summary and 79,688 identities unchanged; headless boot 99.92 %
+static hit rate, miss_total 0. Upstream PR mstan/psxrecomp#296 is a **draft by
+decision (2026-09-02): play-test the split/parallel build more before asking for
+the merge**; **re-pin to plain `mstan/master` when it merges** (recipe below still applies). The bump required
+rebuilding the emitters (`build_emitters.sh`; codegen tag `a4319b6f` →
+`ecd487f7`) and a build-dbg reconfigure; `generate` was a no-op.
+
+The 2026-09-01 "living integration branch" decision below is **superseded**:
+that branch's commits were merged upstream and the pin went back to plain
+master the same night; the perf branch above is an ordinary upstream PR, not
+a new integration branch.
+
+#### (superseded) 2026-09-01 — fork as a living integration branch
 
 **Decision (2026-09-01):** the upstream PR is **held as a draft, not merged** —
 we would rather fix any snag in-tree than round-trip through framework review.
@@ -266,8 +309,11 @@ Phases, for when you need to run one by hand:
 4. `cmake --build build-dbg --target psxrecomp_codegen_hash` (must precede the
    overlay compile after any framework change).
 5. `python psxrecomp/tools/compile_overlays.py --static --force --cps …` — all
-   bands, one `generated/overlays_static.c`. Exit 2 with `[audit]`
-   `0 unknown_bad, N unsupported` failures is the expected outcome.
+   bands; output is `generated/overlays_static.c` (dispatcher) plus one
+   translation unit per overlay, `overlays_static_NNNN.c` (358 today), which
+   `runtime.cmake` globs. Runs in a process pool (`--jobs`, default cores−2).
+   Exit 2 with `[audit]` `0 unknown_bad, N unsupported` failures is the
+   expected outcome. Since 2026-09-02 this phase takes ~20 s, not ~12 min.
 6. Build `psx-runtime`; re-measure per PC with `harvest_interp_pcs.py`.
 
 **It needs a play session reaching new content — that is the only blocking
@@ -361,13 +407,26 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`1bf70960` = upstream `mstan/master`.** No fork commits. Bump
-  by fetching upstream, fast-forwarding the submodule's `master`, and
-  committing the gitlink — never float.
-- `recomp-ui` **`fda07fe`** = fork `kerokline/recomp-ui` branch
-  `feat/present-scanlines` = upstream `4eda654` + the launcher Scanlines toggle.
-  Pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42);
-  pin back to upstream when it merges.
+- `psxrecomp` **`adf54eaa`** = local integration branch `bof3/int-fast-forward`
+  = fork `perf/static-overlay-parallel` `7ab698ca` (draft PR
+  mstan/psxrecomp#296) + cherry-pick of `feat/fast-forward-pad` `2ae78109`
+  (controller fast-forward host shortcut, `[hotkeys] fast_forward_pad`; branch
+  cut from upstream `22fbbfca`, PR [mstan/psxrecomp#307](https://github.com/mstan/psxrecomp/pull/307)). Two PRs
+  outstanding, so the pin is a temporary fork state; bump back to plain
+  `mstan/master` when both merge — fetch upstream, fast-forward the
+  submodule's `master`, commit the gitlink, never float.
+- `recomp-ui` **`a736d57`** = local integration branch
+  `bof3/int-scanlines-master` = fork `feat/present-scanlines` `fda07fe`
+  (pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42))
+  with upstream `master` `da80dc7` merged in. The merge conflicted in
+  `recomp_launcher.h`: #42 and upstream #46 both appended to the tail of
+  `Settings` / `GameInfo`; resolved with upstream's `virtual_stylus` /
+  `has_virtual_stylus` first and the scanline fields after — #42 should be
+  rebased the same way before merge. Upstream #46 already draws every host
+  shortcut on the Controller page, so the Fast-forward row needs no launcher
+  change; [mstan/recomp-ui#47](https://github.com/mstan/recomp-ui/pull/47) is
+  redundant (close it) and the old `bof3/int-fast-forward` branch is dead.
+  Pin back to upstream `master` when #42 merges.
 - Fork branches on `kerokline/psxrecomp` that are now history:
   `fix/static-overlay-residency-signal`, `feat/present-scanlines`,
   `perf/spu-sample-event-gate` (all merged), `integrate/scanlines` (local
@@ -462,10 +521,24 @@ Runtime:
   `exit_origin: "unknown"`). `PSX_STARVATION_TIMEOUT_US=0`.
 - **Two ~87 MB freeze dumps at every boot.** Prune them.
 - **The launcher is the default.** Use `--game game.toml --no-launcher
-  --debug-port 4370`, or the exe sits waiting for a GUI click.
+  --debug-port 4370`, or the exe sits waiting for a GUI click. Prefer
+  `tools
+un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
+  runs the exe under a classic `conhost.exe` window so a Windows Terminal crash
+  cannot take the game down, keeps stderr in `build-*/stderr.log`, and holds the
+  window open on a non-zero exit. A bare `conhost.exe <exe> …` typed into a
+  terminal loses the startup error with the window (2026-09-02 20:49 attempt:
+  exited before any guest code, `frame 0`, reason lost).
 - **PowerShell has no inline env-var prefix**; use `$env:VAR = "x"` then run.
   Git Bash env prefixes do not reliably reach the native child either — run the
   exe from PowerShell.
+- **Scanlines are a per-build-tree setting.** `[video] scanlines` /
+  `scanline_strength` live in each tree's `settings.toml`, and the runtime only
+  writes those keys back once it has seen them, so a tree that never had them
+  defaults to off. "Scanlines went missing" after a rebuild (2026-09-01) was
+  `build-dbg/settings.toml` lacking the keys, not the pin. Verify over TCP with
+  `{"cmd": "scanline"}`. Also: `build-dbg` (-O0) runs the intro FMV at ~40
+  vblank/s windowed and always will — judge the intro on `build-relprof`.
 - **`playsession.send()` takes a dict**, not a string.
 - **In-game savestate slot N is file `slotN-1`.** Load with Enter/Start; the
   windowed TCP `state load` wedges the listener (it works headless). Savestates
@@ -490,8 +563,13 @@ Runtime:
 | `tools/fmv_bench.py` | Clean-boot headless FMV benchmark (vblank/present window) with optional gdb sampling of the emu thread. |
 | `tools/headless_ab.py` | Headless A/B on a savestate workload (skip the load step for the boot workload). |
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
+| `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
 | `tools/emi.py`, `tools/disc_ls.py`, `tools/disasm_exe.py` | Parse/extract `.EMI`; list the ISO9660 tree; disassemble the boot EXE with MMIO naming. |
+| `tools/name_map.py` | `names/` sidecars (overlays / functions / areas): `init` merges new catalog overlays (never overwrites hand edits), `check`, `stats`. See [`NAME_MAP.md`](NAME_MAP.md). |
+| `tools/subsystem_map.py` | Regenerates [`subsystem_map.html`](subsystem_map.html): bands → overlays → functions, boot EXE, areas, search. No bytes embedded. Phase 6 of the loop. |
+| `tools/run_dbg.cmd` | Launch build-dbg (or `relprof`) under legacy conhost, stderr to `build-*/stderr.log`, window held open on failure. |
+| `tools/area_poller.py` | `watch` during play (resident AREA by script-block md5, settled screenshot, native-ring compression, timed interp-PC harvest every 15 min + on Ctrl-C so a dead game costs ≤ one interval), `harvest` at end of session (loop phase 2a), `summarize --apply` → `names/areas.toml` + evidence. |
 | `tools/export_seeds.py`, `tools/ghidra_seed.py` | Kept for the record — the seed experiments were null. |
 
 ## Open questions
@@ -503,6 +581,16 @@ Runtime:
   registered native entries compiled from nothing; dirty-RAM invalidation masks
   them today.
 - Text paths not yet seen live: a shop, an equipment menu, battle text.
+- **`--include-mixed` (new session, deliberately not started 2026-09-02).**
+  10 of the first 15 sighted areas ship **no `code` section** — only data,
+  assets and one section the survey classed `mixed` (67 such sections across
+  67 WORLD files, 177 KB total: WORLD00 20, WORLD01 16, WORLD04 15, WORLD02 11,
+  WORLD03 5). `extract_overlays.py --include-mixed` would compile them. Open:
+  do they hold area-specific code that currently runs interpreted (would show
+  as observed PCs in the `0x801F2C00` WORLD band), or are they data the
+  code-test misclassified (in which case compiling them adds audit failures for
+  nothing)? Decide with evidence: compare observed-PC heat inside the mixed
+  sections' RAM ranges before deciding to extract them.
 
 ## Environment
 

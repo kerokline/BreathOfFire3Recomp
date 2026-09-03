@@ -26,7 +26,9 @@ band), so two sessions are nearly disjoint — measured 2026-08-31, two sessions
 shared only 323 of ~17,500 PCs. Overwriting the observed file would therefore
 throw away every area you did not revisit this run. So this tool UNIONs into the
 existing file, keeping one distinct row per PC (no duplicates), and reports how
-many are newly seen. Run it after every session; the set only grows.
+many are newly seen. Run it after every session; the set only grows. `area_poller.py watch` also
+calls harvest() on a timer (default every 15 min) so a session that dies early
+keeps most of its coverage.
 
     python tools/harvest_interp_pcs.py            # query, report, union-save
     python tools/harvest_interp_pcs.py --port N   # non-default debug port
@@ -77,31 +79,37 @@ def merge_row(old, new):
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--min-insns", type=int, default=0,
-                    help="report filter only: hide entries with fewer "
-                         "interpreted instructions (never affects what is saved)")
-    ap.add_argument("--port", type=int, default=4370)
-    ap.add_argument("--save-json", default="analysis/observed_interp_pcs.json")
-    ap.add_argument("--no-save", action="store_true",
-                    help="report only; do not touch the observed file")
-    args = ap.parse_args()
+def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
+            no_save=False, min_insns=0, quiet=False):
+    """Query the live runtime and union its per-PC table into save_json.
 
-    d = need_ok(send({"cmd": "dirty_ram_stats"}, port=args.port, timeout=120.0),
+    Read-only on the runtime side (dirty_ram_stats walks the PC table; nothing
+    is reset), so this is safe to call repeatedly during play -- area_poller.py
+    watch does exactly that on a timer so a session that dies before its
+    end-of-run harvest (2026-09-02: a Windows Terminal crash took a 74-minute
+    session) loses at most one interval of coverage.
+
+    The observed file is written atomically (temp file + os.replace) so a kill
+    mid-write can never leave a truncated JSON behind.
+
+    Returns a dict: interp, native, aborts, misses, before, after, new,
+    entered, newly_seen (list of (pc, entries, insns)).
+    """
+    d = need_ok(send({"cmd": "dirty_ram_stats"}, port=port, timeout=120.0),
                 "dirty_ram_stats")
-    s = need_ok(send({"cmd": "dispatch_stats"}, port=args.port, timeout=60.0),
+    s = need_ok(send({"cmd": "dispatch_stats"}, port=port, timeout=60.0),
                 "dispatch_stats")
     interp, native = d["insns_run"], s["static_hits"]
     total = interp + native
-    print("interpreted : {:>14,}  ({:.1f}%)".format(interp, 100.0 * interp / max(total, 1)))
-    print("native      : {:>14,}  ({:.1f}%)".format(native, 100.0 * native / max(total, 1)))
-    print("aborts      : %s   dispatch misses: %s" % (d["aborts"], s["miss_total"]))
+    if not quiet:
+        print("interpreted : {:>14,}  ({:.1f}%)".format(interp, 100.0 * interp / max(total, 1)))
+        print("native      : {:>14,}  ({:.1f}%)".format(native, 100.0 * native / max(total, 1)))
+        print("aborts      : %s   dispatch misses: %s" % (d["aborts"], s["miss_total"]))
 
     per_pc = d.get("per_pc") or []
 
     # Union this session's rows into the accumulated distinct set.
-    existing = load_existing(args.save_json)
+    existing = load_existing(save_json)
     before = len(existing)
     newly_seen = []
     for e in per_pc:
@@ -115,24 +123,46 @@ def main():
 
     merged_rows = sorted(existing.values(),
                          key=lambda r: -int(r.get("insns", 0)))
+    entered = sum(1 for r in merged_rows if int(r.get("entries", 0)) > 0)
 
-    if not args.no_save and args.save_json:
-        os.makedirs(os.path.dirname(args.save_json), exist_ok=True)
-        json.dump(merged_rows, open(args.save_json, "w"), indent=1)
-        entered = sum(1 for r in merged_rows if int(r.get("entries", 0)) > 0)
-        print("\nobserved set: %d distinct PCs (%d entered), %d new this session "
-              "-> %s" % (len(merged_rows), entered, len(existing) - before,
-                         args.save_json))
+    if not no_save and save_json:
+        os.makedirs(os.path.dirname(save_json) or ".", exist_ok=True)
+        tmp = save_json + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(merged_rows, fh, indent=1)
+        os.replace(tmp, save_json)
+        if not quiet:
+            print("\nobserved set: %d distinct PCs (%d entered), %d new this session "
+                  "-> %s" % (len(merged_rows), entered, len(existing) - before,
+                             save_json))
 
-    # Report the hottest entries this session that were not already accumulated.
-    shown = [c for c in newly_seen if c[2] >= args.min_insns]
+    shown = [c for c in newly_seen if c[2] >= min_insns]
     shown.sort(key=lambda c: -c[2])
-    print("\nnew proven entries this session: %d" % len(shown))
-    for pc, ent, ins in shown[:20]:
-        print("   %s  entries=%-8d insns=%d" % (pc, ent, ins))
-    if len(shown) > 20:
-        print("   ... and %d more" % (len(shown) - 20))
+    if not quiet:
+        # Report the hottest entries this session that were not already accumulated.
+        print("\nnew proven entries this session: %d" % len(shown))
+        for pc, ent, ins in shown[:20]:
+            print("   %s  entries=%-8d insns=%d" % (pc, ent, ins))
+        if len(shown) > 20:
+            print("   ... and %d more" % (len(shown) - 20))
 
+    return {"interp": interp, "native": native, "aborts": d["aborts"],
+            "misses": s["miss_total"], "before": before, "after": len(merged_rows),
+            "new": len(existing) - before, "entered": entered, "newly_seen": shown}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--min-insns", type=int, default=0,
+                    help="report filter only: hide entries with fewer "
+                         "interpreted instructions (never affects what is saved)")
+    ap.add_argument("--port", type=int, default=4370)
+    ap.add_argument("--save-json", default="analysis/observed_interp_pcs.json")
+    ap.add_argument("--no-save", action="store_true",
+                    help="report only; do not touch the observed file")
+    args = ap.parse_args()
+    harvest(port=args.port, save_json=args.save_json, no_save=args.no_save,
+            min_insns=args.min_insns)
     print("\nnext: tools/extract_overlays.py --observed  (reads %s),\n"
           "      then recompile all bands and rebuild." % args.save_json)
     return 0

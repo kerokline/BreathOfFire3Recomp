@@ -170,6 +170,20 @@ def build():
                       "occupants": [i for i, o in enumerate(overlays) if o["band"] == base]})
     bands.sort(key=lambda b: -b["interp_insns"])
 
+    # Areas (places) from names/areas.toml, joined to any code overlay of the
+    # same .EMI file. Most areas have none: they run on the field game-mode.
+    areas = []
+    by_src = {}
+    for i, o in enumerate(overlays):
+        by_src.setdefault(o["src"].split("#")[0], []).append(i)
+    for f, a in sorted(names.get("areas", {}).items()):
+        areas.append({"file": f, "name": os.path.splitext(os.path.basename(f))[0],
+                      "world": f.split("/")[1] if "/" in f else "",
+                      "script_md5": a.get("script_md5", ""), "alias": a.get("alias", ""),
+                      "status": a.get("status", "unnamed"), "evidence": a.get("evidence", ""),
+                      "sightings": a.get("sightings", []), "shots": a.get("shots", []),
+                      "overlays": by_src.get(f, [])})
+
     bfuncs, bedges = load_boot()
     for f in bfuncs:
         e = names["functions"].get(("boot", f[0]))
@@ -180,7 +194,7 @@ def build():
         "generated_from": {"catalog": cat.get("schema"), "overlays": len(overlays),
                            "bands": len(bands), "observed_pcs": len(observed),
                            "boot_funcs": len(bfuncs), "boot_edges": len(bedges)},
-        "bands": bands, "overlays": overlays, "names": fn_names,
+        "bands": bands, "overlays": overlays, "names": fn_names, "areas": areas,
         "boot": {"funcs": bfuncs, "edges": bedges},
     }
 
@@ -230,7 +244,10 @@ const nm=(k)=>D.names[k];
 const label=(o)=>o.alias?`<span class="a">${h(o.alias)}</span> <span class="n">${h(o.name)}</span>`:h(o.name);
 $('#meta').textContent=`${D.generated_from.overlays} overlays · ${D.generated_from.bands} bands · ${D.generated_from.boot_funcs} boot-EXE funcs · ${D.generated_from.observed_pcs} observed PCs`;
 function nav(){
-  let s='<h3>Boot EXE</h3><a class="ov" data-v="boot">SLPS_009.90 <span class="n">'+D.boot.funcs.length+' funcs</span></a><h3>Bands (by interp heat)</h3>';
+  let s='<h3>Boot EXE</h3><a class="ov" data-v="boot">SLPS_009.90 <span class="n">'+D.boot.funcs.length+' funcs</span></a>';
+  if(D.areas.length){s+='<h3>Areas sighted (places)</h3><a class="ov" data-v="areas">all areas <span class="n">'+D.areas.length+'</span></a>';
+    for(const a of D.areas)s+=`<a class="ov" data-v="area:${h(a.file)}">${a.alias?`<span class="a">${h(a.alias)}</span> <span class="n">${h(a.name)}</span>`:h(a.name)} <span class="n">${a.overlays.length?a.overlays.length+' code':'no code'}</span></a>`;}
+  s+='<h3>Bands (by interp heat)</h3>';
   for(const b of D.bands){
     const fams=b.families.join(', ');
     s+=`<details class="band" open><summary><a class="ov" style="padding:0" data-v="band:${b.base}">${b.base}</a><span class="tag ${b.clean?'clean':'mixed'}">${b.clean?'clean':'mixed '+b.occupant_count}</span><span class="fam">${h(fams)}</span></summary>`;
@@ -247,6 +264,8 @@ function view(key){
   const a=document.querySelector(`.ov[data-v="${key}"]`);if(a)a.classList.add('sel');
   location.hash=key;
   if(key==='boot')return viewBoot();
+  if(key==='areas')return viewAreas();
+  if(key.startsWith('area:'))return viewArea(D.areas.find(a=>a.file===key.slice(5)));
   if(key.startsWith('band:'))return viewBand(key.slice(5));
   if(key.startsWith('ov:'))return viewOverlay(D.overlays.find(o=>o.md5===key.slice(3)));
   viewHome();
@@ -258,7 +277,8 @@ function viewHome(){
   s+='</table></div>';
   const st={};for(const o of D.overlays)st[o.status]=(st[o.status]||0)+1;
   const fn=Object.values(D.names);const fs={};for(const f of fn)fs[f.status]=(fs[f.status]||0)+1;
-  s+=`<div class="card"><h3 style="margin:0 0 6px">Naming coverage</h3><div class="kv"><b>overlays</b><span>${Object.entries(st).map(([k,v])=>`${k} ${v}`).join(' · ')}</span><b>functions</b><span>${fn.length} named (${Object.entries(fs).map(([k,v])=>`${k} ${v}`).join(' · ')||'none'})</span></div></div>`;
+  const as={};for(const a of D.areas)as[a.status]=(as[a.status]||0)+1;
+  s+=`<div class="card"><h3 style="margin:0 0 6px">Naming coverage</h3><div class="kv"><b>overlays</b><span>${Object.entries(st).map(([k,v])=>`${k} ${v}`).join(' · ')}</span><b>areas</b><span>${D.areas.length} sighted (${Object.entries(as).map(([k,v])=>`${k} ${v}`).join(' · ')||'none'}), <a href="#areas">list</a></span><b>functions</b><span>${fn.length} named (${Object.entries(fs).map(([k,v])=>`${k} ${v}`).join(' · ')||'none'})</span></div></div>`;
   $('#view').innerHTML=s;
 }
 function viewBand(base){
@@ -292,6 +312,23 @@ function viewOverlay(o){
   $('#ft').querySelectorAll('th').forEach(t=>t.onclick=()=>{const i=+t.dataset.i;if(sortKey===i)sortDir*=-1;else{sortKey=i;sortDir=i<2||i===7?1:-1}viewOverlay(o)});
 }
 function fnLink(o,f){const n=nm(o.md5+':'+f[0].toString(16).toUpperCase().padStart(8,'0'));return `<a class="mono" href="#ov:${o.md5}" onclick="setTimeout(()=>document.getElementById('f${f[0].toString(16)}')?.scrollIntoView(),0)">${n?h(n.name):hex(f[0])}</a>`}
+function viewAreas(){
+  let s=`<div class="card"><h2 style="margin:0 0 6px">Areas sighted</h2><p class="hint">An area is a place, identified with certainty by the script block at 0x80010000 (tools/area_poller.py). Most areas ship no code section: they run on the field game-mode overlay plus data, so they live in <span class="mono">names/areas.toml</span>, not the overlay sidecar. The alias comes from reading the screenshot.</p>
+  <table><tr><th>area</th><th>world</th><th>alias</th><th>status</th><th>sightings</th><th>shots</th><th>code overlays</th></tr>`;
+  for(const a of D.areas)s+=`<tr><td><a href="#area:${h(a.file)}">${h(a.name)}</a></td><td>${h(a.world)}</td><td>${h(a.alias)}</td><td><span class="tag ${a.status}">${a.status}</span></td><td class="n">${a.sightings.length}</td><td class="n">${a.shots.length}</td><td>${a.overlays.map(i=>`<a href="#ov:${D.overlays[i].md5}">${label(D.overlays[i])}</a>`).join(', ')||'<span class="hint">none</span>'}</td></tr>`;
+  $('#view').innerHTML=s+'</table></div>';
+}
+function viewArea(a){
+  if(!a)return viewAreas();
+  let s=`<div class="card"><h2 style="margin:0">${a.alias?h(a.alias)+' ':''}<span class="${a.alias?'n':''}">${h(a.name)}</span></h2><div class="kv" style="margin-top:8px">
+  <b>file</b><span class="mono">${h(a.file)}</span><b>script md5</b><span class="mono">${h(a.script_md5)}</span>
+  <b>status</b><span><span class="tag ${a.status}">${a.status}</span> ${h(a.evidence)}</span>
+  <b>sightings</b><span>${a.sightings.map(h).join(', ')||'<span class="hint">none</span>'}</span>
+  <b>screenshots</b><span>${a.shots.map(p=>`<span class="mono">${h(p)}</span>`).join('<br>')||'<span class="hint">none yet (the poller shoots 4 s after the area settles)</span>'}</span>
+  <b>code overlays</b><span>${a.overlays.map(i=>`<a href="#ov:${D.overlays[i].md5}">${label(D.overlays[i])}</a>`).join(', ')||'<span class="hint">none: runs on the field game-mode overlay + data</span>'}</span></div>
+  <p class="hint">Screenshots are local files under analysis/ (not committed); open one next to this page to read the location name, then set alias + status in names/areas.toml.</p></div>`;
+  $('#view').innerHTML=s;
+}
 let bsort=0,bdir=1;
 function viewBoot(){
   const cols=['addr','size','confidence','args','ret','callers','callees','tags','name'];
@@ -309,6 +346,7 @@ function search(q){
     if(o.name.toLowerCase().includes(q)||o.alias.toLowerCase().includes(q)||o.md5.startsWith(qn)||o.load.toLowerCase().includes(qn)||o.family.toLowerCase().includes(q))hits.push(`<a href="#ov:${o.md5}">${label(o)}</a> <span class="hint">${h(o.family)} @ ${o.load}</span>`);
     if(/^[0-9a-f]{6,8}$/.test(qn)){const pc=((parseInt(qn,16)|0x80000000)>>>0);for(const f of o.funcs)if(f[0]===pc||(pc>=f[0]&&pc<f[0]+f[2]&&f[2]<=0x4000))hits.push(`<a href="#ov:${o.md5}">${label(o)}</a> <span class="mono">${hex(f[0])}</span> <span class="hint">${f[1]}, span ${f[2]}${f[0]!==pc?' (interior)':''}</span>`)}
   }
+  for(const a of D.areas)if(a.name.toLowerCase().includes(q)||a.alias.toLowerCase().includes(q)||a.file.toLowerCase().includes(q))hits.push(`area <a href="#area:${h(a.file)}">${h(a.alias||a.name)}</a> <span class="hint">${h(a.file)}</span>`);
   for(const [k,v] of Object.entries(D.names))if(v.name.toLowerCase().includes(q)){const [ov,pc]=k.split(':');hits.push(`<b>${h(v.name)}</b> <span class="mono">0x${pc}</span> in <a href="#${ov==='boot'?'boot':'ov:'+ov}">${ov==='boot'?'boot EXE':h((D.overlays.find(o=>o.md5===ov)||{}).name||ov)}</a>`)}
   if(/^[0-9a-f]{6,8}$/.test(qn)){const pc=((parseInt(qn,16)|0x80000000)>>>0);for(const f of D.boot.funcs)if(pc>=f[0]&&pc<f[0]+f[1])hits.push(`<a href="#boot">boot EXE</a> <span class="mono">${hex(f[0])}</span> <span class="hint">${f[2]}${f[0]!==pc?' (interior)':''}</span>`)}
   $('#view').innerHTML=`<div class="card hits"><h3 style="margin:0 0 8px">${hits.length} hit${hits.length!==1?'s':''} for “${h(q)}”</h3>${hits.slice(0,200).map(x=>'<div>'+x+'</div>').join('')}</div>`;

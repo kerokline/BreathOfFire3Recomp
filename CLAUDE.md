@@ -29,12 +29,11 @@ codegen_setup.c/.h   setup-wizard host wiring
 CMakeLists.txt       psxrecomp_add_game_runtime(psx-runtime …)
 disc/                staged boot EXE (gitignored)
 docs/                title-owned notes  ← put agent documents here
-psxrecomp/           SUBMODULE @ 1bf70960 = upstream mstan/master (read-only);
-                     all of this title's framework fixes are merged upstream
-recomp-ui/           SUBMODULE @ fda07fe — launcher (read-only); fork branch
-                     feat/present-scanlines = upstream 4eda654 + Scanlines toggle,
-                     pending mstan/recomp-ui#42. Moves in lockstep with a
-                     psxrecomp bump when the launcher ABI changes
+psxrecomp/           SUBMODULE (read-only) — see docs/HANDOFF.md "Pins and
+                     branches" for the current gitlink; temporarily on a fork
+                     integration branch while upstream PRs are open
+recomp-ui/           SUBMODULE (read-only) — launcher; same rule. Moves in
+                     lockstep with a psxrecomp bump when the launcher ABI changes
 ```
 
 ## Workflow
