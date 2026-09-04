@@ -415,6 +415,14 @@ Order matters, and each of these cost a session once:
   outstanding, so the pin is a temporary fork state; bump back to plain
   `mstan/master` when both merge — fetch upstream, fast-forward the
   submodule's `master`, commit the gitlink, never float.
+- **2026-09-03 — `psxrecomp` working tree is on fork branch
+  `fix/gpu-polyline-terminator` `402cada6`** = upstream `master` `d08d84a3` + one
+  commit (GP0 polyline terminator tested only at vertex-unit boundaries after
+  the first two vertices — [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)).
+  PR [mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313) open;
+  re-pin to `mstan/master` if it merges. Both `build-relprof` and `build-dbg`
+  are built from it. The gitlink in the
+  title repo was already dirty (mid re-pin to master) before this change.
 - `recomp-ui` **`a736d57`** = local integration branch
   `bof3/int-scanlines-master` = fork `feat/present-scanlines` `fda07fe`
   (pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42))
@@ -565,6 +573,7 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
 | `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
+| `tools/pst_tool.py` | Read `.pst` savestates offline: `info`, `vram` (1024×512 PNG), `ram` (raw 2 MB), `diff A B` (VRAM zero-map, per-block diff map, blocks that went populated→zero, RAM diff ranges). Compare two states without loading them into a running game. |
 | `tools/emi.py`, `tools/disc_ls.py`, `tools/disasm_exe.py` | Parse/extract `.EMI`; list the ISO9660 tree; disassemble the boot EXE with MMIO naming. |
 | `tools/name_map.py` | `names/` sidecars (overlays / functions / areas): `init` merges new catalog overlays (never overwrites hand edits), `check`, `stats`. See [`NAME_MAP.md`](NAME_MAP.md). |
 | `tools/subsystem_map.py` | Regenerates [`subsystem_map.html`](subsystem_map.html): bands → overlays → functions, boot EXE, areas, search. No bytes embedded. Phase 6 of the loop. |

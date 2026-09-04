@@ -1,7 +1,7 @@
 # Upstream psxrecomp #302 (DMA2 linked-list cost): BoF3 cross-title check
 
-**Status:** DONE (measured 2026-09-03 against pin `adf54eaa`; re-verify if the
-DMA2 walker changes again)
+**Status:** DONE (measured 2026-09-03 against pin `adf54eaa` and against
+upstream master `2da25c18`, which carries the superseding #304)
 
 [mstan/psxrecomp#302](https://github.com/mstan/psxrecomp/pull/302) resubmits
 #299 (merged and reverted the same minute as #300). It lowers the per-node cost
@@ -38,6 +38,46 @@ is under 4 % of a frame on the current model, versus FF7's 88 %.
 
 The user also played the battle, map and shop on `build-pr302` windowed while
 making the states; no missing or broken geometry was reported.
+
+## Superseded by #304 (merged 2026-09-03 as `71f3c8c3`)
+
+[mstan/psxrecomp#304](https://github.com/mstan/psxrecomp/pull/304) (Alexbeav,
+"preserve live linked-list reads with word-cost timing") landed on master
+before #302 was resolved. Code comparison:
+
+| | #302 | #304 (merged) |
+|---|---|---|
+| Cost constants | header 1, setup 0 | **identical** (same two `#define`s) |
+| Walk cost | `nodes + words` | `nodes + words` — same identity |
+| Empty-OT bound test | added | **copied verbatim**, comment included |
+| Payload read timing | whole packet on the header service (fall-through) | **one live RAM word per one-clock event**, `payload_index` tracked |
+| Late scheduler service | one boundary per call | **loops until every elapsed boundary is consumed** |
+| Widescreen prepass | untouched | fingerprints cached nodes; discards on live change; `observe_header` op |
+| Old `PSX_ND_SIB_FLAP_LAST` polygon-drop hack | untouched | removed |
+| Savestate format | untouched | **boot-state v6; v5 files rejected** |
+| `gpu_ot` counters, cancel ring, CHCR-poll stats, `starts_dropped` | added | **absent** |
+| `PSX_GPU_LL_SYNC` diagnostic lever | added | absent |
+| CPU stall on RAM/MMIO reads during DMA (the hardware root cause above) | not modelled | not modelled ("does not claim to implement complete physical-bus arbitration") |
+
+So: **same root issue, same fix for it.** #304 is a strict superset on the
+timing side (per-word live reads, catch-up service) and additionally fixes
+the Vampire Hunter D / Spot mid-walk mutation cases #277 was for. #302's
+DMA change is fully superseded; what #302 still uniquely offers is the
+observability block, which is what this census ran on. Worth salvaging as a
+small counters-only PR rebased on master — the cancel ring is the only way to
+*see* the FF7-class abort without a screenshot.
+
+**BoF3 on the merged head.** Built upstream master `2da25c18` (with #302's
+counters cherry-picked on top; its walker/test conflicts resolved in master's
+favour) against this title's `generated/` — it configures and builds clean,
+which also clears the way for a pin bump. Boot/title/attract census, 30 s:
+zero cancels, zero dropped starts, `cycles == words` on every walk,
+`cycles_max` 8,157 — same as #302's build. The battle / world-map / merchant
+states could **not** be measured on it: #304's boot-state v6 rejects every
+existing `.pst` (`last_ok: 0` on all three), so **a pin bump past `71f3c8c3`
+invalidates all eleven savestate anchors** and they must be re-saved. Given
+the identical cost model and the small tables, nothing in those scenes is
+expected to differ.
 
 ## Method
 

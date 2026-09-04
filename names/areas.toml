@@ -164,7 +164,7 @@ shots = ["analysis/area_shots/AREA022_f79133.png"]
 [[area]]
 file = "BIN/WORLD00/AREA023.EMI"
 script_md5 = "6dd6f45b1a4c3a6ad162479ed65b87e3"
-alias = "Glauss Mountain"
+alias = "Glauss Mountain - Fall"
 status = "evidence"
 evidence = "named live by player during session 20260902T150006 at frame 2375; shot analysis/area_shots/AREA023_f2375.png"
 sightings = ["20260902T150006:f2375"]

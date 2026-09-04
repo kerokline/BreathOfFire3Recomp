@@ -1,7 +1,12 @@
 # Battle command icon: top rows of the enlarged icon missing
 
-**Status:** IN PROGRESS (2026-09-02) — rows are intact after a clean boot; the loss
-happens later in a session, savestate load under test.
+**Status:** IN PROGRESS (2026-09-03) — probable cause identified: the GP0
+polyline de-phasing fixed in [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md).
+The player confirmed (2026-09-03) that the icon damage first appeared right
+after a **heal spell** effect, the same style of shaded-polyline animation as
+the herb effect that wiped the terrain texture. Awaiting a retest on a build
+carrying the fix; the savestate-load theory below is superseded unless the
+retest reproduces.
 
 ## Symptom
 
@@ -45,6 +50,14 @@ Reported by the player 2026-09-02; reproducible in every battle.
    So neither the CD read nor the boot upload drops the rows.
 
 ## What is not yet known
+
+**Candidate cause added 2026-09-03:** the ground-texture wipe
+([`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)) was a de-phased GP0
+stream — a gouraud polyline ended early on a junk-top-byte colour word and the
+leftover words decoded as a FILL. The same de-phasing produces arbitrary
+primitives from arbitrary data, so a stray fill or rectangle over
+x 256..319 × y 480..485 is now a plausible source of this zero band. Retest on
+a build carrying the polyline fix before pursuing the savestate-load theory.
 
 What zeroes rows 480..485 for x 256..319 later in a session. The damaged
 session had loaded savestates repeatedly (`savestate_status` generation 49,
