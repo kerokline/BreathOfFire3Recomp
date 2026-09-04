@@ -40,6 +40,7 @@ the task touches.
 | [`battle-depth-order.md`](battle-depth-order.md) | investigation | Sprites lunging behind the battle doorway: list order honoured, Beetle shows the same, game behaviour |
 | [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md) | investigation + proposal | build-dbg "crashes" were the starvation watchdog exiting on a cross-thread clock race and reporting itself as `atexit`; evidence, upstream diff, verification plan |
 | [`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md) | review + evidence | Cross-title check of upstream psxrecomp #302 (DMA2 linked-list cost 8+5 → 1+0): BoF3 A/B census, no regression, plus the hardware argument the PR is missing |
+| [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md) | investigation (resolved) | Ground plane vanishing after the herb effect: GP0 shaded-polyline terminator tested on colour words, a junk-byte colour matched, the de-phased stream produced a 341×341 FILL over the terrain texture; hardware rule from Beetle + DuckStation, framework fix |
 
 ## Conventions
 

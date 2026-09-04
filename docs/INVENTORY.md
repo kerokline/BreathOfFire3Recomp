@@ -77,7 +77,7 @@ Gitignored, present on this machine (regenerate on a fresh checkout):
 | `generated/` | Base EXE + BIOS shards (39 files), `overlays_static.c` (overlay dispatcher) + `overlays_static_NNNN.c` (one unit per overlay, all ten bands + LOGO) |
 | `analysis/` | `emi_sections.json` (survey), `observed_interp_pcs.json` (cross-session union — **the one file that accumulates**), `overlay_captures_all.json`, `logo_capture.json`, `overlay_catalog.json`, `functions.tsv`, plus historical capture sets |
 | `build-recompiler/`, `build-dbg/`, `build-relprof/`, `build-release/` | See [`STATUS.md`](STATUS.md) → Build trees |
-| `saves/openbios/` | Savestates `state_8014AA0C_slotNN.pst` — index in [`SAVESTATES.md`](SAVESTATES.md); `card1.mcd` memory card |
+| `saves/openbios/` | Savestates `state_8014AA0C_slotNN.pst` — index in [`SAVESTATES.md`](SAVESTATES.md); readable offline with `tools/pst_tool.py`; `card1.mcd` memory card |
 
 ## Local environment
 

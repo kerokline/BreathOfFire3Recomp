@@ -25,8 +25,8 @@ the player to load one.
 | 2 | `slot01` | 2026-09-03 | **Battle**, several turns and effects queued | DMA2 ordering-table anchor ([`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md)); replaced the opening-mine field state |
 | 3 | `slot02` | 2026-09-03 | **World map** | Largest ordering tables in the game (~1,000 nodes); replaced the dialogue-box state |
 | 4 | `slot03` | 2026-09-03 | **Merchant**, busy screen | Replaced the choice-prompt state |
-| 5 | `slot04` | 2026-08-31 | **Intro boss fight**, PLCHAR resident, attacks executing | Axis B / dispatch measurement anchor (`OVERLAY_EXTRACTION.md` §9, §11–§12; `tools/headless_ab.py`). Loaded with `last_ok: 0` once after the `savestate.c` rework — re-save if it misbehaves |
-| 6 | `slot05` | 2026-08-30 | Dialogue in an open box | Player-reported |
+| 5 | `slot04` | 2026-09-03 | **Field battle, Rei mid herb-use effect** | Reproduces the ground-texture wipe ~35 frames after load on an unfixed build ([`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)); regression anchor for the polyline fix. Replaced the intro-boss dispatch anchor (re-save one if `headless_ab.py` is needed again) |
+| 6 | `slot05` | 2026-09-03 | **Same battle, a few seconds earlier** (herb selected, effect not yet started) | Clean control for `slot04`; does not reproduce. Replaced the dialogue-box state |
 | 7 | `slot06` | 2026-09-01 | Capcom logo, mid-FMV | **Resumes *past* the FMV** — useless for FMV profiling; use a clean boot (`tools/fmv_bench.py`) |
 | 8 | `slot07` | 2026-09-01 | **World map** | Perf anchor (now 60 fps). The one `0x00002934` fail-fast happened resuming this file ([`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md)); not reproduced |
 | 9 | `slot08` | 2026-09-01 | **Save / memory-card screen** | Perf anchor (now 60 fps) |
