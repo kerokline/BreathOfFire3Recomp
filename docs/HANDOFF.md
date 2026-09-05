@@ -14,10 +14,9 @@ The game **plays at 60 fps** on `build-relprof` (Capcom logo, world map,
 memory-card screens all user-verified 2026-09-01 with clean audio). All ten
 overlay bands plus `LOGO/LOGO.EXE` are compiled from the disc and dispatch
 ~99% native. The Axis B loop now takes **90 s** instead of ~16 min (parallel
-static compile + split translation units, `psxrecomp` fork branch
-`perf/static-overlay-parallel` `7ab698ca`, draft PR mstan/psxrecomp#296 —
-play-test more, then request the merge and re-pin to `mstan/master`);
-`recomp-ui` waits on one launcher PR. The text engine is identified and
+static compile + split translation units, merged upstream as
+mstan/psxrecomp#296; `psxrecomp` is pinned to plain `mstan/master` `17f49ad3`
+since 2026-09-05); `recomp-ui` waits on two launcher PRs. The text engine is identified and
 confirmed live. A **readability track** is open: `names/` sidecars
 (overlays, functions, areas), `tools/area_poller.py` (which area is resident,
 with certainty, plus screenshots), and the browsable
@@ -584,43 +583,37 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`adf54eaa`** = local integration branch `bof3/int-fast-forward`
-  = fork `perf/static-overlay-parallel` `7ab698ca` (draft PR
-  mstan/psxrecomp#296) + cherry-pick of `feat/fast-forward-pad` `2ae78109`
-  (controller fast-forward host shortcut, `[hotkeys] fast_forward_pad`; branch
-  cut from upstream `22fbbfca`, PR [mstan/psxrecomp#307](https://github.com/mstan/psxrecomp/pull/307)). Two PRs
-  outstanding, so the pin is a temporary fork state; bump back to plain
-  `mstan/master` when both merge — fetch upstream, fast-forward the
-  submodule's `master`, commit the gitlink, never float.
-- **2026-09-03 — `psxrecomp` working tree is on fork branch
-  `fix/gpu-polyline-terminator` `402cada6`** = upstream `master` `d08d84a3` + one
-  commit (GP0 polyline terminator tested only at vertex-unit boundaries after
-  the first two vertices — [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)).
-  PR [mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313) open;
-  re-pin to `mstan/master` if it merges. Both `build-relprof` and `build-dbg`
-  are built from it. The gitlink in the
-  title repo was already dirty (mid re-pin to master) before this change.
-- `recomp-ui` **`a736d57`** = local integration branch
-  `bof3/int-scanlines-master` = fork `feat/present-scanlines` `fda07fe`
-  (pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42))
-  with upstream `master` `da80dc7` merged in. The merge conflicted in
-  `recomp_launcher.h`: #42 and upstream #46 both appended to the tail of
-  `Settings` / `GameInfo`; resolved with upstream's `virtual_stylus` /
-  `has_virtual_stylus` first and the scanline fields after — #42 should be
-  rebased the same way before merge. Upstream #46 already draws every host
-  shortcut on the Controller page, so the Fast-forward row needs no launcher
-  change; [mstan/recomp-ui#47](https://github.com/mstan/recomp-ui/pull/47) is
-  redundant (close it) and the old `bof3/int-fast-forward` branch is dead.
-  Pin back to upstream `master` when #42 merges.
-- Fork branches on `kerokline/psxrecomp` that are now history:
+- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` (re-pinned
+  2026-09-05). Everything the fork ever carried is merged: #289/#290/#292
+  (residency signal, scanlines, SPUCNT gate), #296 (parallel static overlay
+  compile), #307 (fast-forward pad chord), #313 (GP0 polyline terminator),
+  #318 (fast-forward toggle), #319/#320 (explicit keymap unbind). Bump recipe:
+  `git -C psxrecomp fetch upstream`, check nothing in the old pin is missing
+  from `upstream/master` (`git log upstream/master..<old pin>` must be empty),
+  fast-forward the submodule's `master`, commit the gitlink. Never float.
+  After a bump: `build_emitters.sh` → `generate` (usually a no-op) →
+  `psxrecomp_codegen_hash` → overlays → runtime, in that order.
+- `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
+  (`kerokline/recomp-ui`) = upstream `master` + the Scanlines toggle
+  ([mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42)) + the
+  host-shortcut Select labels
+  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48)). Pin back
+  to upstream `master` when both merge. #42 conflicted once against upstream
+  #46 in `recomp_launcher.h` (both appended to `Settings` / `GameInfo`);
+  resolved upstream-first (`virtual_stylus` before the scanline fields) —
+  rebase the same way if it conflicts again. #47 was redundant with #46.
+- Fork branches on `kerokline/psxrecomp` that are now history (all merged):
   `fix/static-overlay-residency-signal`, `feat/present-scanlines`,
-  `perf/spu-sample-event-gate` (all merged), `integrate/scanlines` (local
-  integration build, obsolete). `fix/vblank-cadence-pacing` still holds the
-  **walk-HLE prototype** `d725af45` (`PSX_HLE_INTRP_WALK=1`, 170 lines in
-  `dirty_ram_interp.c` / `debug_server.c`): not needed for any current fix, kept
-  because its callback-dispatch mechanics are proven
+  `perf/spu-sample-event-gate`, `perf/static-overlay-parallel`,
+  `feat/fast-forward-pad`, `fix/gpu-polyline-terminator`,
+  `feat/fast-forward-toggle`, `feat/keymap-explicit-unbind`;
+  `integrate/scanlines`, `bof3/int-fast-forward`, `bof3/int-scanlines-master`
+  were local integration builds, obsolete. `fix/vblank-cadence-pacing` still
+  holds the **walk-HLE prototype** `d725af45` (`PSX_HLE_INTRP_WALK=1`, 170
+  lines in `dirty_ram_interp.c` / `debug_server.c`): not needed for any current
+  fix, kept because its callback-dispatch mechanics are proven
   ([`vblank-pacing-bug.md`](vblank-pacing-bug.md) → Prototype lessons).
-- `framework_pins.txt` is informational; the gitlinks are authoritative.
+- `framework_pins.txt` is informational (and stale); the gitlinks are authoritative.
 
 ## Capture and disc extraction are not rivals
 

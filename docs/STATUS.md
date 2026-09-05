@@ -157,22 +157,29 @@ the world map, shops and save screens. On the optimised tree (`build-relprof`)
 the Capcom logo, world map and memory-card screens all hold a user-verified
 60 fps with clean audio (2026-09-01). It has not been played end to end.
 
-**Framework pins are upstream `mstan/master` again (2026-09-01).** Every
-psxrecomp change this title produced has been merged upstream — the static
-overlay residency signal, O(1) dispatch and resident-occupant memo
-([#289](https://github.com/mstan/psxrecomp/pull/289)), present-time scanlines
-([#290](https://github.com/mstan/psxrecomp/pull/290)), the cheap SPUCNT gate
-that fixed the FMV slowdown
-([#292](https://github.com/mstan/psxrecomp/pull/292)), and the earlier
-present-skip pacing fix ([#273](https://github.com/mstan/psxrecomp/pull/273)).
-`psxrecomp` is pinned at `adf54eaa` (`bof3/int-fast-forward` = fork
-`perf/static-overlay-parallel` + the fast-forward pad shortcut; see HANDOFF
-"Pins and branches"). `recomp-ui` is pinned at `a736d57` (`bof3/int-scanlines-master` = fork
-`feat/present-scanlines` `fda07fe` + upstream `master` `da80dc7`) until
-[mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42) merges. The
-only fork-side psxrecomp work not upstream is the `PSX_HLE_INTRP_WALK` walk-HLE
-prototype (`d725af45` on `fix/vblank-cadence-pacing`), kept for its proven
-callback-dispatch mechanics and not needed by any current fix.
+**Framework pins: `psxrecomp` is plain upstream `mstan/master` again
+(2026-09-05, `17f49ad3`).** Every psxrecomp change this title produced is
+merged upstream — the static overlay residency signal, O(1) dispatch and
+resident-occupant memo ([#289](https://github.com/mstan/psxrecomp/pull/289)),
+present-time scanlines ([#290](https://github.com/mstan/psxrecomp/pull/290)),
+the cheap SPUCNT gate ([#292](https://github.com/mstan/psxrecomp/pull/292)),
+the parallel static overlay compile
+([#296](https://github.com/mstan/psxrecomp/pull/296)), the controller
+fast-forward shortcut ([#307](https://github.com/mstan/psxrecomp/pull/307)),
+the GP0 polyline terminator fix
+([#313](https://github.com/mstan/psxrecomp/pull/313)), the fast-forward toggle
+([#318](https://github.com/mstan/psxrecomp/pull/318)) and the explicit keymap
+unbind ([#319](https://github.com/mstan/psxrecomp/pull/319)/#320). No fork
+branch carries anything the pin needs. `recomp-ui` stays at `db12620` (fork
+`feat/additional-ui-functionality`: upstream `master` + the Scanlines toggle
+[mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42) + the host-
+shortcut Select labels [#48](https://github.com/mstan/recomp-ui/pull/48)) until
+those merge. The only fork-side psxrecomp work not upstream is the
+`PSX_HLE_INTRP_WALK` walk-HLE prototype (`d725af45` on
+`fix/vblank-cadence-pacing`), kept for its proven callback-dispatch mechanics
+and not needed by any current fix. **Build trees have not been rebuilt against
+`17f49ad3` yet** — do that (emitters, codegen hash, overlays, runtime) before
+measuring anything.
 
 **Most of the game is overlays, and they are all compiled.** 81.6% of the boot
 EXE's text segment is zero-fill that `.EMI` sections load into at runtime
@@ -230,13 +237,13 @@ pin on 2026-09-01 (see Log).
 - **Axis B per-PC re-measure.** The 239 PCs banked from the world-map / shop /
   save-screen session are compiled in but not yet re-measured against a play
   session that re-exercises that content. That session is the one manual input.
-- **GPU polyline terminator fix** (`psxrecomp` `fix/gpu-polyline-terminator`
-  `402cada6`, PR [mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313)
-  open). Both `build-relprof` and `build-dbg` carry it (rebuilt and verified
-  2026-09-03). Re-pin to `mstan/master` when merged. Retest the icon-strip damage on the fixed build
+- **GPU polyline terminator fix** merged upstream
+  ([mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313)) and in
+  the `17f49ad3` pin. Retest the icon-strip damage on the fixed build
   ([`battle-icon-strip-rows.md`](battle-icon-strip-rows.md)).
-- **recomp-ui #42** (launcher Scanlines toggle) awaiting upstream merge; the
-  `recomp-ui` pin moves back to upstream master when it lands.
+- **recomp-ui #42** (launcher Scanlines toggle) and **#48** (host-shortcut
+  Select labels) awaiting upstream merge; the `recomp-ui` pin moves back to
+  upstream master when both land.
 - **Savestate compatibility across the framework bump** is unchecked; the
   `savestate.c` rework (`47bda817`) made pre-merge `.pst` files load with
   `last_ok: 0` once already. In-game memory-card saves are the reliable path.
@@ -307,6 +314,7 @@ Ghidra GUI running. Prior text-decode work at `D:\BoFIII`.
 
 | Date | Entry |
 |---|---|
+| 2026-09-05 | **`psxrecomp` re-pinned to plain upstream `master` `17f49ad3`.** Upstream merged everything the fork carried (#296 parallel compile, #307 fast-forward pad, #313 polyline terminator, #318 fast-forward toggle, #319/#320 keymap explicit unbind); `3b8b98fa` → `17f49ad3` is fast-forward with no fork-only commits left behind. `recomp-ui` unchanged at `db12620` (#42 + #48 still open). Rebuild pending. |
 | 2026-08-29 | Repo inventoried; `docs/` and `CLAUDE.md` established. Localization intent recorded. |
 | 2026-08-29 | Build toolchain installed (MSYS2 MinGW-w64) and proven by a full 169-target emitter build. Toolchain blocker cleared; README gained a *Development environment* section. |
 | 2026-08-29 | Dump moved into gitignored `isos/`; `[game].disc` switched from an absolute machine-local path to repo-relative `isos/Breath of Fire III (Japan).cue`. Portable for any checkout. |
