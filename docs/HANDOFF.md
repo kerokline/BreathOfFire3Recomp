@@ -52,7 +52,7 @@ headless driver. The loop:
 
 | # | Target | Why it pays | How |
 |---|---|---|---|
-| 1 | **`Battle_BaseDamage` + the two defence steps** (`0x801DCAA0`, `0x801DC704`, `0x801DC85C`) | the only part of the damage formula not read; gives the ATK/DEF fields of both record types | `ghidra_run.py export --program BATTLE_EMI3_801D0C00 --decompile 0x801DCAA0,0x801DC704,0x801DC85C`, no game needed |
+| 1 | ~~`Battle_BaseDamage` + the two defence steps~~ **DONE 2026-09-05** — full formula + ATK/DEF/hit/evade fields in BATTLE_RAM.md; the "defence steps" were to-hit rolls | remaining: elemental affinity `0x8009FA78` (BATTLE.EMI#15), enemy `+0x08` | `ghidra_run.py import --source BATTLE.EMI --load-addr 0x80093800 --overwrite --decompile 0x8009FA78` |
 | 2 | **`Battle_Init` `0x801D1228`** to evidence | 1428-byte battle setup, hypothesis only; decompile + the battlebegin trace (33 fields at +563) | decompile; compare against BATTLE_RAM's actor table |
 | 3 | **Enemy record layout** (`0x801EB634 + n*0x118`) | only HP/max/status/flags known; ATK/DEF/EXP-yield/drop table unknown | `capture --watch 0x801EB5A0-0x801EB8D0` over a battle start, then the writers' bodies |
 | 4 | **Item drop + EXP yield** at battle end | closes the results screen: `BATL_END` calls `Inventory_Add` and `BattleResult_AddExp` from somewhere | `capture --watch 0x80145040-0x80145470` on a battle with a drop, window 1500+ |
@@ -61,6 +61,13 @@ headless driver. The loop:
 | 7 | **Dialogue engine anchors** (IDEAS I2) | the translation apply path still needs the box-string writers named | `capture --watch 0x801490A0-0x801490C0` on a dialogue open |
 | 8 | **Psy-Q signatures on the boot EXE** | hundreds of libgpu/libspu/libcd names at once; needs a signature set | Ghidra GUI session; then `ghidra_run.py merge --symbols` |
 | 9 | **Save editor / verifier script** | the format is complete: contiguous `0x10B0` block, u16 byte-sum at `+0x270` | small host tool over `.mcr` files; validates the RAM map end to end |
+
+**Trap paid for 2026-09-05 (GHIDRA.md → Traps):** every overlay decompile
+was silently truncated at the first call into the boot EXE — `Rand` is a
+BIOS thunk (`jr` to `0xA0`) that Ghidra marked no-return. Fixed in the
+seeder (boot EXE mapped into each overlay program, thunks made returning);
+**re-import any program from before 2026-09-05 08:40 with `--overwrite`
+before trusting its decompiles.**
 
 **Traps paid for this weekend** (details in BATTLE_RAM.md / GHIDRA.md):
 long `ramdiff` windows net out later hits; a same-state save rewrites

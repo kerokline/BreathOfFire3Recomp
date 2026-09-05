@@ -52,6 +52,15 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D2B50
+name = "Battle_BeginAction"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: walks the turn list 0x80146308[0x8014631E..0x8014631F] (0xFF = empty), sets actor 0x80146370 / target 0x80146380 context pointers and screen positions, and copies the ACTOR's 32-byte stat block (rec+0x1C.. / enemy+0x20..) to 0x801EC278 -- 0x801EC27C = ATK|DEF; round1.json: written at +202 (Rei), +352 (Teepo), +518 (enemy), +798 (Ryu), ra 0x801D2C08/0x801D2C1C"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801D71B0
 name = "Battle_WriteBackParty"
 args = []
@@ -96,19 +105,19 @@ note = "overlay by --overlay"
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801DC704
-name = "Battle_DefenseStep_Party"
-args = ["amount", "attacker"]
-status = "hypothesis"
-evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is a party member (target<3) and no status bit in mask 100 is set; sibling 0x801DC85C for enemies"
+name = "Battle_HitCheck_PartyTarget"
+args = ["amount", "attacker", "target"]
+status = "evidence"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is a party member (target<3) and no status bit in mask 100 is set; sibling 0x801DC85C for enemies | ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: NOT a defence step -- the to-hit roll when a party member is the target: defend flag 0x801462E4&0x80 = always hit; attacker status bit 8 = 50% miss (Rand&2); else miss if Rand%100 <= target evade% (0x801EC273 = target rec+0x37, +25 under flag 0x124&1); a miss returns 0 and clears bit 0x10 of the target status byte 0x80145FAC"
 note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801DC85C
-name = "Battle_DefenseStep_Enemy"
-args = ["amount", "attacker"]
-status = "hypothesis"
-evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is an enemy (target>=3); sibling 0x801DC704 for party"
+name = "Battle_HitCheck_EnemyTarget"
+args = ["amount", "attacker", "target"]
+status = "evidence"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is an enemy (target>=3); sibling 0x801DC704 for party | ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: to-hit roll when an enemy is the target: defend flag = always hit; attacker status bit 8 = 50% miss; party attacker flag 0x80145FB4&0x100 = sure hit; enemy halfword +0 bit 4 = 50% miss; party attacker hits iff Rand%100 < attacker hit% (0x801EC294 = attacker rec+0x38, 95/95/100 in slot03); enemy-vs-enemy always hits; a miss returns 0 and clears bit 0x10 of enemy status +0x7C (0x801EB69C)"
 note = "overlay by --overlay"
 
 [[function]]
@@ -117,7 +126,25 @@ pc = 0x801DCAA0
 name = "Battle_BaseDamage"
 args = ["attacker", "target", "mode"]
 status = "evidence"
-evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: FUN_801dcaa0(attacker,target,0) is the base amount the formula then scales (weapon-vs-family doubling, status bits, variance, defend/back-row cuts, 9999 cap); mode 1 is re-called under the defend flag (0x801462E4 & 0x80) for the halved+quarter term; trace: attack+defend 'action resolves' set"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: FUN_801dcaa0(attacker,target,0) is the base amount the formula then scales (weapon-vs-family doubling, status bits, variance, defend/back-row cuts, 9999 cap); mode 1 is re-called under the defend flag (0x801462E4 & 0x80) for the halved+quarter term; trace: attack+defend 'action resolves' set | ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: party/enemy-vs-enemy: base = max(0, ATK(0x801EC27C, attacker rec+0x20) - DEF(0x801EC25E, target rec+0x22)); enemy-vs-party: DEF = Battle_PartyAvgDef(); mode 1 skips the DEF subtraction; enemy attacker adds enemy+0x08 * (2 + Rand%2) / 10; then + (Rand&1) and Battle_ScaleDamage. Verified: Rei 47 vs DEF 11 -> 31, Teepo 28 -> 13, Ryu 20 -> 6, all exact for one variance draw"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DCC78
+name = "Battle_PartyAvgDef"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: (sum of party rec+0x22 DEF over 0x801462EC members / count + target DEF 0x801EC25E) >> 1 -- the defence an enemy attack is measured against"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DCD18
+name = "Battle_ScaleDamage"
+args = ["attacker", "target", "base"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: amount = base * 205/256 (the preceding expression can never exceed 0xCD for base >= 0) * {0xDA,0xE6,0xF3,0x100,0x10D,0x11A,0x126,0x133}[Rand&7]/256 (0.85..1.20, table 0x801EAF50); if weapon-table byte (scratch 0x1F800000) & 0x1F: * engine 0x8009FA78(target)/100 (elemental affinity); if & 0x20: * s16 table 0x801EAF70[target type byte rec+0x30 / enemy+0x34]/100 ({300,200,200,150,125,100,50,0}); round half up from 8.8 fixed point"
 note = "overlay by --overlay"
 
 [[function]]
@@ -184,6 +211,15 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DFC68
+name = "Battle_ResolveAction_Party"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: party-actor resolve: copies the TARGET's stat block (*0x8014624C + 0x90) to 0x801EC258 (0x801EC25E = DEF, 0x801EC273 = evade%, +25 capped 99 under flag 0x124&1), calls Battle_ApplyDamage(actor, target) into C+0x11C, death -> status |= 0x4000; enemy-actor sibling 0x801E3B8C copies from *0x801EB458+0xA0"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801E00EC
 name = "Examine_LearnCheck"
 args = []
@@ -205,6 +241,15 @@ name = "Examine_EnemyMove_Tick"
 args = []
 status = "hypothesis"
 evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: x10 over +133..+421 / +124..+412 while the observed skill plays; siblings 0x801E5230/0x801E524C"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E3B8C
+name = "Battle_ResolveAction_Enemy"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: enemy-actor resolve, sibling of 0x801DFC68: target block from *0x801EB458 + 0xA0.., Battle_ApplyDamage, function-pointer call *(rec+0xE4)(1) under 0x801462E6; round1.json: writes 0x801EC260 at +264 and +862 (ra 0x801E3B7C)"
+note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"

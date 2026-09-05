@@ -1,7 +1,8 @@
 # Remote work plan — morning of 2026-09-05
 
-**Status:** IN PROGRESS (written 2026-09-05 08:10, before the user left; the
-machine stays up with build-dbg on port 4370 and this chat drives it)
+**Status:** IN PROGRESS (written 2026-09-05 08:10; track A done in the
+originating session, tracks B–F split into their own sessions at the user's
+request — see Outcomes)
 
 Six tracks, ordered so that the ones needing nothing from the user run first.
 Each track names its inputs, the exact loop, and what "done" writes where.
@@ -18,20 +19,23 @@ the end of the morning and is then marked DONE.
 - Ghidra exports already on disk for the boot EXE, GAME.EMI, both BATTLE.EMI
   code sections, BATL_END, SHOP (both), START. The decompile of `0x801D1228`
   (`Battle_Init`) exists; `0x801DCAA0` / `0x801DC704` / `0x801DC85C` do not.
-- Savestate anchors (file numbers): `slot10` = battle command menu, cursor on
-  Attack (AREA020 field battle); `slot11` = Watch armed, Nu about to stomp;
-  `slot01` = mid-battle with effects queued; `slot04`/`slot05` = the herb-effect
-  battle with Rei. See [`SAVESTATES.md`](SAVESTATES.md).
+- Savestate anchors (file numbers, **re-mapped by the user 2026-09-05** —
+  everything older was overwritten): `slot00` title screen; `slot01` just
+  before the intro-boss battle (auto-advances through a long scripted
+  stretch); `slot02` inside the Nu boss fight; `slot03` inside a regular
+  field battle. See [`SAVESTATES.md`](SAVESTATES.md).
 
-## What the user supplies (before leaving, or remotely)
+## What the user supplied (2026-09-05 ~08:20)
 
-1. **A combat savestate with Rei in the party**, ideally the first command menu
-   of the battle, and the **file slot number**. Without it, track C runs on
-   `slot10` (Ryu + Teepo only) and the Rei roster check waits.
-2. Permission to **rebuild `build-relprof`** (≈3 min) if the Capcom-intro
-   perf number in track D is wanted; the interpreted-PC sampling half of track
-   D does not need it.
-3. Confirmation that "auto attack" means the in-game **Auto** command.
+1. Combat states: `slot03` regular battle, `slot02` Nu boss. Whether Rei is in
+   the `slot03` party is checked from a screenshot on load.
+2. **`build-relprof` rebuild approved** for the perf half of track D.
+3. Auto-attack and Run are **hidden** menu entries: hold **L1** to hover
+   Auto-attack, hold **R1** to hover Run, Circle to confirm. Run is a random
+   check — success ends combat, so capture it more than once and split the
+   captures by outcome.
+4. Memory card 1 holds three saves; the second and third should be identical
+   except timestamp / time played — a built-in differential for track E.
 
 ## Track A — `Battle_BaseDamage` and the two defence steps (offline, first)
 
@@ -76,8 +80,8 @@ and the "effective stats" block of the actor table filled in.
 
 ## Track C — battle command venn + victory (needs the Rei savestate)
 
-Inputs: the user's slot number (fallback `slot10`). One game process at a
-time, so this runs after track D's fresh boot.
+Inputs: `slot03` (regular battle; `slot02` Nu boss as a second dataset).
+One game process at a time, so this runs after track D's fresh boot.
 
 Five captures from the same state, one per command, via
 `tools/callstack_diff.py capture --slot N --press … --hold …`, each with
@@ -89,8 +93,8 @@ actors `0x80145E8C-0x80146250`:
 | attack | `--press circle --press circle` (confirm, first target) |
 | defend | `--hold right --press circle` (the menu needs the hold) |
 | watch | as the 2026-09-04 Watch capture |
-| auto | Auto's position in the menu, taken from a screenshot first |
-| run | Run's position, same |
+| auto | `--hold l1 --press circle` (hidden entry) |
+| run | `--hold r1 --press circle` (hidden; random outcome — repeat, split by result) |
 
 Then `venn` across the five: the functions unique to each command are the
 command handlers; the common prefix is the turn engine. `propose --apply`
@@ -163,7 +167,7 @@ goes back into BATTLE_RAM.md, which is the point of the tool.
 
 1. A, then B (Ghidra only, no game).
 2. D first boot (kills the title-screen process; harvest during the FMV).
-3. C on the user's slot, or `slot10` if none arrives.
+3. C on `slot03`, then `slot02`.
 4. E in the gaps while captures run.
 5. D second boot at the end of the morning.
 6. F only on explicit go-ahead.
@@ -174,7 +178,7 @@ goes back into BATTLE_RAM.md, which is the point of the tool.
 
 | Track | Outcome |
 |---|---|
-| A | |
+| A | **DONE 2026-09-05 ~09:10.** Formula read in full and verified on one `slot03` round (4/4 hits exact). Found on the way: the "defence steps" are hit checks; `Rand` is a BIOS A0:2F thunk that truncated every overlay decompile — Ghidra seeder fixed (boot EXE mapped, thunks returning). 8 names, BATTLE_RAM + GHIDRA.md updated. Rei = roster 4 (target 6 partly closed). Left: elemental affinity fn `0x8009FA78`, enemy `+0x08`. |
 | B | |
 | C | |
 | D | |

@@ -52,6 +52,6 @@
 #define PSX_FN_Zenny_Add 0x80166FFCu
 #define func_80166FFC Zenny_Add  /* alias */
 
-/* guessed: ghidra 2026-09-04: no-arg call whose result mod 8 indexes the 8-byte damage-variance table at 0x801D0C7C in Battle_CalcDamage; 30 call sites in BATTLE.EMI#3, 32 in #15 (Psy-Q rand() shape) */
+/* confirmed: BIOS thunk: li t2,0xA0; jr t2; li t1,0x2F = A0:2F rand() (psx-spx), read from the disc EXE 2026-09-05. Result mod 8 indexes the damage-variance tables (0x801D0C7C, 0x801EAF50), &1 the +0/+1 base term, %100 the hit rolls; 30 call sites in BATTLE.EMI#3, 32 in #15. Ghidra needs it marked returning or every caller's decompile truncates here (tools/ghidra/seed_overlay.py) */
 #define PSX_FN_Rand 0x8017ED4Cu
 #define func_8017ED4C Rand  /* alias */

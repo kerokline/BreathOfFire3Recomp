@@ -101,15 +101,22 @@ record:
 
 ### Enemy working records — game-mode overlay data, stride `0x118`
 
-Base for enemy *n*: `0x801EB634 + n*0x118` (HP is the first field seen).
+Base for enemy *n*: **`0x801EB620 + n*0x118`** (the record proper; the
+earlier "`0x801EB634` base" was the HP cell). Offsets below are from
+`0x801EB620`; the addresses are for n = 0. The stat block `+0x20..+0x3F`
+mirrors the party block `+0x1C..+0x3B` shifted by 4.
 
 | Address (n=0) | Field | Source |
 |---|---|---|
 | `0x801EB5A5` | byte passed to engine `0x800A0680` on status clear (actor/sprite id) *?* | `Battle_CalcDamage` |
 | `0x801EB61D` | family/type byte (`1`, `4` double specific weapon types) | `Battle_CalcDamage` |
-| `0x801EB622` | status-flag halfword | `Battle_CalcDamage` |
-| `0x801EB634` | **HP** (u16) — `0x801EB74C` is enemy 1 | `Battle_ApplyDamage` |
-| `0x801EB640` | **max HP** (u16) — `0x801EB758` fed to the HUD | `Battle_ApplyDamage` |
+| `0x801EB620` | `+0x00` halfword: bit 4 = 50 % miss chance against it (`0xE0` in `slot03`) | `Battle_HitCheck_EnemyTarget` |
+| `0x801EB622` | `+0x02` status-flag halfword | `Battle_CalcDamage` |
+| `0x801EB628` | `+0x08` u16 (10 for both `slot03` enemies) — the enemy's damage bonus term `+0x08 * (2..3) / 10`; level? *?* | `Battle_BaseDamage` |
+| `0x801EB634` | `+0x14` **HP** (u16) — `0x801EB74C` is enemy 1 | `Battle_ApplyDamage` |
+| `0x801EB640` | `+0x20` **max HP** (u16) — `0x801EB758` fed to the HUD; `+0x22` max AP (18) | `Battle_ApplyDamage`, `Battle_BeginAction` |
+| `0x801EB644` | `+0x24` **ATK** (19), `+0x26` **DEF** (11), `+0x28` (7), `+0x2A` (20) | `Battle_BeginAction` → `0x801EC27C` |
+| `0x801EB654` | `+0x34` type / size class byte (5) | `Battle_ScaleDamage` |
 | `0x801EB69C` | status byte | `Battle_ApplyDamage` |
 | `0x801EB69D` | byte zeroed on status clear | `Battle_CalcDamage` |
 | `0x801EB6A0` | flags u32 (`0x100`, `0x10000`) | both |
@@ -121,7 +128,9 @@ Base for enemy *n*: `0x801EB634 + n*0x118` (HP is the first field seen).
 Base and stride are **proven by code**: `Char_RecalcStats` compares its
 argument against `&0x80144964 + n*0xA4` for n in 0..7, and `Char_LevelUp`
 indexes the same array. Records are indexed by **roster index** (Ryu 0,
-Teepo 3 — confirmed over two battles; others not yet identified), not by
+Teepo 3 — confirmed over two battles; **Rei 4**, read off `slot03` where
+slot 2 carries character id 4 and roster byte 4 — Nina / Momo / Peco /
+Garr still unplaced), not by
 battle slot; the working record's byte at `0x80145FC8` holds the roster
 index and `CharId_ToRosterIndex` maps the character-id byte to it.
 
@@ -135,8 +144,9 @@ index and `CharId_ToRosterIndex` maps the character-id byte to it.
 | `+0x18` | u8 ← working `0x80145F18` *?* | write-back |
 | `+0x19` | status bits that halve the byte stats `+0x2B..+0x33` | `Char_RecalcStats` |
 | `+0x1A` | percent-style byte: effective max HP −= (base max HP × this + 5)/10 *?* | `Char_RecalcStats` |
-| `+0x1C..+0x38` | **effective stats** (u16s), recomputed from the base block + equipment (`Stat_AddClamped`, cap 999): `+0x1C` max HP, `+0x20`/`+0x22`/`+0x24` seen ±4/+5/−1,−3 from the equipment pass | `Char_RecalcStats`, levelup3 |
-| `+0x34..+0x38` | 5 bytes checked against a per-roster 5-byte table at `0x80148668` *?* | `Char_RecalcStats` |
+| `+0x1C..+0x38` | **effective stats**, recomputed from the base block + equipment (`Stat_AddClamped`, cap 999): `+0x1C` max HP, `+0x1E` max AP, **`+0x20` ATK**, **`+0x22` DEF**, `+0x24` (Agl-derived: 3 / 10 / 20), `+0x26` (Int-derived: 10 / 43 / 34), `+0x2A` (513 / 513 / 515) *?*. The whole `+0x1C..+0x3B` block is copied to `0x801EC278` / `0x801EC258` when the member acts / is targeted (damage path) | `Char_RecalcStats`, `Battle_BeginAction`, `Battle_ResolveAction_Party` |
+| `+0x30` | **type / size class** byte (5 for all three; indexes the `0x801EAF70` percent table under weapon flag `0x20`) | `Battle_ScaleDamage` |
+| `+0x34..+0x38` | 5 bytes checked against a per-roster 5-byte table at `0x80148668` — of which **`+0x37` = evade %** (6 / 4 / 25) and **`+0x38` = hit %** (95 / 95 / 100) | `Char_RecalcStats`, `Battle_HitCheck_*` |
 | `+0x3C` | **base max HP** (u16) | `Char_LevelUp` +4 |
 | `+0x3E` | **base max AP** | +4 |
 | `+0x40` | **Pwr** | +2 |
@@ -313,36 +323,84 @@ Formula: `gauge = hp * 55 / max_hp`, forced to 1 when HP > 0 rounds to 0.
 
 ## The damage path
 
-```
-Battle_ApplyDamage(attacker, target)                  0x801DBB40
-  status[target] = 0x11
-  amount = Battle_CalcDamage(attacker, target, 0xFFFF)   0x801DC00C
-  amount <= 0 : HP += -amount, clamp at max, status |= 4        (heal)
-  amount >  0 : HP -= amount; if amount >= HP: HP = 0            (kill; survive check vs +0x0C byte for party)
-  if attacker is party in state 5 and weapon id in {'J','L','O'}:
-       engine 0x800A0D78(attacker, target) == 0  ->  engine 0x800A0170(target, 0x40 | 0x08 | 0x20)   (weapon status infliction)
-  return amount
-```
+Read in full on 2026-09-05 (Ghidra with the boot EXE mapped in and the
+BIOS thunks made returning — see [`GHIDRA.md`](GHIDRA.md) → Traps; before
+that fix every decompile stopped at the first `Rand()` and this section
+ended at `Battle_BaseDamage`). Verified against one full round from
+`slot03` (`analysis/callstacks/round1.json`): every hit lands on the
+formula for one variance draw.
+
+**Per-action stat blocks.** When an actor's turn starts,
+`Battle_BeginAction` (`0x801D2B50`) copies the **actor's** 32-byte stat
+block — persistent record `+0x1C..+0x3B` for a party member, enemy
+record `+0x20..+0x3F` for an enemy — to `0x801EC278`; the resolve step
+(`Battle_ResolveAction_Party` `0x801DFC68` / `_Enemy` `0x801E3B8C`) copies
+the **target's** block to `0x801EC258`. The formula reads only those two
+copies:
+
+| Global | = | Field |
+|---|---|---|
+| `0x801EC27C` u16 | actor block `+4` | **ATK** (party `+0x20`, enemy `+0x24`) |
+| `0x801EC27E` u16 | actor block `+6` | actor DEF |
+| `0x801EC294` u8 | actor block `+0x1C` | **hit %** (party `+0x38`; 95 / 95 / 100 in `slot03`) |
+| `0x801EC25E` u16 | target block `+6` | **DEF** (party `+0x22`, enemy `+0x26`) |
+| `0x801EC273` u8 | target block `+0x1B` | **evade %** (party `+0x37`; 6 / 4 / 25), +25 capped 99 under target flag `0x124 & 1` |
 
 ```
 Battle_CalcDamage(attacker, target, flags=0xFFFF)     0x801DC00C
-  scratch 0x1F800000 = weapon table[weapon id].byte  (0x801C9F2F + id*0x14, a 20-byte weapon record table in the field band) when flags == 0xFFFF and attacker is party
-  charge: if attacker flag 0x40, DAT_801EC27C += DAT_801EC27C * charge_byte >> 1; clear both
-  base   = Battle_BaseDamage(attacker, target, 0)     0x801DCAA0
-  x2 if weapon id in {0x13,0x17,0x33} and enemy family == 4
-  x2 if weapon id in {0x16,0x35,0x40} and enemy family == 1
+  scratch 0x1F800000 = weapon table byte (0x801C9F2F + weapon_id*0x14) for a party attacker, else 0
+  charge (flag 0x40): ATK += ATK * charge_byte / 2, both cleared
+  base = Battle_BaseDamage(attacker, target, 0)
+  x2 if weapon id in {0x13,0x17,0x33} and enemy family (enemy-3) == 4;  x2 if id in {0x16,0x35,0x40} and family == 1
   if target status & 100 == 0:
-       base = Battle_DefenseStep_Party/Enemy(base, attacker)    0x801DC704 / 0x801DC85C
-  else: status bits 0x40 / 0x20 wake the target (engine 0x800A0680) and floor the hit at 1; bit 4 floors at 1
-  if target flag byte & 2:  base = base * {50,50,50,50,60,60,60,70}[Rand() % 8] / 100     (Rand = boot 0x8017ED4C; table at 0x801D0C7C)
-  if global 0x801462E4 & 0x80 (defend/guard): base = base/2 + Battle_BaseDamage(attacker,target,1)/4
-  if target is party and DAT_80144F54 == 2 (back row):  base -= base/4
-  if target status & 0x80: base -= base/4
-  floors at 1 for status 0x60 / the 0x80 global; target flag 0x10000 -> 0; cap 9999
+       base = Battle_HitCheck_PartyTarget / _EnemyTarget(base, attacker, target)      -> 0 on a miss
+  else: status bits 0x40 / 0x20 wake the target (engine 0x800A0680) and floor at 1; bit 4 floors at 1
+  if target flag byte & 2:  base = base * {50,50,50,50,60,60,60,70}[Rand & 7] / 100      (table 0x801D0C7C)
+  if defend flag 0x801462E4 & 0x80:  base = base/2 + Battle_BaseDamage(attacker, target, 1)/4
+  back row (target is party and 0x80144F54 == 2): base -= base/4;  target status & 0x80: base -= base/4
+  floors at 1 for status 0x60 / the defend flag; target flag 0x10000 -> 0; clamp to +-9999
+
+Battle_BaseDamage(attacker, target, mode)             0x801DCAA0
+  party attacker, or enemy-vs-enemy:
+       d = ATK - DEF                       (mode 1: d = ATK, the defend term above)
+  enemy attacker vs party:
+       d = ATK - Battle_PartyAvgDef()      0x801DCC78: (mean of every party member's DEF + target DEF) / 2
+  d = max(d, 0)
+  enemy attacker:  d += enemy+0x08 * (2 + Rand % 2) / 10     (+0x08 = 10 for both slot03 enemies: level? *?*)
+  d += Rand & 1
+  return Battle_ScaleDamage(attacker, target, d)
+
+Battle_ScaleDamage(attacker, target, d)               0x801DCD18   (8.8 fixed point throughout)
+  d *= 205/256                                              (0.80; the expression before the max() can never exceed 0xCD for d >= 0)
+  d *= {0xDA,0xE6,0xF3,0x100,0x10D,0x11A,0x126,0x133}[Rand & 7] / 256     (0.85 .. 1.20, table 0x801EAF50)
+  if scratch & 0x1F:  d = d * engine 0x8009FA78(target) / 100            (elemental affinity of the target; BATTLE.EMI#15, not read)
+  if scratch & 0x20:  d = d * s16 table 0x801EAF70[type] / 100            (type = party rec+0x30 / enemy+0x34; {300,200,200,150,125,100,50,0})
+  return round-half-up(d)
+
+Battle_HitCheck_PartyTarget(amount, attacker, target) 0x801DC704     (target < 3)
+  defend flag -> hit.  attacker status bit 8 -> 50 % miss (Rand & 2).
+  miss iff Rand % 100 <= target evade %  (0x801EC273).  A miss returns 0 and clears bit 0x10 of the target's status byte 0x80145FAC.
+
+Battle_HitCheck_EnemyTarget(amount, attacker, target) 0x801DC85C     (target >= 3)
+  defend flag -> hit.  attacker status bit 8 -> 50 % miss.  party attacker flag 0x80145FB4 & 0x100 -> sure hit.
+  enemy halfword +0 bit 4 -> 50 % miss.  party attacker hits iff Rand % 100 < attacker hit % (0x801EC294); enemy-vs-enemy always hits.
+  A miss returns 0 and clears bit 0x10 of the enemy status byte +0x7C (0x801EB69C).
 ```
 
-`Battle_BaseDamage` (attack vs defence proper) and the two defence steps
-are not decompiled yet; they are the next read.
+**Verification, `slot03` (Ryu L1 ATK 20, Teepo L8 ATK 28, Rei L10 ATK 47; two
+enemies HP 31, ATK 19, DEF 11, `+0x08` = 10; party DEF 16 / 22 / 37, mean 25):**
+
+| Hit | Observed | Formula |
+|---|---|---|
+| Rei → enemy 0 | 31 → 0 (31) | (47 − 11 + 1) = 37 → ×205/256 = 29.63 → ×0x10D = 31.13 → **31** |
+| Teepo → enemy 1 | 31 → 18 (13) | (28 − 11) = 17 → 13.61 → ×0xF3 = 12.92 → **13** |
+| Ryu → enemy 1 | 18 → 12 (6) | (20 − 11) = 9 → 7.21 → ×0xDA = 6.14 → **6** |
+| enemy → Ryu, Teepo | 10 → 9, 49 → 48 (1 each) | ATK 19 < (25 + DEF)/2 → 0, + 10·(2|3)/10 = 2..3, ×0.8 ×0.85.. → **1..3** |
+
+The `bytes_b64` weapon-table byte for weapon id 3 must have no element bits
+set (or the affinity was 100 %) — the three party hits reproduce without
+the `0x1F` term. The Rand draw is not observable, so each row is "exact for
+one of the eight draws", not a unique fit.
 
 ## Game-mode overlay header
 
@@ -359,5 +417,7 @@ PLCHAR / BOSS / BMAGIC actor overlays — read one to get all.
   `capture --watch 0x801EB74C` during a Defend round against the same enemy.
 - Party HP cell: `ramdiff` on a round where the enemy hits, deltas from
   the screen; expected `0x80145F14 + m*0x140`.
-- Decompile `Battle_BaseDamage` and the defence steps; find the stat fields
-  (ATK/DEF) they read and add them to the tables above.
+- ~~Decompile `Battle_BaseDamage` and the defence steps.~~ **Done 2026-09-05**
+  (they are hit checks, not defence steps). Still unread: the elemental
+  affinity function `0x8009FA78` (BATTLE.EMI#15), what enemy `+0x08` is,
+  and the party `+0x24`/`+0x26`/`+0x2A` derived stats.

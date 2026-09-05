@@ -10,8 +10,9 @@
 # Ghidra made the name up), prototype, instruction / load / store counts,
 # a cop2 flag (any GTE instruction: cop2, lwc2, swc2), callees (direct),
 # jalr count, computed-jump targets (jump tables = interior entry points),
-# data references split into in-program and external (outside every memory
-# block: for an overlay program that is the boot EXE or another band), and
+# data references split into in-program and external (outside the overlay's
+# own blocks: the boot EXE -- mapped in as `boot_*` blocks but still reported
+# as external -- or another band), and
 # call sites with a constant a0 (message-index / mode-id anchors).
 # Program-wide: globals {addr: reads, writes, functions}, jump_tables,
 # call_sites, ext_targets.
@@ -51,8 +52,16 @@ def hxi(v):
     return "0x%08X" % (int(v) & 0xFFFFFFFF)
 
 
+# `boot_*` blocks are the boot EXE mapped in by seed_overlay.py so calls into
+# it resolve; they are not part of the overlay. Everything the offline tools
+# read from this export is scoped to the overlay's own blocks: functions,
+# globals, and the in-program / external split (a boot-EXE call stays an
+# ext_call, exactly as it was before the boot map existed).
+OV_BLOCKS = [b for b in mem.getBlocks() if not str(b.getName()).startswith("boot_")]
+
+
 def in_program(addr):
-    return mem.contains(addr)
+    return any(b.contains(addr) for b in OV_BLOCKS)
 
 
 def raw_word(instr):
@@ -135,6 +144,8 @@ for f in fm.getFunctions(True):
     if done % 100 == 0:
         monitor.setMessage("export %s: %d/%d" % (name, done, total))
     entry = f.getEntryPoint()
+    if not in_program(entry):
+        continue
     body = f.getBody()
     sym = f.getSymbol()
     rec = {
@@ -209,6 +220,13 @@ for f in fm.getFunctions(True):
         rec[k] = sorted(rec[k])
     functions.append(rec)
 
+# Boot-EXE functions still flagged no-return after analysis would truncate
+# every caller's decompile at the call; say so instead of hiding it.
+noret = [f for f in fm.getFunctions(True) if not in_program(f.getEntryPoint()) and f.hasNoReturn()]
+if noret:
+    print("EXPORT %s: %d boot-EXE functions flagged no-return: %s" % (
+        name, len(noret), ", ".join("%s %s" % (hx(f.getEntryPoint()), f.getName()) for f in noret[:12])))
+
 for g in globals_.values():
     g["funcs"] = sorted(g["funcs"])
 for e in ext_targets.values():
@@ -259,6 +277,8 @@ if DECOMP:
     for f in fm.getFunctions(True):
         e = hx(f.getEntryPoint())
         if want is not None and e not in want:
+            continue
+        if want is None and not in_program(f.getEntryPoint()):
             continue
         monitor.setMessage("decompile %s" % e)
         res = di.decompileFunction(f, 60, monitor)
