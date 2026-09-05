@@ -1,6 +1,6 @@
 # Starvation watchdog: false trips and the "atexit" mislabel
 
-**Status:** IN PROGRESS (proposal drafted 2026-09-02; not yet sent upstream)
+**Status:** IN PROGRESS (proposal drafted 2026-09-02; **filed 2026-09-05 as [mstan/psxrecomp#321](https://github.com/mstan/psxrecomp/pull/321)** from fork branch `fix/starvation-watchdog-wrap` `430c93b8` off the `17f49ad3` pin, with the ctest `starvation_watchdog_test` and both verification steps below done — 10 min poller soak with the watchdog enabled, no trip; forced trip labels `exit_origin: starvation_watchdog`. Bump the gitlink and drop the `setx` workaround when it merges)
 
 Two defects in `psxrecomp/runtime/src/starvation_ring.c` and its callers, both
 observed on 2026-09-02 and both owned by upstream `mstan/psxrecomp`. The

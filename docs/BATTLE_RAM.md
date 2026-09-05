@@ -1,6 +1,6 @@
 # Battle RAM map and damage path — first data anchors
 
-**Status:** IN PROGRESS (opened 2026-09-04, last extended 2026-09-05 with level-up, inventory, equipment and the save format). It began as one
+**Status:** IN PROGRESS (opened 2026-09-04, last extended 2026-09-05 with level-up, inventory, equipment, the save format, then turn order, kills/drops/results, the command menus, escape, enemy AI and `Effect_ApplyResult`; 2026-09-05 afternoon: the save-file verifier `tools/save_tool.py` checked the map against the three card saves and the Mednafen load screen, correcting three rows — `Flag_Test`, the play time, the ability lists — and reading the whole roster order off the record names). It began as one
 evening: a `ramdiff` on an Attack anchor found the enemy HP cell, a
 `capture --watch` on it named the writers, and the Ghidra bodies of those
 writers gave the record layouts and the formula skeleton
@@ -65,7 +65,10 @@ transition, and the battle overlay writing it from `Battle_Init` on.
 | `0x80145EE8..EEB` | `+0x5C..+0x5F` | colour / fade bytes | `Encounter_PlaceParty`, GAME `0x801C3998`/`0x801C388C`, `0x801DF3AC` |
 | `0x80145EEC` | `+0x60` | written every frame with the screen position | `Actor_UpdateScreenPos` |
 | `0x80145F00..FA7` | `+0x74..+0x11B` | **persistent record copy** (`0xA8` bytes; see the table two sections down) | `Battle_InitPartyContexts`, `Battle_ReloadPartyRecords`, `Battle_Init` (+0x80, +0x90..), `Battle_ApplyDamage` |
-| `0x80145FA4..FA5` | `+0x118,+0x119` | battle bytes (`0x801DD264`, `0x801DB45C`) | |
+| `0x80145F1C..F38` | `+0x90..+0xAC` | **effective stat block** = persistent `+0x1C..+0x38` (max HP/AP, ATK, DEF, AGI, `+0x26`, `+0x2A`, …, evade/hit): `Battle_Init` snapshots it to `+0xB0..+0xCC`, lets `Formation_ApplyStatMods` (engine `0x800A79AC`, keyed on `0x80144F54`) adjust the scratch, and copies it back — this is what `Battle_BeginAction` copies to `0x801EC278` per action | `Battle_Init` (store `0x801D13D8..` then `0x801D15A4..`) |
+| `0x80145F3C..F58` | `+0xB0..+0xCC` | scratch copy of the block above (holds the previous battle's values until `Battle_Init` overwrites it) | `Battle_Init`, `Formation_ApplyStatMods` |
+| `0x80145F0C` | `+0x80` | status halfword: `Battle_Init` sets `0x2000` when HP < max/4 (the low-HP bit read by the enemy AI opcode `0xE` and by `Escape_Chance`) | `Battle_Init` |
+| `0x80145FA4/A5/A6` | `+0x118/+0x119/+0x11A` | **target / command / parameter** (see "Commands, Auto, Run and the enemy AI"); `Battle_Init` zeroes the command, `+0x121`, `+0x12C..+0x133`, `+0x136..+0x139` | menus, `Battle_Init` |
 | `0x80145FA8` | `+0x11C` | written per frame on the field (`0x801B1C80`) | |
 | `0x80145FAC` | `+0x120` | battle status byte | `Battle_ApplyDamage` |
 | `0x80145FB0` | `+0x124` | battle flags u32 (`0x100` pending effect, `0x10000` no damage) | `0x801DB45C`, engine `0x800A783C` |
@@ -111,11 +114,14 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 | `0x801EB5A5` | byte passed to engine `0x800A0680` on status clear (actor/sprite id) *?* | `Battle_CalcDamage` |
 | `0x801EB61D` | family/type byte (`1`, `4` double specific weapon types) | `Battle_CalcDamage` |
 | `0x801EB620` | `+0x00` halfword: bit 4 = 50 % miss chance against it (`0xE0` in `slot03`) | `Battle_HitCheck_EnemyTarget` |
-| `0x801EB622` | `+0x02` status-flag halfword | `Battle_CalcDamage` |
-| `0x801EB628` | `+0x08` u16 (10 for both `slot03` enemies) — the enemy's damage bonus term `+0x08 * (2..3) / 10`; level? *?* | `Battle_BaseDamage` |
+| `0x801EB622` | `+0x02` status-flag halfword (`0x4000` set on death by `Battle_EnemyDefeated`) | `Battle_CalcDamage` |
+| `0x801EB624` | `+0x04` **zenny yield** (u16, 10) — added to the battle total `0x8014632C` on death and then zeroed | `Battle_EnemyDefeated` (`c_order.json`) |
+| `0x801EB626` | `+0x06` **EXP yield** (u16, 8) — added to `0x80146328` on death | `Battle_EnemyDefeated` |
+| `0x801EB628` | `+0x08` **level** (u16, 10): the damage bonus term `+0x08 * (2..3) / 10` and the row-0 class for the turn-order variance (`Battle_LevelClass`) | `Battle_BaseDamage`, `Battle_BuildTurnOrder` |
 | `0x801EB634` | `+0x14` **HP** (u16) — `0x801EB74C` is enemy 1 | `Battle_ApplyDamage` |
+| `0x801EB638` | `+0x18` drop 1: u16 item (`category<<8 \| id`, `0x0004`), `+0x1A` chance class (3); `+0x1C`/`+0x1E` drop 2 (`0x0019`, class 1). Zeroed once dropped | `Battle_RollDrops` |
 | `0x801EB640` | `+0x20` **max HP** (u16) — `0x801EB758` fed to the HUD; `+0x22` max AP (18) | `Battle_ApplyDamage`, `Battle_BeginAction` |
-| `0x801EB644` | `+0x24` **ATK** (19), `+0x26` **DEF** (11), `+0x28` (7), `+0x2A` (20) | `Battle_BeginAction` → `0x801EC27C` |
+| `0x801EB644` | `+0x24` **ATK** (19), `+0x26` **DEF** (11), `+0x28` **AGI** (7; the turn-order base, mirrors party `+0x24`), `+0x2A` (20) | `Battle_BeginAction` → `0x801EC27C`, `Battle_BuildTurnOrder` |
 | `0x801EB654` | `+0x34` type / size class byte (5) | `Battle_ScaleDamage` |
 | `0x801EB69C` | status byte | `Battle_ApplyDamage` |
 | `0x801EB69D` | byte zeroed on status clear | `Battle_CalcDamage` |
@@ -127,15 +133,35 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 
 Base and stride are **proven by code**: `Char_RecalcStats` compares its
 argument against `&0x80144964 + n*0xA4` for n in 0..7, and `Char_LevelUp`
-indexes the same array. Records are indexed by **roster index** (Ryu 0,
-Teepo 3 — confirmed over two battles; **Rei 4**, read off `slot03` where
-slot 2 carries character id 4 and roster byte 4 — Nina / Momo / Peco /
-Garr still unplaced), not by
-battle slot; the working record's byte at `0x80145FC8` holds the roster
+indexes the same array. Records are indexed by **roster index**, not by
+battle slot. The order is now complete, read off the 5-byte name field at
+record `+0x00` in the card saves (`save_tool.py dump`, 2026-09-05; Ryu 0 and
+Teepo 3 had been confirmed over two battles, Rei 4 off `slot03`): **0 リュウ
+Ryu, 1 ニーナ Nina, 2 ガーランド Garr, 3 ティーポ Teepo, 4 レイ Rei, 5 モモ Momo,
+6 ペコロス Peco, 7 パピー** — the **intro's baby dragon** (user, 2026-09-05;
+name bytes `f6 f7 fc` = パピー, character id **10**, level 0). Proven live the
+same afternoon from `slot01`: through the intro boss the party is `[0x0A, -,
+-]`, the working record's roster byte `0x80145FC8` is **7** for the whole
+stretch, and `Battle_WriteBackMember` wrote HP 11 → 7, AP and status into
+record 7 at battle end while record 0 stayed untouched (`papi_intro.json`).
+The char-id → roster table `0x80182488` (boot EXE bytes) is
+`00 01 02 03 04 05 06 | 00 01 00 07 | 00 00 00 04`: ids 0..6 are the roster,
+**7 → 0, 8 → 1** (adult Ryu / Nina?), **9 → 0** (the id save 1 carries at 28
+min — the boy Ryu alone, after the transformation; not the whelp as first
+guessed), **10 → 7** (パピー), 14 → 4 (a Rei form). In battle, the working record's byte at `0x80145FC8` holds the roster
 index and `CharId_ToRosterIndex` maps the character-id byte to it.
+
+**Static copy of all eight records:** `START.EMI` §8 carries the new-game
+templates at **`0x801EB4A4`** (stride `0xA4`), byte-identical to the saves'
+untouched records (ニーナ Lv 5 EXP 90, ガーランド Lv 13 EXP 3000, モモ Lv 10
+EXP 1000, パピー id 10). Read a record offset there before tracing it
+([`IDEAS.md`](IDEAS.md) I4). `COMMU02.EMI` holds the character-name strings
+at `0x801DB214` in the same roster order.
 
 | Offset | Field | Evidence |
 |---|---|---|
+| `+0x00..+0x04` | **name**, 5 bytes in the in-game kana encoding (`0x5B..` hiragana, `0xAB..` katakana, `0xFC` ー; 0-terminated) — copied verbatim into the save-slot summary | `Save_BuildImage` (`memcpy(0x80145574, rec0, 5)`), decoded in `save_tool.py` |
+| `+0x05` | **character id** (u8; = roster for 0..6; 10 = パピー on record 7; 7/8/9/14 are alternate forms mapped by the `0x80182488` table) | party ids `0x80144F56` vs records, card saves, `papi_intro.json` |
 | `+0x06` | **level** (u8) | `Char_LevelUp` wrote 3→4 (Teepo `0x80144B56`) |
 | `+0x08` | **EXP** (u32, cap 9,999,999) — Ryu `0x8014496C`, Teepo `0x80144B58` | `BattleResult_AddExp`, three battles |
 | `+0x0C` | **status flags** (u16), persistent subset `& 0x60A0` of the working halfword | `Battle_WriteBackMember` |
@@ -153,7 +179,9 @@ index and `CharId_ToRosterIndex` maps the character-id byte to it.
 | `+0x42` | **Def** | +2 |
 | `+0x44` | **Agl** | +1 |
 | `+0x46` | **Int** | +4 |
-| `+0x71..` | learned ability list (first free byte gets the new id; 10 slots via a lookup) — Teepo gained `0x5E` at L4 | `AbilityList_Add` |
+| `+0x4A..+0x58` | **base copy of the byte-stat block `+0x2A..+0x38`** (the same +0x20 shift as `+0x3C..+0x46` under `+0x1C..+0x26`): equal for unequipped records, differs by the equipment bonuses otherwise (Teepo `+0x34` 0x37 vs 0x32, evade 4 vs 6) | card saves, `save_tool.py dump` 2026-09-05 |
+| `+0x5C`, `+0x66`, `+0x70`, `+0x7A` | **four learned-ability lists, 10 slots each**, one per ability *type*: `AbilityList_ForType` (boot `0x80167514`) reads `(0x801CB231 + id*16) & 3` and returns record `+0x5C` / `+0x66` / `+0x70` / `+0x7A`; `AbilityList_Add` then fills the first zero slot. In the card saves Momo holds `0x46 0x4B` at `+0x5C` and `0x3C 0x44 0x52 0x57` at `+0x66`, Teepo `0x5B 0x5E 0x67` at `+0x70` (so the L4 write "at `+0x71`" was slot 1 of this list), Rei `0x41 0x61` at `+0x70` and `0x45 0x08` at `+0x7A`, Ryu `0x76` at `+0x7A`. The table is in GAME.EMI at **`0x801CB230`** (16-byte records, name in the last 8 bytes): type 0 = healing (アプリフ, リバル), 1 = support (ねらい撃ち, ミカテクト), 2 = attack magic (パダーマ, レイギル, ドメガ), 3 = skills (会心撃, ダブルヒット, 毒撃) — a reading of the names, not of code ([`IDEAS.md`](IDEAS.md) I4) | `AbilityList_Add` disasm, saves, GAME.EMI bytes |
+| `+0x84` | byte, `1` only on Teepo — the one record carrying growth modifiers (apprenticeship flag?) | saves |
 | `+0x85..+0x8A` | six **signed growth modifiers** (one per stat, added to the table growth each level: BoF3's Master apprenticeship bonuses) | `Char_LevelUp` |
 
 ### Equip (field menu)
@@ -278,14 +306,14 @@ block of `0x10B0` = 4,272 bytes at `0x801448D4..0x80145984`**, saved raw:
 
 | RAM | Contents (known so far) |
 |---|---|
-| `0x801448D4` | summary block written at save time: play time (from `0x8014686C..`), date bytes (`0x80146860..`), slot-0 world x/z (`0x80145EC0/C4`), facing (`0x80145E94`), `0x80143F00`, nine u16 from `0x80145AB0` |
+| `0x801448D4` | block head written at save time: four u32 from `0x8014686C..0x80146878` (**not** the play time — saves 2 and 3 differ by three minutes and carry identical words; unlabelled), `+0x20` four bytes from `0x80146860..63`, `+0x24` u16 from `0x80143F00` (read as `lhu` by boot `0x8015C03C`; 10 in save 1, 0 in saves 2/3 — an area/map id?), `+0x27` facing (`0x80145E94`), `+0x28`/`+0x2C` slot-0 world x/z (`0x80145EC0/C4`, 16.16) |
 | `0x80144944` | **u16 checksum slot** (zeroed before the copy; file `+0x270`) |
 | `0x80144964` | 8 character records × `0xA4` |
 | `0x80144E84..0x80144F4C` | unlabelled |
-| `0x80144F24` | `0x92` bytes hashed by boot `Save_FlagsChecksum` `0x8015BFC4` → `0x80145588` |
-| `0x80144F4C` | zenny; `0x80144F56` party ids × formations; `0x80144FBC..` |
+| `0x80144F24` | **progress-flag bit array** (runs to the zenny cell at least): `Save_BuildImage` calls boot **`Flag_Test(0x80144F24, 0x92)`** `0x8015BFC4` — `(bits[idx>>3] >> (idx&7)) & 1`, eight instructions — and stores the bit in the summary byte `0x80145588`. It was recorded here as a hash over `0x92` bytes until `save_tool.py verify` checked the byte against the array (2026-09-05). `0x8015BFE4` is the matching toggle |
+| `0x80144F4C` | zenny; `0x80144F54` formation u16; `0x80144F56` party ids × 3 formations (`0xFF` = empty); **`0x80144FBC` play time as four bytes h / m / s / frame** (the `0x80144FBE` u16 that "advanced 3370 → 4148" during the equip test was the s/frame pair ticking); `0x80145020` form byte (`& 0x7F` = 5 or 0xC exempts Peco from the id-`0xB` rewrite below); `0x80145021` ← low byte of `0x80146254` |
 | `0x8014502C` | lifetime zenny; `0x80145048..0x80145448` inventory (4 × 128 ids, 4 × 128 counts); `0x80145448` key items; `0x80145468` ability list |
-| `0x80145574` | save-slot summary: 5 bytes from `0x80144964`, party ids (`+5..+7`, Peco special-cased), level `+8`, `+0xC` ← `0x80144FBC`, `+9/+A` ← `0x8014494E/F`, EXP `+0x10`, flags checksum `+0x14` |
+| `0x80145574` | save-slot summary = what the load screen shows: `+0..+4` record-0 name bytes, `+5..+7` formation-0 party ids (id 4 written as `0xB` unless form byte is 5 / 0xC — Peco), `+8` record-0 level, `+9/+A` ← `0x8014494E/F`, `+0xC` play time h/m/s/f ← `0x80144FBC`, `+0x10` record-0 EXP, `+0x14` flag bit `0x92`; `0x80145590` nine u16 from `0x80145AB0` (unlabelled) |
 | `0x80145984` | end of block |
 
 Card file layout (`0x1300` bytes, written by `Card_WriteFile`):
@@ -303,6 +331,35 @@ i.e. block `+0xC80` = RAM `0x80145554..` — the summary written at
 (BOSS band, free outside battle); the `save_ser` write page for the confirm
 frame was truncated at `+0x8B4` (more than 2 048 stores in one frame), the
 decompile supplies the rest.
+
+### The save tool, and what it verified (2026-09-05)
+
+`tools/save_tool.py` (`list` / `dump SLOT` / `verify` / `diff A B`) reads the
+block above straight off a raw card image and is the end-to-end check on
+this map. On `saves/card1.mcd` (three saves, re-mapped by the user
+2026-09-05):
+
+- the u16 byte-sum recomputes on all three (`0x950B`, `0xA218`, `0xA22C`);
+- every slot-summary field matches the block it was copied from — name bytes,
+  party ids under the Peco rule, level, `+9/+A`, play time, EXP, flag bit —
+  and the SJIS title's `HH時間MM分 レベルLL` agrees with `0x80144FBC` and
+  record 0;
+- `diff 2 3` on the pair the user described as "identical except time":
+  exactly two runs differ, the checksum and the play time (block `+0x6E9`
+  and its summary copy at `+0xCAD`);
+- **independent oracle**: Mednafen booted from the same card image
+  (`mednafen_ctl.py launch --card`, Start, Start, Circle, Circle) lists
+  リュウ LV 1 at 00:28 / 05:13 / 05:10 with one portrait for file 1 and
+  Teepo / Rei / Ryu for files 2 and 3 — the tool's output line for line
+  (`analysis/mednafen_loadscreen_card1.png`).
+
+The three rows it corrected are marked above (`Flag_Test`, the play time at
+`0x80144FBC`, the four ability lists). Item and ability ids resolve to names
+since the evening of 2026-09-05 (`names/*.toml` from `tools/text_tables.py`,
+[`TEXT_TABLES.md`](TEXT_TABLES.md)); that also proved `+0x20` = `+0x40` +
+weapon power and `+0x22` = `+0x42` + the three armour powers. Not yet readable
+through it: the four `0x8014686C..` words at the block head and record `+0x84`. Record 7 is パピー, the intro's baby dragon
+(live test on `slot01`, same day).
 
 ### HUD gauge records — boot-EXE data, stride `0x24`
 
@@ -402,6 +459,177 @@ set (or the affinity was 100 %) — the three party hits reproduce without
 the `0x1F` term. The Rand draw is not observable, so each row is "exact for
 one of the eight draws", not a unique fit.
 
+## Turn order, kills, drops and the results tally (2026-09-05, track C)
+
+Read from five command captures on `slot03` (Attack, Defend, Watch,
+Auto-attack, Run), one on `slot02` (Nu), a victory capture that paged
+through the results, and `c_order.json` (a write trace on
+`0x80146300-0x80146360`), each cross-checked against the Ghidra body.
+Captures are `analysis/callstacks/c_*.json`.
+
+**The round commit.** When the last command is entered, `Battle_BuildTurnOrder`
+(`0x801DAAB4`; the traced entry `0x801DAE14` is a continuation of it) runs
+once and writes:
+
+| Address | Field |
+|---|---|
+| `0x801EB4C0` | scratch pairs (u16 value, u16 actor) × 11, bubble-sorted descending on value |
+| `0x80146308..12` | **turn order**: actor bytes, `0xFF`-terminated (`slot03`: `[2, 1, 3, 4, 0]` = Rei, Teepo, enemy 0, enemy 1, Ryu) |
+| `0x8014631E` | cursor — `Battle_BeginAction` reads `list[cursor]` and increments it; `0xFF` entries are skipped |
+| `0x8014631F` | count |
+
+```
+party m:   value = AGI (rec+0x24) + bonus × pct[Battle_LevelClass(level, row 1)] / 100
+           bonus: command byte C+0x119 == 4 (skill/magic, id at C+0x11A) -> GAME table 0x801CB231[id*0x10] == 0 ? 4 : (1|3) ? 2 : 0
+                  C+0x119 == 5 (item) -> 1;  else 0
+           pct table 0x801EAEEC = {100, 125, 150, 200, 250}; party level thresholds 0x801EAF3E = {8, 16, 32, 48, 99, 99}
+enemy n:   value = AGI (rec+0x28) + s8 table 0x801EAEF8[Battle_LevelClass(level rec+0x08, row 0) * 16 + Rand & 15]
+           row 0 (level 0..15) = {4,2,2,2,0,0,0,0,0,0,-1,-1,-1,-2,-2,-4}; enemy level thresholds 0x801EAF38 = {16, 36, 64, 99, 99, 99}
+Battle_ActorCanAct(actor) gates entry: present bit, status & 0x4944 (party) / 0x4144 (enemy) clear,
+           and not the side excluded by 0x80146320 (1 = enemies, 2 = party, 3 = both).
+```
+
+So party `+0x24` is **AGI** (Ryu L1 = 3, Teepo L8 = 10) and enemy `+0x28`
+mirrors it. The list carries only actor ids; the *command* rides on the
+actor (next section). The first five-way venn (game-mode band only) found
+no command-specific code because the command menu lives in the **battle
+engine overlay** (`BATTLE.EMI#15` at `0x80093800`), outside the default
+`fn_filter`; the `e_*.json` captures with `--lo 0x80093800 --hi 0x801D0C00`
+found it.
+
+### Commands, Auto, Run and the enemy AI (2026-09-05, engine-band captures)
+
+Each party actor carries a **command byte at `C+0x119`** (slot 0 =
+`0x80145FA5`) and a parameter halfword at `C+0x11A`; the engine writes it
+through the pointer `0x801EB448` (= the choosing member's `C+0x118`) and
+`0x801462FF` is the member whose menu is open (entry order here was slot 2,
+1, 0). The round flags live in `0x801462E4`.
+
+| Command | `C+0x119` | Written by | Cleared by |
+|---|---|---|---|
+| Attack | 1 | `Cmd_ConfirmAttack` `0x80093E14` (engine) | `Actor_ActionDone` `0x801E1D58` when the attack resolves |
+| Defend | 2 | table target after `BattleMenu_ConfirmDispatch` `0x801D24CC` (store `0x801D2520`) | `Battle_ClearCommands` `0x801DB45C` at round end |
+| Watch | 0, and `C+0x124 \|= 1` (Examine armed — the +25 evade bit) | `Cmd_ConfirmWatch` `0x8009521C` (engine) | — |
+| Auto | 1 for every member at once | `Cmd_AutoBattle_Begin` `0x801D2598` sets `0x801462E4 \|= 0x10`, `AutoBattle_FillCommands` `0x801DD264` fills the bytes; `Battle_RoundStart` `0x801D1C88` refills every round while the flag stays | as Attack |
+| Run | 0 | `Escape_Begin` `0x80098450` (engine) | battle ends |
+| skill / magic | 4, skill id in `C+0x11A` (Rei's steal `0x41`, Teepo `0x67`, Ryu `0x46`) | `SkillMenu_Open` `0x80093FBC` sets 4, `SkillMenu_Confirm` `0x8009404C` writes the id, `Skill_TargetSetup` `0x80094768` picks the default target from the skill table `0x801CB230[id*0x10] & 0x20` | `Actor_SkillItemDone` `0x801E19A0`, which also deducts the AP cost `0x801463C4` from `C+0x8A` |
+| item | 5, item id in `C+0x11A` (vitamin = 3) | `ItemMenu_Open` `0x800953D0`, `ItemMenu_Confirm` `0x80095418`; the count is decremented at confirm by `ItemMenu_Reserve` `0x80095F9C` (`0x8014524C` 0x1C → 0x19 over three picks) | `Actor_SkillItemDone` |
+
+The third byte of the block, **`C+0x118`, is the target actor** (written by
+`Attack_TargetSetup` `0x80093B24` the frame the menu opens on Attack, and by
+the skill / item target setups after the confirm; self-targets leave it 0).
+**Skills, items and enemy specials all land through one engine function,
+`Effect_ApplyResult(actor)` `0x8009A160`** (seeded into Ghidra from the
+only prologue in its gap): the effect handler is a `jalr` through the table
+`0x800B165C`, indexed by `0x800B1438[skill id]` for a skill or by the
+category × id table `0x800B164C` for an item; the handler fills a result
+record at `0x8014639C` (`+4` signed HP delta, `+6` signed AP delta,
+negative = heal) which the function then applies to the target
+`0x80146390` — heal capped at max, damage clamped to ±9999, a kill at 0
+with a survive check against the byte `C+0x8C`, enemy HP `0xFFFF` immune,
+target flag `0x10000` = no effect. Seen: the steal on Gunhead 31 → 17
+(`0x8009A6F8`), the vitamin on Ryu in the Nu fight 1 → 10 (`0x8009A608`),
+and the −1 HP enemy specials on `slot03` / Nu. Plain Attack stays on
+`Battle_ApplyDamage`. Capture note: a
+direction has to be *held* across the Circle presses (`--hold up` / `--hold
+down`), so every member picks from the same list; three presses per member
+(open, select, target) commit the round.
+
+**Commit.** `Battle_CommitRound` `0x801D2774`: `Battle_BuildTurnOrder`,
+item commands consumed, `0x801462E4 |= 8`, then the engine's
+`EnemyAI_ChooseActions` `0x80098F8C`. Execution is then per actor:
+`Battle_BeginAction` pulls the next id off the list and the actor's own
+state machine (the `ctx+2` / `ctx+3` dispatch tables) branches on its
+command byte. There is no central switch on the command.
+
+**Run.** `Escape_Roll` `0x80098278` runs on the Circle press (`+17`):
+
+```
+attempts 0x80146322++
+boss flag 0x801462E6        -> no roll (sub-phase++)
+attempts >= 3               -> success
+0x80146320 == 1             -> success
+else chance = Escape_Chance(mean party AGI (rec+0x24, living) - mean enemy AGI (rec+0x28, living))
+     idx = (diff + 32) >> 4 ; chance = {32,36,40,44,48,52}[idx] (0x800B1430), 0x1C below, 0x38 above
+     +8 on the 2nd attempt, +8 if a member has status 0x2000, cap 64
+     success iff chance >= Rand & 63          (slot03: diff ~ +2 -> 40/64 = 62 %)
+0x801462DF = 2 (success) / 1 (failure)
+```
+
+Success: `Escape_Begin` (banner for 60 frames, camera pans, everyone
+turns and runs, commands cleared), a fade (`0x8014932E/F` toggling from
+game-mode `0x801D10A8`), then mode `0x801462DC = 5` with sub-mode 3 from
+the engine at `+183`, the exit steps and the field at `+409`. Failure
+(`Escape_Failed` `0x800987F0`, body only): the party turns back, message
+`0xF` shows for 45 frames, the turn order is rebuilt **without the party**
+and the enemies take the round.
+
+**Enemy AI is table-driven.** `EnemyAI_ChooseActions` walks, for each
+living enemy, the 8-row × 16-byte script at `0x800E407C + (rec+0x60) * 0x88`
+(engine data; Gunhead = script 1): byte 0 is a condition opcode (HP below
+a quarter / half, AP below a fifth, an ally has status `0x2000`, fewer
+enemies than at start, last enemy standing, turn counter `0x801463CC`
+equal to 2 / 10 / odd, party level − enemy level ≥ 6, …), byte 1 the
+action type applied by `EnemyAI_ApplyAction` (set `+0x80`, status change,
+per-bit calls, drop class, **scale the EXP / zenny yield by a percentage**,
+…); a fired row sets its bit in the enemy object's `+0xE1` mask so it
+fires once. `EnemyAI_TurnCheck` `0x80098BB0` evaluates the per-turn
+opcodes (`0..8` party weapon/skill flags, counter `+0xF8`, status bits)
+when the enemy's turn comes. Row semantics beyond the opcodes are unread.
+
+**A kill.** `Battle_EnemyDefeated` (`0x801E542C`, at the kill frame):
+EXP total `0x80146328 += rec+0x06`, zenny total `0x8014632C += rec+0x04`
+(then zeroed), status `|= 0x4000`, `Battle_RemoveFromTurnOrder(actor)`
+(writes `0xFF` over the actor's turn slot — seen at `+153` in
+`c_order.json`), `Battle_RollDrops`, enemies-remaining `0x801462EF--`
+(`0x80146324 |= 2` at zero), engine `0x800A9FA4`, GAME `0x80197718`.
+
+**Drops.** `Battle_RollDrops` (`0x801E525C`): for each of the enemy's two
+drop slots (`+0x18`/`+0x1A`, `+0x1C`/`+0x1E`) with a non-zero item: drop iff
+`Rand() & 0xFF <= 0x801D0CB8[class]`, table `{0, 0, 1, 3, 7, 31, 127, 255}`
+(so class 3 = 4/256 ≈ 1.6 %, class 7 = certain). A drop is merged into the
+result list — items u16 at `0x80146330`, counts at `0x80146350`, count byte
+`0x80146323` (max 15) — and the enemy slot is zeroed so a second kill of the
+same enemy cannot re-roll it. No drop landed in any capture (Gunhead: item
+`0x0004` at 1.6 %, `0x0019` at 0.4 %), so `BattleResult_AwardDrops` is
+body-only.
+
+**The results screen (`BATL_END.EMI` at `0x801EEC00`, mostly interpreted —
+only two of its functions stamped the ring).** `BattleResult_Setup`
+(`0x801EF390`): per party slot, `Char_LevelUp(roster)` when `0x801EF92C`
+says a level was reached (this is the `levelup3.json` caller); zenny total
+`× 1.5` under `0x801EF6C4()` (unread — a bonus condition); tick step
+`0x801463AC = max(1, zenny / 30)`; sorts the drop list. Then, one phase each
+(`0x801462E0++`): `BattleResult_ExpTick` (`0x801EEF58`) feeds
+`BattleResult_AddExp(step)` per member until the remaining counter is spent
+— `c_victory2.json`: +1 every 2 frames × 6 into Ryu and Teepo for a 16-EXP
+battle, i.e. 16 / 3 rounded up — `BattleResult_ZennyTick` (`0x801EF810`)
+does the same through `Zenny_Add` (+1 × 20 into `0x80144F4C` and the
+lifetime total `0x8014502C`), and `BattleResult_AwardDrops` (`0x801EF874`)
+calls `Inventory_Add(category, id, count)` per list entry when the confirm
+check `0x801636F0()` fires. The results need a button press: a 3 600-frame
+window with no presses never left the victory banner.
+
+**Banners and the escape.** The battle-end banners (the victory banner,
+the escape notice) come from an 8-entry pool at `0x801EB460` (stride
+`0xC`: `+0` active, `+1` kind bit, `+3` layer, `+4` text pointer, `+8`
+timer). `BattleBanner_Dispatch` walks it every frame; `BattleBanner_Task`
+(`0x801EA600`) runs slide-in / hold / slide-out on `0x80148644+6` (8 px per
+frame between `-0x16` and `0x12`), `BattleBanner_DrawFrame(x, y)` draws the
+`0x115 × 0x11` window in the theme colour and boot `0x8014F6BC` draws the
+text. A successful Run (all three tries on `slot03` succeeded) plays the
+kind-1 banner, then `Battle_PhaseStep_Escape` (`0x801D7114`, `0x801462DE++`)
+and the common exit steps `0x801D71E0` / `0x801D72F8` that a victory also
+runs after the tally, and the field returns ~400 frames after the press.
+
+**Enemy skill damage bypasses `Battle_ApplyDamage`.** In `c_attack3` all
+three members lost exactly 1 HP in one frame (`+583`) and in `nu_attack`
+Teepo lost 1 HP, both from engine store PC `0x8009A3E4` (BATTLE.EMI#15,
+`ra 0x8009A3E4`, args `(slot*0x140, 1, hp, …)`), while plain enemy attacks
+in `c_defend4` / `c_watch4` went through `Battle_ApplyDamage`. The engine
+PC sits in a Ghidra gap (no function covers it after the 2026-09-05
+re-import) — seed it with `import --start` before reading the skill path.
+
 ## Game-mode overlay header
 
 `0x801D0C00` starts with the word `0x10` and then a vector of 24 pointers
@@ -419,5 +647,29 @@ PLCHAR / BOSS / BMAGIC actor overlays — read one to get all.
   the screen; expected `0x80145F14 + m*0x140`.
 - ~~Decompile `Battle_BaseDamage` and the defence steps.~~ **Done 2026-09-05**
   (they are hit checks, not defence steps). Still unread: the elemental
-  affinity function `0x8009FA78` (BATTLE.EMI#15), what enemy `+0x08` is,
-  and the party `+0x24`/`+0x26`/`+0x2A` derived stats.
+  affinity function `0x8009FA78` (BATTLE.EMI#15) and the party
+  `+0x26`/`+0x2A` derived stats. ~~What enemy `+0x08` is~~ — **level**, and
+  party `+0x24` is **AGI** (turn order, 2026-09-05).
+- ~~Where Run succeeds or fails, where Auto-attack fills the commands~~ —
+  **found in the engine band** (section above). Still open: the Defend
+  confirm body (store `0x801D2520` sits in a Ghidra gap after
+  `BattleMenu_ConfirmDispatch`; seed it with `import --start`), the Defend
+  flag `0x801462E4 & 0x80` (only `8` / `0x10` / `0x1C` were seen on the
+  command captures, so `0x80` is set during the defender's own action), the
+  effect handlers behind `Effect_ApplyResult`'s table `0x800B165C` (which
+  index is the vitamin, which the steal — the handlers were not traced, the
+  engine band being outside the round captures' filter), and the meaning of
+  the AI script rows beyond the opcode byte. ~~Skill and item captures, the
+  skill-damage function, where the heal lands~~ done (`c_skill` / `c_item` /
+  `nu_item`; the slot03 party was at full HP, the Nu save shows the heal).
+- The zenny bonus condition `0x801EF6C4()` and the level-reached check
+  `0x801EF92C(roster, 0)` in `BattleResult_Setup`; the engine skill-damage
+  writer `0x8009A3E4` (Ghidra gap).
+- A drop capture: needs an enemy with a class-7 (certain) drop, or many
+  kills; the writer to watch is `0x80146323` / `0x80146330`.
+- From the save tool (2026-09-05): the meaning of the four ability *types*
+  (`(0x801CB231 + id*16) & 3` — which list is magic, skill, gene), an
+  id→name table for items/abilities (the tool prints ids), the block-head
+  words `0x8014686C..0x80146878`, record `+0x84`, the block-head u16 from
+  `0x80143F00` (10 vs 0 — area id?), and what forms ids 7, 8, 9 and 14 are
+  (table `0x80182488`; 9 is the lone boy Ryu of save 1).

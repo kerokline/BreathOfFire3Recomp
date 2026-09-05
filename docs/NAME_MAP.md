@@ -17,6 +17,8 @@ input it will consume. Nothing here touches the submodules.
 | `names/overlays.toml` | alias / role / status / evidence per overlay | `md5` of the section bytes |
 | `names/functions.toml` | name / args / ret / status / evidence per overlay function | (`overlay` md5, `pc`) |
 | `names/areas.toml` | alias / status / evidence / sightings / shots per **area (place)** | area file + script-block md5 |
+| `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` | **id → name data tables** generated from the disc by `tools/text_tables.py` (never hand-edited; re-run `extract`) — see [`TEXT_TABLES.md`](TEXT_TABLES.md) | (category, id) / id; `[meta]` carries the section md5 |
+| `names/plates.toml` | the **painted world-map name plates**: rectangle on the map's texture page + by-eye transcription + wiki English (`tools/plates.py` for the rectangles; the `jp` column is hand-read) | (world-map area, plate index) |
 | `symbols.toml` | boot-EXE function names (framework `PSX_FN_*` path) | `pc` |
 | `docs/subsystem_map.html` | generated map: bands → overlays → functions, boot EXE, search | — |
 
@@ -69,9 +71,10 @@ evidence rule applied to names.
   `Battle_BaseDamage`), the HUD gauges, battle start/end record copies,
   `Char_LevelUp`, `Menu_EquipConfirm`, the results-screen tallies, and the
   save serialiser. See [`BATTLE_RAM.md`](BATTLE_RAM.md).
-- **boot EXE (`symbols.toml`):** 13: `Rand`, `Zenny_Add/Sub`, `Inventory_Add/Remove`,
-  `Char_RecalcStats`, `Stat_AddClamped`, `AbilityList_Add`, `Actor_Task`,
-  `Actor_UpdateScreenPos`, `Actor_AnimTick`, `Save_FlagsChecksum`, `BootEntry`.
+- **boot EXE (`symbols.toml`):** 14: `Rand`, `Zenny_Add/Sub`, `Inventory_Add/Remove`,
+  `Char_RecalcStats`, `Stat_AddClamped`, `AbilityList_Add`, `AbilityList_ForType`, `Actor_Task`,
+  `Actor_UpdateScreenPos`, `Actor_AnimTick`, `Flag_Test` (was `Save_FlagsChecksum` until
+  2026-09-05), `BootEntry`.
 - **Routes that produced them:** route 3 (differential traces) named the
   first twelve; route 4 (data anchors: `ramdiff` -> `capture --watch` ->
   decompile) named everything since and is the productive route. Route 2

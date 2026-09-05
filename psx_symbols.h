@@ -20,9 +20,9 @@
 #define PSX_FN_Actor_AnimTick 0x8014D86Cu
 #define func_8014D86C Actor_AnimTick  /* alias */
 
-/* guessed: ghidra decomp of Save_BuildImage 2026-09-05: called as (0x80144F24, 0x92) and its u32 result is stored at 0x80145588 inside the save block before the byte-sum; a checksum/hash over 0x92 bytes of game flags */
-#define PSX_FN_Save_FlagsChecksum 0x8015BFC4u
-#define func_8015BFC4 Save_FlagsChecksum  /* alias */
+/* confirmed: Flag_Test(bits, index) -> (bits[index>>3] >> (index&7)) & 1 -- eight instructions, read from the disc EXE 2026-09-05 (tools/disasm_exe.py 8015BFC4:8); 0x8015BFE4 is the matching xor toggle. Save_BuildImage calls it as (0x80144F24, 0x92) and stores the BIT in the slot-summary byte 0x80145588 -- it was named Save_FlagsChecksum ('hash over 0x92 bytes') until tools/save_tool.py verify checked the byte against the flag array on all three card1 saves */
+#define PSX_FN_Flag_Test 0x8015BFC4u
+#define func_8015BFC4 Flag_Test  /* alias */
 
 /* confirmed: wtrace levelup3.json 2026-09-05 + ghidra: (rec) copies base stats rec+0x3C..0x58 -> effective rec+0x1C..0x38, applies FUN_80166150/801662CC/8016651C/80165290 (equipment/modifiers via Stat_AddClamped), scales effective max HP rec+0x1C by (base * u8 rec+0x1A + 5)/10 and clamps HP rec+0x14, halves rec+0x2B..0x33 per status bits in rec+0x19, per-roster table 0x80148668 (5 B) vs rec+0x34..0x38; proves the persistent character records are &0x80144964 + roster*0xA4, 8 of them */
 #define PSX_FN_Char_RecalcStats 0x80165434u
@@ -51,6 +51,10 @@
 /* confirmed: wtrace money.json 2026-09-04: only writer of zenny 0x80144F4C and lifetime total 0x8014502C, +1 per tick x40 from BATL_END 0x801EF824/0x801EF848; ghidra: (amount, skip_total) -> zenny += amount, total += amount if !skip_total, cap 9999999, returns !capped */
 #define PSX_FN_Zenny_Add 0x80166FFCu
 #define func_80166FFC Zenny_Add  /* alias */
+
+/* confirmed: AbilityList_ForType(index, ability_id, working) -> pointer to one of four 10-slot lists inside a character record: base = 0x80144964 + index*0xA4 (persistent) or 0x80145F00 + index*0x140 (working, when a2 != 0); type = (byte at 0x801CB231 + ability_id*16) & 3 selects +0x5C / +0x66 / +0x70 / +0x7A. Called by AbilityList_Add 0x80165BCC, which then fills the first zero slot of ten. Disassembled 2026-09-05; the card1 saves show the lists populated (Momo +0x5C/+0x66, Teepo +0x70, Rei +0x70/+0x7A) */
+#define PSX_FN_AbilityList_ForType 0x80167514u
+#define func_80167514 AbilityList_ForType  /* alias */
 
 /* confirmed: BIOS thunk: li t2,0xA0; jr t2; li t1,0x2F = A0:2F rand() (psx-spx), read from the disc EXE 2026-09-05. Result mod 8 indexes the damage-variance tables (0x801D0C7C, 0x801EAF50), &1 the +0/+1 base term, %100 the hit rolls; 30 call sites in BATTLE.EMI#3, 32 in #15. Ghidra needs it marked returning or every caller's decompile truncates here (tools/ghidra/seed_overlay.py) */
 #define PSX_FN_Rand 0x8017ED4Cu

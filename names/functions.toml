@@ -8,12 +8,255 @@
 #   evidence: which trace / string / data-doc citation backs the name
 
 [[function]]
+overlay = "18ce968c71203c73e1230e19ebd640db"
+pc = 0x801EEF58
+name = "BattleResult_ExpTick"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: BattleResult_AddExp(step 0x801463AC) while the member's remaining counter (s0+0x6328) exceeds the step, then the remainder, counter = 0 and phase 0x801462E0++; trace: c_victory2.json +2137..+2147 six +1 writes into 0x8014496C (Ryu) and 0x80144B58 (Teepo) by BattleResult_AddExp store 0x801DD644 (16 EXP total / 3 members rounded up to 6)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "18ce968c71203c73e1230e19ebd640db"
+pc = 0x801EF390
+name = "BattleResult_Setup"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05 (BATL_END re-imported with the boot EXE mapped): per party slot (count 0x801462EC): roster = CharId_ToRosterIndex(0x80145F05+slot*0x140), if 0x801EF92C(roster,0) != 0 -> Char_LevelUp(roster) (the levelup3.json caller 0x801EF400 is inside this body); zenny total 0x8014632C += 50% when 0x801EF6C4(); tick step 0x801463AC = max(1, zenny/30); formats the zenny line with boot 0x8017ED6C into 0x801490D4, message 0x801503F8(6); sorts the drop list 0x80146330/0x80146350 (count 0x80146323) ascending and sizes its window; boot 0x801629CC(0x80143F00+0x2AB); phase 0x801462E0++; trace: c_victory2.json EXP and zenny tick by +1 every 2 frames = step 1 (totals 16 / 20 < 30)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "18ce968c71203c73e1230e19ebd640db"
+pc = 0x801EF810
+name = "BattleResult_ZennyTick"
+args = []
+status = "evidence"
+evidence = "wtrace c_victory2.json 2026-09-05: Zenny_Add called from ra 0x801EF824 (inside this body) 20 times at +2443..+2481, +1 each into 0x80144F4C and the lifetime total 0x8014502C; ghidra decomp: Zenny_Add(step) while the remaining counter exceeds the step, else Zenny_Add(rest, 0), counter = 0, phase 0x801462E0++ (the 0x801EF848 caller seen 2026-09-04 is the sibling fragment 0x801EF840)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "18ce968c71203c73e1230e19ebd640db"
+pc = 0x801EF874
+name = "BattleResult_AwardDrops"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: when boot 0x801636F0() (confirm) returns nonzero: for each of the 0x80146323 drop entries Inventory_Add(category = 0x80146330[i] >> 8, item = & 0xFF, count 0x80146350[i], 0), then mode bytes 0x801462DD = 4, 0x801462DE/DF/E0 = 0; not traced -- no drop landed in any 2026-09-05 capture (Gunhead drop classes 3 and 1 = 1.6% / 0.4%)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80093B24
+name = "Attack_TargetSetup"
+args = []
+status = "evidence"
+evidence = "wtrace e_skill/e_item.json 2026-09-05: store 0x80093B40 writes 3 (enemy 0) into the choosing member's C+0x118 at +6, the frame the command menu opens on Attack; ghidra decomp: *0x801EB448 = 0x801DB594(3) (default target on the enemy side), 0x80145AC4 = 0, phase 0x801462E0++"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80093E14
+name = "Cmd_ConfirmAttack"
+args = []
+status = "evidence"
+evidence = "wtrace e_attack.json 2026-09-05: store PC 0x80093E38 writes 1 into the choosing member's command byte C+0x119 at each Circle (+20 slot 2, +48 slot 1, +72 slot 0) through the pointer 0x801EB448; ghidra decomp: boot 0x8015E908(0x104) cue, 0x801462EB = 0, *(0x801EB448+1) = 1, menu state *(0x801EBE78+1) = 2, phase bytes 0x801462DD = 1 / DE..E0 = 0, member index 0x801462FF++ (advances to the next member's menu)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80093FBC
+name = "SkillMenu_Open"
+args = []
+status = "evidence"
+evidence = "wtrace c_skill.json 2026-09-05: store 0x80093FD4 writes command 4 into C+0x119 when the skill list opens (Teepo +132, Ryu +222; Rei's byte was already 4 in the savestate); ghidra decomp: *(0x801EB448+1) = 4, 0x80094E88(), list page 0x80148577 = 2 under flag +0x10 bit 1 without bit 0x20000, sub-phase 0x801462DF++, 0x80148652 = *(0x801EBE78+5)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x8009404C
+name = "SkillMenu_Confirm"
+args = []
+status = "evidence"
+evidence = "wtrace c_skill.json 2026-09-05: store 0x800944E8 writes the chosen skill id into C+0x11A (Rei 0x41 = steal, Teepo 0x67, Ryu 0x46) 26 frames after the list opens; ghidra decomp (1312 bytes): cursor 0x80148578 into the list from 0x80167464(0x80148652, page 0x80148577, 1), skill flags from 0x801CB236[id*0x10], cues 0x8015E908(0x100/0x101/0x103/0x106/0x107), sub-phase 0 or 3 on confirm, ++ on cancel"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80094768
+name = "Skill_TargetSetup"
+args = []
+status = "evidence"
+evidence = "wtrace c_skill.json 2026-09-05: store 0x800947B4 writes the default target into C+0x118 four frames after SkillMenu_Confirm (3 = enemy 0 for the steal 0x41 and Teepo's 0x67; nothing for Ryu's 0x46 = self); ghidra decomp: skill table 0x801CB230[id*0x10] & 0x20 -> target = 0x801DB594(3) (enemy side, phase 1) else 0x80094E80() ? 0 (self) : 0x801DB594(0) (party side, phase 2); 0x80145AC4 = 0, 0x801462EB = 1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x8009521C
+name = "Cmd_ConfirmWatch"
+args = []
+status = "evidence"
+evidence = "wtrace e_watch.json 2026-09-05: store PC 0x8009523C writes 0 into C+0x119 (+36); ghidra decomp: same shape as Cmd_ConfirmAttack but command 0 and the actor flag word +0xC (= C+0x124) |= 1 -- the Examine-armed bit that Battle_ResolveAction_Party reads as +25 evade"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800953D0
+name = "ItemMenu_Open"
+args = []
+status = "evidence"
+evidence = "wtrace c_item.json 2026-09-05: store 0x800953E8 writes command 5 into C+0x119 when the item list opens (+34, +134, +232 for the three members); ghidra decomp: *(0x801EB448+1) = 5, 0x80097F4C(), phase 0, sub-phase++"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80095418
+name = "ItemMenu_Confirm"
+args = []
+status = "evidence"
+evidence = "wtrace c_item.json 2026-09-05: store 0x800958D4 writes the item id into C+0x11A (3 for all three members) 26 frames after the list opens; ghidra decomp (1380 bytes): id from 0x80167058(page 0x80148576, ...), usable check GAME 0x801B0494(0x80148574, 0, page, id), cues 0x8015E908, sub-phase 3 on confirm"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80095F9C
+name = "ItemMenu_Reserve"
+args = []
+status = "evidence"
+evidence = "wtrace c_item.json 2026-09-05: store 0x80096064 decrements the item count 0x8014524C (0x1C -> 0x19 over the three confirms, +100/+194/+294) at confirm time, before the round runs -- the item is reserved when chosen, not when used"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80096F94
+name = "Item_TargetSetup"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: sibling of Skill_TargetSetup for items: flags from 0x80166918(category = C+0x11A >> 8, id & 0xFF); flag 0x20 -> target 0x801DB594(3) (enemy side, phase 1) else 0x80097F44() ? 0 : 0x801DB594(0) (party, phase 2); 0x80145AC4 = 0, 0x801462EB = 1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80098278
+name = "Escape_Roll"
+args = []
+status = "evidence"
+evidence = "wtrace e_run3.json 2026-09-05: +17 attempt counter 0x80146322 0->1 at store 0x800982B4 and sub-phase 0x801462DF = 2 (success) at 0x800983F0, two frames before Escape_Begin; ghidra decomp: attempts++; boss flag 0x801462E6 set -> sub-phase++ (no roll); attempts >= 3 -> success; else chance = Escape_Chance(avg party AGI rec+0x24 over 0x801462ED members - avg enemy AGI rec+0x28 over 0x801462EF enemies), success iff chance >= Rand & 0x3F, and always when 0x80146320 == 1; 0x801462DF = 2 success / 1 failure"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80098450
+name = "Escape_Begin"
+args = []
+status = "evidence"
+evidence = "wtrace e_run1/e_run3.json 2026-09-05: +19 store 0x80098634 clears every member's command byte, 0x8014932C = 2 at 0x80098548, phase 0x801462E0 = 1 at 0x800986A8; ghidra decomp: banner pool entry 0 off, 0x801DE528(1, 0, 0, 0x3C, text 0x801EB000) shows the escape notice for 60 frames, 0x801483BF = 1, camera 0x80149304/08 stepped by the direction table 0x800B1400[0x801462E8], on success (0x801462DF == 2) 0x8014932C = distance, sound 0x801629CC(5), pending item commands (5) still consumed via 0x801DDE44, every living member: command 0, state 2, facing ^= 2 (turns to run)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800987F0
+name = "Escape_Failed"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: when 0x8014932E == 0: Battle_BuildTurnOrder, every living member state 2, facing ^= 2 (turns back), 0x801DDFB4(m), Battle_RemoveFromTurnOrder(m) (the enemies get the round alone), 0x801D9454(), message 0x801503F8(0xF) as a kind-2 banner for 0x2D frames, mode 0x801462DC = 3 (execute), phase bytes 0, flags 0x801462E4 |= 8; trace: e_run1.json +99 store 0x8009890C (flags |= 8) -- that attempt's outcome was not screenshotted; c_run1/2/3 and e_run3 all succeeded and never entered it"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80098A94
+name = "Escape_Chance"
+args = ["agi_diff"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05 + live table: idx = (diff + 32) >> 4; below the table 0x1C, above 0x38, else 0x800B1430[idx] = {32, 36, 40, 44, 48, 52} (out of 64: 50 %..81 %); +8 on the second attempt (0x80146322 == 2); +8 if any member has status 0x2000; cap 0x40 = certain"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80098BB0
+name = "EnemyAI_TurnCheck"
+args = []
+status = "hypothesis"
+evidence = "trace: e_auto.json +108, the first enemy action of the round (the other captures' windows ended before an enemy acted); ghidra decomp: walks the current enemy's (0x801EB458) AI script rows with the per-turn opcodes 0..8 (EnemyAI_CondPartyFlag bitmasks), 9/0xA/0x24 (counter +0xF8 with 0x80146371 == 4/1), 0x16/0x17 status +0x82 bits 8/0x80, 0x18 no drop class, 0x21..0x23, 0x25 (+0x94 <= +0xF8); then 0x80099FAC"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80098F8C
+name = "EnemyAI_ChooseActions"
+args = []
+status = "evidence"
+evidence = "trace: once at the round-commit frame of every command capture (e_attack +76, e_defend +60, e_watch +116, e_auto +22), called from Battle_CommitRound; ghidra decomp (2000 bytes): for each living enemy walks its 8-row AI script at 0x800E407C + (rec+0x60)*0x88 (16-byte rows, byte 0 = condition opcode: 0xB HP < max/4, 0xC HP < max/2, 0xD AP < max/5, 0xE an ally has status 0x2000, 0xF fewer enemies than at start, 0x10 last enemy, 0x11 HP > half, 0x12 AP > half, 0x13/0x14 turn counter 0x801463CC == 2/10, 0x15 party level - enemy level >= 6, 0x19 turn counter odd, ...); a row whose done-bit (EnemyAI_RowDone) is clear fires EnemyAI_ApplyAction and sets the bit; slot03 Gunhead uses script 1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80099830
+name = "EnemyAI_RowDone"
+args = ["enemy_obj", "row"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: returns bit `row` of the enemy object byte +0xE1 (the per-row fired mask); EnemyAI_SetRowDone 0x80099844 sets/clears it"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80099844
+name = "EnemyAI_SetRowDone"
+args = ["enemy_obj", "row", "on"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: sets or clears bit `row` of enemy object +0xE1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80099874
+name = "EnemyAI_CondPartyFlag"
+args = ["mask"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: with the enemy counter +0xF8 != 0: acting kind 0x80146371 == 4 -> GAME table 0x801CB234[0x801463BC*0x10] & mask; == 1 and party actor 0x80146370 < 3 -> weapon table byte 0x801C9F2F[weapon id*0x14] & mask (mask 0x100 excluded)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x80099954
+name = "EnemyAI_ApplyAction"
+args = ["enemy_obj", "row"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: switch on row byte 1: 1 -> +0x80 = row[2]; 2 -> status change via engine 0x800A0680/0x800A0170; 3/4 -> per-bit calls 0x80099C7C / 0x80099F40 (row[2] mask, row[3] value); 5 -> drop classes +0x9A/+0x9E = row[3]; 6 -> EXP yield +0x86 / zenny yield +0x84 scaled by row[3] %; 7 -> 0x801463D3 = row[2]; then +0x7E = row[4]"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x8009A160
+name = "Effect_ApplyResult"
+args = ["actor"]
+status = "evidence"
+evidence = "wtrace 2026-09-05: its stores are every HP change not made by Battle_ApplyDamage -- nu_item.json +626 store 0x8009A608 heals Ryu 1 -> 10 (vitamin), c_skill.json +438 store 0x8009A6F8 takes enemy 0 from 31 to 17 (Rei's steal), c_attack3.json +583 and nu_attack.json +647 take 1 HP from party members (enemy specials); seeded with import --start 0x8009A160 (the only prologue in the 0x8009A158..0x8009A900 gap); ghidra decomp: actor status |= 0x31; charge flag 0x80 multiplies the power word 0x801EC282 by (charge byte + 1); effect handler = jalr PTR 0x800B165C[index], index = 0x800B1438[skill id 0x801463BC] for a skill (kind 0x80146371 == 4) else the item table 0x800B164C[category][id]; the handler fills the result record 0x8014639C (+4 signed HP delta, +6 signed AP delta, negative = heal); target 0x80146390 with flag 0x10000 takes nothing; deltas clamped to +-9999; heal caps at max HP/AP (status |= 5 / 10), damage kills at 0 with a survive check (overkill < C+0x8C byte and flags bits 1,2 clear -> flag |= 4), enemy HP 0xFFFF is immune"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800A79AC
+name = "Formation_ApplyStatMods"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: switch on the formation id 0x80144F54 (the value the damage path tests as back row == 2): 1 -> slot 0 +0xB4 (max HP scratch) +50 pct, +0xB6 -25 pct, boot 0x80166084; 2 -> every living member +0xB8 (AGI scratch) -25 pct; 3 -> +0xB8 = slot 0 value, +0xBA -50 pct; 4 -> slot 2 +0x13A.. +50 pct, slot 0 +0xBA -25 pct, slot 1 +0xBA -25 pct, all via Stat_AddClamped on the C+0xB0 scratch block that Battle_Init copies back as the effective stats; battlebegin.json (formation 0) made no stores"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800A8AD4
+name = "Battle_InitEncounterKind"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05 (seeded with --start, it begins exactly where 0x800A8840 ends): boss flag 0x801462E6 == 0 -> 0x800A8B60 else 0x800A8B10; called by Battle_Init before the stat snapshot"
+note = "overlay by --overlay"
+
+[[function]]
 overlay = "62002f85ca149fec9f16aa97ef43b742"
 pc = 0x801D69F0
 name = "Save_BuildImage"
 args = []
 status = "evidence"
-evidence = "wtrace save_ser.json 2026-09-05: store pc 0x801D6C58 wrote the save payload byte-by-byte from 0x801448D4 into the card buffer 0x800C1A00 (= file offset 0x200) at the save confirm; ghidra decomp: fills the summary block 0x801448D4.. (play time 0x8014686C, date bytes 0x80146860, slot-0 world x/z 0x80145EC0/C4, facing 0x80145E94, 9 u16 from 0x80145AB0), party names/ids into 0x80145574.. (memcpy 0x8017ED1C from 0x80144964 x5, party ids 0x80144F56 with a Peco special case), level/EXP of roster 0, checksum32 = 0x8015BFC4(0x80144F24, 0x92) -> 0x80145588; zeroes 0x80144944 then copies 0x10B0 bytes 0x801448D4..0x80145984 to 0x800C1A00 summing every byte into the u16 at 0x800C1A70 (file +0x270); zero-fills after; then FUN_801d6cf4(slot 0x801E5FA8, block)"
+evidence = "wtrace save_ser.json 2026-09-05: store pc 0x801D6C58 wrote the save payload byte-by-byte from 0x801448D4 into the card buffer 0x800C1A00 (= file offset 0x200) at the save confirm; ghidra decomp: fills the summary block 0x801448D4.. (play time 0x8014686C, date bytes 0x80146860, slot-0 world x/z 0x80145EC0/C4, facing 0x80145E94, 9 u16 from 0x80145AB0), party names/ids into 0x80145574.. (memcpy 0x8017ED1C from 0x80144964 x5, party ids 0x80144F56 with a Peco special case), level/EXP of roster 0, flag byte = Flag_Test(0x80144F24, bit 0x92) -> 0x80145588 (a single progress-flag bit, not a hash -- corrected 2026-09-05 by save_tool.py verify); zeroes 0x80144944 then copies 0x10B0 bytes 0x801448D4..0x80145984 to 0x800C1A00 summing every byte into the u16 at 0x800C1A70 (file +0x270); zero-fills after; then FUN_801d6cf4(slot 0x801E5FA8, block)"
 note = "overlay by --overlay"
 
 [[function]]
@@ -38,8 +281,17 @@ overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801D1228
 name = "Battle_Init"
 args = []
-status = "hypothesis"
-evidence = "wtrace battlebegin.json 2026-09-05: single write of working status 0x80145F0C at +635 (store pc 0x801D1490, the first game-mode write after Battle_InitPartyContexts at +481); 1428-byte function, 74 stores, calls engine 0x800A79AC/0x800A8AD4 and boot 0x8014E294/0x801629CC -- the game-mode battle setup | wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +563 writes 33 offsets in the persistent-copy region (C+0x80 status flags, C+0x90.. effective stats) once per slot, 4 changing; the first game-mode writer of the battle"
+status = "evidence"
+evidence = "wtrace battlebegin.json 2026-09-05: single write of working status 0x80145F0C at +635 (store pc 0x801D1490, the first game-mode write after Battle_InitPartyContexts at +481); 1428-byte function, 74 stores, calls engine 0x800A79AC/0x800A8AD4 and boot 0x8014E294/0x801629CC -- the game-mode battle setup | wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +563 writes 33 offsets in the persistent-copy region (C+0x80 status flags, C+0x90.. effective stats) once per slot, 4 changing; the first game-mode writer of the battle | ghidra decomp 2026-09-05 (boot EXE mapped) read against wtrace battlebegin.json: the 33 offsets it writes at +563 per slot are all in the body -- copies the effective-stat block C+0x90..+0xAC (persistent +0x1C..+0x38: max HP/AP, ATK, DEF, AGI, +0x26, +0x2A.., hit/evade) to the scratch C+0xB0..+0xCC (store 0x801D13D8..), sets status 0x2000 (low HP) when HP < max/4 else clears it, zeroes flags C+0x124/+0x128, command +0x119, +0x121, +0x12C..+0x133, +0x136..+0x139, then engine 0x800A79AC (Formation_ApplyStatMods on the scratch) and copies the scratch back over C+0x90.. (store 0x801D15A4..); before that: alive count 0x801462ED, menu actor 0x801EBE78 = C0, resets 0x801462E1..E4, 0x80146324, turn counter 0x801463CC = 1, EXP/zenny totals, escape attempts, drop count, 0x801463BE..; engine 0x800A8AD4 (normal/boss split on 0x801462E6), 0x801E5978, 0x801DDB44; per living actor GAME 0x80197B9C(ctx) (enemies skipped for boss id 0x25); boot 0x8014E294(0x1A/0x1B); battle-start sound 0x801629CC(0x80143F00+9) unless boss, else (*0x801463A8)(6); 16 words 0x80146360 zeroed; phase++"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D1C88
+name = "Battle_RoundStart"
+args = []
+status = "evidence"
+evidence = "wtrace c_order.json 2026-09-05: mode 0x801462DC 1->2 at store 0x801D1CCC at +19 and +673 (each new round); ghidra decomp: Battle_ClearCommands, 0x801DA7A4, member index 0x801462FF = 0; if the auto flag 0x801462E4 & 0x10: AutoBattle_FillCommands and mode = 2 (skip the menu), else 0x801DE19C (open the menu) and phase++ -- this is why Auto persists across rounds"
 note = "overlay by --overlay"
 
 [[function]]
@@ -52,11 +304,47 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D24CC
+name = "BattleMenu_ConfirmDispatch"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: 0x801DD7C8() then jumps through the table 0x801EAB94[0x801462DE]; the Defend confirm store 0x801D2520 (C+0x119 = 2, e_defend +20/+36/+56, ra 0x801D2504) lies in the gap right after this body -- one of its table targets"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D2598
+name = "Cmd_AutoBattle_Begin"
+args = []
+status = "evidence"
+evidence = "wtrace e_auto.json 2026-09-05: store 0x801D2708 sets the auto flag 0x801462E4 |= 0x10 at +18, two frames before AutoBattle_FillCommands; ghidra decomp: 0x801483BF = 2, consumes pending item commands (5) via 0x801DDE44 over the entry list, living members state 2, flags |= 0x10, sound 0x801629CC(5), phase bytes 0"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D2774
+name = "Battle_CommitRound"
+args = []
+status = "evidence"
+evidence = "wtrace 2026-09-05: store 0x801D2890 sets 0x801462E4 |= 8 at the commit frame of every command capture (+76 attack, +60 defend, +116 watch, +22 auto); ghidra decomp: Battle_BuildTurnOrder, banner 0 off, item commands (5 with id >> 8) consumed via 0x801DDE44 unless flag 0x124 & 0x4000, flags |= 8, engine EnemyAI_ChooseActions, sound 5 unless auto, phase++"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801D2B50
 name = "Battle_BeginAction"
 args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: walks the turn list 0x80146308[0x8014631E..0x8014631F] (0xFF = empty), sets actor 0x80146370 / target 0x80146380 context pointers and screen positions, and copies the ACTOR's 32-byte stat block (rec+0x1C.. / enemy+0x20..) to 0x801EC278 -- 0x801EC27C = ATK|DEF; round1.json: written at +202 (Rei), +352 (Teepo), +518 (enemy), +798 (Ryu), ra 0x801D2C08/0x801D2C1C | wtrace c_order.json 2026-09-05: consumes the turn-order list -- cursor 0x8014631E incremented per action at store PCs 0x801D2F4C/0x801D2BF4 (+45, +195, +361, +513); ghidra decomp: actor = 0x80146308[cursor] (0xFF skipped), copies the actor stat block (party C+0x90 / enemy rec+0x20, 32 bytes) to 0x801EC278.., sets the actor/target pointers 0x80146378/0x8014637C/0x80146388 and screen positions; past the count: mode 0x801462DC = 4 (round over)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D7114
+name = "Battle_PhaseStep_Escape"
+args = []
 status = "hypothesis"
-evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: walks the turn list 0x80146308[0x8014631E..0x8014631F] (0xFF = empty), sets actor 0x80146370 / target 0x80146380 context pointers and screen positions, and copies the ACTOR's 32-byte stat block (rec+0x1C.. / enemy+0x20..) to 0x801EC278 -- 0x801EC27C = ATK|DEF; round1.json: written at +202 (Rei), +352 (Teepo), +518 (enemy), +798 (Ryu), ra 0x801D2C08/0x801D2C1C"
+evidence = "ghidra decomp 2026-09-05: 0x801462DE++ (phase step); trace: only after a successful Run (c_run1/2/3 +265), absent from the victory capture c_victory2"
 note = "overlay by --overlay"
 
 [[function]]
@@ -70,6 +358,33 @@ note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D71E0
+name = "Battle_PhaseStep_Exit1"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: 0x801462DE++; trace: after an escape (c_run1 +321) and after the victory tally (c_victory2 +2485) -- the common battle-exit sequence"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D72F8
+name = "Battle_PhaseStep_Exit2"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: 0x801462DE++ (thunk 0x801D72D8 jumps here); trace: c_run1 +339 and c_victory2 +2503, right after Battle_PhaseStep_Exit1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D7E80
+name = "BattleBanner_DrawFrame"
+args = ["x", "y"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: boot 0x8017AF98/0x8017CC50/0x8014E494 setup then the rect/line primitives 0x801D9C50/0x801D9A84/0x801DA578/0x801DA484 draw a 0x115 x 0x11 window frame in the theme colour 0x8002BA08[0x8014494E<<6|0x20] (same colour source as BattleMenu_TargetCursor); trace: per frame under BattleBanner_Task in c_auto/c_run1"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801D8060
 name = "BattleMenu_TargetCursor"
 args = ["x", "y"]
@@ -78,11 +393,47 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DAAB4
+name = "Battle_BuildTurnOrder"
+args = []
+status = "evidence"
+evidence = "wtrace c_order.json 2026-09-05 (slot03, auto): at +21 (round commit) writes the order list 0x80146308..12 = [2,1,3,4,0] (Rei, Teepo, enemy0, enemy1, Ryu), count 0x8014631F=5, cursor 0x8014631E=0 from store PCs 0x801DAF8C/0x801DAFDC/0x801DAE90 (the traced fragment 0x801DAE14 is a CPS continuation of this body); ghidra decomp: party value = AGI (rec+0x24) + command bonus {skill/magic: 4 or 2 by GAME table 0x801CB231[skill*0x10], item: 1} x pct 0x801EAEEC[level class]/100; enemy value = rec+0x28 + signed byte 0x801EAEF8[level class*16 + Rand&15]; level class = Battle_LevelClass(level, row 1 party / row 0 enemy); (value, actor) pairs at 0x801EB4C0 bubble-sorted descending, then the actor bytes copied to 0x80146308 (0xFF-terminated); consumed by Battle_BeginAction"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DB3FC
+name = "Battle_LevelClass"
+args = ["level", "row"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: index of the first threshold in the 6-byte row 0x801EAF38 + row*6 that exceeds level (row 0 enemies = 16,36,64,99,99,99; row 1 party = 8,16,32,48,99,99), 6 if none; trace: called once per actor in the Battle_BuildTurnOrder frame (c_order.json +21)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DB45C
+name = "Battle_ClearCommands"
+args = []
+status = "evidence"
+evidence = "wtrace 2026-09-05: store 0x801DB47C zeroes C+0x119 for all three members (e_auto +20, c_defend4 +453 at round end); ghidra decomp: command byte and flags +0x124 = 0 for the 3 party slots, +0x75 and +0x80 = 0 for the 8 enemy slots"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801DB4EC
 name = "Battle_ActorFrameUpdate"
 args = ["actor"]
 status = "hypothesis"
 evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): in all three captures, called from 0x801E6C60 with a0 = 0,1,2 every frame (one call per party member)"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DB9AC
+name = "Battle_ActorCanAct"
+args = ["actor"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: predicate used by Battle_BuildTurnOrder: party (actor<3) needs C+0 present bit, status 0x80145F0C & 0x4944 == 0, and (flag 0x801463CA set -> C+0x128 & 0x10); enemy needs 0x801EB5A0+0 bit0, status +0x02 & 0x4144 == 0, (0x801463CA -> +0x104 & 0x10); returns 0 when 0x80146320 == side (1 enemy, 2 party) or 3; trace: 7 calls in the round-commit frame of every command capture (attack +76, defend +49, watch +113, auto +23)"
+note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
@@ -158,6 +509,24 @@ note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD114
+name = "Battle_RemoveFromTurnOrder"
+args = ["actor"]
+status = "evidence"
+evidence = "wtrace c_order.json 2026-09-05: at +153 (enemy 1 killed) store PC 0x801DD210 overwrites the killed actor's slot 0x8014630B (was 4) with 0xFF; ghidra decomp: clears the command byte C+0x119 / enemy +0x75 and flag bit 0x2 (party also 0x128 bit 0x4), then replaces every occurrence of the actor in 0x80146308[0..count) with 0xFF"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD264
+name = "AutoBattle_FillCommands"
+args = []
+status = "evidence"
+evidence = "wtrace e_auto.json 2026-09-05: store 0x801DD2C8 writes command 1 (Attack) into C+0x119 of all three members in one frame (+20); ghidra decomp: walks the entry-order list 0x801462F2[0x801462FF..2] (0xFF ends it), command = 1, C+0x118 = 3, 0x801462EA = last member"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801DD564
 name = "BattleResult_AddExp"
 args = ["amount"]
@@ -194,11 +563,74 @@ note = "overlay by --overlay"
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DE178
+name = "Battle_ClearActorBit"
+args = ["actor"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: 0x801463BE &= ~(1 << actor); called from Battle_EnemyDefeated"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DE440
+name = "BattleBanner_Dispatch"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: per frame: clears the active-kind mask 0x80146325, walks the 8-entry banner pool 0x801EB460 (stride 0xC: +0 active, +1 kind bit, +3 layer 0/1, +4 text pointer, +8 timer) for layers 0 then 1 and calls the kind's handler through a table on the stack (kind 1 -> 0x801DE660, kind 4 -> 0x801DE71C seen); sets scratch 0x1F800000 = index; trace: writes 0x80146325 every other frame in every capture"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DE660
+name = "BattleBanner_Kind1_Tick"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: sets the kind bit in 0x80146325, decrements the pool entry's timer (+8, 0xFF = forever); at 0 deactivates the entry and, when BattleBanner_NoneOfKind(1), clears 0x801483BF; trace: c_run1.json only, +137 (the escape notice)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DE71C
+name = "BattleBanner_Kind4_Tick"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: sibling of 0x801DE660 for kind 4: timer countdown, at 0 deactivates and when BattleBanner_NoneOfKind(4) sets 0x8014832F = 2, else 0x80148336 = pool index; trace: per frame after a victory (c_auto +841..+933) and after an escape (c_run1 +85..+169)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DE820
+name = "BattleBanner_NoneOfKind"
+args = ["kind"]
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: scans the 8 pool entries at 0x801EB460 (stride 0xC): returns 1 when no active entry has +1 == kind; trace: c_run1.json +137 with a0=1 from 0x801DE660"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801DEEC8
 name = "Battle_InitMemberActor"
 args = []
 status = "evidence"
 evidence = "wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +563 (same frame as Battle_Init) writes 15 low context offsets +1..+3E once per slot; ghidra decomp on ctx=*(0x1F800044): +0x29=4, +0xC..+0x20 zeroed, +8=DAT_801462E8, +0x48=0, +0x3E=boot 0x80155238(+0x34,+0x38) (depth from x/z), +0x2B=0, state bytes +1=2,+2..+4=0"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DF860
+name = "Attack_DispatchByCharacter"
+args = []
+status = "hypothesis"
+evidence = "trace: attack+auto only, once per party attack start (c_attack4 +136, c_auto +51); ghidra decomp: jalr through 0x801EB0D0[character id *(0x8014624C)+0x79] unless flag +0x128 & 1 (then 0x801EB0FC) -- per-character attack animation entry"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DF8D0
+name = "Attack_SetAnim"
+args = []
+status = "hypothesis"
+evidence = "trace: attack+auto only, same frame as Attack_DispatchByCharacter; ghidra decomp: ctx+9/+10 = 0x801EB100[character id] (or 0x801EB10C[0x801463C5] under flag +0x128 & 2), boot 0x8014D7C8(ctx+8 + 12), 0x801DEDA0(), ctx+1++"
 note = "overlay by --overlay"
 
 [[function]]
@@ -236,6 +668,42 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E04B4
+name = "Examine_State_Cue"
+args = []
+status = "hypothesis"
+evidence = "trace: watch-only in the 2026-09-05 five-way venn (c_watch4 +419, once, at an enemy move while Examine is armed); ghidra decomp: boot 0x8015E10C(0x205) then ctx+3++ (Defend_Action state-table target)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E0670
+name = "Examine_State_Nop"
+args = []
+status = "hypothesis"
+evidence = "trace: watch-only (c_watch4 +261, once); ghidra decomp: empty body -- a no-op entry of the ctx+3 state table"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E19A0
+name = "Actor_SkillItemDone"
+args = []
+status = "evidence"
+evidence = "wtrace c_skill/c_item.json 2026-09-05: store 0x801E19F4 clears C+0x119 when a skill (4) or item (5) action finishes (+378 steal; +424/+740/+1364 items); ghidra decomp: for command 4 the working AP C+0x8A -= cost 0x801463C4; flags 0x801462E4 |= 0x800; command = 0; skill table 0x801CB234[0x801463BC*0x10] & 0x800 -> ctx state +2 ++, else 0x801DEE08() and state 4"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E1D58
+name = "Actor_ActionDone"
+args = []
+status = "evidence"
+evidence = "wtrace 2026-09-05: store 0x801E1DEC clears the actor's command byte C+0x119 when its attack resolves (c_attack4 +190/+356/+680, c_auto +105/+271/+575); ghidra decomp: ctx state bytes +1..+4 = 2/0/0/0, Battle_ClearActorBit(actor), flag +0x124 &= ~0x200, and the command byte cleared unless 0x801462E4 & 0x40"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801E2500
 name = "Examine_EnemyMove_Tick"
 args = []
@@ -249,6 +717,24 @@ name = "Battle_ResolveAction_Enemy"
 args = []
 status = "hypothesis"
 evidence = "ghidra decomp 2026-09-05 (boot EXE mapped, BIOS thunks returning) + round1.json trace: enemy-actor resolve, sibling of 0x801DFC68: target block from *0x801EB458 + 0xA0.., Battle_ApplyDamage, function-pointer call *(rec+0xE4)(1) under 0x801462E6; round1.json: writes 0x801EC260 at +264 and +862 (ra 0x801E3B7C)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E525C
+name = "Battle_RollDrops"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: for the two drop slots of the dying enemy (rec+0x18/+0x1C item u16 = category<<8|id, rec+0x1A/+0x1E chance class): drop iff Rand() byte <= 0x801D0CB8[class] (table 0,0,1,3,7,31,127,255); a drop is merged into the result list 0x80146330 (items, u16) / 0x80146350 (counts) with count 0x80146323 (max 15) and the enemy slot zeroed; slot03 Gunhead: item 0x0004 class 3 (1.6%), item 0x0019 class 1 (0.4%); trace: called from Battle_EnemyDefeated at every kill frame (c_attack4 +406, c_auto +321/+791), no drop landed in any capture"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E542C
+name = "Battle_EnemyDefeated"
+args = []
+status = "evidence"
+evidence = "wtrace c_order.json 2026-09-05: at +153 and +789 (each kill) store PCs 0x801E5468/0x801E5484 add enemy rec+0x06 (EXP yield, 8) to 0x80146328 and rec+0x04 (zenny yield, 10) to 0x8014632C with a0 = the enemy object 0x801EB5A0+n*0x118; ghidra decomp: ctx flag |= 0x40, zeroes the zenny yield, status |= 0x4000, Battle_RemoveFromTurnOrder(actor), Battle_RollDrops(), enemies-remaining 0x801462EF-- (0 -> 0x80146324 |= 2), engine 0x800A9FA4(+0x7C), GAME 0x80197718(ctx), clears bits 0x70 of +0x100, ctx state = 2/0/0; in the attack+auto venn set at the kill frames"
 note = "overlay by --overlay"
 
 [[function]]
@@ -277,6 +763,15 @@ evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,w
 
 [[function]]
 overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E9454
+name = "Battle_State_Nop"
+args = []
+status = "hypothesis"
+evidence = "ghidra decomp 2026-09-05: empty body (0x801E9468 is its return stub, stamped x92 every other frame in c_run1 +137..+319 while the escape plays out and x282 in nu_attack); a no-op state handler"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
 pc = 0x801E9B74
 name = "Battle_MemberStatusTick"
 args = []
@@ -300,6 +795,42 @@ name = "HUD_GaugeUpdate"
 args = ["gauge_len", "max_hp", "shown_max", "shown_hp"]
 status = "evidence"
 evidence = "wtrace attack_w.json 2026-09-04: writer of the HUD HP copy 0x801484CC (store pc 0x801EA4D0), called from 0x801EA1F4 once per gauge per frame with a0=gauge byte (0x801484B8+n*0x24+0xB), a1=working max HP (enemy 0x801EB640+n*0x118 / party 0x80145F1C+n*0x140, then +2 for AP), a2/a3 = HUD shown max / shown HP; ghidra decomp: gauge = hp*0x37/max with min 1, shrink animation via stack args (delta, step, flag)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA600
+name = "BattleBanner_Task"
+args = []
+status = "evidence"
+evidence = "trace: per frame while a battle-end banner is on screen -- c_auto.json +841..+933 (the victory banner) and c_run1.json +83..+181 (escape); ghidra decomp: dispatches the state byte 0x80148644+3 through {0x801D0FF8 slide-in, 0x801D0FFC hold, 0x801D1000 slide-out}, then BattleBanner_DrawFrame(x=+4, y=+6) and boot 0x8014F6BC(x+4, y+3, colour 0x801EB46A[i*0xC], 0xFF, text 0x801EB464[i*0xC]) for pool entry i = +10"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA6D8
+name = "BattleBanner_SlideIn"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: y (0x80148644+6) += 8 per frame until 0x12, then state (+3)++; trace: x6 at the start of the banner in c_auto (+841..+851) and c_run1 (+83..+93)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA71C
+name = "BattleBanner_Hold"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: empty state body (the hold between slide-in and slide-out); trace: per frame after BattleBanner_SlideIn in c_auto (+853..+933) and c_run1 (+95..+169)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA724
+name = "BattleBanner_SlideOut"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: y -= 8 per frame until -0x16, then clears the pool entry's kind bit in 0x80146325 and calls boot 0x801598DC; trace: c_run1.json only, x6 at +171..+181 (6 frames x 8 px = 0x12 -> -0x16), the escape banner leaving before the field returns"
 note = "overlay by --overlay"
 
 [[function]]

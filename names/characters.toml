@@ -1,0 +1,127 @@
+# names/characters.toml -- the roster names (COMMU02.EMI 0x801DB214, 5-byte stride, roster
+# order 0..6 = the character record order at 0x80144964) and the new-game record
+# templates START.EMI 0x801EB4A4 (8 x 0xA4; roster 7 = the intro whelp, char_id 10).
+
+[meta]
+generator = "tools/text_tables.py"
+disc = "Breath of Fire III (Japan).bin"
+source = "BIN/ETC/COMMU02.EMI#8"
+section_md5 = "5434a7fa67f831392b66916713763e7a"
+section_dest = "0x801D0C00"
+templates_source = "BIN/ETC/START.EMI#8"
+templates_md5 = "b8cc1561528b84ba16fe96074dfee289"
+templates = "0x801EB4A4"
+
+[[character]]
+id = 0
+ram = 0x801DB214
+jp = "リュウ"
+en = "Ryu"
+
+[[character]]
+id = 1
+ram = 0x801DB219
+jp = "ニーナ"
+en = "Nina"
+
+[[character]]
+id = 2
+ram = 0x801DB21E
+jp = "ガーランド"
+en = "Garr"
+
+[[character]]
+id = 3
+ram = 0x801DB223
+jp = "ティーポ"
+en = "Teepo"
+
+[[character]]
+id = 4
+ram = 0x801DB228
+jp = "レイ"
+en = "Rei"
+
+[[character]]
+id = 5
+ram = 0x801DB22D
+jp = "モモ"
+en = "Momo"
+
+[[character]]
+id = 6
+ram = 0x801DB232
+jp = "ペコロス"
+en = "Peco"
+[[template]]
+roster = 0
+jp = "リュウ"
+char_id = 0
+level = 1
+exp = 0
+hp = 20
+ap = 11
+
+[[template]]
+roster = 1
+jp = "ニーナ"
+char_id = 1
+level = 5
+exp = 90
+hp = 27
+ap = 33
+
+[[template]]
+roster = 2
+jp = "ガーランド"
+char_id = 2
+level = 13
+exp = 3000
+hp = 99
+ap = 7
+
+[[template]]
+roster = 3
+jp = "ティーポ"
+char_id = 3
+level = 1
+exp = 0
+hp = 22
+ap = 13
+
+[[template]]
+roster = 4
+jp = "レイ"
+char_id = 4
+level = 5
+exp = 90
+hp = 42
+ap = 12
+
+[[template]]
+roster = 5
+jp = "モモ"
+char_id = 5
+level = 10
+exp = 1000
+hp = 52
+ap = 40
+
+[[template]]
+roster = 6
+jp = "ペコロス"
+char_id = 6
+level = 1
+exp = 0
+hp = 40
+ap = 8
+
+[[template]]
+roster = 7
+jp = "パピー"
+char_id = 10
+level = 0
+exp = 0
+hp = 15
+ap = 15
+

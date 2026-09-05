@@ -1,6 +1,6 @@
 # Ideas catalog — proposed improvements, with feasibility
 
-**Status:** IN PROGRESS (opened 2026-09-04). Each entry records what was
+**Status:** IN PROGRESS (opened 2026-09-04; I4 built 2026-09-05). Each entry records what was
 asked, what in the tree already serves it, what is missing, a feasibility
 rating, and the first concrete step. Nothing here is scheduled. Enhancements
 with a design go to [`ENHANCEMENTS.md`](ENHANCEMENTS.md); naming/readability
@@ -405,3 +405,68 @@ against real screens before any renderer work.
    on a dialogue savestate with `gpu_frame_dump` + the fn-entry ring).
 3. Only then cost the box geometry as `[[recompiler.patch]]` words vs an
    upstream hook, and file the design in `ENHANCEMENTS.md`.
+
+## I4 — Name tables straight from the `.EMI` (items, abilities, places, characters)
+
+**Status:** DONE 2026-09-05 evening — `tools/text_tables.py` → `names/items.toml`
+(five tables, 311 records), `names/abilities.toml` (227), `names/places.toml`
+(200), `names/characters.toml` (7 + 8 templates); `save_tool.py dump` prints
+names and `verify` cross-checks ability types and weapon/armour powers against
+the saves (all pass). Layouts, evidence and what is still open:
+[`TEXT_TABLES.md`](TEXT_TABLES.md). The category question (step 2) was
+settled by the bytes: four inventory categories = four tables with four
+strides (14 / 20 / 18 / 16), plus a 12-byte key-item table. Step 5 is half done: `places.toml` id = AREA number (proven), so each entry
+carries `area_file`, the game's own kanji entry banner (`caption`) and the
+dev label from the area script; wiring that into `area_poller.py summarize`
+is what remains. Step 4 (label the record bytes from the templates) is not done. The probe notes below are kept as the record.
+
+Asked by the user after track E: `save_tool.py` prints item and ability *ids*
+because no id→name table existed. The non-dialogue text was known to be in
+the overlays (the prior decode at `D:\BoFIII` has `extract_menu_text.py` and
+13 675 menu strings from `GAME.EMI` alone), but as a flat string dump with no
+id order. The finding that makes this cheap: **the names sit in fixed-stride
+record tables**, so the id is the record index and the other fields come free.
+
+### What the probes found (all offline, disc bytes via `D:\BoFIII\BIN`)
+
+Encoding is the in-game kana table (`0x5B..` hiragana, `0xAB..` katakana,
+`0xFC` ー, `0x12xx/0x13xx` kanji through `bof3_character_table.json`);
+`tools/save_tool.py` carries the kana half, `D:\BoFIII\decode_text.py` the
+whole thing. Search for a known name encoded (薬草 = `13 1a 12 8b`) and read
+the neighbourhood.
+
+| Table | Where | Record | Evidence |
+|---|---|---|---|
+| **Items (consumables at least)** | `GAME.EMI` §0, RAM **`0x801C995C`** (file `0x3395C`), straight after the 5+5 inventory pointer tables at `0x801C9934` (the tenth pointer is null — key items have no count list) | **14 bytes**: `name[8]` (0-padded), `u16 flags` (`0xC7`/`0xC6`/`0xD7`), `u8 type`, `0x40`, `u16 price` | ids match the saves: 0 なし, 1 あおりんご, 2 パン, **3 薬草** (cat 0 id 3 ×28 in save 2; price 20 = the shop trace's −20 per buy); 知力の種 500 / 知力の研 1000 = Wisdom Seed / Fruit. Open: are weapons / armour / accessories (cats 1–3) further down the same table or separate ones; check cat 1 id 3 (Ryu's starting weapon) |
+| **Abilities** | `GAME.EMI` §0, RAM **`0x801CB230`** (file `0x35230`) — the table `AbilityList_ForType` indexes (`lbu 0x801CB231 + id*16`, `& 3` = type) | **16 bytes**: 8 param bytes (`+1 & 3` = type → which record list; `+5` looks like AP cost; `+6..+7` a u16 running `0x40FC + id`), then `name[8]` | 0x5E レイギル, 0x5B パダーマ, 0x67 ドメガ (Teepo, type 2 = attack magic); 0x46 アプリフ, 0x4B リバル (Momo, type 0 = healing); 0x3C ねらい撃ち, 0x52 ミカテクト, 0x57 ダール (type 1); 0x76 ダブルヒット, 0x08 毒撃, 0x01 会心撃 (type 3 = skills); 0x45 リリフ (Rei). Type semantics are a hypothesis from these names |
+| **Character names** | `COMMU02.EMI` §8 (band `0x801D0C00`), RAM `0x801DB214`, 5-byte stride, preceded by eight pointers `0x801DB1C4..` | リュウ ニーナ ガーランド ティーポ レイ モモ ペコロス — roster order 0..6, a second static confirmation of the order read from the saves |
+| **New-game character templates** | `START.EMI` §8, RAM **`0x801EB4A4`**, 8 × `0xA4` | the persistent record format, statically: roster 1 ニーナ id 1 Lv 5 EXP 90 HP 27, 2 ガーランド Lv 13 EXP 3000 HP 99, 5 モモ Lv 10 EXP 1000, 7 パピー id 10 Lv 0 HP 15 — byte-identical to the untouched records in the saves. Any record offset can be read here without a trace |
+| **Place names (debug map select)** | `MTEST.EMI` §0 (band `0x801D0C00`), RAM `0x801D0D94..`, ~10-byte entries `name[≤8] [0xFF] code` | マクニールむら, ダウナこうざん, さいくつげんば, シーダのもり, レイのかくれが, ぼくそうち, グラウスのどうくつ… one entry per AREA variant (`0x53`/`0x41` suffixes). A name source for IDEAS I2 / `names/areas.toml` — the test-menu list, so confirm each against the world-map guide text before trusting it as *the* label |
+| **Masters (師匠)** | `FIRST.EMI` §11 / `AFLDKWA.EMI` (`0x80014000` band): name · description · location triples, `0xFF`-padded | ウルカン・タパ / いろいろ器用な魔法使い / ダウナの山小屋; 古の大魔法使い / 古のほこら; 世界最高のコック / ウインディア城 |
+
+### What to build (one session, offline)
+
+1. `tools/text_tables.py`: parse the item and ability tables off the staged
+   disc (`tools/emi.py extract` for the section, or the `.EMI` directly) into
+   `names/items.toml` and `names/abilities.toml` — id, JP name, the raw
+   param bytes, and the EN name where `D:\BoFIII\_claude_work\pairs.json` has
+   an aligned line. Confirm every id the saves use (`save_tool.py dump`
+   lists them) decodes to a plausible name; that is the acceptance test.
+2. Settle the category question for items: watch `Inventory_Add`'s callers
+   or read the shop/equip menus for the name lookup — the id byte → string
+   address arithmetic tells whether cats 1–3 share the table.
+3. Wire the two sidecars into `save_tool.py` (`--names`, default on when the
+   files exist) so `dump` prints 薬草 ×28 instead of id3.
+4. Character templates: diff `START.EMI`'s 8 records against the saves'
+   untouched ones to label the remaining record bytes (`+0x07`, `+0x18`,
+   `+0x28..+0x36`, `+0x84`) from what the game *initialises* them to.
+5. Places: emit the MTEST list as candidate labels for `names/areas.toml`
+   with `status = "hypothesis"`; promote per area from the guide text (I2).
+
+### Why this beats the flat dump
+
+The prior extractor kept any block that was ≥20 % kana and split on control
+bytes — right strings, no ids, no fields. A record table gives the id order
+(what the save and the RAM hold), the prices, AP costs and type bits as a
+side effect, and the same trick locates every other non-script table:
+search for one known name in the encoding, read the stride.

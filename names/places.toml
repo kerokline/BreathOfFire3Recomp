@@ -1,0 +1,1619 @@
+# names/places.toml -- one entry per AREA file: the debug map-select list in MTEST.EMI
+# (200 x 10-byte kana names at 0x801D0D94; id = AREA number) joined to the area's own
+# script block (docs/TEXT_TABLES.md 'Places').
+#   jp         the debug list's kana name; ' S' / ' A' = the spring / autumn variant (season)
+#   area_file  BIN/WORLDnn/AREAnnn.EMI -- the key names/areas.toml uses
+#   caption    the on-entry banner the game draws (<0c> ... <16> message), kanji as displayed
+#   dev_label  message 0 of the script when it is a bare label (developer's map name)
+#   en         wiki glossary English; en_source says which string matched (caption / dev_label / jp)
+#   sel        the two bytes the list head holds for this entry (0x801D0C04 + 2*id), undecoded
+
+[meta]
+generator = "tools/text_tables.py"
+disc = "Breath of Fire III (Japan).bin"
+source = "BIN/ETC/MTEST.EMI#0"
+section_md5 = "2af3b23ed9a9e83c5385a9317a8c4cc8"
+section_dest = "0x801D0C00"
+names = "0x801D0D94"
+stride = 10
+count = 200
+head_u32 = 449
+status = "caption = evidence (what the game draws); dev_label and en = hypothesis"
+
+[[place]]
+id = 0
+ram = 0x801D0D94
+jp = "マクニールむら S"
+area_file = "BIN/WORLD00/AREA000.EMI"
+season = "S"
+caption = "泉のマクニール"
+en = "McNeil Village"
+en_source = "romaji jp"
+sel = [4, 20]
+
+[[place]]
+id = 1
+ram = 0x801D0D9E
+jp = "ダウナこうざん"
+area_file = "BIN/WORLD00/AREA001.EMI"
+dev_label = "鉱山の外"
+en = "Dauna Mine"
+en_source = "romaji jp"
+sel = [15, 33]
+
+[[place]]
+id = 2
+ram = 0x801D0DA8
+jp = "さいくつげんば"
+area_file = "BIN/WORLD00/AREA002.EMI"
+sel = [52, 67]
+
+[[place]]
+id = 3
+ram = 0x801D0DB2
+jp = "シーダのもり S"
+area_file = "BIN/WORLD00/AREA003.EMI"
+season = "S"
+caption = "シーダの森、泉"
+en = "Cedar Woods"
+en_source = "caption"
+sel = [55, 37]
+
+[[place]]
+id = 4
+ram = 0x801D0DBC
+jp = "ダウナのこうどう"
+area_file = "BIN/WORLD00/AREA004.EMI"
+sel = [70, 52]
+
+[[place]]
+id = 5
+ram = 0x801D0DC6
+jp = "レイのかくれが S"
+area_file = "BIN/WORLD00/AREA005.EMI"
+season = "S"
+sel = [57, 33]
+
+[[place]]
+id = 6
+ram = 0x801D0DD0
+jp = "にしのはやし S"
+area_file = "BIN/WORLD00/AREA006.EMI"
+season = "S"
+en = "Cedar Woods"
+en_source = "sibling AREA009.EMI caption"
+sel = [78, 20]
+
+[[place]]
+id = 7
+ram = 0x801D0DDA
+jp = "マクニールむら A"
+area_file = "BIN/WORLD00/AREA007.EMI"
+season = "A"
+dev_label = "まくにーるむら"
+en = "McNeil Village"
+en_source = "romaji dev_label"
+sel = [4, 20]
+
+[[place]]
+id = 8
+ram = 0x801D0DE4
+jp = "シーダのもり A"
+area_file = "BIN/WORLD00/AREA008.EMI"
+season = "A"
+dev_label = "シーダの森"
+en = "Cedar Woods"
+en_source = "dev_label"
+sel = [55, 37]
+
+[[place]]
+id = 9
+ram = 0x801D0DEE
+jp = "にしのはやし A"
+area_file = "BIN/WORLD00/AREA009.EMI"
+season = "A"
+caption = "シーダの森"
+en = "Cedar Woods"
+en_source = "caption"
+sel = [78, 20]
+
+[[place]]
+id = 10
+ram = 0x801D0DF8
+jp = "レイのかくれが A"
+area_file = "BIN/WORLD00/AREA010.EMI"
+season = "A"
+sel = [57, 33]
+
+[[place]]
+id = 11
+ram = 0x801D0E02
+jp = "かくれがのかじ"
+area_file = "BIN/WORLD00/AREA011.EMI"
+sel = [57, 33]
+
+[[place]]
+id = 12
+ram = 0x801D0E0C
+jp = "かくれがのやけあと"
+area_file = "BIN/WORLD00/AREA012.EMI"
+dev_label = "やけあと"
+sel = [57, 33]
+
+[[place]]
+id = 13
+ram = 0x801D0E16
+jp = "ぼくそうち S"
+area_file = "BIN/WORLD00/AREA013.EMI"
+season = "S"
+caption = "泉の牧場"
+en = "Farm"
+en_source = "caption"
+sel = [3, 31]
+
+[[place]]
+id = 14
+ram = 0x801D0E20
+jp = "ぼくそうち A"
+area_file = "BIN/WORLD00/AREA014.EMI"
+season = "A"
+en = "Farm"
+en_source = "sibling AREA013.EMI caption"
+sel = [3, 31]
+
+[[place]]
+id = 15
+ram = 0x801D0E2A
+jp = "マクニルていまえ S"
+area_file = "BIN/WORLD00/AREA015.EMI"
+season = "S"
+caption = "おやしき前、泉"
+sel = [54, 81]
+
+[[place]]
+id = 16
+ram = 0x801D0E34
+jp = "ぜんたいマップ1 S"
+area_file = "BIN/WORLD00/AREA016.EMI"
+season = "S"
+sel = [45, 33]
+
+[[place]]
+id = 17
+ram = 0x801D0E3E
+jp = "マクニルていまえ A"
+area_file = "BIN/WORLD00/AREA017.EMI"
+season = "A"
+dev_label = "ぶるじょあまえ"
+sel = [54, 81]
+
+[[place]]
+id = 18
+ram = 0x801D0E48
+jp = "ウールかいどう S"
+area_file = "BIN/WORLD00/AREA018.EMI"
+season = "S"
+sel = [2, 27]
+
+[[place]]
+id = 19
+ram = 0x801D0E52
+jp = "ウールかいどう A"
+area_file = "BIN/WORLD00/AREA019.EMI"
+season = "A"
+sel = [2, 27]
+
+[[place]]
+id = 20
+ram = 0x801D0E5C
+jp = "エンカウンタ016"
+area_file = "BIN/WORLD00/AREA020.EMI"
+dev_label = "2と使いまわし"
+sel = [25, 25]
+
+[[place]]
+id = 21
+ram = 0x801D0E66
+jp = "やみいち"
+area_file = "BIN/WORLD00/AREA021.EMI"
+en = "Syn City"
+en_source = "romaji jp"
+sel = [41, 12]
+
+[[place]]
+id = 22
+ram = 0x801D0E70
+jp = "グラウスのどうくつ"
+area_file = "BIN/WORLD00/AREA022.EMI"
+caption = "グラウスのほらあな"
+sel = [22, 76]
+
+[[place]]
+id = 23
+ram = 0x801D0E7A
+jp = "グラウスさんふもと"
+area_file = "BIN/WORLD00/AREA023.EMI"
+caption = "グラウス山"
+en = "Mt. Glaus"
+en_source = "caption"
+sel = [74, 65]
+
+[[place]]
+id = 24
+ram = 0x801D0E84
+jp = "パピー・ゴースト"
+area_file = "BIN/WORLD00/AREA024.EMI"
+sel = [67, 28]
+
+[[place]]
+id = 25
+ram = 0x801D0E8E
+jp = "ダウナてつどう"
+area_file = "BIN/WORLD00/AREA025.EMI"
+sel = [11, 6]
+
+[[place]]
+id = 26
+ram = 0x801D0E98
+jp = "マクニールてい にわ"
+area_file = "BIN/WORLD00/AREA026.EMI"
+en = "McNeil Manor"
+en_source = "romaji jp"
+sel = [53, 76]
+
+[[place]]
+id = 27
+ram = 0x801D0EA2
+jp = "マクニールていない"
+area_file = "BIN/WORLD00/AREA027.EMI"
+sel = [39, 38]
+
+[[place]]
+id = 28
+ram = 0x801D0EAC
+jp = "マクニールてい やね"
+area_file = "BIN/WORLD00/AREA028.EMI"
+en = "McNeil Manor"
+en_source = "romaji jp"
+sel = [62, 3]
+
+[[place]]
+id = 29
+ram = 0x801D0EB6
+jp = "エンカウンタ033"
+area_file = "BIN/WORLD00/AREA029.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 30
+ram = 0x801D0EC0
+jp = "つりば みずうみ"
+area_file = "BIN/WORLD00/AREA030.EMI"
+sel = [16, 45]
+
+[[place]]
+id = 31
+ram = 0x801D0ECA
+jp = "エレベーター"
+area_file = "BIN/WORLD00/AREA031.EMI"
+sel = [7, 20]
+
+[[place]]
+id = 32
+ram = 0x801D0ED4
+jp = "パピー・ゴースト 5"
+area_file = "BIN/WORLD00/AREA032.EMI"
+dev_label = "24と使いまわし"
+sel = [67, 28]
+
+[[place]]
+id = 33
+ram = 0x801D0EDE
+jp = "ぜんたいマップ1 A"
+area_file = "BIN/WORLD00/AREA033.EMI"
+season = "A"
+sel = [45, 33]
+
+[[place]]
+id = 34
+ram = 0x801D0EE8
+jp = "さいくつげんば 5"
+area_file = "BIN/WORLD00/AREA034.EMI"
+dev_label = "2と使いまわし"
+sel = [52, 67]
+
+[[place]]
+id = 35
+ram = 0x801D0EF2
+jp = "うらかいどう"
+area_file = "BIN/WORLD00/AREA035.EMI"
+dev_label = "オウガー街道"
+en = "Ogre Road"
+en_source = "dev_label"
+sel = [5, 13]
+
+[[place]]
+id = 36
+ram = 0x801D0EFC
+jp = "ざっかや"
+area_file = "BIN/WORLD00/AREA036.EMI"
+sel = [20, 30]
+
+[[place]]
+id = 37
+ram = 0x801D0F06
+jp = "ウィンじょうかまち"
+area_file = "BIN/WORLD00/AREA037.EMI"
+dev_label = "ウインディア"
+en = "Wyndia"
+en_source = "dev_label"
+sel = [33, 66]
+
+[[place]]
+id = 38
+ram = 0x801D0F10
+jp = "ウィンじょう まえ"
+area_file = "BIN/WORLD01/AREA038.EMI"
+sel = [48, 44]
+
+[[place]]
+id = 39
+ram = 0x801D0F1A
+jp = "ウィンじょうない"
+area_file = "BIN/WORLD01/AREA039.EMI"
+caption = "ウインディア城"
+dev_label = "8がつ22にち"
+sel = [49, 40]
+
+[[place]]
+id = 40
+ram = 0x801D0F24
+jp = "モモのとう 1F"
+area_file = "BIN/WORLD01/AREA040.EMI"
+sel = [32, 36]
+
+[[place]]
+id = 41
+ram = 0x801D0F2E
+jp = "ウィンじょう B1"
+area_file = "BIN/WORLD01/AREA041.EMI"
+dev_label = "ちかちーろ"
+sel = [6, 2]
+
+[[place]]
+id = 42
+ram = 0x801D0F38
+jp = "モモのとう まえ"
+area_file = "BIN/WORLD01/AREA042.EMI"
+sel = [30, 54]
+
+[[place]]
+id = 43
+ram = 0x801D0F42
+jp = "せきしょ"
+area_file = "BIN/WORLD01/AREA043.EMI"
+dev_label = "せきしょですわ"
+en = "Checkpoint"
+en_source = "romaji jp"
+sel = [35, 2]
+
+[[place]]
+id = 44
+ram = 0x801D0F4C
+jp = "モモのとう 2F"
+area_file = "BIN/WORLD01/AREA044.EMI"
+sel = [87, 10]
+
+[[place]]
+id = 45
+ram = 0x801D0F56
+jp = "マップ2 へいげん"
+area_file = "BIN/WORLD01/AREA045.EMI"
+sel = [40, 59]
+
+[[place]]
+id = 46
+ram = 0x801D0F60
+jp = "とうげのせきしょ"
+area_file = "BIN/WORLD01/AREA046.EMI"
+dev_label = "せきしょ"
+en = "Checkpoint"
+en_source = "romaji dev_label"
+sel = [18, 75]
+
+[[place]]
+id = 47
+ram = 0x801D0F6A
+jp = "ウィンじろ がいへき"
+area_file = "BIN/WORLD01/AREA047.EMI"
+sel = [113, 10]
+
+[[place]]
+id = 48
+ram = 0x801D0F74
+jp = "モモのとう 3F"
+area_file = "BIN/WORLD01/AREA048.EMI"
+sel = [24, 27]
+
+[[place]]
+id = 49
+ram = 0x801D0F7E
+jp = "じっけんのうじょう"
+area_file = "BIN/WORLD01/AREA049.EMI"
+sel = [77, 35]
+
+[[place]]
+id = 50
+ram = 0x801D0F88
+jp = "コロシアム"
+area_file = "BIN/WORLD01/AREA050.EMI"
+caption = "漢羅狂烈大武会"
+en = "Contest of Champions"
+en_source = "caption"
+sel = [47, 38]
+
+[[place]]
+id = 51
+ram = 0x801D0F92
+jp = "モーランジやま"
+area_file = "BIN/WORLD01/AREA051.EMI"
+caption = "モーランジ山"
+en = "Mt. Myrneg"
+en_source = "caption"
+sel = [15, 76]
+
+[[place]]
+id = 52
+ram = 0x801D0F9C
+jp = "はいきぶつしょりじょ"
+area_file = "BIN/WORLD01/AREA052.EMI"
+sel = [38, 12]
+
+[[place]]
+id = 53
+ram = 0x801D0FA6
+jp = "キャンプ シナリオ"
+area_file = "BIN/WORLD01/AREA053.EMI"
+dev_label = "きゃんぷう"
+sel = [20, 22]
+
+[[place]]
+id = 54
+ram = 0x801D0FB0
+jp = "ロケット ついらく"
+area_file = "BIN/WORLD01/AREA054.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 55
+ram = 0x801D0FBA
+jp = "だいけんじゅ"
+area_file = "BIN/WORLD01/AREA055.EMI"
+sel = [31, 18]
+
+[[place]]
+id = 56
+ram = 0x801D0FC4
+jp = "ウィンディアちかぼち"
+area_file = "BIN/WORLD01/AREA056.EMI"
+dev_label = "地奥墓地"
+sel = [16, 6]
+
+[[place]]
+id = 57
+ram = 0x801D0FCE
+jp = "こうわんとしゴモラ"
+area_file = "BIN/WORLD01/AREA057.EMI"
+dev_label = "港町"
+sel = [40, 82]
+
+[[place]]
+id = 58
+ram = 0x801D0FD8
+jp = "ジャンクむら"
+area_file = "BIN/WORLD01/AREA058.EMI"
+en = "Junk Town"
+en_source = "romaji jp"
+sel = [29, 52]
+
+[[place]]
+id = 59
+ram = 0x801D0FE2
+jp = "ウィンディア すみ"
+area_file = "BIN/WORLD01/AREA059.EMI"
+sel = [25, 18]
+
+[[place]]
+id = 60
+ram = 0x801D0FEC
+jp = "つりばし"
+area_file = "BIN/WORLD01/AREA060.EMI"
+sel = [46, 70]
+
+[[place]]
+id = 61
+ram = 0x801D0FF6
+jp = "けんじゅ きりかぶ"
+area_file = "BIN/WORLD01/AREA061.EMI"
+sel = [31, 18]
+
+[[place]]
+id = 62
+ram = 0x801D1000
+jp = "メーカースふきん"
+area_file = "BIN/WORLD01/AREA062.EMI"
+sel = [29, 41]
+
+[[place]]
+id = 63
+ram = 0x801D100A
+jp = "エンカウンタ045"
+area_file = "BIN/WORLD01/AREA063.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 64
+ram = 0x801D1014
+jp = "エンカウンタ065"
+area_file = "BIN/WORLD01/AREA064.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 65
+ram = 0x801D101E
+jp = "マップ3 さんみゃく"
+area_file = "BIN/WORLD01/AREA065.EMI"
+dev_label = "危険入るな"
+sel = [28, 61]
+
+[[place]]
+id = 66
+ram = 0x801D1028
+jp = "キャンプ もり"
+area_file = "BIN/WORLD01/AREA066.EMI"
+dev_label = "かいそうしーん"
+sel = [19, 21]
+
+[[place]]
+id = 67
+ram = 0x801D1032
+jp = "メーカースけいこく"
+area_file = "BIN/WORLD01/AREA067.EMI"
+en = "Maekyss Gorge"
+en_source = "romaji jp"
+sel = [46, 34]
+
+[[place]]
+id = 68
+ram = 0x801D103C
+jp = "ちゃや"
+area_file = "BIN/WORLD01/AREA068.EMI"
+en = "Coffee Shop"
+en_source = "romaji jp"
+sel = [36, 61]
+
+[[place]]
+id = 69
+ram = 0x801D1046
+jp = "エッグノックかいどう"
+area_file = "BIN/WORLD01/AREA069.EMI"
+en = "Eygnock Road"
+en_source = "romaji jp"
+sel = [2, 27]
+
+[[place]]
+id = 70
+ram = 0x801D1050
+jp = "リベットさん"
+area_file = "BIN/WORLD01/AREA070.EMI"
+sel = [21, 53]
+
+[[place]]
+id = 71
+ram = 0x801D105A
+jp = "ボウモウやま"
+area_file = "BIN/WORLD01/AREA071.EMI"
+sel = [20, 124]
+
+[[place]]
+id = 72
+ram = 0x801D1064
+jp = "エンカウンタ087"
+area_file = "BIN/WORLD01/AREA072.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 73
+ram = 0x801D106E
+jp = "エンカウンタ088"
+area_file = "BIN/WORLD01/AREA073.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 74
+ram = 0x801D1078
+jp = "ウルカン・タパ"
+area_file = "BIN/WORLD01/AREA074.EMI"
+dev_label = "ウルカンタパ"
+en = "Urkan Tapa"
+en_source = "romaji dev_label"
+sel = [52, 21]
+
+[[place]]
+id = 75
+ram = 0x801D1082
+jp = "きかいがはま"
+area_file = "BIN/WORLD01/AREA075.EMI"
+dev_label = "機械浜"
+en = "Steel Beach"
+en_source = "dev_label"
+sel = [30, 109]
+
+[[place]]
+id = 76
+ram = 0x801D108C
+jp = "さきもりのとうだい"
+area_file = "BIN/WORLD02/AREA076.EMI"
+sel = [53, 83]
+
+[[place]]
+id = 77
+ram = 0x801D1096
+jp = "とうだい ないぶ"
+area_file = "BIN/WORLD02/AREA077.EMI"
+dev_label = "灯台の中"
+en = "Lighthouse"
+en_source = "romaji jp"
+sel = [9, 20]
+
+[[place]]
+id = 78
+ram = 0x801D10A0
+jp = "アリーナ1"
+area_file = "BIN/WORLD02/AREA078.EMI"
+sel = [40, 127]
+
+[[place]]
+id = 79
+ram = 0x801D10AA
+jp = "アリーナ2"
+area_file = "BIN/WORLD02/AREA079.EMI"
+sel = [112, 31]
+
+[[place]]
+id = 80
+ram = 0x801D10B4
+jp = "アリーナ3"
+area_file = "BIN/WORLD02/AREA080.EMI"
+sel = [64, 29]
+
+[[place]]
+id = 81
+ram = 0x801D10BE
+jp = "アリーナ4"
+area_file = "BIN/WORLD02/AREA081.EMI"
+sel = [165, 13]
+
+[[place]]
+id = 82
+ram = 0x801D10C8
+jp = "いせき1"
+area_file = "BIN/WORLD02/AREA082.EMI"
+dev_label = "竜の墓、遺跡"
+sel = [35, 68]
+
+[[place]]
+id = 83
+ram = 0x801D10D2
+jp = "いせき2"
+area_file = "BIN/WORLD02/AREA083.EMI"
+sel = [47, 10]
+
+[[place]]
+id = 84
+ram = 0x801D10DC
+jp = "いせき3"
+area_file = "BIN/WORLD02/AREA084.EMI"
+sel = [63, 90]
+
+[[place]]
+id = 85
+ram = 0x801D10E6
+jp = "いせき4"
+area_file = "BIN/WORLD02/AREA085.EMI"
+dev_label = "いせきんなか"
+sel = [37, 29]
+
+[[place]]
+id = 86
+ram = 0x801D10F0
+jp = "せんすいかん"
+area_file = "BIN/WORLD02/AREA086.EMI"
+dev_label = "ほしへゆくふね"
+sel = [65, 3]
+
+[[place]]
+id = 87
+ram = 0x801D10FA
+jp = "マップ4 はんとう"
+area_file = "BIN/WORLD02/AREA087.EMI"
+dev_label = "ラパラ地方"
+en = "Rhapala Region"
+en_source = "dev_label"
+sel = [34, 61]
+
+[[place]]
+id = 88
+ram = 0x801D1104
+jp = "マップ5 わんがん"
+area_file = "BIN/WORLD02/AREA088.EMI"
+dev_label = "ウルカン地方"
+en = "Urkan Region"
+en_source = "dev_label"
+sel = [63, 62]
+
+[[place]]
+id = 89
+ram = 0x801D110E
+jp = "つりば うみ"
+area_file = "BIN/WORLD02/AREA089.EMI"
+sel = [16, 45]
+
+[[place]]
+id = 90
+ram = 0x801D1118
+jp = "キャンプ そうげん"
+area_file = "BIN/WORLD02/AREA090.EMI"
+dev_label = "きゃんぷう"
+sel = [20, 22]
+
+[[place]]
+id = 91
+ram = 0x801D1122
+jp = "もり"
+area_file = "BIN/WORLD02/AREA091.EMI"
+sel = [37, 53]
+
+[[place]]
+id = 92
+ram = 0x801D112C
+jp = "ゴモラのよる"
+area_file = "BIN/WORLD02/AREA092.EMI"
+caption = "その夜"
+sel = [40, 82]
+
+[[place]]
+id = 93
+ram = 0x801D1136
+jp = "ボウモウさんろく"
+area_file = "BIN/WORLD02/AREA093.EMI"
+sel = [19, 14]
+
+[[place]]
+id = 94
+ram = 0x801D1140
+jp = "とうだいふなつきば"
+area_file = "BIN/WORLD02/AREA094.EMI"
+dev_label = "ラパラの船着き場"
+sel = [53, 51]
+
+[[place]]
+id = 95
+ram = 0x801D114A
+jp = "グラウスまえのもりS"
+area_file = "BIN/WORLD02/AREA095.EMI"
+sel = [60, 80]
+
+[[place]]
+id = 96
+ram = 0x801D1154
+jp = "グラウスまえのもりA"
+area_file = "BIN/WORLD02/AREA096.EMI"
+sel = [60, 80]
+
+[[place]]
+id = 97
+ram = 0x801D115E
+jp = "しんでん がいぶ"
+area_file = "BIN/WORLD02/AREA097.EMI"
+dev_label = "火山"
+sel = [35, 74]
+
+[[place]]
+id = 98
+ram = 0x801D1168
+jp = "しんでん ないぶ"
+area_file = "BIN/WORLD02/AREA098.EMI"
+dev_label = "竜のほこら"
+sel = [5, 20]
+
+[[place]]
+id = 99
+ram = 0x801D1172
+jp = "やまごや"
+area_file = "BIN/WORLD02/AREA099.EMI"
+sel = [13, 118]
+
+[[place]]
+id = 100
+ram = 0x801D117C
+jp = "みさきのこや"
+area_file = "BIN/WORLD02/AREA100.EMI"
+dev_label = "何かの機械のようだが"
+sel = [36, 26]
+
+[[place]]
+id = 101
+ram = 0x801D1186
+jp = "こじま"
+area_file = "BIN/WORLD02/AREA101.EMI"
+dev_label = "こじょま"
+sel = [33, 32]
+
+[[place]]
+id = 102
+ram = 0x801D1190
+jp = "しれんのどうくつ1"
+area_file = "BIN/WORLD02/AREA102.EMI"
+sel = [6, 110]
+
+[[place]]
+id = 103
+ram = 0x801D119A
+jp = "しれんのどうくつ2"
+area_file = "BIN/WORLD02/AREA103.EMI"
+dev_label = "火山の中"
+sel = [28, 67]
+
+[[place]]
+id = 104
+ram = 0x801D11A4
+jp = "タイムアタック"
+area_file = "BIN/WORLD02/AREA104.EMI"
+sel = [66, 66]
+
+[[place]]
+id = 105
+ram = 0x801D11AE
+jp = "なみのかいろう 1"
+area_file = "BIN/WORLD02/AREA105.EMI"
+sel = [10, 15]
+
+[[place]]
+id = 106
+ram = 0x801D11B8
+jp = "なみのかいろう 2"
+area_file = "BIN/WORLD02/AREA106.EMI"
+sel = [44, 7]
+
+[[place]]
+id = 107
+ram = 0x801D11C2
+jp = "なみのかいろう 3"
+area_file = "BIN/WORLD02/AREA107.EMI"
+sel = [55, 37]
+
+[[place]]
+id = 108
+ram = 0x801D11CC
+jp = "ダウナはいこう 1"
+area_file = "BIN/WORLD02/AREA108.EMI"
+dev_label = "トロッコボム"
+sel = [9, 12]
+
+[[place]]
+id = 109
+ram = 0x801D11D6
+jp = "ダウナはいこう 2"
+area_file = "BIN/WORLD02/AREA109.EMI"
+sel = [25, 27]
+
+[[place]]
+id = 110
+ram = 0x801D11E0
+jp = "エンカウンタ115"
+area_file = "BIN/WORLD02/AREA110.EMI"
+sel = [25, 25]
+
+[[place]]
+id = 111
+ram = 0x801D11EA
+jp = "てっとう UPPER"
+area_file = "BIN/WORLD02/AREA111.EMI"
+dev_label = "てっとうだよん"
+en = "Steel Tower"
+en_source = "romaji jp"
+sel = [6, 225]
+
+[[place]]
+id = 112
+ram = 0x801D11F4
+jp = "てっとう LOWER"
+area_file = "BIN/WORLD02/AREA112.EMI"
+dev_label = "てっとう"
+en = "Steel Tower"
+en_source = "romaji dev_label"
+sel = [51, 32]
+
+[[place]]
+id = 113
+ram = 0x801D11FE
+jp = "はま"
+area_file = "BIN/WORLD02/AREA113.EMI"
+sel = [43, 20]
+
+[[place]]
+id = 114
+ram = 0x801D1208
+jp = "とってい"
+area_file = "BIN/WORLD03/AREA114.EMI"
+sel = [29, 38]
+
+[[place]]
+id = 115
+ram = 0x801D1212
+jp = "マップ6 ダウナ"
+area_file = "BIN/WORLD03/AREA115.EMI"
+dev_label = "ダウナ山地"
+en = "Dauna Hills"
+en_source = "dev_label"
+sel = [63, 43]
+
+[[place]]
+id = 116
+ram = 0x801D121C
+jp = "ダウナのやまごや"
+area_file = "BIN/WORLD03/AREA116.EMI"
+sel = [26, 28]
+
+[[place]]
+id = 117
+ram = 0x801D1226
+jp = "バイオプラント1"
+area_file = "BIN/WORLD03/AREA117.EMI"
+sel = [64, 8]
+
+[[place]]
+id = 118
+ram = 0x801D1230
+jp = "バイオプラント2"
+area_file = "BIN/WORLD03/AREA118.EMI"
+sel = [11, 8]
+
+[[place]]
+id = 119
+ram = 0x801D123A
+jp = "バイオプラント3"
+area_file = "BIN/WORLD03/AREA119.EMI"
+sel = [7, 2]
+
+[[place]]
+id = 120
+ram = 0x801D1244
+jp = "どうくつじゅうきょ"
+area_file = "BIN/WORLD03/AREA120.EMI"
+dev_label = "クリフ"
+en = "Cliff"
+en_source = "dev_label"
+sel = [49, 19]
+
+[[place]]
+id = 121
+ram = 0x801D124E
+jp = "マップ7 ミッドシー"
+area_file = "BIN/WORLD03/AREA121.EMI"
+dev_label = "ミッド・シー"
+en = "Middle Sea"
+en_source = "dev_label"
+sel = [47, 60]
+
+[[place]]
+id = 122
+ram = 0x801D1258
+jp = "けんじゅ A045"
+area_file = "BIN/WORLD03/AREA122.EMI"
+sel = [31, 18]
+
+[[place]]
+id = 123
+ram = 0x801D1262
+jp = "けんじゅ A151"
+area_file = "BIN/WORLD03/AREA123.EMI"
+sel = [31, 18]
+
+[[place]]
+id = 124
+ram = 0x801D126C
+jp = "エンカウンタ こうや"
+area_file = "BIN/WORLD03/AREA124.EMI"
+sel = [20, 20]
+
+[[place]]
+id = 125
+ram = 0x801D1276
+jp = "エンカウンタ さばく"
+area_file = "BIN/WORLD03/AREA125.EMI"
+sel = [20, 20]
+
+[[place]]
+id = 126
+ram = 0x801D1280
+jp = "コンテナ せつがん"
+area_file = "BIN/WORLD03/AREA126.EMI"
+dev_label = "ふねがついたところん"
+sel = [77, 44]
+
+[[place]]
+id = 127
+ram = 0x801D128A
+jp = "ジャンクダンジョン"
+area_file = "BIN/WORLD03/AREA127.EMI"
+sel = [5, 7]
+
+[[place]]
+id = 128
+ram = 0x801D1294
+jp = "ポンポンせん ドック"
+area_file = "BIN/WORLD03/AREA128.EMI"
+dev_label = "どっく"
+en = "Dock"
+en_source = "romaji dev_label"
+sel = [26, 23]
+
+[[place]]
+id = 129
+ram = 0x801D129E
+jp = "つりば かわ"
+area_file = "BIN/WORLD03/AREA129.EMI"
+sel = [16, 45]
+
+[[place]]
+id = 130
+ram = 0x801D12A8
+jp = "ぎょそん"
+area_file = "BIN/WORLD03/AREA130.EMI"
+dev_label = "ぎょそんぱーち"
+sel = [20, 40]
+
+[[place]]
+id = 131
+ram = 0x801D12B2
+jp = "ポンポンせん"
+area_file = "BIN/WORLD03/AREA131.EMI"
+dev_label = "ポンポンきゃんぷう"
+sel = [35, 44]
+
+[[place]]
+id = 132
+ram = 0x801D12BC
+jp = "ふね へいそう"
+area_file = "BIN/WORLD03/AREA132.EMI"
+dev_label = "ポンポン船へいそう"
+sel = [37, 47]
+
+[[place]]
+id = 133
+ram = 0x801D12C6
+jp = "ふね せつげん"
+area_file = "BIN/WORLD03/AREA133.EMI"
+dev_label = "ぶつけたよ"
+sel = [51, 44]
+
+[[place]]
+id = 134
+ram = 0x801D12D0
+jp = "コンテナせん"
+area_file = "BIN/WORLD03/AREA134.EMI"
+dev_label = "船の外よん"
+en = "Freighter"
+en_source = "romaji jp"
+sel = [74, 40]
+
+[[place]]
+id = 135
+ram = 0x801D12DA
+jp = "コンテナせんないぶ1"
+area_file = "BIN/WORLD03/AREA135.EMI"
+sel = [10, 4]
+
+[[place]]
+id = 136
+ram = 0x801D12E4
+jp = "コンテナせんないぶ2"
+area_file = "BIN/WORLD03/AREA136.EMI"
+dev_label = "ブリッジふきん"
+sel = [10, 10]
+
+[[place]]
+id = 137
+ram = 0x801D12EE
+jp = "コンテナせんないぶ3"
+area_file = "BIN/WORLD03/AREA137.EMI"
+sel = [15, 45]
+
+[[place]]
+id = 138
+ram = 0x801D12F8
+jp = "パイプダンジョン 1"
+area_file = "BIN/WORLD03/AREA138.EMI"
+sel = [9, 61]
+
+[[place]]
+id = 139
+ram = 0x801D1302
+jp = "パイプダンジョン 2"
+area_file = "BIN/WORLD03/AREA139.EMI"
+sel = [85, 44]
+
+[[place]]
+id = 140
+ram = 0x801D130C
+jp = "パイプダンジョン 3"
+area_file = "BIN/WORLD03/AREA140.EMI"
+sel = [11, 70]
+
+[[place]]
+id = 141
+ram = 0x801D1316
+jp = "セラピ ひょうそう"
+area_file = "BIN/WORLD03/AREA141.EMI"
+sel = [96, 50]
+
+[[place]]
+id = 142
+ram = 0x801D1320
+jp = "セラピ しんそう"
+area_file = "BIN/WORLD03/AREA142.EMI"
+dev_label = "せらぴしんそう"
+sel = [13, 11]
+
+[[place]]
+id = 143
+ram = 0x801D132A
+jp = "ドラグニール"
+area_file = "BIN/WORLD03/AREA143.EMI"
+dev_label = "ドラグニール"
+en = "Dragnier"
+en_source = "dev_label"
+sel = [59, 32]
+
+[[place]]
+id = 144
+ram = 0x801D1334
+jp = "ドラグニール ちか"
+area_file = "BIN/WORLD03/AREA144.EMI"
+dev_label = "いどのなか"
+en = "Dragnier"
+en_source = "jp"
+sel = [24, 59]
+
+[[place]]
+id = 145
+ram = 0x801D133E
+jp = "しゅうらく コロニー"
+area_file = "BIN/WORLD03/AREA145.EMI"
+dev_label = "ころにー"
+en = "Colony"
+en_source = "romaji dev_label"
+sel = [67, 22]
+
+[[place]]
+id = 146
+ram = 0x801D1348
+jp = "コンテナヤード"
+area_file = "BIN/WORLD03/AREA146.EMI"
+en = "Container Yard"
+en_source = "jp"
+sel = [22, 34]
+
+[[place]]
+id = 147
+ram = 0x801D1352
+jp = "めがみのまち"
+area_file = "BIN/WORLD03/AREA147.EMI"
+dev_label = "いにしえのみやこ"
+en = "Caer Xhan"
+en_source = "romaji dev_label"
+sel = [54, 34]
+
+[[place]]
+id = 148
+ram = 0x801D135C
+jp = "シャトルステーション"
+area_file = "BIN/WORLD03/AREA148.EMI"
+sel = [39, 50]
+
+[[place]]
+id = 149
+ram = 0x801D1366
+jp = "きどうエレベーター"
+area_file = "BIN/WORLD03/AREA149.EMI"
+dev_label = "るーぷやねん"
+sel = [10, 12]
+
+[[place]]
+id = 150
+ram = 0x801D1370
+jp = "オアシス"
+area_file = "BIN/WORLD03/AREA150.EMI"
+dev_label = "おえいしす"
+en = "Oasis"
+en_source = "jp"
+sel = [22, 32]
+
+[[place]]
+id = 151
+ram = 0x801D137A
+jp = "マップ8 こうや"
+area_file = "BIN/WORLD03/AREA151.EMI"
+dev_label = "彼の地"
+en = "Lost Shore"
+en_source = "dev_label"
+sel = [52, 34]
+
+[[place]]
+id = 152
+ram = 0x801D1384
+jp = "マップ9 さばく"
+area_file = "BIN/WORLD04/AREA152.EMI"
+dev_label = "砂漠"
+en = "Desert"
+en_source = "dev_label"
+sel = [39, 35]
+
+[[place]]
+id = 153
+ram = 0x801D138E
+jp = "キャンプ こうや"
+area_file = "BIN/WORLD04/AREA153.EMI"
+dev_label = "きゃんぷう"
+sel = [20, 22]
+
+[[place]]
+id = 154
+ram = 0x801D1398
+jp = "キャンプ さばく"
+area_file = "BIN/WORLD04/AREA154.EMI"
+dev_label = "きゃんぷう"
+sel = [20, 22]
+
+[[place]]
+id = 155
+ram = 0x801D13A2
+jp = "コンビナート"
+area_file = "BIN/WORLD04/AREA155.EMI"
+dev_label = "こんびなーと"
+en = "Kombinat"
+en_source = "jp"
+sel = [34, 47]
+
+[[place]]
+id = 156
+ram = 0x801D13AC
+jp = "がいかい"
+area_file = "BIN/WORLD04/AREA156.EMI"
+sel = [10, 10]
+
+[[place]]
+id = 157
+ram = 0x801D13B6
+jp = "カプセル チャンバー"
+area_file = "BIN/WORLD04/AREA157.EMI"
+sel = [47, 63]
+
+[[place]]
+id = 158
+ram = 0x801D13C0
+jp = "カプセル A・B"
+area_file = "BIN/WORLD04/AREA158.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 159
+ram = 0x801D13CA
+jp = "カプセル C・D"
+area_file = "BIN/WORLD04/AREA159.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 160
+ram = 0x801D13D4
+jp = "カプセル E・F"
+area_file = "BIN/WORLD04/AREA160.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 161
+ram = 0x801D13DE
+jp = "カプセル G・H"
+area_file = "BIN/WORLD04/AREA161.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 162
+ram = 0x801D13E8
+jp = "カプセル I・J"
+area_file = "BIN/WORLD04/AREA162.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 163
+ram = 0x801D13F2
+jp = "カプセル K・L"
+area_file = "BIN/WORLD04/AREA163.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 164
+ram = 0x801D13FC
+jp = "カプセル M・N"
+area_file = "BIN/WORLD04/AREA164.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 165
+ram = 0x801D1406
+jp = "カプセル O・P"
+area_file = "BIN/WORLD04/AREA165.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 166
+ram = 0x801D1410
+jp = "カプセル Q・R"
+area_file = "BIN/WORLD04/AREA166.EMI"
+sel = [10, 20]
+
+[[place]]
+id = 167
+ram = 0x801D141A
+jp = "OーBARD 1"
+area_file = "BIN/WORLD04/AREA167.EMI"
+sel = [13, 105]
+
+[[place]]
+id = 168
+ram = 0x801D1424
+jp = "OーBARD 2"
+area_file = "BIN/WORLD04/AREA168.EMI"
+sel = [49, 16]
+
+[[place]]
+id = 169
+ram = 0x801D142E
+jp = "OーBARD 3"
+area_file = "BIN/WORLD04/AREA169.EMI"
+sel = [29, 8]
+
+[[place]]
+id = 170
+ram = 0x801D1438
+jp = "OーBARD 4"
+area_file = "BIN/WORLD04/AREA170.EMI"
+sel = [45, 4]
+
+[[place]]
+id = 171
+ram = 0x801D1442
+jp = "OーBARD 5"
+area_file = "BIN/WORLD04/AREA171.EMI"
+sel = [22, 8]
+
+[[place]]
+id = 172
+ram = 0x801D144C
+jp = "OーBARD 6"
+area_file = "BIN/WORLD04/AREA172.EMI"
+sel = [31, 5]
+
+[[place]]
+id = 173
+ram = 0x801D1456
+jp = "OーBARD 7"
+area_file = "BIN/WORLD04/AREA173.EMI"
+dev_label = "いよいよさいごだよん"
+sel = [54, 34]
+
+[[place]]
+id = 174
+ram = 0x801D1460
+jp = "OーBARD 8"
+area_file = "BIN/WORLD04/AREA174.EMI"
+sel = [51, 4]
+
+[[place]]
+id = 175
+ram = 0x801D146A
+jp = "きょうどうたいきほん"
+area_file = "BIN/WORLD04/AREA175.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 176
+ram = 0x801D1474
+jp = "きょうどうたいAー1"
+area_file = "BIN/WORLD04/AREA176.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 177
+ram = 0x801D147E
+jp = "きょうどうたいAー2"
+area_file = "BIN/WORLD04/AREA177.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 178
+ram = 0x801D1488
+jp = "きょうどうたいAー3"
+area_file = "BIN/WORLD04/AREA178.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 179
+ram = 0x801D1492
+jp = "きょうどうたいAー4"
+area_file = "BIN/WORLD04/AREA179.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 180
+ram = 0x801D149C
+jp = "きょうどうたいAー5"
+area_file = "BIN/WORLD04/AREA180.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 181
+ram = 0x801D14A6
+jp = "きょうどうたいAー6"
+area_file = "BIN/WORLD04/AREA181.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 182
+ram = 0x801D14B0
+jp = "きょうどうたいAー7"
+area_file = "BIN/WORLD04/AREA182.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 183
+ram = 0x801D14BA
+jp = "きょうどうたいAー8"
+area_file = "BIN/WORLD04/AREA183.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 184
+ram = 0x801D14C4
+jp = "きょうどうたいAー9"
+area_file = "BIN/WORLD04/AREA184.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 185
+ram = 0x801D14CE
+jp = "きょうどうたいAーA"
+area_file = "BIN/WORLD04/AREA185.EMI"
+dev_label = "きょうどうたい"
+sel = [50, 13]
+
+[[place]]
+id = 186
+ram = 0x801D14D8
+jp = "セントラルターミナル"
+area_file = "BIN/WORLD04/AREA186.EMI"
+dev_label = "ループエレベータ"
+sel = [10, 10]
+
+[[place]]
+id = 187
+ram = 0x801D14E2
+jp = "ポンポンせんキャンプ"
+area_file = "BIN/WORLD04/AREA187.EMI"
+dev_label = "ポンポンきゃんぷう"
+sel = [36, 96]
+
+[[place]]
+id = 188
+ram = 0x801D14EC
+jp = "コンテナせんないぶ2"
+area_file = "BIN/WORLD04/AREA188.EMI"
+dev_label = "コンテナ船"
+en = "Freighter"
+en_source = "dev_label"
+sel = [10, 10]
+
+[[place]]
+id = 189
+ram = 0x801D14F6
+jp = "むげんのさばく"
+area_file = "BIN/WORLD04/AREA189.EMI"
+dev_label = "こっからさきはループ"
+sel = [5, 5]
+
+[[place]]
+id = 190
+ram = 0x801D1500
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA190.EMI"
+sel = [10, 10]
+
+[[place]]
+id = 191
+ram = 0x801D150A
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA191.EMI"
+dev_label = "さばくもきゃんぷう"
+sel = [10, 10]
+
+[[place]]
+id = 192
+ram = 0x801D1514
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA192.EMI"
+dev_label = "さばくもきゃんぷう"
+sel = [10, 10]
+
+[[place]]
+id = 193
+ram = 0x801D151E
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA193.EMI"
+dev_label = "こっからさきはループ"
+sel = [10, 10]
+
+[[place]]
+id = 194
+ram = 0x801D1528
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA194.EMI"
+sel = [10, 10]
+
+[[place]]
+id = 195
+ram = 0x801D1532
+jp = "しんでん がいぶ 5"
+area_file = "BIN/WORLD04/AREA195.EMI"
+dev_label = "火山"
+sel = [35, 74]
+
+[[place]]
+id = 196
+ram = 0x801D153C
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA196.EMI"
+dev_label = "まんもー"
+sel = [10, 10]
+
+[[place]]
+id = 197
+ram = 0x801D1546
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA197.EMI"
+sel = [10, 10]
+
+[[place]]
+id = 198
+ram = 0x801D1550
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA198.EMI"
+sel = [10, 10]
+
+[[place]]
+id = 199
+ram = 0x801D155A
+jp = "みかいたくち"
+area_file = "BIN/WORLD04/AREA199.EMI"
+sel = [10, 10]

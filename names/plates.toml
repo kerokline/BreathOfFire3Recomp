@@ -1,0 +1,1111 @@
+# names/plates.toml -- the place-name plates painted into the world maps' texture pages
+# (docs/TEXT_TABLES.md "World-map plates").  Rectangles come from tools/plates.py plates
+# (analysis/plates/plates.json); jp is a by-eye transcription of plates_sheet.png on
+# 2026-09-05; en is the wiki glossary's Locations row where one exists.
+#   area      the world-map AREA file the page belongs to (names/places.toml id)
+#   x y w h   texel rectangle on the 8-bit page (section dest 0x0E001000, 1024 x 256), 14-row body
+#   span      "W+N" when the plate wraps at texel 256 and continues at the next 16-row band
+#   status    evidence = read off the decoded page; note says when the extractor clipped it
+
+[meta]
+generator = "scratch gen_plates_toml.py over tools/plates.py plates"
+page_dest = "0x0E001000"
+plate_heights = 14
+plate_widths = [44, 60, 76]
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 2
+x = 146
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "牧場"
+en = "Farm"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 3
+x = 194
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "シーダの森"
+en = "Cedar Woods"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 4
+x = 2
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "やみ市"
+en = "Syn City"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 5
+x = 50
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "グラウス山"
+en = "Mt. Glaus"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 6
+x = 130
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "リヴェット山"
+en = "Mt. Levett"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 7
+x = 194
+y = 16
+w = 63
+h = 14
+span = "62+14"
+jp = "ウールオル街道"
+en = "Yraall Road"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 8
+x = 18
+y = 32
+w = 76
+h = 14
+span = "76x14"
+jp = "オウガー街道"
+en = "Ogre Road"
+status = "evidence"
+
+[[plate]]
+area = 16
+area_file = "BIN/WORLD00/AREA016.EMI"
+index = 9
+x = 98
+y = 32
+w = 76
+h = 14
+span = "76x14"
+jp = "マクニール村"
+en = "McNeil Village"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 0
+x = 34
+y = 64
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 1
+x = 82
+y = 64
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 2
+x = 146
+y = 64
+w = 44
+h = 14
+span = "44x14"
+jp = "牧場"
+en = "Farm"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 3
+x = 194
+y = 64
+w = 60
+h = 14
+span = "60x14"
+jp = "シーダの森"
+en = "Cedar Woods"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 4
+x = 2
+y = 80
+w = 44
+h = 14
+span = "44x14"
+jp = "やみ市"
+en = "Syn City"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 5
+x = 50
+y = 80
+w = 60
+h = 14
+span = "60x14"
+jp = "グラウス山"
+en = "Mt. Glaus"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 6
+x = 130
+y = 80
+w = 60
+h = 14
+span = "60x14"
+jp = "リヴェット山"
+en = "Mt. Levett"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 7
+x = 194
+y = 80
+w = 63
+h = 14
+span = "62+14"
+jp = "ウールオル街道"
+en = "Yraall Road"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 8
+x = 18
+y = 96
+w = 76
+h = 14
+span = "76x14"
+jp = "オウガー街道"
+en = "Ogre Road"
+status = "evidence"
+
+[[plate]]
+area = 33
+area_file = "BIN/WORLD00/AREA033.EMI"
+index = 9
+x = 98
+y = 96
+w = 76
+h = 14
+span = "76x14"
+jp = "マクニール村"
+en = "McNeil Village"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 2
+x = 146
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "ウインディア"
+en = "Wyndia"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 3
+x = 210
+y = 0
+w = 47
+h = 14
+span = "46+30"
+jp = "エッグノック街道"
+en = "Eygnock Road"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 5
+x = 34
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "山小屋"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 6
+x = 82
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ボウモウ山"
+en = "Mt. Boumore"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 7
+x = 146
+y = 16
+w = 76
+h = 14
+span = "76x14"
+jp = "メーカース渓谷"
+en = "Maekyss Gorge"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 8
+x = 226
+y = 16
+w = 31
+h = 14
+span = "30+30"
+jp = "モーランジ山"
+en = "Mt. Myrneg"
+status = "evidence"
+
+[[plate]]
+area = 45
+area_file = "BIN/WORLD01/AREA045.EMI"
+index = 10
+x = 34
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "関所"
+en = "Checkpoint"
+status = "evidence"
+note = "extractor clipped the box at 31 texels; the painted plate is whole"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 0
+x = 290
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 1
+x = 338
+y = 32
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 2
+x = 402
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "塔"
+en = "Tower"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 3
+x = 450
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "茶屋"
+en = "Coffee Shop"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 4
+x = 258
+y = 48
+w = 60
+h = 14
+span = "60x14"
+jp = "プラント"
+en = "Plant"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 5
+x = 338
+y = 48
+w = 60
+h = 14
+span = "60x14"
+jp = "ボウモウ山"
+en = "Mt. Boumore"
+status = "evidence"
+
+[[plate]]
+area = 65
+area_file = "BIN/WORLD01/AREA065.EMI"
+index = 6
+x = 418
+y = 48
+w = 60
+h = 14
+span = "60x14"
+jp = "ゴミすて場"
+en = "Dump"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 2
+x = 146
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "船着き場"
+en = "Wharf"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 3
+x = 210
+y = 0
+w = 47
+h = 14
+span = "46+14"
+jp = "ズブロ火山"
+en = "Mt. Zublo"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 4
+x = 18
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "ドック"
+en = "Dock"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 5
+x = 66
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "ラパラ"
+en = "Rhapala"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 6
+x = 114
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "灯台"
+en = "Lighthouse"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 7
+x = 162
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "クリフ"
+en = "Cliff"
+status = "evidence"
+
+[[plate]]
+area = 87
+area_file = "BIN/WORLD02/AREA087.EMI"
+index = 8
+x = 210
+y = 16
+w = 47
+h = 14
+span = "46+14"
+jp = "タイドパレス"
+en = "Tidal Caves"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 2
+x = 146
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "船着き場"
+en = "Wharf"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 3
+x = 210
+y = 0
+w = 47
+h = 14
+span = "46+14"
+jp = "ズブロ火山"
+en = "Mt. Zublo"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 4
+x = 18
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "ドック"
+en = "Dock"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 5
+x = 66
+y = 16
+w = 76
+h = 14
+span = "76x14"
+jp = "ウルカン・タパ"
+en = "Urkan Tapa"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 6
+x = 146
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "遺跡"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 7
+x = 194
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ジャンク村"
+en = "Junk Town"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 8
+x = 2
+y = 32
+w = 60
+h = 14
+span = "60x14"
+jp = "機械浜"
+en = "Steel Beach"
+status = "evidence"
+
+[[plate]]
+area = 88
+area_file = "BIN/WORLD02/AREA088.EMI"
+index = 9
+x = 66
+y = 32
+w = 60
+h = 14
+span = "60x14"
+jp = "天使の塔"
+en = "Angel Tower"
+status = "evidence"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 0
+x = 34
+y = 80
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 1
+x = 82
+y = 80
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 2
+x = 146
+y = 80
+w = 68
+h = 14
+span = "68x14"
+jp = "ダウナ鉱山"
+en = "Dauna Mine"
+status = "evidence"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 3
+x = 218
+y = 80
+w = 31
+h = 14
+span = "31x14"
+jp = "関所"
+en = "Checkpoint"
+status = "evidence"
+note = "extractor clipped the box at 31 texels; the painted plate is whole"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 4
+x = 2
+y = 96
+w = 44
+h = 14
+span = "44x14"
+jp = "やみ市"
+en = "Syn City"
+status = "evidence"
+
+[[plate]]
+area = 115
+area_file = "BIN/WORLD03/AREA115.EMI"
+index = 5
+x = 50
+y = 96
+w = 76
+h = 14
+span = "76x14"
+jp = "オウガー街道"
+en = "Ogre Road"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 0
+x = 34
+y = 216
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 1
+x = 82
+y = 216
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 2
+x = 146
+y = 216
+w = 60
+h = 14
+span = "60x14"
+jp = "船着き場"
+en = "Wharf"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 3
+x = 210
+y = 216
+w = 47
+h = 14
+span = "46+14"
+jp = "ズブロ火山"
+en = "Mt. Zublo"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 4
+x = 18
+y = 232
+w = 44
+h = 14
+span = "44x14"
+jp = "ドック"
+en = "Dock"
+status = "evidence"
+
+[[plate]]
+area = 121
+area_file = "BIN/WORLD03/AREA121.EMI"
+index = 5
+x = 66
+y = 232
+w = 44
+h = 14
+span = "44x14"
+jp = "パーチ"
+en = "Parch"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 2
+x = 146
+y = 0
+w = 68
+h = 14
+span = "68x14"
+jp = "機械墓場"
+en = "Steel Grave"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 3
+x = 218
+y = 0
+w = 31
+h = 14
+span = "31x14"
+jp = "古の都"
+en = "Caer Xhan"
+status = "evidence"
+note = "extractor clipped the box at 31 texels; the painted plate is whole"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 4
+x = 2
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ファクトリー"
+en = "Factory"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 5
+x = 66
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ドラグニール"
+en = "Dragnier"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 6
+x = 130
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "コロニー"
+en = "Colony"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 7
+x = 178
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "コンビナート"
+en = "Kombinat"
+status = "evidence"
+
+[[plate]]
+area = 151
+area_file = "BIN/WORLD03/AREA151.EMI"
+index = 8
+x = 2
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "オアシス"
+en = "Oasis"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 0
+x = 34
+y = 0
+w = 44
+h = 14
+span = "44x14"
+jp = "?"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 1
+x = 82
+y = 0
+w = 60
+h = 14
+span = "60x14"
+jp = "つりポイント"
+en = "Fishing Spot"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 2
+x = 146
+y = 0
+w = 68
+h = 14
+span = "68x14"
+jp = "機械墓場"
+en = "Steel Grave"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 3
+x = 218
+y = 0
+w = 31
+h = 14
+span = "31x14"
+jp = "古の都"
+en = "Caer Xhan"
+status = "evidence"
+note = "extractor clipped the box at 31 texels; the painted plate is whole"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 4
+x = 2
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ファクトリー"
+en = "Factory"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 5
+x = 66
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "ドラグニール"
+en = "Dragnier"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 6
+x = 130
+y = 16
+w = 44
+h = 14
+span = "44x14"
+jp = "コロニー"
+en = "Colony"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 7
+x = 178
+y = 16
+w = 60
+h = 14
+span = "60x14"
+jp = "コンビナート"
+en = "Kombinat"
+status = "evidence"
+
+[[plate]]
+area = 152
+area_file = "BIN/WORLD04/AREA152.EMI"
+index = 8
+x = 2
+y = 32
+w = 44
+h = 14
+span = "44x14"
+jp = "オアシス"
+en = "Oasis"
+status = "evidence"

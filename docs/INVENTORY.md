@@ -1,7 +1,8 @@
 # Repo inventory
 
-**Status:** STABLE (re-snapshotted 2026-09-01; the original 2026-08-29 snapshot
-at `40185ff` described a scaffold that had never been built)
+**Status:** STABLE (re-snapshotted 2026-09-01, `names/` and `saves/` rows
+refreshed 2026-09-05; the original 2026-08-29 snapshot at `40185ff` described
+a scaffold that had never been built)
 
 What exists in this repository so a new session doesn't have to re-derive it.
 Re-verify anything you're about to depend on.
@@ -63,7 +64,7 @@ when the exe runs from a build tree. `/isos/` is gitignored.
 | `launcher_assets/img/` | `boxart.png` / `.tga` + `BOXART_SOURCE.txt` |
 | `assets/` | Default app icon |
 | `.github/workflows/release.yml` | Setup-host multi-platform release workflow (never ships `generated/`) |
-| `names/` | Human-name sidecars: `overlays.toml` (339, keyed by section md5), `functions.toml` (overlay functions, keyed by md5+pc), `areas.toml` (15 sighted places, keyed by script-block md5). See `docs/NAME_MAP.md` |
+| `names/` | Human-name sidecars: `overlays.toml` (339, keyed by section md5), `functions.toml` (overlay functions, keyed by md5+pc), `areas.toml` (15 sighted places, keyed by script-block md5). See `docs/NAME_MAP.md`. **Data tables read off the disc** (2026-09-05, `docs/TEXT_TABLES.md`): `items.toml` (311 records in five tables), `abilities.toml` (227), `places.toml` (200 = AREA000..199, with each area's kanji entry caption and dev label), `characters.toml` (roster + new-game templates) from `tools/text_tables.py extract`; `plates.toml` (85 painted world-map name plates, rectangles from `tools/plates.py`, names transcribed by eye) |
 | `.claude/launch.json` | `docs-static`: `python -m http.server 8765 -d docs` to browse `docs/subsystem_map.html` |
 | `psxrecomp/` | **Submodule** @ `7ab698ca` = fork branch `perf/static-overlay-parallel` = upstream `mstan/master` `04d9184b` + parallel/split static compile (draft PR mstan/psxrecomp#296; re-pin to master when merged) |
 | `recomp-ui/` | **Submodule** @ `fda07fe` = fork `feat/present-scanlines` (upstream `4eda654` + launcher Scanlines toggle; PR mstan/recomp-ui#42 open) |

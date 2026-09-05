@@ -17,186 +17,6 @@ status = "evidence"
 evidence = "STATUS.md 2026-09-01: LOGO/LOGO.EXE is a standalone PS-EXE at 0x801CE000 running the Capcom logo; profiled + compiled as overlay"
 
 [[overlay]]
-md5 = "27015df09cf24a6ac6e52ae375418aa4"
-name = "AREA030"
-family = "WORLD00"
-source = "BIN/WORLD00/AREA030.EMI#4"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "da030ff3b5d7ac775f98eb265a7605f1"
-name = "BATE"
-family = "ETC"
-source = "BIN/ETC/BATE.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "8a80230efd4a882da0558fde6eb0badb"
-name = "BATTLE"
-family = "BATTLE"
-source = "BIN/BATTLE/BATTLE.EMI#3"
-alias = "Battle game-mode"
-role = "battle game-mode executable (command menu, turn loop, result)"
-status = "evidence"
-evidence = "community data doc ch.2 (GameMode executable): mode overlays load at 0x801D0C00; BATTLE.EMI named there"
-
-[[overlay]]
-md5 = "c72ce23ef757ece852594e98b155231f"
-name = "COMMU01"
-family = "ETC"
-source = "BIN/ETC/COMMU01.EMI#7"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "5434a7fa67f831392b66916713763e7a"
-name = "COMMU02"
-family = "ETC"
-source = "BIN/ETC/COMMU02.EMI#8"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "a19ae306bb597709fd24f9b921cf9a9e"
-name = "COMMU03"
-family = "ETC"
-source = "BIN/ETC/COMMU03.EMI#6"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "c0f72f49c32b74cf9c48fc16e251af5b"
-name = "COMMU04"
-family = "ETC"
-source = "BIN/ETC/COMMU04.EMI#6"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "1d8bf929c12155d48d4b2f95abaa6b61"
-name = "COMMU05"
-family = "ETC"
-source = "BIN/ETC/COMMU05.EMI#7"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "093aeda4e126251379f570db9e7d7dd6"
-name = "GAME"
-family = "ETC"
-source = "BIN/ETC/GAME.EMI#1"
-alias = "Field game-mode (small)"
-role = ""
-status = "hypothesis"
-evidence = "filename + game-mode load address; the 227 KB GAME at 0x80196800 is the large sibling"
-
-[[overlay]]
-md5 = "4e5ec177870b0558b93cf7c3132be2eb"
-name = "SCE10EFF"
-family = "SCENARIO"
-source = "BIN/SCENARIO/SCE10EFF.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "e5812cdd35b1051df5c675cc5e469b0c"
-name = "SCE15EF0"
-family = "SCENARIO"
-source = "BIN/SCENARIO/SCE15EF0.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "0299ce792013ac404fb6bef278cdb622"
-name = "SCE15EF1"
-family = "SCENARIO"
-source = "BIN/SCENARIO/SCE15EF1.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "4103714bedfaad82a005e87d90cea6bd"
-name = "SCE15EF2"
-family = "SCENARIO"
-source = "BIN/SCENARIO/SCE15EF2.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "be65339b39dc21a6775962fbd256d95a"
-name = "SCE15EF3"
-family = "SCENARIO"
-source = "BIN/SCENARIO/SCE15EF3.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "9fcb452d0bab313487a85ff6b9b48614"
-name = "SHISU"
-family = "ETC"
-source = "BIN/ETC/SHISU.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "62002f85ca149fec9f16aa97ef43b742"
-name = "SHOP"
-family = "ETC"
-source = "BIN/ETC/SHOP.EMI#0"
-alias = "Shop / inn / save-point game-mode"
-role = "town service menus: buying (inline zenny subtract + Inventory_Add), and the save UI (Save_BuildImage assembles the 0x10B0 game block into the card buffer)"
-status = "evidence"
-evidence = "callstack_diff buy.json + save_ser.json 2026-09-05: resident at 0x801D0C00 during a shop purchase (zenny store 0x801D1E9C) and during a save (Save_BuildImage 0x801D69F0)"
-
-[[overlay]]
-md5 = "7041d0047eb18d5b813f7c5ba464e52e"
-name = "SISYOU"
-family = "ETC"
-source = "BIN/ETC/SISYOU.EMI#0"
-alias = ""
-role = ""
-status = "unnamed"
-evidence = ""
-
-[[overlay]]
-md5 = "b8cc1561528b84ba16fe96074dfee289"
-name = "START"
-family = "ETC"
-source = "BIN/ETC/START.EMI#8"
-alias = "Field main menu (status / equip / items)"
-role = "title screen / new-continue selection"
-status = "evidence"
-evidence = "callstack_diff capture equip.json 2026-09-05: resident at 0x801D0C00 while the field menu was open (equip on Ryu); its 0x801DB650 polls/writes the character status flags 0x80144970 every ~2 frames and 0x801D17B0 writes them once on confirm, then boot Char_RecalcStats runs"
-
-[[overlay]]
 md5 = "321aa9282fa723b23cb60b4ebc8f521a"
 name = "PLP012"
 family = "PLCHAR"
@@ -385,6 +205,186 @@ alias = "Party character set 678"
 role = ""
 status = "hypothesis"
 evidence = "directory BIN/PLCHAR; 3-hex-digit suffix looks like a member-id triple, unverified"
+
+[[overlay]]
+md5 = "27015df09cf24a6ac6e52ae375418aa4"
+name = "AREA030"
+family = "WORLD00"
+source = "BIN/WORLD00/AREA030.EMI#4"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "da030ff3b5d7ac775f98eb265a7605f1"
+name = "BATE"
+family = "ETC"
+source = "BIN/ETC/BATE.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "8a80230efd4a882da0558fde6eb0badb"
+name = "BATTLE"
+family = "BATTLE"
+source = "BIN/BATTLE/BATTLE.EMI#3"
+alias = "Battle game-mode"
+role = "battle game-mode executable (command menu, turn loop, result)"
+status = "evidence"
+evidence = "community data doc ch.2 (GameMode executable): mode overlays load at 0x801D0C00; BATTLE.EMI named there"
+
+[[overlay]]
+md5 = "c72ce23ef757ece852594e98b155231f"
+name = "COMMU01"
+family = "ETC"
+source = "BIN/ETC/COMMU01.EMI#7"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "5434a7fa67f831392b66916713763e7a"
+name = "COMMU02"
+family = "ETC"
+source = "BIN/ETC/COMMU02.EMI#8"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "a19ae306bb597709fd24f9b921cf9a9e"
+name = "COMMU03"
+family = "ETC"
+source = "BIN/ETC/COMMU03.EMI#6"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "c0f72f49c32b74cf9c48fc16e251af5b"
+name = "COMMU04"
+family = "ETC"
+source = "BIN/ETC/COMMU04.EMI#6"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "1d8bf929c12155d48d4b2f95abaa6b61"
+name = "COMMU05"
+family = "ETC"
+source = "BIN/ETC/COMMU05.EMI#7"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "093aeda4e126251379f570db9e7d7dd6"
+name = "GAME"
+family = "ETC"
+source = "BIN/ETC/GAME.EMI#1"
+alias = "Field game-mode (small)"
+role = ""
+status = "hypothesis"
+evidence = "filename + game-mode load address; the 227 KB GAME at 0x80196800 is the large sibling"
+
+[[overlay]]
+md5 = "4e5ec177870b0558b93cf7c3132be2eb"
+name = "SCE10EFF"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE10EFF.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "e5812cdd35b1051df5c675cc5e469b0c"
+name = "SCE15EF0"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF0.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "0299ce792013ac404fb6bef278cdb622"
+name = "SCE15EF1"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF1.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "4103714bedfaad82a005e87d90cea6bd"
+name = "SCE15EF2"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF2.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "be65339b39dc21a6775962fbd256d95a"
+name = "SCE15EF3"
+family = "SCENARIO"
+source = "BIN/SCENARIO/SCE15EF3.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "9fcb452d0bab313487a85ff6b9b48614"
+name = "SHISU"
+family = "ETC"
+source = "BIN/ETC/SHISU.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "62002f85ca149fec9f16aa97ef43b742"
+name = "SHOP"
+family = "ETC"
+source = "BIN/ETC/SHOP.EMI#0"
+alias = "Shop / inn / save-point game-mode"
+role = "town service menus: buying (inline zenny subtract + Inventory_Add), and the save UI (Save_BuildImage assembles the 0x10B0 game block into the card buffer)"
+status = "evidence"
+evidence = "callstack_diff buy.json + save_ser.json 2026-09-05: resident at 0x801D0C00 during a shop purchase (zenny store 0x801D1E9C) and during a save (Save_BuildImage 0x801D69F0)"
+
+[[overlay]]
+md5 = "7041d0047eb18d5b813f7c5ba464e52e"
+name = "SISYOU"
+family = "ETC"
+source = "BIN/ETC/SISYOU.EMI#0"
+alias = ""
+role = ""
+status = "unnamed"
+evidence = ""
+
+[[overlay]]
+md5 = "b8cc1561528b84ba16fe96074dfee289"
+name = "START"
+family = "ETC"
+source = "BIN/ETC/START.EMI#8"
+alias = "Field main menu (status / equip / items)"
+role = "title screen / new-continue selection"
+status = "evidence"
+evidence = "callstack_diff capture equip.json 2026-09-05: resident at 0x801D0C00 while the field menu was open (equip on Ryu); its 0x801DB650 polls/writes the character status flags 0x80144970 every ~2 frames and 0x801D17B0 writes them once on confirm, then boot Char_RecalcStats runs"
 
 [[overlay]]
 md5 = "9d00fd19af78fbe9c0a411ef3ae2a810"

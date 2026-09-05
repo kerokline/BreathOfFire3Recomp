@@ -32,8 +32,9 @@ the task touches.
 | [`MEDNAFEN.md`](MEDNAFEN.md) | reference | Stock Mednafen in `./mednafen/` as an isolated oracle: what crosses over (memcards yes, savestates no), the card naming, and driving it with `tools/mednafen_ctl.py` |
 | [`SAVESTATES.md`](SAVESTATES.md) | index | What each savestate slot holds; the in-game-vs-file off-by-one |
 | [`NAME_MAP.md`](NAME_MAP.md) | plan + evidence | The readability track: `names/` sidecars (overlays / functions / areas), the status+evidence rule, the area poller, routes to earn names |
+| [`TEXT_TABLES.md`](TEXT_TABLES.md) | evidence | Id→name tables read straight from the `.EMI`: the five item tables, abilities, the MTEST place list (= AREA numbers, joined to each area's kanji caption), the roster; the encoding facts the names taught; the save cross-checks that prove weapon/armour power and ability type; **the world-map place names as painted texture plates** (format, `tools/plates.py`, `names/plates.toml`, the text-swap constraints); `tools/text_tables.py` → `names/items.toml` etc. |
 | [`subsystem_map.html`](subsystem_map.html) | generated | Browsable map (bands → overlays → functions, boot EXE, areas). Regenerate with `tools/subsystem_map.py`; never hand-edit |
-| [`IDEAS.md`](IDEAS.md) | intake | Proposed improvements with feasibility: combat call-stack mapping (I1), programmatic area labels from map text (I2), 1.5x dialogue box + furigana (I3) |
+| [`IDEAS.md`](IDEAS.md) | intake | Proposed improvements with feasibility: combat call-stack mapping (I1), programmatic area labels from map text (I2), 1.5x dialogue box + furigana (I3), name tables straight from the `.EMI` (I4, done 2026-09-05 → [`TEXT_TABLES.md`](TEXT_TABLES.md)) |
 | [`ENHANCEMENTS.md`](ENHANCEMENTS.md) | plan | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance (designed), costed backlog |
 | [`vblank-pacing-bug.md`](vblank-pacing-bug.md) | investigation | The Capcom FMV slowdown: root cause (SPU snapshot gate), fix, and the two wrong theses |
 | [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md) | investigation | One unreproduced fail-fast into kernel RAM on a savestate resume |
