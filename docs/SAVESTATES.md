@@ -21,18 +21,24 @@ the player to load one.
 
 | In-game | File | Written | Contents | Use |
 |---|---|---|---|---|
-| 1 | `slot00` | 2026-09-03 | Title / boot-shaped scene (small OTs) | Re-saved during the PR #302 census; replaced the name-entry state |
-| 2 | `slot01` | 2026-09-03 | **Battle**, several turns and effects queued | DMA2 ordering-table anchor ([`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md)); replaced the opening-mine field state |
-| 3 | `slot02` | 2026-09-03 | **World map** | Largest ordering tables in the game (~1,000 nodes); replaced the dialogue-box state |
-| 4 | `slot03` | 2026-09-03 | **Merchant**, busy screen | Replaced the choice-prompt state |
-| 5 | `slot04` | 2026-09-03 | **Field battle, Rei mid herb-use effect** | Reproduces the ground-texture wipe ~35 frames after load on an unfixed build ([`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)); regression anchor for the polyline fix. Replaced the intro-boss dispatch anchor (re-save one if `headless_ab.py` is needed again) |
-| 6 | `slot05` | 2026-09-03 | **Same battle, a few seconds earlier** (herb selected, effect not yet started) | Clean control for `slot04`; does not reproduce. Replaced the dialogue-box state |
-| 7 | `slot06` | 2026-09-01 | Capcom logo, mid-FMV | **Resumes *past* the FMV** — useless for FMV profiling; use a clean boot (`tools/fmv_bench.py`) |
-| 8 | `slot07` | 2026-09-01 | **World map** | Perf anchor (now 60 fps). The one `0x00002934` fail-fast happened resuming this file ([`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md)); not reproduced |
-| 9 | `slot08` | 2026-09-01 | **Save / memory-card screen** | Perf anchor (now 60 fps) |
-| 10 | `slot09` | 2026-09-01 | **Just before a merchant transition** | Perf anchor; doubles as a shop-text capture point |
-| 11 | `slot10` | 2026-09-04 | **Battle command menu, cursor on Attack** (AREA020, Dauna-region field battle) | `tools/callstack_diff.py` differential anchor (Attack vs Defend); saved over TCP mid-animation, so the first frames after load are not idle |
-| 12 | `slot11` | 2026-09-04 | **Watch armed, enemy (Nu) about to use Nu Stomp**; the question mark appears ~30 frames after load | Examine-logic anchor for `tools/callstack_diff.py` (second of two trigger states; the first, against a different enemy, was overwritten) |
+| 1 | `slot00` | 2026-09-05 | **Title / start screen** | Quick restarts |
+| 2 | `slot01` | 2026-09-05 | **Just before the intro-boss battle** | Auto-advances into the battle; after it, any command auto-advances through several scene transitions of auto-playing dialogue and areas — a long scripted stretch from one load |
+| 3 | `slot02` | 2026-09-05 | **Inside the Nu boss fight** | Boss-battle anchor |
+| 4 | `slot03` | 2026-09-05 | **Inside a regular field battle** | `tools/callstack_diff.py` differential anchor (Attack / Defend / Watch / Auto / Run — see the command-menu note below) |
+| 5–12 | `slot04`–`slot11` | earlier | **Overwritten or stale** (user, 2026-09-05) — the 2026-09-03/04 anchors listed in the Log below no longer hold what they said | Re-save before use |
+
+**Hidden command-menu entries.** Auto-attack and Run do not appear in the
+battle command list: **hold L1** to hover Auto-attack, **hold R1** to hover
+Run, then Circle to confirm (user, 2026-09-05). Run is a randomised check, so
+its call path differs on success (ends combat) vs failure. In
+`callstack_diff.py` terms: `--hold l1 --press circle` / `--hold r1 --press
+circle`, the same mechanism as `--hold right` for Defend.
+
+Former contents (2026-09-03/04, for the Log's cross-references): `slot01`
+mid-battle DMA2 anchor, `slot02` world map, `slot03` merchant, `slot04`/`05`
+the herb-effect battle with Rei, `slot06` mid-FMV, `slot07` world map,
+`slot08` memory-card screen, `slot09` pre-merchant, `slot10` battle menu on
+Attack (AREA020), `slot11` Watch armed vs Nu.
 
 The text-path states (1–4, 6) were all within ~30 s of boot on 2026-08-30 and
 predate every rebuild since; they have survived rebuilds before (verified

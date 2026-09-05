@@ -14,10 +14,9 @@ The game **plays at 60 fps** on `build-relprof` (Capcom logo, world map,
 memory-card screens all user-verified 2026-09-01 with clean audio). All ten
 overlay bands plus `LOGO/LOGO.EXE` are compiled from the disc and dispatch
 ~99% native. The Axis B loop now takes **90 s** instead of ~16 min (parallel
-static compile + split translation units, `psxrecomp` fork branch
-`perf/static-overlay-parallel` `7ab698ca`, draft PR mstan/psxrecomp#296 —
-play-test more, then request the merge and re-pin to `mstan/master`);
-`recomp-ui` waits on one launcher PR. The text engine is identified and
+static compile + split translation units, merged upstream as
+mstan/psxrecomp#296; `psxrecomp` is pinned to plain `mstan/master` `17f49ad3`
+since 2026-09-05); `recomp-ui` waits on two launcher PRs. The text engine is identified and
 confirmed live. A **readability track** is open: `names/` sidecars
 (overlays, functions, areas), `tools/area_poller.py` (which area is resident,
 with certainty, plus screenshots), and the browsable
@@ -27,7 +26,16 @@ screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
 **2026-09-05:** a second track produced most of the names so far: the
 data-anchor loop (section 0 below) decoded the damage formula, level-up,
 inventory, equipment and the save format in one weekend, with the RAM map in
-[`BATTLE_RAM.md`](BATTLE_RAM.md).
+[`BATTLE_RAM.md`](BATTLE_RAM.md); the morning of 2026-09-05 added the turn
+order, the command menus, escape, the enemy AI tables, the results tally and
+the effect applier (~70 names, most at `evidence`). **2026-09-05 evening:**
+the game's own data tables are readable off the disc — items (five tables),
+abilities, the 200-entry place list (= AREA numbers) and the roster are in
+`names/*.toml` with English where the wiki has it, `save_tool.py` prints
+names and proves weapon/armour power against the saves, and the world-map
+place names turned out to be **painted plates** in the map textures, now
+decoded and transcribed (`tools/plates.py`, `names/plates.toml`,
+[`TEXT_TABLES.md`](TEXT_TABLES.md)).
 
 ## Start here
 
@@ -53,15 +61,57 @@ headless driver. The loop:
 
 | # | Target | Why it pays | How |
 |---|---|---|---|
-| 1 | **`Battle_BaseDamage` + the two defence steps** (`0x801DCAA0`, `0x801DC704`, `0x801DC85C`) | the only part of the damage formula not read; gives the ATK/DEF fields of both record types | `ghidra_run.py export --program BATTLE_EMI3_801D0C00 --decompile 0x801DCAA0,0x801DC704,0x801DC85C`, no game needed |
-| 2 | **`Battle_Init` `0x801D1228`** to evidence | 1428-byte battle setup, hypothesis only; decompile + the battlebegin trace (33 fields at +563) | decompile; compare against BATTLE_RAM's actor table |
-| 3 | **Enemy record layout** (`0x801EB634 + n*0x118`) | only HP/max/status/flags known; ATK/DEF/EXP-yield/drop table unknown | `capture --watch 0x801EB5A0-0x801EB8D0` over a battle start, then the writers' bodies |
-| 4 | **Item drop + EXP yield** at battle end | closes the results screen: `BATL_END` calls `Inventory_Add` and `BattleResult_AddExp` from somewhere | `capture --watch 0x80145040-0x80145470` on a battle with a drop, window 1500+ |
-| 5 | **Magic / Item / Run command paths** | same venn method as Attack/Defend/Watch; identifies the BMAGIC overlay ABI via the resident md5 | three captures from the slot-10 anchor with `--hold` |
-| 6 | **Roster order** (who is roster 1, 2, 4..7) | one kill with Rei or Nina in the party | `--watch` on the `0x80144A10` / `0x80144AB4` EXP cells |
+| 1 | ~~`Battle_BaseDamage` + the two defence steps~~ **DONE 2026-09-05** — full formula + ATK/DEF/hit/evade fields in BATTLE_RAM.md; the "defence steps" were to-hit rolls | remaining: elemental affinity `0x8009FA78` (BATTLE.EMI#15), enemy `+0x08` | `ghidra_run.py import --source BATTLE.EMI --load-addr 0x80093800 --overwrite --decompile 0x8009FA78` |
+| 2 | ~~`Battle_Init` `0x801D1228` to evidence~~ **DONE 2026-09-05** — all 33 traced offsets explained (effective-stat snapshot + `Formation_ApplyStatMods`, low-HP bit, resets) | left: boot helpers `0x8014E294`, `0x801629CC` unnamed | — |
+| 3 | ~~Enemy record layout~~ **DONE 2026-09-05** — `+0x04` zenny, `+0x06` EXP, `+0x08` level, `+0x18..+0x1F` drop slots, `+0x28` AGI, `+0x60` AI script, obj `+0xE1` AI row mask | left: `+0x2A`, the AI row semantics | BATTLE_RAM.md enemy table |
+| 4 | ~~Item drop + EXP yield~~ **DONE 2026-09-05** — `Battle_EnemyDefeated` → `Battle_RollDrops` → BATL_END `BattleResult_Setup` / `_ExpTick` / `_ZennyTick` / `_AwardDrops` | left: a battle where a drop actually lands (`AwardDrops` is body-only) | `--watch 0x80146320-0x80146360` on a kill |
+| 5 | ~~Magic / Item / Run command paths~~ **DONE 2026-09-05** — command byte `C+0x119` (+target `+0x118`, parameter `+0x11A`), engine-band menus, `Escape_Roll`/`Escape_Chance`, `Effect_ApplyResult` and its handler table `0x800B165C` | left: per-skill/item handler indices (user: read directly later), Defend confirm body (Ghidra gap `0x801D2520`) | engine band needs `--lo 0x80093800 --hi 0x801D0C00` and ≤ ~130-frame windows |
+| 6 | ~~Roster order~~ **DONE 2026-09-05** — read off the record name bytes in the card saves (`save_tool.py dump`): 0 リュウ, 1 ニーナ, 2 ガーランド, 3 ティーポ, 4 レイ, 5 モモ, 6 ペコロス, 7 パピー = the intro's baby dragon (char id 10; proven live on `slot01`: roster byte 7, write-back into record 7); char id = roster for 0..6, ids 7/8/9/14 are alternate forms via table `0x80182488` (9 = the lone boy Ryu of save 1) | left: which forms 7, 8, 14 are | — |
 | 7 | **Dialogue engine anchors** (IDEAS I2) | the translation apply path still needs the box-string writers named | `capture --watch 0x801490A0-0x801490C0` on a dialogue open |
 | 8 | **Psy-Q signatures on the boot EXE** | hundreds of libgpu/libspu/libcd names at once; needs a signature set | Ghidra GUI session; then `ghidra_run.py merge --symbols` |
-| 9 | **Save editor / verifier script** | the format is complete: contiguous `0x10B0` block, u16 byte-sum at `+0x270` | small host tool over `.mcr` files; validates the RAM map end to end |
+| 10 | ~~Name tables from the `.EMI`~~ **DONE 2026-09-05** — `tools/text_tables.py extract` → `names/items.toml` (consumables 92 / key 16 / weapons 83 / armour 68 / accessories 52, five tables with five strides), `abilities.toml` (227, `type = b1 & 3`), `places.toml` (200 MTEST entries = AREA000..199, joined to each area's kanji entry banner and dev label, 45 with English), `characters.toml`; `save_tool.py` prints names and `verify` proves ability types and weapon ATK / armour DEF against the saves | left: the `ref` index, accessory effect codes, the ability param bytes, masters (a message block, not a table), promoting places into `areas.toml` | [`TEXT_TABLES.md`](TEXT_TABLES.md) |
+| 9 | ~~Save verifier script~~ **DONE 2026-09-05** — `tools/save_tool.py`; card1's three saves verify and match the Mednafen load screen; three RAM-map corrections (`Flag_Test`, play time `0x80144FBC`, four ability lists); names since row 10 | left: the `0x8014686C..` words at the block head, record `+0x84` | `python tools/save_tool.py verify saves/card1.mcd` |
+
+**Trap paid for 2026-09-05 (GHIDRA.md → Traps):** every overlay decompile
+was silently truncated at the first call into the boot EXE — `Rand` is a
+BIOS thunk (`jr` to `0xA0`) that Ghidra marked no-return. Fixed in the
+seeder (boot EXE mapped into each overlay program, thunks made returning);
+**re-import any program from before 2026-09-05 08:40 with `--overwrite`
+before trusting its decompiles.**
+
+**Track C outcome (2026-09-05 morning, remote plan):** targets 3, 4 and 5
+above are closed as far as the compiled code allows — enemy record yields
+/ level / drop slots, the kill → drop roll → BATL_END tally chain, and the
+finding that **no battle command has its own compiled function** (the
+five-way venn is empty for Auto and Defend; Run and Watch differ only in
+exit/Examine states). BATTLE_RAM.md "Turn order, kills, drops and the
+results tally" has the RAM; 30 names landed. Follow-up the same morning: widening the
+`fn_filter` to the engine band (`--lo 0x80093800 --hi 0x801D0C00`, 100-frame
+windows) found the command menu, the Run roll (`Escape_Roll` /
+`Escape_Chance`), Auto's flag + fill, and the table-driven enemy AI
+(`EnemyAI_ChooseActions`) — BATTLE_RAM.md "Commands, Auto, Run and the
+enemy AI". Skill and item rounds were captured after that (`c_skill`,
+`c_item`, `nu_item`) and the engine's `Effect_ApplyResult` `0x8009A160`
+(the one function behind skill, item and enemy-special HP changes) was
+seeded and read. Left from C: the Defend confirm body (Ghidra gap at
+`0x801D2520`), the Defend flag `0x80`, a real drop, the per-skill/item
+handler indices behind `0x800B165C` (user: read directly later). **Rule learned:
+the default `fn_filter` sees only the game-mode band; anything the engine
+does (menus, escape, AI) needs the engine band in the filter, and then
+only ~130 frames fit the ring.**
+
+**Traps paid for on track C (2026-09-05):** the fn-entry ring wraps at
+262 144 entries and keeps the *newest*, so with the default filter a
+battle window over ~1 000 frames loses the presses (`WARNING: entry ring
+wrapped` — trust the tail, not the head); `slot03` opens on the *first*
+member's menu, so one Circle-pair only enters Ryu's command and nothing
+resolves — a round is Circle ×6 (or `--hold l1 --press circle` for Auto,
+which resolves everything in one press); the results screen waits for
+Circle — use `--press circle` ×18 with `--press-gap 150` to page through
+it; `BATL_END.EMI` shares `0x801EEC00` with `SHOP.EMI#8`, so `name` there
+needs `--overlay 18ce968c…`; `playsession.py dump` is not a RAM dump —
+snapshot RAM with `ramdiff --range LO-HI --no-ask` and read the
+`.before.bin`.
 
 **Traps paid for this weekend** (details in BATTLE_RAM.md / GHIDRA.md):
 long `ramdiff` windows net out later hits; a same-state save rewrites
@@ -584,43 +634,42 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`adf54eaa`** = local integration branch `bof3/int-fast-forward`
-  = fork `perf/static-overlay-parallel` `7ab698ca` (draft PR
-  mstan/psxrecomp#296) + cherry-pick of `feat/fast-forward-pad` `2ae78109`
-  (controller fast-forward host shortcut, `[hotkeys] fast_forward_pad`; branch
-  cut from upstream `22fbbfca`, PR [mstan/psxrecomp#307](https://github.com/mstan/psxrecomp/pull/307)). Two PRs
-  outstanding, so the pin is a temporary fork state; bump back to plain
-  `mstan/master` when both merge — fetch upstream, fast-forward the
-  submodule's `master`, commit the gitlink, never float.
-- **2026-09-03 — `psxrecomp` working tree is on fork branch
-  `fix/gpu-polyline-terminator` `402cada6`** = upstream `master` `d08d84a3` + one
-  commit (GP0 polyline terminator tested only at vertex-unit boundaries after
-  the first two vertices — [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md)).
-  PR [mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313) open;
-  re-pin to `mstan/master` if it merges. Both `build-relprof` and `build-dbg`
-  are built from it. The gitlink in the
-  title repo was already dirty (mid re-pin to master) before this change.
-- `recomp-ui` **`a736d57`** = local integration branch
-  `bof3/int-scanlines-master` = fork `feat/present-scanlines` `fda07fe`
-  (pending [mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42))
-  with upstream `master` `da80dc7` merged in. The merge conflicted in
-  `recomp_launcher.h`: #42 and upstream #46 both appended to the tail of
-  `Settings` / `GameInfo`; resolved with upstream's `virtual_stylus` /
-  `has_virtual_stylus` first and the scanline fields after — #42 should be
-  rebased the same way before merge. Upstream #46 already draws every host
-  shortcut on the Controller page, so the Fast-forward row needs no launcher
-  change; [mstan/recomp-ui#47](https://github.com/mstan/recomp-ui/pull/47) is
-  redundant (close it) and the old `bof3/int-fast-forward` branch is dead.
-  Pin back to upstream `master` when #42 merges.
-- Fork branches on `kerokline/psxrecomp` that are now history:
+- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` (re-pinned
+  2026-09-05). Everything the fork ever carried is merged: #289/#290/#292
+  (residency signal, scanlines, SPUCNT gate), #296 (parallel static overlay
+  compile), #307 (fast-forward pad chord), #313 (GP0 polyline terminator),
+  #318 (fast-forward toggle), #319/#320 (explicit keymap unbind). Bump recipe:
+  `git -C psxrecomp fetch upstream`, check nothing in the old pin is missing
+  from `upstream/master` (`git log upstream/master..<old pin>` must be empty),
+  fast-forward the submodule's `master`, commit the gitlink. Never float.
+  After a bump: `build_emitters.sh` → `generate` (usually a no-op) →
+  `psxrecomp_codegen_hash` → overlays → runtime, in that order.
+- `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
+  (`kerokline/recomp-ui`) = upstream `master` + the Scanlines toggle
+  ([mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42)) + the
+  host-shortcut Select labels
+  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48)). Pin back
+  to upstream `master` when both merge. #42 conflicted once against upstream
+  #46 in `recomp_launcher.h` (both appended to `Settings` / `GameInfo`);
+  resolved upstream-first (`virtual_stylus` before the scanline fields) —
+  rebase the same way if it conflicts again. #47 was redundant with #46.
+- **Open fork branch:** `fix/starvation-watchdog-wrap` `430c93b8` (= `17f49ad3` + 1)
+  = [mstan/psxrecomp#321](https://github.com/mstan/psxrecomp/pull/321) — the starvation-watchdog cross-thread wrap fix + exit-origin labels
+  ([`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md)).
+  When it merges: bump the pin per the recipe above and
+  `setx PSX_STARVATION_TIMEOUT_US ""` to re-enable the watchdog.
+- Fork branches on `kerokline/psxrecomp` that are now history (all merged):
   `fix/static-overlay-residency-signal`, `feat/present-scanlines`,
-  `perf/spu-sample-event-gate` (all merged), `integrate/scanlines` (local
-  integration build, obsolete). `fix/vblank-cadence-pacing` still holds the
-  **walk-HLE prototype** `d725af45` (`PSX_HLE_INTRP_WALK=1`, 170 lines in
-  `dirty_ram_interp.c` / `debug_server.c`): not needed for any current fix, kept
-  because its callback-dispatch mechanics are proven
+  `perf/spu-sample-event-gate`, `perf/static-overlay-parallel`,
+  `feat/fast-forward-pad`, `fix/gpu-polyline-terminator`,
+  `feat/fast-forward-toggle`, `feat/keymap-explicit-unbind`;
+  `integrate/scanlines`, `bof3/int-fast-forward`, `bof3/int-scanlines-master`
+  were local integration builds, obsolete. `fix/vblank-cadence-pacing` still
+  holds the **walk-HLE prototype** `d725af45` (`PSX_HLE_INTRP_WALK=1`, 170
+  lines in `dirty_ram_interp.c` / `debug_server.c`): not needed for any current
+  fix, kept because its callback-dispatch mechanics are proven
   ([`vblank-pacing-bug.md`](vblank-pacing-bug.md) → Prototype lessons).
-- `framework_pins.txt` is informational; the gitlinks are authoritative.
+- `framework_pins.txt` is informational (and stale); the gitlinks are authoritative.
 
 ## Capture and disc extraction are not rivals
 
@@ -751,6 +800,9 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
 | `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
+| `tools/save_tool.py` | **Save-file reader/verifier** over raw card images (`saves/*.mcd`, `*.mcr`): `list` (slots, SJIS title, checksum OK/BAD, play time, lead level, zenny, party), `dump SLOT` (summary block, all eight character records with the BATTLE_RAM offsets and kana-decoded names, equipment, the four ability lists, inventory by category, key items, slot summary — **item / ability / character names from `names/*.toml`** since 2026-09-05; `--raw` hexdumps the unlabelled ranges), `verify` (u16 byte-sum + every load-screen cross-check + title parse + the table cross-checks: every id is a record, ability list ↔ table type, ATK = base + weapon power, DEF = base + armour powers), `diff A B` (byte runs annotated with the RAM map; `--file2` for a second card). Read-only. Any FAIL is a RAM-map bug. |
+| `tools/text_tables.py` | **Id→name tables off the disc** ([`TEXT_TABLES.md`](TEXT_TABLES.md)): `extract` reads the five item tables, the ability table (GAME.EMI), the MTEST place list and the roster (COMMU02 / START templates) through the `.cue` into `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` with the wiki glossary's English; `show TABLE` prints one. Refuses to write if a table's count moves. `save_tool.py` reads the sidecars (`--names`). |
+| `tools/plates.py` | **World-map name plates** ([`TEXT_TABLES.md`](TEXT_TABLES.md) "World-map plates"): decodes each world map's 8-bit texture page (tiled section `dest 0x0E001000`, CLUTs from `0x8002BE00`) off the disc, finds the painted place-name plates by their rim, joins the ones that wrap at texel 256, writes `analysis/plates/` (page PNGs, `plates.json`, a contact sheet). Transcriptions live in `names/plates.toml`. |
 | `tools/pst_tool.py` | Read `.pst` savestates offline: `info`, `vram` (1024×512 PNG), `ram` (raw 2 MB), `diff A B` (VRAM zero-map, per-block diff map, blocks that went populated→zero, RAM diff ranges). Compare two states without loading them into a running game. |
 | `tools/emi.py`, `tools/disc_ls.py`, `tools/disasm_exe.py` | Parse/extract `.EMI`; list the ISO9660 tree; disassemble the boot EXE with MMIO naming. |
 | `tools/name_map.py` | `names/` sidecars (overlays / functions / areas): `init` merges new catalog overlays (never overwrites hand edits), `check`, `stats`. See [`NAME_MAP.md`](NAME_MAP.md). |

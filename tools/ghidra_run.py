@@ -48,6 +48,10 @@ CAPTURES_JSON = os.path.join(AN, "overlay_captures_all.json")
 FUNCTIONS_TOML = os.path.join(ROOT, "names", "functions.toml")
 OVERLAYS_TOML = os.path.join(ROOT, "names", "overlays.toml")
 SYMBOLS_TOML = os.path.join(ROOT, "symbols.toml")
+BOOT_EXE = os.path.join(ROOT, "disc", "SLPS_009.90")            # PS-X EXE, 0x800 header, text at 0x80093800
+BOOT_RANGES = os.path.join(ROOT, "generated", "SLPS_009.90_full.ranges")   # recompiler code-range manifest
+BOOT_TEXT = 0x80093800
+BOOT_HEADER = 0x800
 
 GHIDRA_DIR = os.environ.get("PSX_GHIDRA_DIR", r"D:\Utilities\ghidra_12.1.3_PUBLIC")
 PROJECT_DIR = os.environ.get("PSX_GHIDRA_PROJECT_DIR", r"D:\Utilities\GhidraProjects")
@@ -165,6 +169,55 @@ def select_captures(caps, sources, md5s, load_addr):
     return out
 
 
+def boot_seed(lo_b, hi_b):
+    """The boot EXE as memory for an overlay program, so calls into it resolve.
+
+    Without it every overlay decompile is cut off at the first `jal` into the
+    boot EXE: the callee has no memory, Ghidra treats the call as no-return,
+    and the body after it (the whole damage formula after `Rand()`,
+    2026-09-05) silently disappears from the C. The seed carries the code
+    ranges the recompiler proved (`generated/SLPS_009.90_full.ranges`, `R`
+    lines), clipped around the overlay's own load range because overlays land
+    in the boot image's zero-fill, plus the function entries (`F` lines) and
+    the names in symbols.toml. seed_overlay.py turns them into `boot_*`
+    blocks; export_program.py keeps those out of the overlay's own function
+    list and still reports references into them as external."""
+    if not (os.path.exists(BOOT_EXE) and os.path.exists(BOOT_RANGES)):
+        print("boot seed: skipped (%s / %s missing) -- decompiles will truncate at boot-EXE calls"
+              % (BOOT_EXE, BOOT_RANGES))
+        return None
+    ranges, entries = [], []
+    with open(BOOT_RANGES, encoding="utf-8") as fh:
+        for line in fh:
+            t = line.split()
+            if len(t) == 3 and t[0] == "R":
+                lo, ln = int(t[1], 16) | 0x80000000, int(t[2], 16)
+                for a, b in ((lo, min(lo + ln, lo_b)), (max(lo, hi_b), lo + ln)):
+                    if b > a:
+                        ranges.append([hx(a), b - a])
+            elif len(t) == 2 and t[0] == "F":
+                e = int(t[1], 16) | 0x80000000
+                if not (lo_b <= e < hi_b):
+                    entries.append(hx(e))
+    names = {}
+    with open(SYMBOLS_TOML, "rb") as fh:
+        for r in tomllib.load(fh).get("func", []):
+            pc = int(r["pc"]) | 0x80000000
+            if not (lo_b <= pc < hi_b):
+                names[hx(pc)] = r["name"]
+    # The manifest repeats an R line per F line and adjacent ranges abut;
+    # coalesce so each byte lands in exactly one block.
+    merged = []
+    for lo, ln in sorted((int(a, 0), n) for a, n in ranges):
+        if merged and lo <= merged[-1][0] + merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], lo + ln - merged[-1][0])
+        else:
+            merged.append([lo, ln])
+    ranges = [[hx(lo), ln] for lo, ln in merged]
+    return {"exe": BOOT_EXE, "header": BOOT_HEADER, "text": hx(BOOT_TEXT),
+            "ranges": ranges, "entries": sorted(set(entries)), "names": names}
+
+
 def traced_entries(lo, hi):
     """Distinct `func` values (KSEG0) inside [lo, hi) across every callstack
     capture in analysis/callstacks/ -- entry stamps of compiled functions."""
@@ -216,6 +269,8 @@ def cmd_import(a):
                 "traced_extra": sorted(traced - static),
                 "interior": [hx(int(x, 0)) for x in (c.get("dispatch_entry_pcs") or [])
                              if hx(int(x, 0)) not in {hx(int(y, 0)) for y in (c.get("static_discovery_entry_pcs") or [])}]}
+        if not a.no_boot:
+            seed["boot"] = boot_seed(lo_b, hi_b)
         seed_path = os.path.join(OUT, pn + ".seed.json")
         with open(seed_path, "w", encoding="utf-8") as fh:
             json.dump(seed, fh, indent=1)
@@ -476,6 +531,8 @@ def main():
     i.add_argument("--all", action="store_true", help="import every match instead of listing them")
     i.add_argument("--overwrite", action="store_true", help="replace an existing program of the same name")
     i.add_argument("--no-analysis", action="store_true")
+    i.add_argument("--no-boot", action="store_true",
+                   help="do not map the boot EXE into the program (decompiles then truncate at every boot-EXE call)")
     i.add_argument("--decompile", default=None, help="all | named | 0x..,0x.. (written next to the export)")
     i.add_argument("--start", action="append", default=None,
                    help="extra function start to seed (repeatable), e.g. a store PC's gap found by callstack_diff writes")

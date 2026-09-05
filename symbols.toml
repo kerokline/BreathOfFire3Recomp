@@ -14,8 +14,8 @@ note = "SYSTEM.CNF / EXE entry PC (probe seed)"
 pc = 0x8017ED4C
 name = "Rand"
 emit = false
-status = "guessed"
-note = "ghidra 2026-09-04: no-arg call whose result mod 8 indexes the 8-byte damage-variance table at 0x801D0C7C in Battle_CalcDamage; 30 call sites in BATTLE.EMI#3, 32 in #15 (Psy-Q rand() shape)"
+status = "confirmed"
+note = "BIOS thunk: li t2,0xA0; jr t2; li t1,0x2F = A0:2F rand() (psx-spx), read from the disc EXE 2026-09-05. Result mod 8 indexes the damage-variance tables (0x801D0C7C, 0x801EAF50), &1 the +0/+1 base term, %100 the hit rolls; 30 call sites in BATTLE.EMI#3, 32 in #15. Ghidra needs it marked returning or every caller's decompile truncates here (tools/ghidra/seed_overlay.py)"
 
 [[func]]
 pc = 0x80166FFC
@@ -89,7 +89,14 @@ note = "equip3.json 2026-09-05: on weapon swap (record +0x0E 3->0x1C) START.EMI 
 
 [[func]]
 pc = 0x8015BFC4
-name = "Save_FlagsChecksum"
+name = "Flag_Test"
 emit = false
-status = "guessed"
-note = "ghidra decomp of Save_BuildImage 2026-09-05: called as (0x80144F24, 0x92) and its u32 result is stored at 0x80145588 inside the save block before the byte-sum; a checksum/hash over 0x92 bytes of game flags"
+status = "confirmed"
+note = "Flag_Test(bits, index) -> (bits[index>>3] >> (index&7)) & 1 -- eight instructions, read from the disc EXE 2026-09-05 (tools/disasm_exe.py 8015BFC4:8); 0x8015BFE4 is the matching xor toggle. Save_BuildImage calls it as (0x80144F24, 0x92) and stores the BIT in the slot-summary byte 0x80145588 -- it was named Save_FlagsChecksum ('hash over 0x92 bytes') until tools/save_tool.py verify checked the byte against the flag array on all three card1 saves"
+
+[[func]]
+pc = 0x80167514
+name = "AbilityList_ForType"
+emit = false
+status = "confirmed"
+note = "AbilityList_ForType(index, ability_id, working) -> pointer to one of four 10-slot lists inside a character record: base = 0x80144964 + index*0xA4 (persistent) or 0x80145F00 + index*0x140 (working, when a2 != 0); type = (byte at 0x801CB231 + ability_id*16) & 3 selects +0x5C / +0x66 / +0x70 / +0x7A. Called by AbilityList_Add 0x80165BCC, which then fills the first zero slot of ten. Disassembled 2026-09-05; the card1 saves show the lists populated (Momo +0x5C/+0x66, Teepo +0x70, Rei +0x70/+0x7A)"

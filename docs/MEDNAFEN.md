@@ -74,6 +74,11 @@ line (e.g. `--set nothrottle=1`, `--set psx.dbg_mask=cpu`).
   load screen needs ~4 s before the save list draws.
 - Snapshots land in `mednafen/snaps/` as `<disc base>-NNNN.png` at the
   emulator's native output size (700×480 here, `psx.correct_aspect`).
+- **The title cursor already sits on LOAD GAME when the card has saves.**
+  Start, Start, Circle reaches the card picker; a `down` first wraps onto NEW
+  GAME and Circle then opens the name-entry screen, **which cannot be
+  cancelled** (Cross only deletes characters) — `quit` and relaunch, ~60 s
+  (user, 2026-09-05). Then Circle on メモリーカード1 and ~8 s for the file check.
 
 ## Verified 2026-09-03
 
@@ -81,3 +86,9 @@ Launched with `--card`, injected Start ×2, Down, Circle, Circle: reached the
 load screen and it listed the three saves from `card1.mcd` (Ryu Lv1 00:28,
 02:35, 02:19). Savestate slot 2 saved on the load screen, backed out with
 Cross, `state load 2` returned to the load screen. Clean exit via `quit`.
+
+**2026-09-05:** used as the independent oracle for `tools/save_tool.py`: booted
+from the re-mapped `card1.mcd` (Start, Start, Circle, Circle), the load screen
+listed リュウ Lv 1 at 00:28 / 05:13 / 05:10 with one portrait for file 1 and
+Teepo / Rei / Ryu for files 2 and 3 — the tool's `list` and slot-summary
+output byte for byte (`analysis/mednafen_loadscreen_card1.png`).

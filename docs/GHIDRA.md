@@ -1,6 +1,6 @@
 # Ghidra — headless exports of the boot EXE and the battle overlays
 
-**Status:** IN PROGRESS (opened 2026-09-04). Every number below was
+**Status:** IN PROGRESS (opened 2026-09-04, programs table refreshed 2026-09-05). Every number below was
 produced by `tools/ghidra_run.py` on that date against the pins in
 [`HANDOFF.md`](HANDOFF.md); re-run `report` rather than trusting a number
 here.
@@ -47,8 +47,8 @@ python tools/ghidra_run.py merge [--apply] [--symbols]
 | Piece | Does |
 |---|---|
 | `tools/ghidra_run.py` | driver: lock check, headless command lines, program naming `<FILE>_EMI<idx>_<LOADADDR>`, `report`, `merge` |
-| `tools/ghidra/seed_overlay.py` | `-preScript` on import: disassemble + `createFunction` at every `static_discovery_entry_pcs`; `dispatch_entry_pcs` become functions only behind an `addiu sp,sp,-N` prologue, else `ov_entry_XXXXXXXX` labels (a function created at a jump-table interior splits its owner) |
-| `tools/ghidra/export_program.py` | `-postScript`: per function entry/size/name/source/prototype, insn/load/store counts, **cop2 flag** (GTE = drawing), callees, `jalr` count, computed-jump targets, external refs; program-wide `globals` (r/w counts + functions), `ext_targets`, `jump_tables`, `call_sites` with a constant `a0`; optional decompile to `_decomp/<addr>_<name>.c` |
+| `tools/ghidra/seed_overlay.py` | `-preScript` on import: **maps the boot EXE in** as `boot_*` blocks (the recompiler's code ranges from `generated/SLPS_009.90_full.ranges`, clipped around the overlay), makes functions at its 1 462 entries with `symbols.toml` names, turns the 55 **BIOS thunks** (`li t2,0xA0|B0|C0; jr t2; li t1,N`) into returning `BIOS_<name>` functions and switches off no-return discovery; then disassemble + `createFunction` at every `static_discovery_entry_pcs`; `dispatch_entry_pcs` become functions only behind an `addiu sp,sp,-N` prologue, else `ov_entry_XXXXXXXX` labels (a function created at a jump-table interior splits its owner). `import --no-boot` skips the map |
+| `tools/ghidra/export_program.py` | `-postScript` (scoped to the overlay's own blocks — `boot_*` functions are not exported and calls into them stay `ext_calls`; prints any boot function still flagged no-return): per function entry/size/name/source/prototype, insn/load/store counts, **cop2 flag** (GTE = drawing), callees, `jalr` count, computed-jump targets, external refs; program-wide `globals` (r/w counts + functions), `ext_targets`, `jump_tables`, `call_sites` with a constant `a0`; optional decompile to `_decomp/<addr>_<name>.c` |
 | `tools/ghidra/list_programs.py` | project listing (headless needs a program to `-process`, so it runs against the boot EXE read-only) |
 
 Outputs go to `analysis/ghidra/` (gitignored — decompiled text is derived
@@ -66,9 +66,9 @@ Ghidra's function entries into the starts it nests the call forest by.
 | Program | Section | Base | Functions | Notes |
 |---|---|---|---|---|
 | `SLPS_009.90` | boot EXE | `0x80093000` | 1025 (56 human/BIOS names) | 52 cop2 functions, 77 jump tables, 1676 in-program globals |
-| `BATTLE_EMI3_801D0C00` | `BIN/BATTLE/BATTLE.EMI#3`, md5 `8a80230e…` | `0x801D0C00` | 495 | game-mode overlay; 0 cop2; 50 with `jalr`; 431 globals |
-| `BATTLE_EMI15_80093800` | `BIN/BATTLE/BATTLE.EMI#15`, md5 `4065db04…` | `0x80093800` | 347 | battle engine; 0 cop2; 24 with `jalr` |
-| `BATL_END_EMI0_801EEC00` | `BIN/BATTLE/BATL_END.EMI#0` | `0x801EEC00` | 94 | results screen (zenny/EXP tally callers) |
+| `BATTLE_EMI3_801D0C00` | `BIN/BATTLE/BATTLE.EMI#3`, md5 `8a80230e…` | `0x801D0C00` | 663 (re-imported 2026-09-05 09:42 with the track-C captures seeded) | game-mode overlay; 0 cop2; 50 with `jalr`; 492 globals |
+| `BATTLE_EMI15_80093800` | `BIN/BATTLE/BATTLE.EMI#15`, md5 `4065db04…` | `0x80093800` | 364 (re-imported 2026-09-05 11:14 with the `e_*`/`c_skill`/`c_item` captures seeded, `--start 0x8009A160 --start 0x800A8AD4`) | battle engine: command menus (`Cmd_*`, `SkillMenu_*`, `ItemMenu_*`), `Escape_*`, `EnemyAI_*`, `Effect_ApplyResult`; 0 cop2 |
+| `BATL_END_EMI0_801EEC00` | `BIN/BATTLE/BATL_END.EMI#0`, md5 `18ce968c…` | `0x801EEC00` | 109 (re-imported 2026-09-05 09:45, all decompiled) | results screen: `BattleResult_Setup` / `_ExpTick` / `_ZennyTick` / `_AwardDrops`; shares the band with `SHOP.EMI#8`, so `name` needs `--overlay` |
 | `GAME_EMI0_80196800` | `BIN/ETC/GAME.EMI#0` (227 KB) | `0x80196800` | 582 | resident field/system module: `Char_LevelUp`, `Battle_InitPartyContexts`, the level table at `0x801CC068` |
 | `SHOP_EMI0_801D0C00` | `BIN/ETC/SHOP.EMI#0` | `0x801D0C00` | 438 | shop / inn / save UI: `Save_BuildImage` |
 | `SHOP_EMI8_801EEC00` | `BIN/ETC/SHOP.EMI#8` (5 KB, also in START.EMI) | `0x801EEC00` | 87 | memory-card manager: `Card_*` |
@@ -138,6 +138,21 @@ battle overlays are logic and 2D UI; 3D goes through boot-EXE helpers.
 
 ## Traps
 
+- **Every decompile used to stop at the first call into the boot EXE**, and
+  the C after it silently vanished — `Battle_BaseDamage` read as three
+  lines, and the whole damage formula sat in the part Ghidra dropped
+  (2026-09-05). Two causes, both fixed in `seed_overlay.py`: the callee had
+  no memory in the overlay program (now the boot EXE is mapped in), and
+  `Rand` `0x8017ED4C` is not a body at all but a **BIOS thunk** — `li
+  t2,0xA0; jr t2; li t1,0x2F` = A0:2F `rand()` — whose `jr` into unmapped
+  kernel RAM made it no-return, so every caller was cut at the call. The
+  thunks get a `CALL_RETURN` flow override, `setNoReturn(false)`, a
+  psx-spx name, and the heuristic no-return analyzer is disabled for the
+  program. `export` prints any boot function still flagged no-return; treat
+  a non-empty list as this bug coming back. Programs imported before the
+  fix (everything before 2026-09-05 08:40 except `BATTLE_EMI3`) still have
+  the truncated decompiles — re-import with `--overwrite` before reading
+  one.
 - **`0x801D0C00..0x801D112C` is undisassembled.** A pcode error at
   `0x801D0C64` ("does not contain referenced instruction `0x801D0C68`")
   stopped the flow; no static root lies below `0x801D112C`, so Ghidra has no
