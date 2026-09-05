@@ -31,6 +31,8 @@ the player to load one.
 | 8 | `slot07` | 2026-09-01 | **World map** | Perf anchor (now 60 fps). The one `0x00002934` fail-fast happened resuming this file ([`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md)); not reproduced |
 | 9 | `slot08` | 2026-09-01 | **Save / memory-card screen** | Perf anchor (now 60 fps) |
 | 10 | `slot09` | 2026-09-01 | **Just before a merchant transition** | Perf anchor; doubles as a shop-text capture point |
+| 11 | `slot10` | 2026-09-04 | **Battle command menu, cursor on Attack** (AREA020, Dauna-region field battle) | `tools/callstack_diff.py` differential anchor (Attack vs Defend); saved over TCP mid-animation, so the first frames after load are not idle |
+| 12 | `slot11` | 2026-09-04 | **Watch armed, enemy (Nu) about to use Nu Stomp**; the question mark appears ~30 frames after load | Examine-logic anchor for `tools/callstack_diff.py` (second of two trigger states; the first, against a different enemy, was overwritten) |
 
 The text-path states (1–4, 6) were all within ~30 s of boot on 2026-08-30 and
 predate every rebuild since; they have survived rebuilds before (verified

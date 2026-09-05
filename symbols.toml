@@ -9,3 +9,87 @@ name = "BootEntry"
 emit = false
 status = "guessed"
 note = "SYSTEM.CNF / EXE entry PC (probe seed)"
+
+[[func]]
+pc = 0x8017ED4C
+name = "Rand"
+emit = false
+status = "guessed"
+note = "ghidra 2026-09-04: no-arg call whose result mod 8 indexes the 8-byte damage-variance table at 0x801D0C7C in Battle_CalcDamage; 30 call sites in BATTLE.EMI#3, 32 in #15 (Psy-Q rand() shape)"
+
+[[func]]
+pc = 0x80166FFC
+name = "Zenny_Add"
+emit = false
+status = "confirmed"
+note = "wtrace money.json 2026-09-04: only writer of zenny 0x80144F4C and lifetime total 0x8014502C, +1 per tick x40 from BATL_END 0x801EF824/0x801EF848; ghidra: (amount, skip_total) -> zenny += amount, total += amount if !skip_total, cap 9999999, returns !capped"
+
+[[func]]
+pc = 0x80165434
+name = "Char_RecalcStats"
+emit = false
+status = "confirmed"
+note = "wtrace levelup3.json 2026-09-05 + ghidra: (rec) copies base stats rec+0x3C..0x58 -> effective rec+0x1C..0x38, applies FUN_80166150/801662CC/8016651C/80165290 (equipment/modifiers via Stat_AddClamped), scales effective max HP rec+0x1C by (base * u8 rec+0x1A + 5)/10 and clamps HP rec+0x14, halves rec+0x2B..0x33 per status bits in rec+0x19, per-roster table 0x80148668 (5 B) vs rec+0x34..0x38; proves the persistent character records are &0x80144964 + roster*0xA4, 8 of them"
+
+[[func]]
+pc = 0x80165EE4
+name = "Stat_AddClamped"
+emit = false
+status = "confirmed"
+note = "wtrace levelup3.json 2026-09-05 + ghidra: (u16* stat, s16 delta) adds with floor 0 and cap 999, returns the applied delta; called from the equipment modifier pass under Char_RecalcStats"
+
+[[func]]
+pc = 0x80165BCC
+name = "AbilityList_Add"
+emit = false
+status = "guessed"
+note = "wtrace levelup3.json 2026-09-05: wrote 0x5E into the first zero byte at rec+0x71 (Teepo, level 3->4); ghidra: (id, p2, use_global, p4) stores id in the first free slot of a 10-slot list from FUN_80167514(p2,id,p4) or the 128-slot list at 0x80145468 (NOT the inventory -- see Inventory_Add)"
+
+[[func]]
+pc = 0x8014D184
+name = "Actor_UpdateScreenPos"
+emit = false
+status = "guessed"
+note = "wtrace battlebegin.json 2026-09-05: 10 824 writes over a whole battle to actor C+0x2E/+0x30/+0x32/+0x60 (every frame, every slot); ghidra: computes +0x32 from +0x36/+0x3A/+0x34/+0x38 minus camera 0x8014931C/1E and a per-sprite table at 0x8017FED4[+0x2B*3] -- world->screen projection of the party actor"
+
+[[func]]
+pc = 0x8014C3C8
+name = "Actor_Task"
+emit = false
+status = "guessed"
+note = "wtrace battlebegin.json 2026-09-05: writes the actor present flag C+0 1 804 times (unchanged) across field and battle -- the per-actor frame task; 2420 B, 8 callees (largest boot function by insns after the text engine)"
+
+[[func]]
+pc = 0x8014D86C
+name = "Actor_AnimTick"
+emit = false
+status = "guessed"
+note = "wtrace battlebegin.json 2026-09-05: writes C+0x4A/+0x58 every ~2 frames per slot (1 622 changing writes); siblings 0x8014DA8C (+0x4A/+0x58/+0x5A) and 0x8014D9E0 (+0x4A) -- sprite animation counters"
+
+[[func]]
+pc = 0x80165AA4
+name = "Inventory_Add"
+emit = false
+status = "confirmed"
+note = "shop buy trace buy.json 2026-09-05 (SHOP.EMI 0x801D1E98 jal, a0=item id byte 0x801E5F7C, a1=qty) + ghidra: (category, item_id, count): id list = *(0x801C9934 + cat*4), count list = *(0x801C9948 + cat*4), 128 slots; existing stack += count (cap 99, returns 0 when capped) else first slot with id 0 or count 0; scratchpad 0x1F800000 = 1 if a new slot was used"
+
+[[func]]
+pc = 0x80166FCC
+name = "Zenny_Sub"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05: (amount) if amount <= zenny 0x80144F4C: zenny -= amount, return true; the shop overlay instead subtracts inline (store pc 0x801D1E9C, buy.json) and calls the interior 0x80166FD4 after its own check"
+
+[[func]]
+pc = 0x80166F30
+name = "Inventory_Remove"
+emit = false
+status = "confirmed"
+note = "equip3.json 2026-09-05: on weapon swap (record +0x0E 3->0x1C) START.EMI 0x801D6E70 calls it with (count ptr 0x801452CA, item 0x1C, 1, id ptr 0x801450CA) and the count went 2->1 at store pc 0x80166F94; then Inventory_Add(1, 3, 1) put the old weapon back (slot 5) and the menu wrote the record byte at 0x801D6EA4"
+
+[[func]]
+pc = 0x8015BFC4
+name = "Save_FlagsChecksum"
+emit = false
+status = "guessed"
+note = "ghidra decomp of Save_BuildImage 2026-09-05: called as (0x80144F24, 0x92) and its u32 result is stored at 0x80145588 inside the save block before the byte-sum; a checksum/hash over 0x92 bytes of game flags"

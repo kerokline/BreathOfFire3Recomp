@@ -6,8 +6,15 @@ RAM destination, so the (load_addr, bytes) pair the framework's Layer B wants
 can be produced offline -- no DMA-time capture, no `[runtime] overlay_cache`.
 See docs/OVERLAYS.md section 5 for why that is true here and not for Tomba.
 
-Reads the survey written by tools/emi_survey.py, selects code sections, and
-emits captures with statically derived entry seeds.
+Reads the survey written by tools/emi_survey.py, selects the sections that hold
+code, and emits captures with statically derived entry seeds.
+
+Both `code` and `mixed` survey classes are taken. `mixed` is not a third kind
+of section -- it is what the survey's classifier says when a section holds code
+but misses the `jr>=4 AND prologues>=4` gate, which leaf-heavy code does
+routinely (WORLD04 AREA176-180: 34 `jr ra`, 3 prologues). Excluding it left 58
+of 200 AREA files with nothing compiled at all. `--no-mixed` restores the old
+behaviour for A/B work.
 
     python tools/emi_survey.py "isos/Breath of Fire III (Japan).cue"
     python tools/extract_overlays.py "isos/Breath of Fire III (Japan).cue" \
@@ -97,15 +104,31 @@ def main():
                     help="only this RAM destination (repeatable), e.g. 0x80196800")
     ap.add_argument("--file", action="append",
                     help="only sections from this disc path (repeatable)")
+    # Mixed sections are taken BY DEFAULT since 2026-09-04. 58 of 200 AREA
+    # files ship no `code` section at all -- their `mixed` section is the only
+    # compilable code they have (AREA000 MacNeil Village, AREA001/002 Dauna
+    # Mines, ...), so excluding it leaves those areas running fully
+    # interpreted. See docs/HANDOFF.md "Mixed sections are extracted by
+    # default" for the measurement that settled this.
+    ap.add_argument("--no-mixed", action="store_true",
+                    help="take only sections the survey classed 'code'. Drops "
+                         "the only code 58 AREA files have -- for A/B "
+                         "experiments, not normal runs")
     ap.add_argument("--include-mixed", action="store_true",
-                    help="also take sections the survey classed 'mixed'")
+                    help="accepted and ignored; mixed sections are the default "
+                         "now (kept so existing scripts and muscle memory "
+                         "keep working)")
     ap.add_argument("--observed", default="analysis/observed_interp_pcs.json")
     args = ap.parse_args()
 
     with open(args.survey) as fh:
         survey = json.load(fh)
 
-    want_cls = {"code"} | ({"mixed"} if args.include_mixed else set())
+    want_cls = {"code"} if args.no_mixed else {"code", "mixed"}
+    print("[extract] section classes: %s" % ", ".join(sorted(want_cls)))
+    if args.no_mixed:
+        print("[extract] WARNING --no-mixed: 58 AREA files have no 'code' section "
+              "and contribute nothing to this capture set")
     dests = {int(d, 0) for d in args.dest} if args.dest else None
     files = {f.upper() for f in args.file} if args.file else None
 

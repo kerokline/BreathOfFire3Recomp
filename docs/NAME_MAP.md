@@ -56,17 +56,26 @@ The `evidence` field says *how* — which trace, which string, which doc. An
 alias without evidence stays `hypothesis`. This is the docs/README.md
 evidence rule applied to names.
 
-## What is named today (2026-09-01)
+## What is named today (2026-09-05)
 
-- **evidence (2):** `LOGO.EXE` = Capcom logo intro (STATUS.md 2026-09-01
-  root-cause); `BATTLE` @ `0x801D0C00` = Battle game-mode (community data doc
-  ch. 2: game-mode executables load at `0x801D0C00`, BATTLE.EMI named there).
-- **hypothesis (204):** filename-derived — `SHOP`/`START`/`GAME` game-modes,
-  `BATL_END`/`BATL_OVR`, `SCENAnn` scenario banks, `BOSSnnn`, `MAGICnnn`,
-  `PLPxyz` party sets. The PLP suffix reading (member-id triple) is a guess.
-- **unnamed (133):** every `AREAnnn`, all `COMMUnn`, `BATE`, `SHISU`,
-  `SISYOU`, the second BATTLE/AREA030/GAME/SHOP images, `SCE1xEFn`.
-- **functions:** none beyond `BootEntry` in symbols.toml.
+- **overlays, evidence with roles:** `LOGO.EXE`; `BATTLE.EMI#3` (battle
+  game-mode); `BATL_END.EMI` (results screen); `SHOP.EMI#0` (shop / inn /
+  save-point game-mode); the 5 KB memory-card manager module shipped in
+  SHOP.EMI#8 and START.EMI; `START.EMI` (field main menu). Plus 25 area
+  sightings from `area_poller.py`.
+- **overlay functions:** 23 `evidence`, 23 `hypothesis` across BATTLE,
+  GAME.EMI, SHOP, START, BATL_END and the card module: the battle command
+  roots, the damage path (`Battle_ApplyDamage` -> `Battle_CalcDamage` ->
+  `Battle_BaseDamage`), the HUD gauges, battle start/end record copies,
+  `Char_LevelUp`, `Menu_EquipConfirm`, the results-screen tallies, and the
+  save serialiser. See [`BATTLE_RAM.md`](BATTLE_RAM.md).
+- **boot EXE (`symbols.toml`):** 13: `Rand`, `Zenny_Add/Sub`, `Inventory_Add/Remove`,
+  `Char_RecalcStats`, `Stat_AddClamped`, `AbilityList_Add`, `Actor_Task`,
+  `Actor_UpdateScreenPos`, `Actor_AnimTick`, `Save_FlagsChecksum`, `BootEntry`.
+- **Routes that produced them:** route 3 (differential traces) named the
+  first twelve; route 4 (data anchors: `ramdiff` -> `capture --watch` ->
+  decompile) named everything since and is the productive route. Route 2
+  (Psy-Q signatures) is still unrun.
 
 ## Gathering evidence — savestates vs. live commands
 
