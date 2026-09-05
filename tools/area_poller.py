@@ -251,18 +251,42 @@ def cmd_watch(a):
 
     def do_harvest(fr, why):
         """Union the live per-PC table into the observed file; never raises.
-        Returns the timeline row (or None on failure)."""
+        Returns the timeline row (or None on failure).
+
+        The harvest session id is NOT this watch run's id: it comes from
+        hp.resolve_session(), which identifies the running GAME process by its
+        frame counter. A watch run is not a play session -- start the poller
+        late, or restart it mid-game, and you get two ids over one session,
+        which is what happened on 2026-09-04 (ids ...101508 and ...101601, byte
+        identical PC sets 53 seconds apart). Chao2 counts sampling units, so
+        that split deflates Q1 and overstates coverage. `session` below stays
+        this run's id for the TIMELINE rows, where per-watch-run really is the
+        right grain.
+
+        The area resident right now is stamped on PCs newly seen by this pass,
+        which is how the observed set earns `--by area` stratification.
+        Coverage is only computed on the final pass -- it re-reads the 5 MB
+        capture file, too expensive to do every 15 minutes for a line nobody
+        reads mid-session."""
         try:
-            r = hp.harvest(port=a.port, save_json=hp_observed(), quiet=True)
+            r = hp.harvest(port=a.port, save_json=hp_observed(), quiet=True,
+                           session=None, area=area_file,
+                           coverage=(why == "stop"))
         except Exception as e:
             print(f"[f{fr}]   harvest ({why}) failed: {e}", file=sys.stderr)
             return None
         print(f"[f{fr}]   harvest ({why}): {r['new']} new PCs, observed set {r['after']} "
               f"({r['entered']} entered)")
+        g = (r.get("coverage") or {}).get("global") or {}
+        if g.get("coverage") is not None:
+            print(f"[f{fr}]   estimated coverage {100.0 * g['coverage']:.1f}% "
+                  f"({g['s_obs']} of ~{g['estimate']:.0f}); "
+                  f"python tools/pc_coverage.py for the per-band table")
         return {"session": session, "event": "harvest", "frame": fr, "why": why,
                 "t": dt.datetime.now().isoformat(timespec="seconds"),
                 "new": r["new"], "total": r["after"], "entered": r["entered"],
-                "interp": r["interp"], "native": r["native"]}
+                "interp": r["interp"], "native": r["native"],
+                "coverage": g.get("coverage"), "est_total": g.get("estimate")}
 
     fr = 0
     try:

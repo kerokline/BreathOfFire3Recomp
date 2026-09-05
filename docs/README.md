@@ -33,6 +33,7 @@ the task touches.
 | [`SAVESTATES.md`](SAVESTATES.md) | index | What each savestate slot holds; the in-game-vs-file off-by-one |
 | [`NAME_MAP.md`](NAME_MAP.md) | plan + evidence | The readability track: `names/` sidecars (overlays / functions / areas), the status+evidence rule, the area poller, routes to earn names |
 | [`subsystem_map.html`](subsystem_map.html) | generated | Browsable map (bands → overlays → functions, boot EXE, areas). Regenerate with `tools/subsystem_map.py`; never hand-edit |
+| [`IDEAS.md`](IDEAS.md) | intake | Proposed improvements with feasibility: combat call-stack mapping (I1), programmatic area labels from map text (I2), 1.5x dialogue box + furigana (I3) |
 | [`ENHANCEMENTS.md`](ENHANCEMENTS.md) | plan | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance (designed), costed backlog |
 | [`vblank-pacing-bug.md`](vblank-pacing-bug.md) | investigation | The Capcom FMV slowdown: root cause (SPU snapshot gate), fix, and the two wrong theses |
 | [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md) | investigation | One unreproduced fail-fast into kernel RAM on a savestate resume |

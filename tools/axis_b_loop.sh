@@ -50,7 +50,10 @@ SKIP_HASH=0
 HARVEST_ONLY=0
 FORCE=0
 PRUNE=1
-INCLUDE_MIXED=0
+# Mixed sections are extracted BY DEFAULT (2026-09-04): they are the only
+# compilable code in 58 of 200 AREA files. --no-mixed is the A/B escape hatch.
+NO_MIXED=0
+NO_COVERAGE=0
 
 usage() {
   cat <<'EOF'
@@ -63,7 +66,10 @@ Usage: tools/axis_b_loop.sh [options]
   --skip-hash       skip the codegen-hash rebuild (only safe with no framework bump)
   --force           rebuild even when harvest reports 0 new PCs
   --no-prune        keep build-dbg freeze dumps (default: prune them at the end)
-  --include-mixed   also extract sections the EMI survey classed 'mixed' (experiment; HANDOFF open question)
+  --no-mixed        extract only 'code' sections, dropping the 'mixed' ones that
+                    are the ONLY code in 58 of 200 AREA files (A/B experiments
+                    only; mixed sections are included by default)
+  --no-coverage     skip the coverage estimate re-print at the end
   -h, --help        this text
 
 Run it with the game still live on --port. See docs/HANDOFF.md.
@@ -80,7 +86,9 @@ while [ $# -gt 0 ]; do
     --skip-hash)    SKIP_HASH=1; shift ;;
     --force)        FORCE=1; shift ;;
     --no-prune)     PRUNE=0; shift ;;
-    --include-mixed) INCLUDE_MIXED=1; shift ;;
+    --no-mixed)     NO_MIXED=1; shift ;;
+    --no-coverage)  NO_COVERAGE=1; shift ;;
+    --include-mixed) shift ;;   # now the default; accepted so old invocations still run
     -h|--help)      usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage; exit 2 ;;
   esac
@@ -93,6 +101,18 @@ export PYTHONIOENCODING=utf-8   # tool banners use non-cp1252 glyphs
 
 say() { printf '\n\033[1;36m=== %s ===\033[0m\n' "$*"; }
 die() { printf '\n\033[1;31mFATAL: %s\033[0m\n' "$*" >&2; exit 1; }
+
+# Re-print the Chao2 coverage estimate. Called LAST on purpose: phases 5a/5b
+# bury the screen in compile and link output, and the number that decides
+# whether to keep playing must survive that scrollback. Also called on both
+# early-exit paths -- especially the '0 new PCs' one, since that criterion is
+# exactly what the estimate replaces (docs/HANDOFF.md 'The stop condition').
+# Off the build path: a failure here warns, it never fails the loop.
+coverage_report() {
+  if [ "$NO_COVERAGE" -eq 1 ]; then return 0; fi
+  say "coverage estimate — what the observed set has actually seen"
+  python tools/pc_coverage.py || echo "WARN: pc_coverage failed; run it by hand"
+}
 
 # ---- preflight --------------------------------------------------------------
 say "preflight"
@@ -130,6 +150,7 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
     say "harvest-only: done ($NEW_PCS new PCs). Stopping before extract."
     echo "For a per-area timeline next session, run DURING play:"
     echo "  python tools/area_poller.py watch --port $PORT"
+    coverage_report
     exit 0
   fi
 
@@ -138,6 +159,7 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
     echo "This session covered only already-seen content, so a rebuild would be"
     echo "wasted (~90 s on build-dbg). Play into NEW content and re-run, or pass --force to"
     echo "rebuild anyway. Observed set on disk is unchanged in substance."
+    coverage_report
     exit 0
   fi
 else
@@ -147,8 +169,8 @@ fi
 
 # ---- phase 3: extract -------------------------------------------------------
 EXTRACT_ARGS=()
-[ "$INCLUDE_MIXED" -eq 1 ] && EXTRACT_ARGS+=(--include-mixed)
-say "phase 3/5 — extract all bands from observed set (include-mixed=$INCLUDE_MIXED)"
+[ "$NO_MIXED" -eq 1 ] && EXTRACT_ARGS+=(--no-mixed)
+say "phase 3/5 — extract all bands from observed set (mixed sections: $([ "$NO_MIXED" -eq 1 ] && echo EXCLUDED || echo included))"
 python tools/extract_overlays.py "$CUE" --out "$CAPTURES" "${EXTRACT_ARGS[@]}" \
   || die "extract_overlays failed"
 [ -f "$CAPTURES" ] || die "extract produced no $CAPTURES"
@@ -269,3 +291,5 @@ echo "Next: relaunch build-dbg and RE-MEASURE per-PC —"
 echo "  BreathOfFire3_Recompiled.exe --game game.toml --no-launcher --debug-port $PORT"
 echo "  python tools/harvest_interp_pcs.py --port $PORT"
 echo "Never infer success from static_hits aggregates (see HANDOFF §9)."
+
+coverage_report

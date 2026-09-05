@@ -142,7 +142,8 @@ def load_function_names():
             "name": r["name"], "args": r.get("args", []), "ret": r.get("ret"),
             "status": r.get("status", "unnamed"), "evidence": r.get("note", ""),
         }
-    for r in _read(FUNCTIONS_TOML, "func"):
+    # the file documents `[[function]]`; an older tool revision wrote `[[func]]`
+    for r in _read(FUNCTIONS_TOML, "function") + _read(FUNCTIONS_TOML, "func"):
         if r.get("overlay") == "boot":
             sys.exit("names/functions.toml: boot-EXE entries belong in symbols.toml")
         out[(r["overlay"], int(r["pc"]))] = r

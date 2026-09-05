@@ -1,7 +1,7 @@
 # Handoff — next session
 
 **Status:** IN PROGRESS (rewritten 2026-09-01 night after the framework pin
-returned to upstream master; the dated banner history this file used to carry
+returned to upstream master; section 0 added 2026-09-05 after the data-anchor weekend; the dated banner history this file used to carry
 is in the [`STATUS.md`](STATUS.md) Log)
 
 Read [`STATUS.md`](STATUS.md) for where the project stands. This file is what
@@ -24,8 +24,55 @@ with certainty, plus screenshots), and the browsable
 `docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
 coverage inside the bands as new content is played, naming areas off their
 screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
+**2026-09-05:** a second track produced most of the names so far: the
+data-anchor loop (section 0 below) decoded the damage formula, level-up,
+inventory, equipment and the save format in one weekend, with the RAM map in
+[`BATTLE_RAM.md`](BATTLE_RAM.md).
 
 ## Start here
+
+### 0. The data-anchor loop — where the names now come from (2026-09-05)
+
+The weekend of 2026-09-04/05 replaced "differential traces name a function"
+with a loop that names a function *and* the RAM it touches, and it ran
+eleven times without a miss. Read [`BATTLE_RAM.md`](BATTLE_RAM.md) first: it
+holds the party actor object, the persistent character records (base and
+stride proven by code), the level table, inventory, zenny, the HUD, and
+the complete save-file format. Then [`GHIDRA.md`](GHIDRA.md) for the
+headless driver. The loop:
+
+1. `callstack_diff.py ramdiff` around one action; type the numbers you saw
+   on screen afterwards (`ramfilter --intersect FILE=n,n` across rounds).
+2. `capture --watch LO-HI` on the cell(s); `writes` names the store PCs.
+3. `ghidra_run.py export --decompile PC` (import the overlay first if new;
+   `--start` seeds a gap the static walk missed).
+4. `name PC Name --status evidence` when trace and body agree; document the
+   RAM in BATTLE_RAM.md.
+
+**Highest-value targets left, in order:**
+
+| # | Target | Why it pays | How |
+|---|---|---|---|
+| 1 | **`Battle_BaseDamage` + the two defence steps** (`0x801DCAA0`, `0x801DC704`, `0x801DC85C`) | the only part of the damage formula not read; gives the ATK/DEF fields of both record types | `ghidra_run.py export --program BATTLE_EMI3_801D0C00 --decompile 0x801DCAA0,0x801DC704,0x801DC85C`, no game needed |
+| 2 | **`Battle_Init` `0x801D1228`** to evidence | 1428-byte battle setup, hypothesis only; decompile + the battlebegin trace (33 fields at +563) | decompile; compare against BATTLE_RAM's actor table |
+| 3 | **Enemy record layout** (`0x801EB634 + n*0x118`) | only HP/max/status/flags known; ATK/DEF/EXP-yield/drop table unknown | `capture --watch 0x801EB5A0-0x801EB8D0` over a battle start, then the writers' bodies |
+| 4 | **Item drop + EXP yield** at battle end | closes the results screen: `BATL_END` calls `Inventory_Add` and `BattleResult_AddExp` from somewhere | `capture --watch 0x80145040-0x80145470` on a battle with a drop, window 1500+ |
+| 5 | **Magic / Item / Run command paths** | same venn method as Attack/Defend/Watch; identifies the BMAGIC overlay ABI via the resident md5 | three captures from the slot-10 anchor with `--hold` |
+| 6 | **Roster order** (who is roster 1, 2, 4..7) | one kill with Rei or Nina in the party | `--watch` on the `0x80144A10` / `0x80144AB4` EXP cells |
+| 7 | **Dialogue engine anchors** (IDEAS I2) | the translation apply path still needs the box-string writers named | `capture --watch 0x801490A0-0x801490C0` on a dialogue open |
+| 8 | **Psy-Q signatures on the boot EXE** | hundreds of libgpu/libspu/libcd names at once; needs a signature set | Ghidra GUI session; then `ghidra_run.py merge --symbols` |
+| 9 | **Save editor / verifier script** | the format is complete: contiguous `0x10B0` block, u16 byte-sum at `+0x270` | small host tool over `.mcr` files; validates the RAM map end to end |
+
+**Traps paid for this weekend** (details in BATTLE_RAM.md / GHIDRA.md):
+long `ramdiff` windows net out later hits; a same-state save rewrites
+identical bytes (use the write trace, not the diff); `wtrace_dump` truncates
+a frame with more than 2 048 stores (the decompile fills in); a boot-EXE fn
+filter wraps the ring in ~160 frames and the libcard range is flooded by
+the `TestEvent` wait loop, so filter on the file-API wrappers
+`0x8017F7B0-0x8017F830` instead; store PCs inside a shared band must be
+attributed against the *resident* overlay only; `ghidra_run.py import` now
+seeds traced entries and creates functions in descending order so lower
+functions cannot swallow higher starts.
 
 ### 1. Axis B — the loop (mechanical, proven, converging)
 
@@ -46,7 +93,9 @@ The loop is mechanical and self-improving:
    --out analysis/overlay_captures_all.json` (it reads the observed file by
    default via `--observed`) → `analysis/overlay_captures_all.json`.
 4. Recompile all bands and rebuild.
-5. Re-measure. Repeat until a session stops producing new entered PCs.
+5. Re-measure. Repeat until `tools/pc_coverage.py` shows every stratum near
+   saturation — **not** until a session produces 0 new PCs (see *The stop
+   condition* below; 0 new is not evidence of a complete set).
 
 **It needs a play session to harvest against — that is the only blocking
 input.** Everything after step 2 is mechanical.
@@ -321,6 +370,134 @@ input.** Replaying seen content converges to ~0 new PCs (325→56→20→6). The
 observed set accumulates across sessions because two sessions enter almost
 disjoint PC sets (which `.EMI` is resident decides what buckets to a band).
 
+### Mixed sections are extracted by default (2026-09-04)
+
+`extract_overlays.py` takes both `code` and `mixed` survey classes now. The old
+`--include-mixed` opt-in is accepted and ignored; `--no-mixed` restores the old
+behaviour for A/B work and prints a warning when used. `axis_b_loop.sh` follows.
+
+The measurement that settled the open question:
+
+| | default | `--no-mixed` |
+|---|---|---|
+| sections extracted | 405 | 338 |
+| AREA files with ≥1 selectable section | **184 of 200** | **126 of 200** |
+
+- **58 of 200 AREA files ship no `code` section at all** — their `mixed`
+  section is the only compilable code they have. That list is not obscure
+  content: AREA000 (MacNeil Village), AREA001/002 (Dauna Mines). Excluded, those
+  areas have **zero** compiled code and run entirely in the dirty-RAM
+  interpreter.
+- **All 67 mixed sections load to one band, `0x801F2C00`** (the WORLD band), at
+  section index 13 of each AREA file, 67 distinct md5s — one per area, as
+  area-specific code should be. `0x801F2C00` is a known remaining interpreted
+  sink, and `pc_coverage.py` ranks it the least-covered band.
+- **`mixed` is a classifier artifact, not a third kind of section.**
+  `emi_survey.classify` demands `jr>=4 AND prologues>=4 AND density>=2/kword`;
+  the mixed sections are small (median 710 words vs 1957 for `code`) and
+  leaf-heavy, so they fail the *absolute* prologue count while passing density
+  by a wide margin (median 11.9/kword). WORLD04 AREA176–180 have **34 `jr ra`
+  and 3 prologues** — unambiguously code, one prologue short of the gate.
+
+**The cost of the old default was performance, not correctness.** Nothing was
+"missed" in the sense of unexecuted or wrong: the dirty-RAM interpreter runs
+whatever bytes are resident. What was missed is *compilation* — 58 areas' worth.
+The tail of the mixed class does look like genuine data (AREA090: 1359 words,
+2 `jr ra`, 0 prologues); compiling those costs a dead translation unit and some
+audit noise, which is the cheaper error than leaving 58 areas interpreted.
+
+### The stop condition — estimated coverage, not "0 new PCs"
+
+"Play until a session produces no new entered PCs" is unfalsifiable: it is
+equally consistent with *the set is complete* and with *the player walked the
+same three rooms twice*. Since the sessions are nearly disjoint by construction,
+the second reading is the likelier one, and the criterion also says nothing
+about **where** the gaps are.
+
+[`tools/pc_coverage.py`](../tools/pc_coverage.py) replaces it. Each play
+session is a sampling unit, each PC a species, and the unseen remainder is a
+Chao2 richness estimate over session incidence:
+
+```
+N = S_obs + ((m-1)/m) · Q1² / (2·Q2)        Q1/Q2 = PCs seen in exactly 1 / 2 sessions
+```
+
+```bash
+python tools/pc_coverage.py            # by band (+ static fn-start ceiling)
+python tools/pc_coverage.py --by area  # by resident area, named from names/areas.toml
+```
+
+Three things to hold onto when reading the output:
+
+- **Stratify, and trust the strata over the global row.** Chao2 assumes samples
+  drawn from one pool; these are not (the 323-of-17,500 overlap). Within one
+  band or one area the sampling is far closer to homogeneous, so the per-stratum
+  estimates are sounder, and their sum exceeds the global estimate — that gap
+  *is* the heterogeneity. Read the global row as a lower bound.
+- **Coverage is harvest completeness, not nativeness.** A band at 100 % can
+  still be slow until its PCs are compiled in. That axis is the interpreted/
+  native ratio, same tool, different number.
+- **Two denominators.** `est. total` is what remains to be *found*; `fn starts`
+  is the static function count in the band (`jr ra`, fingerprint-deduped) — a
+  ceiling, not a target, since most of those are already native via static call
+  edges and can never appear as an interpreted PC.
+- **The one way this can mislead: replayed content.** Chao2's whole signal is
+  singletons. Two sessions covering the *same* content see almost every PC
+  twice, Q1 collapses, and coverage prints ~100 % — which is indistinguishable,
+  to the estimator, from genuine saturation. The report warns when Q1 falls
+  below 10 % of the observed set, or when coverage exceeds 95 % on fewer than
+  four sessions. **Vary what you play**; a coverage number is only ever about
+  the content the sessions actually reached.
+- **`NEVER SAMPLED` rows are the honest gaps.** Every known band is listed even
+  with zero observations, and unsampled bands lead the "go play these next"
+  line, because a stratum with no draws is a bigger hole than one at 40 % — and
+  a table that quietly omitted them would read as far better news than it is.
+
+The estimate needs **session incidence**, added to `observed_interp_pcs.json`
+on 2026-09-04 as a per-row `sessions` list (plus `areas`, stamped on PCs newly
+seen in a poller pass while that area was resident). Rows harvested before that
+have no `sessions` key; they count as seen but cannot contribute Q1/Q2, so the
+report is pessimistic and calls out the legacy count until they are re-observed.
+**Chao2 needs at least two sessions carrying ids** — the report says so plainly
+rather than printing a number it cannot support.
+
+**Strata are named.** `pc_coverage.py` labels each band from
+`analysis/overlay_catalog.json` (refreshed by the loop's phase 3b), so rows read
+`0x801F6C00 SCENARIO x20` and `0x801D0C00 BATTLE+ETC+SCENARIO +1 x18` rather
+than bare addresses. Numbered siblings collapse (`WORLD00..04` → `WORLD*5`), and
+a single-occupant band with an alias in `names/overlays.toml` uses the alias
+(`0x801CE000 Capcom logo intro`, `0x80196800 Field/map core (large)`) — that is
+the readability track paying off. `--by area` names rows from
+`names/areas.toml`. Missing catalog degrades to bare addresses.
+
+**A session id identifies the RUNNING PROCESS, not the wall clock.** This bit
+us within hours of shipping it: harvesting the same live game twice (the loop's
+end-of-run pass after the poller's timed one) minted ids `…093558` and
+`…094409` over one play session. Both saw the same 196 PCs, none unique to
+either, so Q1 = 0 and the harvest line printed **100.0 % coverage** of a set
+nobody had finished exploring. `resolve_session()` now reads the runtime's
+`frame` counter against `analysis/harvest_session.json`: a frame below the
+stored one means the game restarted (a real new sample), anything else
+continues the stored id. `area_poller.py watch` still passes its own id
+explicitly, which wins. The two phantom ids were merged in the observed file on
+2026-09-04 (backup: `analysis/observed_interp_pcs.prefix.bak`).
+
+**The same bug had a second mouth: `area_poller.py watch`.** It passed its own
+per-watch-run timestamp, which bypassed `resolve_session` entirely — so
+starting the poller late, or restarting it mid-game, split one play session
+again (ids `…101508-b053` and `…101601`, byte-identical PC sets 53 seconds
+apart). The poller now passes `session=None` and lets the process decide; its
+own run id stays on the *timeline* rows, where per-watch-run is the right grain.
+
+**Detecting the split after the fact.** A cumulative per-PC table only grows
+within a process, so if session A's PC set is a **subset** of session B's, A is
+not a separate session — it is an earlier snapshot of the same one.
+`pc_coverage.py` reports such ids as `DUPLICATE SESSIONS` and
+`--merge-duplicates` collapses them (backup: `<observed>.premerge.bak`,
+idempotent). Merging the 2026-09-04 set took 6 ids → 3 real sessions and the
+global estimate from a flattering **97.6 %** to an honest **72.0 %** — the
+clearest measurement yet of how badly a split sampling unit distorts Chao2.
+
 **Pending right now:** the 239 PCs from the world-map / shop / save-screen
 session are compiled in but not re-measured. Remaining interpreted sinks:
 SCENARIO band `0x801F6C00`, mixed BATTLE band `0x801D0C00`, and two residual
@@ -560,8 +737,9 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 
 | Tool | Use |
 |---|---|
-| `tools/axis_b_loop.sh` | **The Axis B loop in one command** (harvest → extract → LOGO merge → catalog → hash → compile → build). Gates on 0 new PCs (`--force`), tolerates only the benign exit-2 shape, refuses to link a running exe. `--harvest-only`, `--skip-harvest`, `--skip-hash`. |
-| `tools/harvest_interp_pcs.py` | Live run → interpreted/native ratio + proven interpreted entry PCs, **unioned** into `analysis/observed_interp_pcs.json`. |
+| `tools/axis_b_loop.sh` | **The Axis B loop in one command** (harvest → extract → LOGO merge → catalog → hash → compile → build). Gates on 0 new PCs (`--force`) — that gate means "nothing new to compile", **not** "the set is complete"; for completeness read `pc_coverage.py`. Tolerates only the benign exit-2 shape, refuses to link a running exe. **Re-prints the `pc_coverage.py` table as the last thing it prints on every path** (including both early exits), so the number that decides whether to keep playing survives the compile/link scrollback. `--harvest-only`, `--skip-harvest`, `--skip-hash`, `--no-mixed`, `--no-coverage`. |
+| `tools/harvest_interp_pcs.py` | Live run → interpreted/native ratio + proven interpreted entry PCs, **unioned** into `analysis/observed_interp_pcs.json` with per-row session incidence (`--session`, `--area`); prints estimated coverage. |
+| `tools/pc_coverage.py` | Chao2 coverage estimate over the observed set, stratified `--by band` (default) / `area` / `none`. The Axis B **stop condition** — replaces "0 new PCs". `--json` for the full report. |
 | `tools/extract_overlays.py` | `.EMI` survey → `overlay_captures_all.json` with static roots + observed entries. Reads the observed file by default. |
 | `tools/extract_logo_overlay.py` | `LOGO/LOGO.EXE` (a PS-EXE at `0x801CE000`) → `static-emi-v1` capture; `--append-to` the all-bands file. |
 | `tools/harvest_logo_handlers.py` | Locate runtime-populated function-pointer tables statically, read them live, emit every handler as a dispatch entry. |
@@ -579,6 +757,9 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/subsystem_map.py` | Regenerates [`subsystem_map.html`](subsystem_map.html): bands → overlays → functions, boot EXE, areas, search. No bytes embedded. Phase 6 of the loop. |
 | `tools/run_dbg.cmd` | Launch build-dbg (or `relprof`) under legacy conhost, stderr to `build-*/stderr.log`, window held open on failure. |
 | `tools/area_poller.py` | `watch` during play (resident AREA by script-block md5, settled screenshot, native-ring compression, timed interp-PC harvest every 15 min + on Ctrl-C so a dead game costs ≤ one interval), `harvest` at end of session (loop phase 2a), `summarize --apply` → `names/areas.toml` + evidence. |
+| [`BATTLE_RAM.md`](BATTLE_RAM.md) | **Battle RAM map + damage path** (2026-09-04): enemy records `0x801EB634+n*0x118`, party `0x80145F0C+m*0x140`, HUD gauges `0x801484B8+n*0x24`; `Battle_ApplyDamage` → `Battle_CalcDamage` → `Battle_BaseDamage` with the variance table and `Rand`. The loop that produced it: `callstack_diff.py ramdiff` (damage read afterwards, `ramfilter --intersect`) → `capture --watch` → `ghidra_run.py export --decompile` → `name`. |
+| `tools/ghidra_run.py`, `tools/ghidra/*.py` | **Headless Ghidra driver** ([`GHIDRA.md`](GHIDRA.md)): `import` an overlay section from `overlay_captures_all.json` as its own program (seeded from the recompiler's roots), `export` every program to `analysis/ghidra/<program>.json` (functions, cop2 flag, callees, globals r/w, cross-band refs, jump tables, constant-`a0` call sites, optional decompile), `report`, `merge` → `names/functions.toml`. GUI must be closed (project lock). 2026-09-04: boot EXE + both BATTLE.EMI code sections exported; `Battle_FrameTask` / `BattleMenu_TargetCursor` promoted to `evidence` from the bodies. |
+| `tools/callstack_diff.py` | **Differential call-stack tracer** (IDEAS I1 / NAME_MAP route 3): `capture` loads a savestate, arms `fn_filter` (sent physical — the server does not mask KSEG0), presses one button, drains the fn entry/exit rings and rebuilds the call forest with the resident area md5 + native-ring body CRCs; `tree`, `diff --prefix` (Attack vs Defend set difference, common-prefix = `Battle_Init` candidate), `propose --apply` upserts `hypothesis` rows into `names/functions.toml` (refuses ambiguous mixed-band occupants without `--overlay`). `--dry-run` drains the rings read-only. |
 | `tools/export_seeds.py`, `tools/ghidra_seed.py` | Kept for the record — the seed experiments were null. |
 
 ## Open questions
@@ -590,16 +771,8 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
   registered native entries compiled from nothing; dirty-RAM invalidation masks
   them today.
 - Text paths not yet seen live: a shop, an equipment menu, battle text.
-- **`--include-mixed` (new session, deliberately not started 2026-09-02).**
-  10 of the first 15 sighted areas ship **no `code` section** — only data,
-  assets and one section the survey classed `mixed` (67 such sections across
-  67 WORLD files, 177 KB total: WORLD00 20, WORLD01 16, WORLD04 15, WORLD02 11,
-  WORLD03 5). `extract_overlays.py --include-mixed` would compile them. Open:
-  do they hold area-specific code that currently runs interpreted (would show
-  as observed PCs in the `0x801F2C00` WORLD band), or are they data the
-  code-test misclassified (in which case compiling them adds audit failures for
-  nothing)? Decide with evidence: compare observed-PC heat inside the mixed
-  sections' RAM ranges before deciding to extract them.
+- ~~`--include-mixed`~~ — **RESOLVED 2026-09-04, mixed is now the default.**
+  See "Mixed sections are extracted by default" below.
 
 ## Environment
 

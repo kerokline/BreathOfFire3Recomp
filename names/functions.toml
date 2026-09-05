@@ -6,3 +6,405 @@
 #   args:     parameter names in a0..a3 order, e.g. ["location", "actor"]
 #   status:   unnamed | hypothesis | evidence | verified
 #   evidence: which trace / string / data-doc citation backs the name
+
+[[function]]
+overlay = "62002f85ca149fec9f16aa97ef43b742"
+pc = 0x801D69F0
+name = "Save_BuildImage"
+args = []
+status = "evidence"
+evidence = "wtrace save_ser.json 2026-09-05: store pc 0x801D6C58 wrote the save payload byte-by-byte from 0x801448D4 into the card buffer 0x800C1A00 (= file offset 0x200) at the save confirm; ghidra decomp: fills the summary block 0x801448D4.. (play time 0x8014686C, date bytes 0x80146860, slot-0 world x/z 0x80145EC0/C4, facing 0x80145E94, 9 u16 from 0x80145AB0), party names/ids into 0x80145574.. (memcpy 0x8017ED1C from 0x80144964 x5, party ids 0x80144F56 with a Peco special case), level/EXP of roster 0, checksum32 = 0x8015BFC4(0x80144F24, 0x92) -> 0x80145588; zeroes 0x80144944 then copies 0x10B0 bytes 0x801448D4..0x80145984 to 0x800C1A00 summing every byte into the u16 at 0x800C1A70 (file +0x270); zero-fills after; then FUN_801d6cf4(slot 0x801E5FA8, block)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "62002f85ca149fec9f16aa97ef43b742"
+pc = 0x801D6CF4
+name = "Save_Commit"
+args = ["slot", "block"]
+status = "hypothesis"
+evidence = "ghidra decomp of Save_BuildImage 2026-09-05: called last with the slot index (0x801E5FA8) and the block pointer; the card module's Card_Open(mode 2)/Card_WriteFile follow (save_file.json)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D10DC
+name = "Examine_ActiveTick"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: per frame (x452/x450) only while Watch is armed"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D1228
+name = "Battle_Init"
+args = []
+status = "hypothesis"
+evidence = "wtrace battlebegin.json 2026-09-05: single write of working status 0x80145F0C at +635 (store pc 0x801D1490, the first game-mode write after Battle_InitPartyContexts at +481); 1428-byte function, 74 stores, calls engine 0x800A79AC/0x800A8AD4 and boot 0x8014E294/0x801629CC -- the game-mode battle setup | wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +563 writes 33 offsets in the persistent-copy region (C+0x80 status flags, C+0x90.. effective stats) once per slot, 4 changing; the first game-mode writer of the battle"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D2198
+name = "BattleMenu_DirectionHold"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): present in defend+watch only, once at +3/+4 frames = the held Right/Left that selects those commands"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D71B0
+name = "Battle_WriteBackParty"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-05: Battle_WriteBackMember(0..2), then boot 0x8015990C() and 0x801629CC(0x256), then DAT_801462DE++; trace: ra 0x801D71C0 of the write-back stores at battle end (levelup2.json)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801D8060
+name = "BattleMenu_TargetCursor"
+args = ["x", "y"]
+status = "evidence"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): present in attack+watch only (both need a target), absent in defend; fires every frame from the first menu frame with constant args; callees 0x801D80A0/0x801D80BC/0x801D80C8 | ghidra BATTLE_EMI3_801D0C00 decomp 2026-09-04: FUN_801d8060(x,y) draws the cursor box: theme colour from 0x8002BA08[DAT_8014494E<<6|0x20], rect/line draws 0x801D9C50/0x801D9A84/0x801DA578/0x801DA484 (second route agrees with the trace)"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DB4EC
+name = "Battle_ActorFrameUpdate"
+args = ["actor"]
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): in all three captures, called from 0x801E6C60 with a0 = 0,1,2 every frame (one call per party member)"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DBB40
+name = "Battle_ApplyDamage"
+args = ["attacker", "target"]
+status = "evidence"
+evidence = "wtrace attack_w.json 2026-09-04: only writer of enemy working HP 0x801EB74C (26->14) at store pc 0x801DBEAC, same frame the HUD copy 0x801484CC followed | ghidra decomp: amount = FUN_801dc00c(attacker,target,0xFFFF); target<3 = party record 0x80145F14+t*0x140 (HP), max at +8; target>=3 = enemy record 0x801EB634+(t-3)*0x118 (HP), max at +0xC, status byte +0x68 |= 4 on clamp, flags +0x6C; negative amount heals and clamps at max; kill sets HP 0 with a survive check against byte 0x80145F18; then weapon element chars J/L/O at 0x80145F0E roll engine 0x800A0D78 and inflict via 0x800A0170(target, 0x40/8/0x20); returns the amount"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DC00C
+name = "Battle_CalcDamage"
+args = ["attacker", "target", "flags"]
+status = "evidence"
+evidence = "ghidra decomp of Battle_ApplyDamage 2026-09-04: called as FUN_801dc00c(attacker, target, 0xFFFF) and its signed return is the amount subtracted from the target's HP (negative = heal); trace: in the attack+defend 'action resolves' set (venn 2026-09-04)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DC704
+name = "Battle_DefenseStep_Party"
+args = ["amount", "attacker"]
+status = "hypothesis"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is a party member (target<3) and no status bit in mask 100 is set; sibling 0x801DC85C for enemies"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DC85C
+name = "Battle_DefenseStep_Enemy"
+args = ["amount", "attacker"]
+status = "hypothesis"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: applied to the base amount when the target is an enemy (target>=3); sibling 0x801DC704 for party"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DCAA0
+name = "Battle_BaseDamage"
+args = ["attacker", "target", "mode"]
+status = "evidence"
+evidence = "ghidra decomp of Battle_CalcDamage 2026-09-04: FUN_801dcaa0(attacker,target,0) is the base amount the formula then scales (weapon-vs-family doubling, status bits, variance, defend/back-row cuts, 9999 cap); mode 1 is re-called under the defend flag (0x801462E4 & 0x80) for the halved+quarter term; trace: attack+defend 'action resolves' set"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD054
+name = "Battle_ReloadPartyRecords"
+args = []
+status = "evidence"
+evidence = "wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +1769, right after Battle_WriteBackMember (+1749), writes 41 words at C+0x74.. for each slot; ghidra decomp: for slot < DAT_801462EC: memcpy(0x80145F00+slot*0x140, 0x80144964 + u8(0x80145FC8+slot*0x140)*0xA4, 0xA8) -- refreshes the working copy from the persistent record (the reverse of the write-back, so level-ups land in the working record)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD564
+name = "BattleResult_AddExp"
+args = ["amount"]
+status = "evidence"
+evidence = "wtrace xp.json 2026-09-04: store pc 0x801DD644 (ra 0x801DD610, in-function loop) is the only writer of 0x8014496C (roster 0) and 0x80144B58 (roster 3), +1 every 2 frames x12 = the results screen ticking 12 EXP; ghidra decomp (seeded via --start): for slot in 0..DAT_801462EC: if FUN_801dd6cc(slot): idx = FUN_801dd774(u8 at 0x80145F05+slot*0x140); u32 at 0x8014496C+idx*0xA4 += amount, capped 9999999 | status held at hypothesis 2026-09-04 pending a second battle (user) | second battle 2026-09-04 (user): same two cells ticked again; 0x8014496C = Ryu (roster 0), 0x80144B58 = Teepo (roster 3)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD6CC
+name = "BattleResult_MemberEligible"
+args = ["slot"]
+status = "hypothesis"
+evidence = "ghidra decomp of BattleResult_AddExp 2026-09-04: per-slot predicate gating the EXP add (alive / present)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD774
+name = "CharId_ToRosterIndex"
+args = ["char_id"]
+status = "hypothesis"
+evidence = "ghidra decomp of BattleResult_AddExp 2026-09-04: maps the byte at working record +0x-7 (0x80145F05+slot*0x140) to the index into the 0xA4-byte persistent character records at 0x8014496C"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD874
+name = "Battle_WriteBackMember"
+args = ["slot"]
+status = "evidence"
+evidence = "wtrace levelup2.json 2026-09-05: at frame +421 (battle end) the only writer of 0x80144970/0x80144978/0x8014497A/0x8014497C (Ryu's record), called x3 from 0x801D71C0; ghidra decomp: if working flag 0x80145E8C+slot*0x140 & 1: rec = 0x8014496C + u8(0x80145FC8+slot*0x140)*0xA4; rec+0xC = working HP (0x80145F14), rec+0xE = working AP (0x80145F16), rec+0x10 = u8 0x80145F18, rec+0x4 = working status halfword (0x80145F0C) & 0x60A0 (also written back to the working copy)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DEEC8
+name = "Battle_InitMemberActor"
+args = []
+status = "evidence"
+evidence = "wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +563 (same frame as Battle_Init) writes 15 low context offsets +1..+3E once per slot; ghidra decomp on ctx=*(0x1F800044): +0x29=4, +0xC..+0x20 zeroed, +8=DAT_801462E8, +0x48=0, +0x3E=boot 0x80155238(+0x34,+0x38) (depth from x/z), +0x2B=0, state bytes +1=2,+2..+4=0"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DFA04
+name = "Attack_Action"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): attack only, +546..+1036 frames, x36 calls with 19 distinct a0; the largest attack-only function; siblings 0x801DF9D0/0x801DFB18/0x801E3AE0-0x801E42C0"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E00EC
+name = "Examine_LearnCheck"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: once at +449/+440, right before the cannot-learn message"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E0400
+name = "Defend_Action"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): defend only, +556..+736 frames; siblings 0x801E0434/0x801E04B4-0x801E06C8 defend-only | ghidra decomp 2026-09-04: trampoline (*PTR_801EB154[*(u8*)(*(u32*)0x1F800044+3)])() -- per-state dispatch on the battle context in scratchpad 0x1F800044; the defend logic is in the table's targets"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E2500
+name = "Examine_EnemyMove_Tick"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: x10 over +133..+421 / +124..+412 while the observed skill plays; siblings 0x801E5230/0x801E524C"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E69E0
+name = "Examine_QuestionMark_Tick"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: x23 over +39..+83 / +30..+74, the question-mark animation"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E6A68
+name = "Examine_QuestionMark_Begin"
+args = []
+status = "hypothesis"
+evidence = "callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: once at +39/+30 = the question mark appearing; followed by the 0x801E69E0/69E8/6A58/6B00/6B58 animation cluster for ~45 frames"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E8FAC
+name = "Battle_FrameTask"
+args = []
+status = "evidence"
+evidence = "callstack_diff venn 2026-09-04 (analysis/callstacks/{attack,defend,watch}.json, slot10 anchor, 900-frame window): called once per frame from boot EXE 0x80159828 in every capture; every battle-band root hangs off it (tree) | ghidra decomp 2026-09-04: 8-way state dispatch (*table[*(u8*)(_DAT_80148644+2)])() over 0x801D0F80..0x801D0F9C thunks = the battle game-mode state machine; called once per frame from boot 0x80159828"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E9B74
+name = "Battle_MemberStatusTick"
+args = []
+status = "hypothesis"
+evidence = "wtrace battlebegin.json 2026-09-05: rewrites working status 0x80145F0C every ~2 frames from +637 for the rest of the window (286 writes, value unchanged)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA190
+name = "HUD_GaugesTick"
+args = []
+status = "hypothesis"
+evidence = "wtrace attack_w.json 2026-09-04: all HUD_GaugeUpdate calls return to 0x801EA1F4 inside this 116-byte function; runs every frame (gauge records for 3 enemies at 0x801484B8 and the party HP/AP at 0x8014850B/0x8014852F)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801EA204
+name = "HUD_GaugeUpdate"
+args = ["gauge_len", "max_hp", "shown_max", "shown_hp"]
+status = "evidence"
+evidence = "wtrace attack_w.json 2026-09-04: writer of the HUD HP copy 0x801484CC (store pc 0x801EA4D0), called from 0x801EA1F4 once per gauge per frame with a0=gauge byte (0x801484B8+n*0x24+0xB), a1=working max HP (enemy 0x801EB640+n*0x118 / party 0x80145F1C+n*0x140, then +2 for AP), a2/a3 = HUD shown max / shown HP; ghidra decomp: gauge = hp*0x37/max with min 1, shrink animation via stack args (delta, step, flag)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801AEDD4
+name = "Char_LevelUp"
+args = ["roster"]
+status = "evidence"
+evidence = "wtrace levelup3.json 2026-09-05 (Teepo L3->4): store PCs 0x801AEF2C..0x801AF1D4 wrote base stats rec+0x3C..0x46 (+4,+4,+2,+2,+1,+4) and level byte rec+6 (3->4), called from BATL_END 0x801EF400; ghidra decomp: level = first L whose cumulative sum of u16 exp-to-next (table 0x801CC068 + roster*0x318 + L*8) exceeds EXP rec+8; per gained level adds growth bytes (hp, ap, pwr<<4|def, agl<<4|int) plus signed master modifiers rec+0x85..0x8A, cap 999, learns skills at table +6/+7 via AbilityList_Add, then Char_RecalcStats(rec). Disc table reproduces the observed growth exactly and Ryu's cumulative 105 at L5"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801C0114
+name = "Encounter_PlaceParty"
+args = []
+status = "hypothesis"
+evidence = "wtrace battlebegin.json 2026-09-05 (full battle, watch 0x80145E8C-0x80145FCC): at +355..+371 (pre-battle transition) writes 12 offsets incl. C+0x34/+0x38 (world x/z from the 8-byte table at 0x80143F2C indexed by party position in 0x80144F59), C+0x3E depth, C+0x29 sprite from 0x8014933A, C+0xB=1, colour bytes +0x5C..+0x5F; ghidra decomp: sets 0x80143F24/28 camera target from DAT_801CDBE4[DAT_801462E8]"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801C224C
+name = "Battle_InitPartyMember"
+args = ["char_id", "slot"]
+status = "hypothesis"
+evidence = "ghidra decomp of Battle_InitPartyContexts 2026-09-05: called per slot with the character id and slot before the record copy"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801C23F8
+name = "Battle_InitPartyContexts"
+args = ["formation"]
+status = "evidence"
+evidence = "wtrace battlebegin.json 2026-09-05: one-shot write to working status 0x80145F0C at +481 from store pc 0x801C253C; ghidra decomp: for slot < DAT_80146250: ctx = 0x80145E8C+slot*0x140, ctx[0]=1 (present), ctx[5]=slot, roster = 0x80182488[char id from 0x80144F56+slot+formation*3], ctx+0x13C = roster, memcpy(ctx+0x74 = 0x80145F00+slot*0x140, &0x80144964 + roster*0xA4, 0xA8) -- the working record IS a copy of the persistent record, same offsets; scratchpad 0x1F800044 and 0x8014624C = ctx"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF040
+name = "Card_InfoPoll"
+args = []
+status = "evidence"
+evidence = "save_card2.json 2026-09-05: calls BIOS _card_info (A0:AB, 0x8017E928) at 0x801EF068 every ~75 frames while the card menu is open"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF0C4
+name = "Card_LoadDirectory"
+args = []
+status = "evidence"
+evidence = "save_card2.json 2026-09-05: calls BIOS _card_async_load_directory (A0:AC, 0x8017E938) at 0x801EF0DC right after each Card_InfoPoll"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF270
+name = "Card_BuildTitleFrame"
+args = ["a", "blocks", "name"]
+status = "evidence"
+evidence = "wtrace save_ser.json 2026-09-05: called as 0x801EF27C(1, 0x13, 0x80145AD0) from Save_BuildImage; its stores fill file offsets 0x00..0x7F of the card buffer 0x800C1800 (byte at +0, bytes +1..+0x5F = 'SC' + title, words +0x60..+0x7C = icon CLUT) in the confirm frame, followed by the three 128-byte icon-frame copies 0x801EF764/0x801EF874/0x801EF92C into +0x80/+0x100/+0x180"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF764
+name = "Card_CopyIconFrame0"
+args = []
+status = "hypothesis"
+evidence = "wtrace save_ser.json 2026-09-05: 32 word stores filling card buffer +0x80..+0xFC (icon frame 1) right after Card_BuildTitleFrame"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF874
+name = "Card_CopyIconFrame1"
+args = []
+status = "hypothesis"
+evidence = "wtrace save_ser.json 2026-09-05: 32 word stores filling +0x100..+0x17C (icon frame 2)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF92C
+name = "Card_CopyIconFrame2"
+args = []
+status = "hypothesis"
+evidence = "wtrace save_ser.json 2026-09-05: 32 word stores filling +0x180..+0x1FC (icon frame 3); ghidra: 16-byte-stride copy loop"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EF9E4
+name = "Card_Open"
+args = ["name"]
+status = "evidence"
+evidence = "save_file.json 2026-09-05 (fn trace on the BIOS file-API wrappers 0x8017F7B0-0x8017F830 during a save; card module resident at 0x801EEC00): calls strcpy 0x8017ECDC then BIOS open (0x8017F7B4) at 0x801EFA18 with the path at 0x801FF4B0/0x801FF4D0 and mode 1 (read) or 2 (write)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EFB44
+name = "Card_ReadSlotHeader"
+args = ["fd"]
+status = "evidence"
+evidence = "save_file.json 2026-09-05 (fn trace on the BIOS file-API wrappers 0x8017F7B0-0x8017F830 during a save; card module resident at 0x801EEC00): lseek(fd, 0xE80) / read(fd, 0x800C2680, 0x80) / close at 0x801EFBDC..0x801EFBFC, once per save slot listed (three slots, entries 0x8018F308/0x8018F320/0x8018F338)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EFC00
+name = "Card_WriteFile"
+args = ["fd"]
+status = "evidence"
+evidence = "save_file.json 2026-09-05 (fn trace on the BIOS file-API wrappers 0x8017F7B0-0x8017F830 during a save; card module resident at 0x801EEC00): lseek(fd,0) at 0x801EFC10, write(fd, 0x800C1800, 0x1300) at 0x801EFC20, close at 0x801EFC30 -- the save image is 4864 bytes staged at 0x800C1800 (the BOSS band, idle outside battle)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EFD9C
+name = "Card_ListFiles"
+args = []
+status = "evidence"
+evidence = "save_file.json 2026-09-05 (fn trace on the BIOS file-API wrappers 0x8017F7B0-0x8017F830 during a save; card module resident at 0x801EEC00): BIOS firstfile (0x8017F814) at 0x801EFDAC with the pattern buffer 0x801FF490 and dirent 0x801FF468, then Card_NextFile x3"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "af7a685c120fd0b148741ce08c7ac775"
+pc = 0x801EFE28
+name = "Card_NextFile"
+args = []
+status = "evidence"
+evidence = "save_file.json 2026-09-05 (fn trace on the BIOS file-API wrappers 0x8017F7B0-0x8017F830 during a save; card module resident at 0x801EEC00): BIOS nextfile (0x8017F824) tail-called three times after firstfile"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "b8cc1561528b84ba16fe96074dfee289"
+pc = 0x801D6D94
+name = "Menu_EquipConfirm"
+args = []
+status = "evidence"
+evidence = "wtrace equip3.json 2026-09-05 (weapon 3 -> 28 on Ryu, START.EMI menu resident): in one frame calls boot Inventory_Remove(count ptr, new item 0x1C, 1, id ptr) from 0x801D6E70, Inventory_Add(cat 1, old item 3, 1) from 0x801D6E90, then stores the new weapon id into record +0x0E (0x80144972) at 0x801D6EA4; Char_RecalcStats follows (equip.json) | ghidra decomp 2026-09-05: record = 0x80144964 + roster(0x80182488[0x80144F56[cursor 0x8014850C]])*0xA4; for slot 0..5: if 0x801ED5BC[slot] != record[0x0E+slot]: Inventory_Remove(cat=0x801EC3E8[slot], new, 1); Inventory_Add(cat, old, 1); record[0x0E+slot] = new; then Char_RecalcStats(record)"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "c39f0a09914873fc3e73d8b1300dc381"
+pc = 0x801EF188
+name = "Examine_EnemyMove_Begin"
+args = []
+status = "hypothesis"
+evidence = "overlay corrected 2026-09-04: 0x801EF188 is in the 0x801EEC00 BMAGIC band (BATTLE.EMI#3 ends 0x801ED93F), resident MAGIC069 at capture; callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: once at +133/+124, at the start of the observed enemy skill (Nu Stomp)"
