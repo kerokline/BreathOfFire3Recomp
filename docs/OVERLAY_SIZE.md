@@ -165,6 +165,47 @@ call is lowest (2.86 on the card-poll screen, where `card_mgr_trace_record`
 fires on a `TestEvent` spin the source describes as re-entering "millions of
 times") and lowest where the engine does real work per call (2.11 in combat).
 
+### Three trees: both axes are multiplicative, and they anti-correlate
+
+Adding `build-dbg` (`-O0`, tools ON) gives a second, independent factor.
+dbg -> relprof is **purely the optimizer** (tools on in both); relprof ->
+release is **tools removal plus `-O2`->`-O3`**. All uncapped as above.
+
+| Scene | dbg | relprof | release | dbg->rp | rp->rl | dbg->rl |
+|---|---:|---:|---:|---:|---:|---:|
+| Intro / Capcom | 0.8x | 1.75x | 5.0x | 2.19 | 2.86 | 6.25 |
+| Memory-card | 0.9x | 1.75x | 5.0x | 1.94 | 2.86 | 5.56 |
+| Start screen | 2.3x | 6.0x | 16.0x | 2.61 | 2.67 | 6.96 |
+| Transitions / areas | 1.75x | 3.5x | 8.0x | 2.00 | 2.29 | 4.57 |
+| Combat | 1.75x | 4.5x | 9.5x | 2.57 | 2.11 | 5.43 |
+
+| Step | Mean | Range | CV |
+|---|---:|---|---:|
+| dbg -> relprof (optimizer only) | **2.26x** | 1.94-2.61 | 0.14 |
+| relprof -> release (tools + O3) | **2.56x** | 2.11-2.86 | 0.13 |
+| dbg -> release (composed) | **5.75x** | 4.57-6.96 | 0.16 |
+
+The optimizer axis is multiplicative too (CV 0.14), so the chain composes:
+**dbg x ~5.75 estimates release.**
+
+**The two axes anti-correlate (Pearson r = -0.34)**, with near-reversed rank
+order:
+
+```
+optimizer gain:  start > combat > intro > areas > memcard
+tools gain:      memcard > intro > start > areas > combat
+```
+
+The optimizer pays off where there is real recompiled guest work to optimise
+(combat, start screen); removing per-call hooks pays off where call rate is
+high but work per call is near zero (the `TestEvent` card poll, the intro).
+The two partly cancel, which is why the composed ratio stays inside 4.6-7.0x
+even though each axis varies by ~35%.
+
+Note that **`build-dbg` runs below real time** on the intro (0.8x) and the
+memory-card screen (0.9x) - it cannot hold 60 fps there at all. Treat dbg
+numbers as unusable for performance judgement, even relative ones.
+
 ### Consequences
 
 - **The 4x speed target is met on a shipping build with margin.** Worst case is

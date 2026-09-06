@@ -544,6 +544,23 @@ so the interpreter-cost delta is explicit.
 
 ## I6 — Why the Capcom intro caps at ~45 fps (build-dbg)
 
+> **Note 2026-09-06 — the dbg half of this is answered; the FMV half is not.**
+> Matched uncapped windowed runs (`PSX_FAST_FORWARD_SPEED=max` + `PSX_VSYNC=0`)
+> put the intro at **0.8x on `build-dbg`** (~48 fps, matching the ~45 fps in the
+> ask), **1.75x on `build-relprof`**, and **5x on `build-release`**.
+>
+> So "why does the intro cap at ~45 fps on dbg" needs no intro-specific
+> explanation: it is the build tier. The dbg->release ratio for this scene is
+> 6.25x, in line with the 4.6-7.0x seen across every other scene, so the intro
+> is not anomalous — `build-dbg` simply runs below real time here (and on the
+> card screen at 0.9x). See [`OVERLAY_SIZE.md`](OVERLAY_SIZE.md).
+>
+> **What is still open:** the separate claim below that the ceiling is
+> CD/FMV-pacing-limited rather than CPU-limited (`CAPCOM30.STR` streaming, the
+> ~30 present-fps note). That was never measured on a release build and this
+> work did not touch it. If the intro still looks wrong to a player on Release,
+> that is the question to pick up — not the CPU ceiling.
+
 **Ask (2026-09-05):** the Capcom logo/intro will not break 45 fps on
 `build-dbg`. Non-dbg reaches 60, but we want to know the ceiling's cause and
 whether there is headroom to win.
