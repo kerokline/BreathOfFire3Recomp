@@ -67,8 +67,8 @@ headless driver. The loop:
 | 4 | ~~Item drop + EXP yield~~ **DONE 2026-09-05** — `Battle_EnemyDefeated` → `Battle_RollDrops` → BATL_END `BattleResult_Setup` / `_ExpTick` / `_ZennyTick` / `_AwardDrops` | left: a battle where a drop actually lands (`AwardDrops` is body-only) | `--watch 0x80146320-0x80146360` on a kill |
 | 5 | ~~Magic / Item / Run command paths~~ **DONE 2026-09-05** — command byte `C+0x119` (+target `+0x118`, parameter `+0x11A`), engine-band menus, `Escape_Roll`/`Escape_Chance`, `Effect_ApplyResult` and its handler table `0x800B165C` | left: per-skill/item handler indices (user: read directly later), Defend confirm body (Ghidra gap `0x801D2520`) | engine band needs `--lo 0x80093800 --hi 0x801D0C00` and ≤ ~130-frame windows |
 | 6 | ~~Roster order~~ **DONE 2026-09-05** — read off the record name bytes in the card saves (`save_tool.py dump`): 0 リュウ, 1 ニーナ, 2 ガーランド, 3 ティーポ, 4 レイ, 5 モモ, 6 ペコロス, 7 パピー = the intro's baby dragon (char id 10; proven live on `slot01`: roster byte 7, write-back into record 7); char id = roster for 0..6, ids 7/8/9/14 are alternate forms via table `0x80182488` (9 = the lone boy Ryu of save 1) | left: which forms 7, 8, 14 are | — |
-| 7 | **Dialogue engine anchors** (IDEAS I2) | the translation apply path still needs the box-string writers named | `capture --watch 0x801490A0-0x801490C0` on a dialogue open |
-| 8 | **Psy-Q signatures on the boot EXE** | hundreds of libgpu/libspu/libcd names at once; needs a signature set | Ghidra GUI session; then `ghidra_run.py merge --symbols` |
+| 7 | ~~Dialogue engine anchors~~ **DONE 2026-09-05** — `capture --watch 0x801490A4-0x801490B0` on an NPC talk (`slot04`, `npc_talk.json`): GAME.EMI `Script_ShowMessage` → boot `Msg_OpenScript(idx)` / `Msg_OpenSystem(id)` are the only box-string writers; 13 text-engine functions named `confirmed` in `symbols.toml`, control codes `0x02/0x0A/0x0C/0x0F/0x10/0x14` read, box frame drawer found. TEXT_ENGINE.md "The resolver" | left: the hook *shape* — the pointer is never a dispatch arg, so the framework's a0..a3 hook can't see it (in-place patch needs a BoF3 encoding profile upstream, or repoint at `MsgBox_Reset`) | — |
+| 8 | ~~Psy-Q signatures on the boot EXE~~ **DONE 2026-09-05** — `tools/psyq_sigs.py` against lab313ru/psx_psyq_signatures (sibling checkout): SDK 3.70, 246 objects, **500 names** appended to `symbols.toml` (libgpu 101, libsnd 121, libgte 63, libcd 53, libspu 45, libetc 29, libapi thunks incl. `open`/`read`/`write`/`firstfile`). No Ghidra needed | left: `0x8014E494`, `0x8015E908` are game code, not library (the `0x8017F7B0` file-API range is the `open`/`lseek`/`read`/`write`/`close`/`firstfile`/`nextfile` thunk block, now named); re-seed the Ghidra boot program to see the names in decompiles | — |
 | 10 | ~~Name tables from the `.EMI`~~ **DONE 2026-09-05** — `tools/text_tables.py extract` → `names/items.toml` (consumables 92 / key 16 / weapons 83 / armour 68 / accessories 52, five tables with five strides), `abilities.toml` (227, `type = b1 & 3`), `places.toml` (200 MTEST entries = AREA000..199, joined to each area's kanji entry banner and dev label, 45 with English), `characters.toml`; `save_tool.py` prints names and `verify` proves ability types and weapon ATK / armour DEF against the saves | left: the `ref` index, accessory effect codes, the ability param bytes, masters (a message block, not a table), promoting places into `areas.toml` | [`TEXT_TABLES.md`](TEXT_TABLES.md) |
 | 9 | ~~Save verifier script~~ **DONE 2026-09-05** — `tools/save_tool.py`; card1's three saves verify and match the Mednafen load screen; three RAM-map corrections (`Flag_Test`, play time `0x80144FBC`, four ability lists); names since row 10 | left: the `0x8014686C..` words at the block head, record `+0x84` | `python tools/save_tool.py verify saves/card1.mcd` |
 
@@ -573,15 +573,104 @@ that a fix took), and `--group` for an interp-weighted subsystem breakdown.
 sidecar (`analysis/overlay_catalog.json`): family, band co-residency, root
 provenance, honestly-attributed heat.
 
-**The durable upgrade is tier-1/2 in the runtime**: record, per PC at entry
-time, the resident-occupant CRC (tier 1) and a transfer-type histogram
-(call/jalr/jr/branch/irq-resume, tier 2) in `DirtyRamPcEntry`
-(`dirty_ram_interp.c`, emitted via `dirty_ram_stats.per_pc`). Mixed bands
-(`0x801D0C00` = BATTLE+ETC+SCENARIO+WORLD) cannot be resolved to an occupant
-offline; tier 2 would have diagnosed §9 in minutes. This is now an ordinary
-upstream `psxrecomp` PR — there is no fork branch to carry it. Endgame: once
-calls are grouped by shared caller/callee, the `.EMI`-shaped subsystems fall
-out — the unit for modding, performance and extensibility.
+**Tier-1/2 landed in the runtime (2026-09-05, psxrecomp fork branch
+`feat/dirty-pc-enrichment`, off the `17f49ad3` pin).** `DirtyRamPcEntry`
+gained two fields, stamped only on **external** entries (arrived from native
+dispatch, not interp block chaining) and emitted per row in
+`dirty_ram_stats.per_pc`:
+
+- `occ_crc` + `occ_ok` (tier 1) — `psx_overlay_resident_crc_at(pc)`: a scan
+  of the static-match cache for the compiled piece whose code ranges span the
+  PC. **The runtime validates per function / fragment, not per section**, so
+  `occ_crc` is that piece's CRC; [`tools/occ_resolve.py`](../tools/occ_resolve.py)
+  joins it back to the piece's symbol, band and source-section crc32 from
+  `generated/overlays_static.c` (`ov_<band>_<sectioncrc>_…_func_<pc>`, cached
+  in `analysis/static_variants.json`). `occ_ok = 1`: the piece validated —
+  an interior gap inside live native code, the Axis B seed case. `occ_ok = 0`
+  with a CRC: the piece is resident but CRC-missing — compiled from *another*
+  section's bytes, or rewritten at run time; no seed helps, the resident
+  section needs its own piece. `0`: nothing compiled spans the PC (BIOS,
+  kernel, boot EXE). The first draft read the loader's process-global last
+  hash, which the static path never sets — all zeros on a real boot; the
+  per-PC scan replaced it.
+- `ext_ra` (tier 2) — `$ra` at the most recent external entry: the caller
+  that reached this interior. A PC reached only through a function-pointer
+  table shows the dispatcher's `ra`, so the §9 LOGO diagnosis (find the table's
+  call site) comes out of the session-long snapshot with no ring window.
+  `ext_ra == pc` is a `jr ra` **return** into interpreted code (native callee
+  returning to an interpreted continuation), not a call. The full
+  call/jalr/jr/irq histogram was **not** built — the fp-log ring still carries
+  the transfer split when one is needed.
+
+**First result (title screen, headless boot):** resident SCENARIO-band section
+= SCENA16 (`enrich_pcs.py --pc 0x801F6C90`), yet `occ_resolve` shows every
+interpreted PC there spanned by a piece from SCENA19 / SCENA04 / SCENA06 …
+with `occ_ok = 0` — 517 + 235 + 235 entries in one title visit. The band is
+"compiled" but the resident section has no pieces at those PCs.
+
+**Root-caused and fixed the same evening (2026-09-05) — it was the compile
+side, not extract-side attribution.** `extract_overlays.py` does attach every
+observed PC to every occupant of its band (SCENA16's capture listed all 53),
+but `compile_overlays.py --static`'s isolated-fragment pass resolved demands
+by **bare address** across all captures: once any part had a variant at an
+address, the address counted as served for every capture in the band, and
+`static_entry_sources` kept only the *last* capture's bytes. So exactly one
+occupant per multi-section band ever got fragments (BOSS055 35/35, PLP678
+19/19, SCENA19 20/20; the 128-occupant `0x801EEC00` and 181-area
+`0x801F2C00` bands got none) — 23,728 (entry, image) demands unserved, and
+`STATIC COVERAGE WARNING` never fired because by address everything looked
+served. Fix on psxrecomp fork branch **`fix/static-fragments-per-variant`
+`2fa3472a`** (stacked on `feat/dirty-pc-enrichment` `6e760748`, both pushed
+to `kerokline/psxrecomp`): demands keyed `(entry, image crc)`, parts carry
+`image_crc`, fragments compiled on the `--jobs` pool (image table sent once
+per worker), deterministic data-as-code verdicts (generated-C audit, and the
+recompiler *throwing* on a walk that runs off the image) memoized in
+`generated/interior_fail_memo.txt` and counted as *skipped* rather than
+`SHARD FAIL`; fragment parts grouped one translation unit per image.
+Unit test `psxrecomp/tools/tests/test_static_fragment_variant_keys.py`.
+Numbers (full BoF3 run): 20,250 fragments built, 3,570 memoized rejections,
+**238 s cold / ~3 min warm** for phase 5a (was ~80 s), served keys 99,778 →
+138,148 with nothing lost, `PSX_SHARD_RESULT failed=17` unchanged (the loop's
+gate passes). Cost: `generated/` is now **1.6 GB of C in 779 units** (was
+358 MB / 480) and the build-dbg exe 699 MB — a cold `psx-runtime` build is
+minutes, not 69 s; incremental rebuilds only touch changed units.
+**Verified headless at the title screen** (same injected Start/Start/Circle
+protocol, `scratchpad/title_probe.py` pattern): interpreted SCENARIO-band
+entries **12 → 2**, and the two left (`0x801F7144`, `0x801F7170`, spanned by
+a SCENA00 piece) are simply not in the observed set yet — the ordinary Axis B
+harvest case. Overall interp/native at the title is unchanged (~14 M / 11 M
+insns): the residue there is BIOS kernel entries (`0x000000B0`, 2.6 M
+entries), not overlay code.
+
+**Follow-up that would cut the 1.6 GB:** most of the 20k fragments are for
+band siblings that never ran the PC (an observed PC attributed to all 181
+areas). The observed rows now carry `areas` (resident area at first sight)
+and, after one play session on this build, `occ_crc`/`occ_ok` — enough to
+attribute a PC to the occupant that actually ran it and demand fragments
+only there. Not done; the current output is correct, just large. A
+batched-per-image fragment compile with bisection on audit failure (the DLL
+path's hosted-fragment idea) would dedupe the overlapping walks too.
+
+`build-relprof` has **not** been rebuilt since 08:17 and carries neither the
+enrichment nor the fragment fix — rebuild it before measuring play.
+
+`tools/harvest_interp_pcs.py` merges all three (newest non-zero wins, they are
+not counts); `analysis/observed_interp_pcs.json` rows carry them from the
+first harvest against an enriched build. The debug-server reply buffer grew
+32 → 64 KiB for the wider rows. Play/harvest builds must be rebuilt from the
+branch (`build-enrich` = Debug, mirrors build-dbg, was the test bed; headless
+TCP savestate loads wedge on this pin, so scenes were reached by injected
+input from a cold boot). `docs/TCP_COMMANDS.md` in the submodule documents
+the fields. **Branch state: committed as `6e760748` and pushed to
+`kerokline/psxrecomp`; the fragment fix `2fa3472a` sits on top.** Open the
+two upstream PRs (rebase the fix onto `mstan/master` if they should be
+independent — the files are disjoint), then bump the pin. The `area_poller.py
+watch` / `harvest_interp_pcs.py` report now prints the gap split per harvest
+(`seedable` / `attribution` / `outside compiled code`, also stored on the
+timeline `harvest` row as `occ_seed`/`occ_attrib`/`occ_none`), so a session
+on an enriched build says at once whether the next loop will help. Endgame unchanged: once calls are grouped by
+shared caller/callee, the `.EMI`-shaped subsystems fall out — the unit for
+modding, performance and extensibility.
 
 ### 3. Translation
 
@@ -653,6 +742,13 @@ Order matters, and each of these cost a session once:
   #46 in `recomp_launcher.h` (both appended to `Settings` / `GameInfo`);
   resolved upstream-first (`virtual_stylus` before the scanline fields) —
   rebase the same way if it conflicts again. #47 was redundant with #46.
+- **Open fork branches (2026-09-05, pushed, no PR yet):**
+  `feat/dirty-pc-enrichment` `6e760748` (= `17f49ad3` + 1, the tier-1/2
+  per-PC enrichment) and `fix/static-fragments-per-variant` `2fa3472a`
+  (= `6e760748` + 1, the compile-side fragment fix; see "Enrichment"). The
+  submodule working tree is checked out on the fix branch so `build-dbg`
+  carries both; the gitlink still says `17f49ad3`. `generated/` was compiled
+  with the fix — a checkout of the gitlink alone cannot reproduce it.
 - **Open fork branch:** `fix/starvation-watchdog-wrap` `430c93b8` (= `17f49ad3` + 1)
   = [mstan/psxrecomp#321](https://github.com/mstan/psxrecomp/pull/321) — the starvation-watchdog cross-thread wrap fix + exit-origin labels
   ([`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md)).

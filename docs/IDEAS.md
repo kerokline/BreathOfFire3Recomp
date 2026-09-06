@@ -470,3 +470,98 @@ bytes — right strings, no ids, no fields. A record table gives the id order
 (what the save and the RAM hold), the prices, AP costs and type bits as a
 side effect, and the same trick locates every other non-script table:
 search for one known name in the encoding, read the stride.
+
+---
+
+## I5 — Faster save / load / memory-card screens (BIOS + card paths)
+
+**Ask (2026-09-05):** the save screen, memory-card read, and saving a game
+are slow — the player meets them in the first minute and we want real
+headroom, not "just barely 60." Investigate the BIOS and card paths.
+
+**Kind:** runtime/BIOS profiling, then likely an upstream change. **Feasibility: MEDIUM** (the profile is host tooling; the fix probably needs framework BIOS work).
+
+### What the measurement already established (2026-09-05)
+
+- The three front-end card screens — the "checking memory card" poll
+  (`slot06` precursor), the NEW/LOAD menu (`slot06`), and the LOAD-GAME
+  card-select screen (`slot11`, 「どのカードからロードしますか」) — are
+  **99% BIOS/kernel-interpreted code, ~0 overlays** (`per_pc`: 9.0 M interp
+  insns/window in `<0x10000`, 15 in any overlay band). So this is **not** an
+  overlay/dispatch problem and the static-fragment work does not touch it.
+- In `build-relprof` these run 418–470 present-fps (floors 355 / 394), far
+  above 60. In `build-dbg` (`-O0` + the instrumented dirty-RAM interpreter)
+  the same screens are ~30 fps — ~14× slower, because the BIOS card code runs
+  **interpreted**, and the debug interpreter is heavy. Release is fine today;
+  the concern is margin.
+- The hot PC is the BIOS call vector **`0x000000B0`** (2.6 M external entries
+  in a title-visit window; `ra` into `0x8014B7xx` / `0x8017Exx`, the boot-EXE
+  card/pad wrappers). The card front-end spins on B0-function kernel calls.
+  Kernel-call **HLE is structurally unavailable on OpenBIOS** ("no
+  DeliverEvent anchor"), so every card syscall stays LLE-interpreted.
+
+### What is missing / the levers
+
+1. **Which BIOS calls dominate** — filter `fn_entry`/`dirty_ram_stats.per_pc`
+   to `<0x10000` on `slot11` and read the top B0/C0 ordinals (card_read,
+   card_write, `_card_*`, `TestEvent` wait loops). The Psy-Q pass already
+   named the boot-EXE card wrappers (`Card_Open`, `Card_ReadSlotHeader`,
+   BATTLE_RAM.md "save format").
+2. **Compile the hot BIOS routines** (the recompiler already emits the BIOS
+   backend; the card/kernel path is the LLE remainder) **or** land a BoF3/
+   OpenBIOS call-HLE anchor so `TestEvent`/card waits stop interpreting.
+3. **Cut the poll** — a `TestEvent` spin waiting on card completion burns
+   frames; an HLE fast-path for the completion event would remove it.
+
+### First step
+
+`floor_bench.py`/`ab_frames_disc.py` on `slot11` with a `<0x10000` `per_pc`
+top-N read to rank the BIOS ordinals, then decide compile-the-BIOS-path vs
+enable-call-HLE with the framework. Bring a build-dbg vs build-relprof pair
+so the interpreter-cost delta is explicit.
+
+---
+
+## I6 — Why the Capcom intro caps at ~45 fps (build-dbg)
+
+**Ask (2026-09-05):** the Capcom logo/intro will not break 45 fps on
+`build-dbg`. Non-dbg reaches 60, but we want to know the ceiling's cause and
+whether there is headroom to win.
+
+**Kind:** profiling. **Feasibility: MEDIUM** (needs a windowed/dbg run — the intro does not execute headless).
+
+### What is known
+
+- The intro runs from **`LOGO/LOGO.EXE`** (standalone PS-EXE at `0x801CE000`,
+  a **single-occupant** overlay band). It was root-caused and compiled as an
+  overlay 2026-09-01; the note then read **"~30 present-fps is now
+  pacing-limited (idle CPU; `CAPCOM30.STR` FMV / CD streaming), not
+  CPU-limited"** — i.e. the ceiling was CD/FMV throughput, not the CPU.
+- The static-fragment fix is a **no-op** here (single occupant → byte-identical
+  code; its fragments are for other bands and never enter the intro's i-cache
+  working set), so 45 fps is not from this change.
+- **The intro does not run in the headless harness** even with `--disc` and
+  `PSX_BIOS_HLE_KEEP_INTRO=1`: `LOGO.EXE` never executes and boot races to the
+  title. It is only observable windowed (as the user measured), so this needs
+  a windowed run with `--debug-port`, not the scripted headless path.
+
+### The question to settle first
+
+**Is the intro CPU-bound or pace-bound on dbg?** Sample `dirty_ram_stats`
+(interp insns/s) and `dispatch_stats` (native/s) during the intro on a
+windowed dbg run:
+- **CPU idle** (low insns/s, native≈0, present ~45) → the ceiling is CD-sector
+  read rate / `.STR` FMV decode / present cadence. Levers: CD read-speed
+  (`disc-speed.md`), the FMV/MDEC path, VSync pacing — a framework axis, and
+  the intro may simply be authored at the FMV's native rate.
+- **CPU busy** (interp insns/s high in the `0x801CE000` band) → an interior of
+  `LOGO.EXE` is still interpreted; harvest it (the same overlay-alias route
+  that took `0x801CEEDC` native) and re-measure.
+
+### First step
+
+Windowed `build-dbg` launch with `--debug-port`; during the Capcom logo poll
+`dirty_ram_stats`/`dispatch_stats` and the `frame` counter (VSync freezes in
+FMV — use the debug frame counter). Classify pace- vs CPU-bound, then follow
+the matching lever above. Compare against `build-relprof` to separate the
+`-O0`/debug-interpreter tax from the real ceiling.

@@ -4,9 +4,21 @@
  */
 #pragma once
 
+/* confirmed: Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN___main 0x8014AA04u
+#define func_8014AA04 __main  /* alias */
+
 /* guessed: SYSTEM.CNF / EXE entry PC (probe seed) */
 #define PSX_FN_BootEntry 0x8014AA0Cu
 #define func_8014AA0C BootEntry  /* alias */
+
+/* confirmed: Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0x2C: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_stup1 0x8014AA30u
+#define func_8014AA30 stup1  /* alias */
+
+/* confirmed: Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0xA8: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_stup0 0x8014AAACu
+#define func_8014AAAC stup0  /* alias */
 
 /* guessed: wtrace battlebegin.json 2026-09-05: writes the actor present flag C+0 1 804 times (unchanged) across field and battle -- the per-actor frame task; 2420 B, 8 callees (largest boot function by insns after the text engine) */
 #define PSX_FN_Actor_Task 0x8014C3C8u
@@ -19,6 +31,58 @@
 /* guessed: wtrace battlebegin.json 2026-09-05: writes C+0x4A/+0x58 every ~2 frames per slot (1 622 changing writes); siblings 0x8014DA8C (+0x4A/+0x58/+0x5A) and 0x8014D9E0 (+0x4A) -- sprite animation counters */
 #define PSX_FN_Actor_AnimTick 0x8014D86Cu
 #define func_8014D86C Actor_AnimTick  /* alias */
+
+/* confirmed: wtrace npc_talk.json 2026-09-05 (slot04, AREA000 NPC talk): the only writer of the box string base 0x801490A8 / stepper pointer 0x801490AC (store pcs 0x8015037C/84) and of the message index 0x801490A4 (0x80150394), a0=3 from GAME.EMI Script_ShowMessage 0x801A2858; ghidra: (u16 idx) ptr = 0x80010000 + u16[0x80010000 + 2*idx] (area script block, table at +0), MsgBox_Reset(), index stored last. 0 boot-EXE callers: only overlays open messages. Message 3 decoded off the disc at 0x245 = the taxes/Windia line, two pages split by code 0x02 */
+#define PSX_FN_Msg_OpenScript 0x8015034Cu
+#define func_8015034C Msg_OpenScript  /* alias */
+
+/* confirmed: ghidra 2026-09-05: (u16 id) ptr = Msg_SystemPtr(id), 0x801490A4 = id, 0x801490A8 = 0x801490AC = ptr, MsgBox_Reset(). Twin of Msg_OpenScript for the 0x80014000 system/UI/item pool; Script_ShowMessage selects it with bit 0x2000 of the message id (id & 0xFFF). 0 boot-EXE callers; BATL_END BattleResult_Setup uses Msg_SystemPtr(6) directly */
+#define PSX_FN_Msg_OpenSystem 0x801503ACu
+#define func_801503AC Msg_OpenSystem  /* alias */
+
+/* confirmed: ghidra 2026-09-05: (u16 id) block = 0x80014000 + u32[0x80014000 + ((id >> 12) & 0xC)] (sub-block select from id bits 14-15), returns block + u16[block + 2*(id & 0x3FFF)] — the W-header pool formula of TEXT_ENGINE.md, with the header word chosen by the id's top bits */
+#define PSX_FN_Msg_SystemPtr 0x801503F8u
+#define func_801503F8 Msg_SystemPtr  /* alias */
+
+/* confirmed: wtrace npc_talk.json 2026-09-05: writes 0x801490A6 (store pc 0x8015046C) at the open, ra 0x80150390 (inside Msg_OpenScript); ghidra: zeroes the interpreter state block 0x8014909C..9F, A2, A6, B4..B7, C4, keeps only flag 0x40 of 0x801490A0, a leading 0x0C byte in the string sets 0x801490CA = next byte (speaker/portrait id) and skips both, Window_Alloc(0, 0), window 0 state byte 0x8014833B = 2 */
+#define PSX_FN_MsgBox_Reset 0x8015042Cu
+#define func_8015042C MsgBox_Reset  /* alias */
+
+/* confirmed: ghidra 2026-09-05 + npc_talk.json: called from Window_Task 0x80159F60 each frame; box origin 0x801490BC/BE = (window x >> 4) + 10, (window y >> 4) + 6 from window record 0 (0x80148330/32), then MsgBox_StateDispatch, the 0x8014909E table 0x80149AB4, and MsgBox_Render unless flag 4; returns !(flag 2) */
+#define PSX_FN_MsgBox_FrameTask 0x80150508u
+#define func_80150508 MsgBox_FrameTask  /* alias */
+
+/* confirmed: TEXT_ENGINE.md renderer (lead 0x80150770); npc_talk.json 2026-09-05: entered every frame from MsgBox_FrameTask 0x80150578 while the box is open (6 per 6-frame group), interior 0x80150870 calls 0x80150664/0x80150688/0x801507A4 per glyph */
+#define PSX_FN_MsgBox_Render 0x80150598u
+#define func_80150598 MsgBox_Render  /* alias */
+
+/* confirmed: ghidra 2026-09-05: jumps through the 8-entry table at 0x80149A5C indexed by the stepper state 0x8014909C — state 0 = 0x80149A5C (calls MsgBox_Step, TEXT_ENGINE.md caller), 1 = 0x80150F3C, 4 = 0x80151204, 5 = 0x80151660 (choice), 6 = 0x80151948 */
+#define PSX_FN_MsgBox_StateDispatch 0x801508ECu
+#define func_801508EC MsgBox_StateDispatch  /* alias */
+
+/* confirmed: wtrace npc_talk.json 2026-09-05: advances 0x801490AC by one glyph every 6 frames (store pcs 0x80150E28 / 0x80150F04, 36 steps f+17..+173), ra 0x8015095C; ghidra: the control-code stepper — 0x00 end (state 2) or return from substitution, 0x02 page break (state 3), 0x0B prompt (state 1, y += 8), 0x03/0x04 name insert from the character record (0x80182488[char id] * 0xA4 + 0x80144963, 6 glyphs), 0x07 32-byte table 0x801490D3, 0x08 sub-message via the 0x80010004 table (0x11 glyphs), 0x0A sound 0x8015E908(byte | 0x200), 0x0F style from 0x8017FF30[byte*4], 0x10 toggles flag 0x10, 0x14 choice menu (0x801490C0..C2, state 5 when no choices); every other byte >= 0x12 is a glyph */
+#define PSX_FN_MsgBox_Step 0x8015096Cu
+#define func_8015096C MsgBox_Step  /* alias */
+
+/* confirmed: TEXT_ENGINE.md font-atlas mapper: (palette, charptr) -> sprite UVs on the 21-glyph-wide 12 px atlas; lead 0x13 = +0x100, 0x15 = +0x5B */
+#define PSX_FN_Font_MapGlyph 0x80151F4Cu
+#define func_80151F4C Font_MapGlyph  /* alias */
+
+/* confirmed: ghidra 2026-09-05: (slot, kind) claims window record 0x8014832C + slot*0x24 if its byte 0 is free (sets 1, +1 = kind, +2/+3 = 0), returns slot or 0xFF; MsgBox_Reset calls it as (0, 0). The record holds the box position (+4/+6, 12.4 fixed) and size (+0x10/+0x12) that Window_Task draws */
+#define PSX_FN_Window_Alloc 0x80159874u
+#define func_80159874 Window_Alloc  /* alias */
+
+/* confirmed: ghidra 2026-09-05 + npc_talk.json (ra 0x80159F60 into MsgBox_FrameTask every frame): if window record 0x80148644 flag byte +0xD bit 0 is clear, Window_DrawFrame(x >> 4, y >> 4, w >> 4, h >> 4) from +4/+6/+0x10/+0x12, then MsgBox_FrameTask. 0 static callers — reached by pointer (task list) */
+#define PSX_FN_Window_Task 0x80159F00u
+#define func_80159F00 Window_Task  /* alias */
+
+/* confirmed: ghidra 2026-09-05 (confidence verified): (x, y, w, h) builds the dialogue-box frame primitives on the ordering table 0x80145988 — a (w+1) x (h+1) filled box, a 16x16 sprite set with TPage 0x8017AF98(0,0,0x3C0,0) and CLUT 0x8017B068(0x8014494E << 5 | 0x10, 0x1E1) for the border pieces; answers IDEAS.md I3 'what draws the box frame' — the frame size comes from window record +0x10/+0x12, not from the text */
+#define PSX_FN_Window_DrawFrame 0x8015A58Cu
+#define func_8015A58C Window_DrawFrame  /* alias */
+
+/* confirmed: TEXT_ENGINE.md immediate draw (lead 0x8015AE78): byte *draw(short x, short y, byte *str), returns the pointer past the terminator; menu/label path, not on the dialogue-box path (npc_talk.json 2026-09-05: never entered during an NPC talk) */
+#define PSX_FN_Text_DrawImmediate 0x8015AD34u
+#define func_8015AD34 Text_DrawImmediate  /* alias */
 
 /* confirmed: Flag_Test(bits, index) -> (bits[index>>3] >> (index&7)) & 1 -- eight instructions, read from the disc EXE 2026-09-05 (tools/disasm_exe.py 8015BFC4:8); 0x8015BFE4 is the matching xor toggle. Save_BuildImage calls it as (0x80144F24, 0x92) and stores the BIT in the slot-summary byte 0x80145588 -- it was named Save_FlagsChecksum ('hash over 0x92 bytes') until tools/save_tool.py verify checked the byte against the flag array on all three card1 saves */
 #define PSX_FN_Flag_Test 0x8015BFC4u
@@ -56,6 +120,1994 @@
 #define PSX_FN_AbilityList_ForType 0x80167514u
 #define func_80167514 AbilityList_ForType  /* alias */
 
+/* confirmed: Psy-Q LIBSPU.LIB S_GKS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80168C58, 148 B, 131 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuGetKeyStatus 0x80168C58u
+#define func_80168C58 SpuGetKeyStatus  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_init 0x80168CECu
+#define func_80168CEC _spu_init  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x294: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_writeByIO 0x80168F80u
+#define func_80168F80 _spu_writeByIO  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x460: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FiDMA 0x8016914Cu
+#define func_8016914C _spu_FiDMA  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x530: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_r_ 0x8016921Cu
+#define func_8016921C _spu_r_  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x5EC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_t 0x801692D8u
+#define func_801692D8 _spu_t  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x87C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_write 0x80169568u
+#define func_80169568 _spu_write  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x904: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_read 0x801695F0u
+#define func_801695F0 _spu_read  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x96C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FsetRXX 0x80169658u
+#define func_80169658 _spu_FsetRXX  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0x9B4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FsetRXXa 0x801696A0u
+#define func_801696A0 _spu_FsetRXXa  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0xA58: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FgetRXXa 0x80169744u
+#define func_80169744 _spu_FgetRXXa  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0xA94: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FsetPCR 0x80169780u
+#define func_80169780 _spu_FsetPCR  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0xAF4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FsetDelayW 0x801697E0u
+#define func_801697E0 _spu_FsetDelayW  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0xB20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FsetDelayR 0x8016980Cu
+#define func_8016980C _spu_FsetDelayR  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB SPU.OBJ +0xB4C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_FwaitFs 0x80169838u
+#define func_80169838 _spu_FwaitFs  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_INI.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169898, 372 B, 253 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuInit 0x80169898u
+#define func_80169898 _SpuInit  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_INI.OBJ +0xF8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169898, 372 B, 253 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuStart 0x80169990u
+#define func_80169990 SpuStart  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_DCB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169A0C, 36 B, 33 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuDataCallback 0x80169A0Cu
+#define func_80169A0C _SpuDataCallback  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_STM.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169A30, 52 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetTransferMode 0x80169A30u
+#define func_80169A30 SpuSetTransferMode  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SVV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80169A64, 136 B, 129 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetVoiceVolume 0x80169A64u
+#define func_80169A64 SpuSetVoiceVolume  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_GVV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x80169AEC, 96 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuGetVoiceVolume 0x80169AECu
+#define func_80169AEC SpuGetVoiceVolume  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169B4C, 1688 B, 1547 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetVoiceAttr 0x80169B4Cu
+#define func_80169B4C SpuSetVoiceAttr  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SVA.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169B4C, 1688 B, 1547 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuSetVoiceAttr 0x80169B74u
+#define func_80169B74 _SpuSetVoiceAttr  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_N2P.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A1E4, 588 B, 578 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_note2pitch 0x8016A1E4u
+#define func_8016A1E4 _spu_note2pitch  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_N2P.OBJ +0xF0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A1E4, 588 B, 578 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_pitch2note 0x8016A2D4u
+#define func_8016A2D4 _spu_pitch2note  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_6.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A430, 1072 B, 1015 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContDataEntry 0x8016A430u
+#define func_8016A430 _SsContDataEntry  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_7.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A860, 216 B, 206 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContMainVol 0x8016A860u
+#define func_8016A860 _SsContMainVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A938, 208 B, 198 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContPanpot 0x8016A938u
+#define func_8016A938 _SsContPanpot  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_64.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AA08, 176 B, 160 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContDamper 0x8016AA08u
+#define func_8016AA08 _SsContDamper  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_98.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AAB8, 312 B, 298 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContNrpn1 0x8016AAB8u
+#define func_8016AAB8 _SsContNrpn1  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_99.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016ABF0, 316 B, 282 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContNrpn2 0x8016ABF0u
+#define func_8016ABF0 _SsContNrpn2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_100.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AD2C, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContRpn1 0x8016AD2Cu
+#define func_8016AD2C _SsContRpn1  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CC_101.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016ADA4, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsContRpn2 0x8016ADA4u
+#define func_8016ADA4 _SsContRpn2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIBEND.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AE1C, 184 B, 174 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSetPitchBend 0x8016AE1Cu
+#define func_8016AE1C _SsSetPitchBend  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDICC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AED4, 576 B, 477 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSetControlChange 0x8016AED4u
+#define func_8016AED4 _SsSetControlChange  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIMETA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B114, 472 B, 458 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsGetMetaEvent 0x8016B114u
+#define func_8016B114 _SsGetMetaEvent  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDINOTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B2EC, 232 B, 219 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsNoteOn 0x8016B2ECu
+#define func_8016B2EC _SsNoteOn  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIPROG.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B3D4, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSetProgramChange 0x8016B3D4u
+#define func_8016B3D4 _SsSetProgramChange  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDITIME.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B44C, 184 B, 177 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsReadDeltaValue 0x8016B44Cu
+#define func_8016B44C _SsReadDeltaValue  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsClose 0x8016B504u
+#define func_8016B504 _SsClose  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x17C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqClose 0x8016B680u
+#define func_8016B680 SsSeqClose  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x1A0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepClose 0x8016B6A4u
+#define func_8016B6A4 SsSepClose  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetCres 0x8016B6C8u
+#define func_8016B6C8 _SsSndSetCres  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCRES.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqSetCrescendo 0x8016B774u
+#define func_8016B774 SsSeqSetCrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCRES.OBJ +0x12C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepSetCrescendo 0x8016B7F4u
+#define func_8016B7F4 SsSepSetCrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSDECRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetDecres 0x8016B8A0u
+#define func_8016B8A0 _SsSndSetDecres  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSDECRES.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqSetDecrescendo 0x8016B94Cu
+#define func_8016B94C SsSeqSetDecrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSDECRES.OBJ +0x12C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepSetDecrescendo 0x8016B9CCu
+#define func_8016B9CC SsSepSetDecrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSEND.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BA78, 196 B, 139 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsEnd 0x8016BA78u
+#define func_8016BA78 SsEnd  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSINIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BB3C, 232 B, 205 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsInit 0x8016BB3Cu
+#define func_8016BB3C _SsInit  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSINIT_C.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420, object at 0x8016BC24, 48 B, 39 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsInit 0x8016BC24u
+#define func_8016BC24 SsInit  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSLOOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BC74, 144 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetLoop 0x8016BC74u
+#define func_8016BC74 SsSetLoop  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSLOOP.OBJ +0x48: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BC74, 144 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsIsEos 0x8016BCBCu
+#define func_8016BCBC SsIsEos  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSOPENPJ.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BD04, 300 B, 275 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepOpenJ 0x8016BD04u
+#define func_8016BD04 SsSepOpenJ  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SEPINIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BE30, 944 B, 914 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsInitSoundSep 0x8016BE30u
+#define func_8016BE30 _SsInitSoundSep  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSPAUSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetPauseMode 0x8016C1E0u
+#define func_8016C1E0 _SsSndSetPauseMode  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSPAUSE.OBJ +0xD8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqPause 0x8016C2B8u
+#define func_8016C2B8 SsSeqPause  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSPAUSE.OBJ +0x100: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepPause 0x8016C2E0u
+#define func_8016C2E0 SsSepPause  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016C30C, 112 B, 106 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqPlay 0x8016C30Cu
+#define func_8016C30C SsSeqPlay  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSPLAY.OBJ +0x38: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016C30C, 112 B, 106 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepPlay 0x8016C344u
+#define func_8016C344 SsSepPlay  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_Q.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C39C, 124 B, 85 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuQuit 0x8016C39Cu
+#define func_8016C39C SpuQuit  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSREPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetReplayMode 0x8016C418u
+#define func_8016C418 _SsSndSetReplayMode  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSREPLAY.OBJ +0xA4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqReplay 0x8016C4BCu
+#define func_8016C4BC SsSeqReplay  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSREPLAY.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepReplay 0x8016C4E4u
+#define func_8016C4E4 SsSepReplay  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB PLAYMODE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C510, 256 B, 246 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Snd_SetPlayMode 0x8016C510u
+#define func_8016C510 Snd_SetPlayMode  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSATTR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C610, 148 B, 145 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetSerialAttr 0x8016C610u
+#define func_8016C610 SsSetSerialAttr  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SCA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C6A4, 916 B, 792 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetCommonAttr 0x8016C6A4u
+#define func_8016C6A4 SpuSetCommonAttr  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSMV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x8016CA38, 80 B, 77 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetMVol 0x8016CA38u
+#define func_8016CA38 SsSetMVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSRV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CA88, 136 B, 133 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetRVol 0x8016CA88u
+#define func_8016CA88 SsSetRVol  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SRD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x8016CB10, 120 B, 104 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetReverbDepth 0x8016CB10u
+#define func_8016CB10 SpuSetReverbDepth  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTART.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsStart 0x8016CB88u
+#define func_8016CB88 _SsStart  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTART.OBJ +0x268: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsStart 0x8016CDF0u
+#define func_8016CDF0 SsStart  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTART.OBJ +0x288: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsStart2 0x8016CE10u
+#define func_8016CE10 SsStart2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTART.OBJ +0x2A8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsTrapIntrVSync 0x8016CE30u
+#define func_8016CE30 _SsTrapIntrVSync  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTART.OBJ +0x2E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSeqCalledTbyT_1per2 0x8016CE70u
+#define func_8016CE70 _SsSeqCalledTbyT_1per2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSCALL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016CEC0, 628 B, 565 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqCalledTbyT 0x8016CEC0u
+#define func_8016CEC0 SsSeqCalledTbyT  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB CRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D134, 736 B, 704 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndCrescendo 0x8016D134u
+#define func_8016D134 _SsSndCrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB DECRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D414, 672 B, 640 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndDecrescendo 0x8016D414u
+#define func_8016D414 _SsSndDecrescendo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB PAUSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D6B4, 164 B, 157 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndPause 0x8016D6B4u
+#define func_8016D6B4 _SsSndPause  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB PLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/350/3610/3611/370/400, object at 0x8016D758, 44 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Snd_play 0x8016D758u
+#define func_8016D758 Snd_play  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSeqPlay 0x8016D784u
+#define func_8016D784 _SsSeqPlay  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x110: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSeqGetEof 0x8016D894u
+#define func_8016D894 _SsSeqGetEof  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x2D4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsGetSeqData 0x8016DA58u
+#define func_8016DA58 _SsGetSeqData  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB NEXT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DD3C, 264 B, 260 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndNextSep 0x8016DD3Cu
+#define func_8016DD3C _SsSndNextSep  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB REPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DE44, 104 B, 100 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndReplay 0x8016DE44u
+#define func_8016DE44 _SsSndReplay  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndStop 0x8016DEACu
+#define func_8016DEAC _SsSndStop  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTOP.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqStop 0x8016E014u
+#define func_8016E014 SsSeqStop  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSTOP.OBJ +0x190: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepStop 0x8016E03Cu
+#define func_8016E03C SsSepStop  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSSV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016E068, 252 B, 249 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetSerialVol 0x8016E068u
+#define func_8016E068 SsSetSerialVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSTABLE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E164, 480 B, 448 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetTableSize 0x8016E164u
+#define func_8016E164 SsSetTableSize  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSTICK.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016E344, 364 B, 277 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetTickMode 0x8016E344u
+#define func_8016E344 SsSetTickMode  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSVOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetVol 0x8016E4B0u
+#define func_8016E4B0 _SsSndSetVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSVOL.OBJ +0x38: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqSetVol 0x8016E4E8u
+#define func_8016E4E8 SsSeqSetVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSVOL.OBJ +0x68: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSepSetVol 0x8016E518u
+#define func_8016E518 SsSepSetVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB SSVOL.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSeqGetVol 0x8016E550u
+#define func_8016E550 SsSeqGetVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB TEMPO.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E584, 480 B, 462 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndTempo 0x8016E584u
+#define func_8016E584 _SsSndTempo  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E764, 208 B, 201 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsSndSetVolData 0x8016E764u
+#define func_8016E764 _SsSndSetVolData  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_AKO.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E834, 312 B, 257 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtAllKeyOff 0x8016E834u
+#define func_8016E834 SsUtAllKeyOff  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016E96C, 100 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtAutoPan 0x8016E96Cu
+#define func_8016E96C SsUtAutoPan  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016E9D0, 100 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtAutoPan_2 0x8016E9D0u
+#define func_8016E9D0 SsUtAutoPan_2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_GPA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016EA34, 264 B, 230 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtGetProgAtr 0x8016EA34u
+#define func_8016EA34 SsUtGetProgAtr  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_GVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016EB3C, 572 B, 498 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtGetVagAtr 0x8016EB3Cu
+#define func_8016EB3C SsUtGetVagAtr  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_KEYV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016ED78, 1036 B, 805 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtKeyOnV 0x8016ED78u
+#define func_8016ED78 SsUtKeyOnV  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_KEYV.OBJ +0x394: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016ED78, 1036 B, 805 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtKeyOffV 0x8016F10Cu
+#define func_8016F10C SsUtKeyOffV  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_RDEP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F184, 152 B, 137 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtSetReverbDepth 0x8016F184u
+#define func_8016F184 SsUtSetReverbDepth  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SRMP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F21C, 1272 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetReverbModeParam 0x8016F21Cu
+#define func_8016F21C SpuSetReverbModeParam  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_UTIL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F714, 268 B, 244 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuIsInAllocateArea 0x8016F714u
+#define func_8016F714 _SpuIsInAllocateArea  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_UTIL.OBJ +0x80: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F714, 268 B, 244 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuIsInAllocateArea_ 0x8016F794u
+#define func_8016F794 _SpuIsInAllocateArea_  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SRA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x8016F820, 1232 B, 1104 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_setReverbAttr 0x8016F820u
+#define func_8016F820 _spu_setReverbAttr  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_CRWA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FCF0, 412 B, 340 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuClearReverbWorkArea 0x8016FCF0u
+#define func_8016FCF0 SpuClearReverbWorkArea  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_REV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FE8C, 180 B, 152 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtSetReverbType 0x8016FE8Cu
+#define func_8016FE8C SsUtSetReverbType  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_REV.OBJ +0xA4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FE8C, 180 B, 152 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtGetReverbType 0x8016FF30u
+#define func_8016FF30 SsUtGetReverbType  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FF40, 208 B, 160 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetReverb 0x8016FF40u
+#define func_8016FF40 SpuSetReverb  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_SVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80170050, 456 B, 382 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtSetVagAtr 0x80170050u
+#define func_80170050 SsUtSetVagAtr  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtGetDetVVol 0x80170218u
+#define func_80170218 SsUtGetDetVVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtSetDetVVol 0x80170270u
+#define func_80170270 SsUtSetDetVVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_VVOL.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtGetVVol 0x801702DCu
+#define func_801702DC SsUtGetVVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x150: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsUtSetVVol 0x80170368u
+#define func_80170368 SsUtSetVVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_ALOC2.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801703F4, 532 B, 417 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmDoAllocate 0x801703F4u
+#define func_801703F4 _SsVmDoAllocate  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170608, 1268 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SeAutoPan 0x80170608u
+#define func_80170608 SeAutoPan  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_AUTOP.OBJ +0x1B0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170608, 1268 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetAutoPan 0x801707B8u
+#define func_801707B8 SetAutoPan  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_AUTOV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170AFC, 1276 B, 1119 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SeAutoVol 0x80170AFCu
+#define func_80170AFC SeAutoVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_AUTOV.OBJ +0x1B0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170AFC, 1276 B, 1119 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetAutoVol 0x80170CACu
+#define func_80170CAC SetAutoVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_F.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017101C, 948 B, 781 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmFlush 0x8017101Cu
+#define func_8017101C _SsVmFlush  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SNV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801713D0, 36 B, 33 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetNoiseVoice 0x801713D0u
+#define func_801713D0 SpuSetNoiseVoice  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_SAV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801713F4, 520 B, 456 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SpuSetAnyVoice 0x801713F4u
+#define func_801713F4 _SpuSetAnyVoice  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801715FC, 784 B, 589 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmInit 0x801715FCu
+#define func_801715FC _SsVmInit  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017190C, 84 B, 65 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuInitMalloc 0x8017190Cu
+#define func_8017190C SpuInitMalloc  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_IT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80171960, 68 B, 53 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_setInTransfer 0x80171960u
+#define func_80171960 _spu_setInTransfer  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_IT.OBJ +0x2C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80171960, 68 B, 53 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_getInTransfer 0x8017198Cu
+#define func_8017198C _spu_getInTransfer  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_KEY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmKeyOn 0x801719A4u
+#define func_801719A4 _SsVmKeyOn  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_KEY.OBJ +0x550: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmKeyOff 0x80171EF4u
+#define func_80171EF4 _SsVmKeyOff  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_KEY.OBJ +0x69C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSeKeyOn 0x80172040u
+#define func_80172040 _SsVmSeKeyOn  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_KEY.OBJ +0x788: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSeKeyOff 0x8017212Cu
+#define func_8017212C _SsVmSeKeyOff  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_KEY.OBJ +0x7BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_KeyOnCheck 0x80172160u
+#define func_80172160 KeyOnCheck  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_ALOC1.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172168, 620 B, 536 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmAlloc 0x80172168u
+#define func_80172168 _SsVmAlloc  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_N2P.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801723D4, 448 B, 410 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_note2pitch 0x801723D4u
+#define func_801723D4 note2pitch  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_N2P.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801723D4, 448 B, 410 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_note2pitch2 0x80172498u
+#define func_80172498 note2pitch2  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_NO1.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172594, 1228 B, 1050 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_vmNoiseOn 0x80172594u
+#define func_80172594 vmNoiseOn  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_NOFF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80172A60, 68 B, 56 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_vmNoiseOff 0x80172A60u
+#define func_80172A60 vmNoiseOff  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_NOWOF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80172AA4, 208 B, 157 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmKeyOffNow 0x80172AA4u
+#define func_80172AA4 _SsVmKeyOffNow  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_NOWON.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172B74, 1252 B, 1094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmKeyOnNow 0x80172B74u
+#define func_80172B74 _SsVmKeyOnNow  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_PB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173058, 752 B, 669 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmPBVoice 0x80173058u
+#define func_80173058 _SsVmPBVoice  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_PB.OBJ +0x200: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173058, 752 B, 669 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmPitchBend 0x80173258u
+#define func_80173258 _SsVmPitchBend  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSetSeqVol 0x80173348u
+#define func_80173348 _SsVmSetSeqVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x540: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmGetSeqVol 0x80173888u
+#define func_80173888 _SsVmGetSeqVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x5AC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmGetSeqLVol 0x801738F4u
+#define func_801738F4 _SsVmGetSeqLVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x5FC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmGetSeqRVol 0x80173944u
+#define func_80173944 _SsVmGetSeqRVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x64C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSeqKeyOff 0x80173994u
+#define func_80173994 _SsVmSeqKeyOff  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_STAV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173A30, 180 B, 172 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSelectToneAndVag 0x80173A30u
+#define func_80173A30 _SsVmSelectToneAndVag  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_VOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173AE4, 1412 B, 1321 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmSetVol 0x80173AE4u
+#define func_80173AE4 _SsVmSetVol  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VM_VSU.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174068, 196 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__SsVmVSetUp 0x80174068u
+#define func_80174068 _SsVmVSetUp  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_SRV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174160, 48 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsSetReservedVoice 0x80174160u
+#define func_80174160 SsSetReservedVoice  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VAB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174190, 132 B, 109 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabClose 0x80174190u
+#define func_80174190 SsVabClose  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_F.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x80174214, 124 B, 110 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuFree 0x80174214u
+#define func_80174214 SpuFree  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_INT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174290, 776 B, 699 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__spu_gcSPU 0x80174290u
+#define func_80174290 _spu_gcSPU  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VH.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabOpenHead 0x80174598u
+#define func_80174598 SsVabOpenHead  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VH.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabOpenHeadSticky 0x801745C8u
+#define func_801745C8 SsVabOpenHeadSticky  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VH.OBJ +0x60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabFakeHead 0x801745F8u
+#define func_801745F8 SsVabFakeHead  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VH.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabOpenHeadWithMode 0x80174628u
+#define func_80174628 SsVabOpenHeadWithMode  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_M_M.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174A04, 712 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuMalloc 0x80174A04u
+#define func_80174A04 SpuMalloc  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VTBP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174CCC, 352 B, 282 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabTransBodyPartly 0x80174CCCu
+#define func_80174CCC SsVabTransBodyPartly  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_STSA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174E2C, 88 B, 74 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuSetTransferStartAddr 0x80174E2Cu
+#define func_80174E2C SpuSetTransferStartAddr  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_WP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80174E84, 140 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuWritePartly 0x80174E84u
+#define func_80174E84 SpuWritePartly  /* alias */
+
+/* confirmed: Psy-Q LIBSND.LIB VS_VTC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/340/370/400, object at 0x80174F10, 40 B, 37 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SsVabTransCompleted 0x80174F10u
+#define func_80174F10 SsVabTransCompleted  /* alias */
+
+/* confirmed: Psy-Q LIBSPU.LIB S_ITC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174F38, 168 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SpuIsTransferCompleted 0x80174F38u
+#define func_80174F38 SpuIsTransferCompleted  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB PAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PadInit 0x80174FE0u
+#define func_80174FE0 PadInit  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB PAD.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PadRead 0x80175030u
+#define func_80175030 PadRead  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB PAD.OBJ +0x78: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PadStop 0x80175058u
+#define func_80175058 PadStop  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB VSYNC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175078, 484 B, 396 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VSync 0x80175078u
+#define func_80175078 VSync  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB VSYNC.OBJ +0x148: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175078, 484 B, 396 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_v_wait 0x801751C0u
+#define func_801751C0 v_wait  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ResetCallback 0x8017525Cu
+#define func_8017525C ResetCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InterruptCallback 0x8017528Cu
+#define func_8017528C InterruptCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DMACallback 0x801752BCu
+#define func_801752BC DMACallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VSyncCallback 0x801752ECu
+#define func_801752EC VSyncCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VSyncCallbacks 0x80175320u
+#define func_80175320 VSyncCallbacks  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0xF4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopCallback 0x80175350u
+#define func_80175350 StopCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x124: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RestartCallback 0x80175380u
+#define func_80175380 RestartCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CheckCallback 0x801753B0u
+#define func_801753B0 CheckCallback  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x164: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetIntrMask 0x801753C0u
+#define func_801753C0 GetIntrMask  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x17C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetIntrMask 0x801753D8u
+#define func_801753D8 SetIntrMask  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x198: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_startIntr 0x801753F4u
+#define func_801753F4 startIntr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x274: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_trapIntr 0x801754D0u
+#define func_801754D0 trapIntr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x45C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_setIntr 0x801756B8u
+#define func_801756B8 setIntr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x5B0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_stopIntr 0x8017580Cu
+#define func_8017580C stopIntr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x65C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_restartIntr 0x801758B8u
+#define func_801758B8 restartIntr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR.OBJ +0x6E4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memclr 0x80175940u
+#define func_80175940 memclr  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_VB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_startIntrVSync 0x8017596Cu
+#define func_8017596C startIntrVSync  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_VB.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_trapIntrVSync 0x801759C4u
+#define func_801759C4 trapIntrVSync  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_VB.OBJ +0xD0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_setIntrVSync 0x80175A3Cu
+#define func_80175A3C setIntrVSync  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_VB.OBJ +0xFC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memclr_2 0x80175A68u
+#define func_80175A68 memclr_2  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_startIntrDMA 0x80175A94u
+#define func_80175A94 startIntrDMA  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_trapIntrDMA 0x80175AE4u
+#define func_80175AE4 trapIntrDMA  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x1D4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_setIntrDMA 0x80175C68u
+#define func_80175C68 setIntrDMA  /* alias */
+
+/* confirmed: Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x27C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memclr_3 0x80175D10u
+#define func_80175D10 memclr_3  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB EVENT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdInit 0x80175D64u
+#define func_80175D64 CdInit  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB EVENT.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_def_cbsync 0x80175DF4u
+#define func_80175DF4 def_cbsync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB EVENT.OBJ +0xB8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_def_cbready 0x80175E1Cu
+#define func_80175E1C def_cbready  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB EVENT.OBJ +0xE0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_def_cbread 0x80175E44u
+#define func_80175E44 def_cbread  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdStatus 0x80175E6Cu
+#define func_80175E6C CdStatus  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x10: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdMode 0x80175E7Cu
+#define func_80175E7C CdMode  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdLastCom 0x80175E8Cu
+#define func_80175E8C CdLastCom  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdLastPos 0x80175E9Cu
+#define func_80175E9C CdLastPos  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x40: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReset 0x80175EACu
+#define func_80175EAC CdReset  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdFlush 0x80175F18u
+#define func_80175F18 CdFlush  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdSetDebug 0x80175F38u
+#define func_80175F38 CdSetDebug  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0xE4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdComstr 0x80175F50u
+#define func_80175F50 CdComstr  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x118: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdIntstr 0x80175F84u
+#define func_80175F84 CdIntstr  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x14C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdSync 0x80175FB8u
+#define func_80175FB8 CdSync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x16C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReady 0x80175FD8u
+#define func_80175FD8 CdReady  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x18C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdSyncCallback 0x80175FF8u
+#define func_80175FF8 CdSyncCallback  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x1A4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReadyCallback 0x80176010u
+#define func_80176010 CdReadyCallback  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x1BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdControl 0x80176028u
+#define func_80176028 CdControl  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x2F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdControlF 0x80176160u
+#define func_80176160 CdControlF  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x420: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdControlB 0x8017628Cu
+#define func_8017628C CdControlB  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x564: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdMix 0x801763D0u
+#define func_801763D0 CdMix  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x584: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdGetSector 0x801763F0u
+#define func_801763F0 CdGetSector  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x5A4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdDataCallback 0x80176410u
+#define func_80176410 CdDataCallback  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x5C8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdDataSync 0x80176434u
+#define func_80176434 CdDataSync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x5E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdIntToPos 0x80176454u
+#define func_80176454 CdIntToPos  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB SYS.OBJ +0x6EC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdPosToInt 0x80176558u
+#define func_80176558 CdPosToInt  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_getintr 0x801765D8u
+#define func_801765D8 getintr  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x588: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_sync 0x80176B60u
+#define func_80176B60 CD_sync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x808: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_ready 0x80176DE0u
+#define func_80176DE0 CD_ready  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0xAD4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_cw 0x801770ACu
+#define func_801770AC CD_cw  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0xEF0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_vol 0x801774C8u
+#define func_801774C8 CD_vol  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0xF78: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_flush 0x80177550u
+#define func_80177550 CD_flush  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x1058: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_initvol 0x80177630u
+#define func_80177630 CD_initvol  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x114C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_initintr 0x80177724u
+#define func_80177724 CD_initintr  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x119C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_init 0x80177774u
+#define func_80177774 CD_init  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x1388: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_datasync 0x80177960u
+#define func_80177960 CD_datasync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x14F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_getsector 0x80177ACCu
+#define func_80177ACC CD_getsector  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x15F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_set_test_parmnum 0x80177BCCu
+#define func_80177BCC CD_set_test_parmnum  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB BIOS.OBJ +0x1604: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_callback 0x80177BDCu
+#define func_80177BDC callback  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdSearchFile 0x80177CC0u
+#define func_80177CC0 CdSearchFile  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x2CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__cmp 0x80177F8Cu
+#define func_80177F8C _cmp  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x2EC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_newmedia 0x80177FACu
+#define func_80177FAC CD_newmedia  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x5CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_searchdir 0x8017828Cu
+#define func_8017828C CD_searchdir  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x674: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CD_cachefile 0x80178334u
+#define func_80178334 CD_cachefile  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x920: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_cd_read 0x801785E0u
+#define func_801785E0 cd_read  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB ISO9660.OBJ +0x98C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memcpy 0x8017864Cu
+#define func_8017864C memcpy  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_cb_read 0x80178680u
+#define func_80178680 cb_read  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x214: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_cd_read_retry 0x80178894u
+#define func_80178894 cd_read_retry  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x3E0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReadBreak 0x80178A60u
+#define func_80178A60 CdReadBreak  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x430: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdRead 0x80178AB0u
+#define func_80178AB0 CdRead  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x510: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReadSync 0x80178B90u
+#define func_80178B90 CdReadSync  /* alias */
+
+/* confirmed: Psy-Q LIBCD.LIB CDREAD.OBJ +0x5DC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CdReadCallback 0x80178C5Cu
+#define func_80178C5C CdReadCallback  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB GEO_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178C74, 204 B, 170 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_rsin 0x80178C74u
+#define func_80178C74 rsin  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB GEO_00.OBJ +0x3C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178C74, 204 B, 170 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_sin_1 0x80178CB0u
+#define func_80178CB0 sin_1  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB GEO_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x80178D40, 160 B, 135 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_rcos 0x80178D40u
+#define func_80178D40 rcos  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB COR_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178DE0, 496 B, 466 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_csqrt_1 0x80178DE0u
+#define func_80178DE0 csqrt_1  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB COR_05.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178DE0, 496 B, 466 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_csqrt 0x80178F34u
+#define func_80178F34 csqrt  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350, object at 0x80178FD8, 128 B, 117 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitGeom 0x80178FD8u
+#define func_80178FD8 InitGeom  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x80179060, 144 B, 140 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SquareRoot0 0x80179060u
+#define func_80179060 SquareRoot0  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InvSquareRoot 0x801790F0u
+#define func_801790F0 InvSquareRoot  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC02.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VectorNormalS 0x8017917Cu
+#define func_8017917C VectorNormalS  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC02.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VectorNormal 0x80179190u
+#define func_80179190 VectorNormal  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC02.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_VectorNormalSS 0x801791BCu
+#define func_801791BC VectorNormalSS  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MSC02.OBJ +0x1B8: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_MatrixNormal 0x801792A8u
+#define func_801792A8 MatrixNormal  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_004.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80179390, 352 B, 352 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ApplyMatrixLV 0x80179390u
+#define func_80179390 ApplyMatrixLV  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_006.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x801794F0, 320 B, 266 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PushMatrix 0x801794F0u
+#define func_801794F0 PushMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_006.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x801794F0, 320 B, 266 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PopMatrix 0x80179590u
+#define func_80179590 PopMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179630, 272 B, 272 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_MulMatrix2 0x80179630u
+#define func_80179630 MulMatrix2  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179740, 80 B, 80 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ApplyMatrix 0x80179740u
+#define func_80179740 ApplyMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_06.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179790, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ApplyMatrixSV 0x80179790u
+#define func_80179790 ApplyMatrixSV  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_07.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801797F0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_TransMatrix 0x801797F0u
+#define func_801797F0 TransMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_08.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x80179820, 304 B, 304 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ScaleMatrix 0x80179820u
+#define func_80179820 ScaleMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_09.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179950, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetRotMatrix 0x80179950u
+#define func_80179950 SetRotMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179980, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLightMatrix 0x80179980u
+#define func_80179980 SetLightMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_11.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801799B0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetColorMatrix 0x801799B0u
+#define func_801799B0 SetColorMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB MTX_12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801799E0, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTransMatrix 0x801799E0u
+#define func_801799E0 SetTransMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB REG10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A00, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetBackColor 0x80179A00u
+#define func_80179A00 SetBackColor  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB REG12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A20, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetGeomOffset 0x80179A20u
+#define func_80179A20 SetGeomOffset  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB REG13.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A40, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetGeomScreen 0x80179A40u
+#define func_80179A40 SetGeomScreen  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LocalLight 0x80179A50u
+#define func_80179A50 LocalLight  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x24: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DpqColor 0x80179A74u
+#define func_80179A74 DpqColor  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x40: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColor 0x80179A90u
+#define func_80179A90 NormalColor  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x5C: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColor3 0x80179AACu
+#define func_80179AAC NormalColor3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x98: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColorDpq 0x80179AE8u
+#define func_80179AE8 NormalColorDpq  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0xBC: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColorDpq3 0x80179B0Cu
+#define func_80179B0C NormalColorDpq3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x104: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColorCol 0x80179B54u
+#define func_80179B54 NormalColorCol  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x124: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NormalColorCol3 0x80179B74u
+#define func_80179B74 NormalColorCol3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ColorDpq 0x80179BB8u
+#define func_80179BB8 ColorDpq  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x190: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ColorCol 0x80179BE0u
+#define func_80179BE0 ColorCol  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x1B4: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AverageSZ3 0x80179C04u
+#define func_80179C04 AverageSZ3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP.OBJ +0x1C4: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AverageSZ4 0x80179C14u
+#define func_80179C14 AverageSZ4  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LightColor 0x80179C30u
+#define func_80179C30 LightColor  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DpqColorLight 0x80179C58u
+#define func_80179C58 DpqColorLight  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DpqColor3 0x80179C80u
+#define func_80179C80 DpqColor3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Intpl 0x80179CBCu
+#define func_80179CBC Intpl  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0xB0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Square12 0x80179CE0u
+#define func_80179CE0 Square12  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0xD8: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Square0 0x80179D08u
+#define func_80179D08 Square0  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x100: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AverageZ3 0x80179D30u
+#define func_80179D30 AverageZ3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x120: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AverageZ4 0x80179D50u
+#define func_80179D50 AverageZ4  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x144: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_OuterProduct12 0x80179D74u
+#define func_80179D74 OuterProduct12  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x19C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_OuterProduct0 0x80179DCCu
+#define func_80179DCC OuterProduct0  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_00.OBJ +0x1F4: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Lzc 0x80179E24u
+#define func_80179E24 Lzc  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179E40, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotTransPers 0x80179E40u
+#define func_80179E40 RotTransPers  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_03.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179E70, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotTransPers3 0x80179E70u
+#define func_80179E70 RotTransPers3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB SMP_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179ED0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotTrans 0x80179ED0u
+#define func_80179ED0 RotTrans  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB CMB_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179F00, 128 B, 128 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotTransPers4 0x80179F00u
+#define func_80179F00 RotTransPers4  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB CMB_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179F80, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotAverage3 0x80179F80u
+#define func_80179F80 RotAverage3  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB CMB_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179FE0, 128 B, 128 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotAverage4 0x80179FE0u
+#define func_80179FE0 RotAverage4  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370, object at 0x8017A060, 80 B, 80 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_TransposeMatrix 0x8017A060u
+#define func_8017A060 TransposeMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A0B0, 656 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotMatrix 0x8017A0B0u
+#define func_8017A0B0 RotMatrix  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A340, 656 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotMatrixYXZ 0x8017A340u
+#define func_8017A340 RotMatrixYXZ  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A5D0, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotMatrixX 0x8017A5D0u
+#define func_8017A5D0 RotMatrixX  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A770, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotMatrixY 0x8017A770u
+#define func_8017A770 RotMatrixY  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB FGO_06.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A910, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RotMatrixZ 0x8017A910u
+#define func_8017A910 RotMatrixZ  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB RATAN.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017AAB0, 384 B, 364 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ratan2 0x8017AAB0u
+#define func_8017AAB0 ratan2  /* alias */
+
+/* confirmed: Psy-Q LIBGTE.LIB PATCHGTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017AC30, 160 B, 135 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__patch_gte 0x8017AC30u
+#define func_8017AC30 _patch_gte  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB EXT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LoadTPage 0x8017ACD0u
+#define func_8017ACD0 LoadTPage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB EXT.OBJ +0xEC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LoadClut 0x8017ADBCu
+#define func_8017ADBC LoadClut  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB EXT.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LoadClut2 0x8017AE24u
+#define func_8017AE24 LoadClut2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB EXT.OBJ +0x1BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDefDrawEnv 0x8017AE8Cu
+#define func_8017AE8C SetDefDrawEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB EXT.OBJ +0x28C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDefDispEnv 0x8017AF5Cu
+#define func_8017AF5C SetDefDispEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetTPage 0x8017AF98u
+#define func_8017AF98 GetTPage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0xD0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetClut 0x8017B068u
+#define func_8017B068 GetClut  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0xE8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DumpTPage 0x8017B080u
+#define func_8017B080 DumpTPage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x1B8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DumpClut 0x8017B150u
+#define func_8017B150 DumpClut  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x1F8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_NextPrim 0x8017B190u
+#define func_8017B190 NextPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x214: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_IsEndPrim 0x8017B1ACu
+#define func_8017B1AC IsEndPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x230: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AddPrim 0x8017B1C8u
+#define func_8017B1C8 AddPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x26C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_AddPrims 0x8017B204u
+#define func_8017B204 AddPrims  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x2A8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CatPrim 0x8017B240u
+#define func_8017B240 CatPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x2CC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_TermPrim 0x8017B264u
+#define func_8017B264 TermPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x2E4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetSemiTrans 0x8017B27Cu
+#define func_8017B27C SetSemiTrans  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x30C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetShadeTex 0x8017B2A4u
+#define func_8017B2A4 SetShadeTex  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x334: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyF3 0x8017B2CCu
+#define func_8017B2CC SetPolyF3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x348: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyFT3 0x8017B2E0u
+#define func_8017B2E0 SetPolyFT3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x35C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyG3 0x8017B2F4u
+#define func_8017B2F4 SetPolyG3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x370: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyGT3 0x8017B308u
+#define func_8017B308 SetPolyGT3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x384: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyF4 0x8017B31Cu
+#define func_8017B31C SetPolyF4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x398: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyFT4 0x8017B330u
+#define func_8017B330 SetPolyFT4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x3AC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyG4 0x8017B344u
+#define func_8017B344 SetPolyG4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x3C0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPolyGT4 0x8017B358u
+#define func_8017B358 SetPolyGT4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x3D4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetSprt8 0x8017B36Cu
+#define func_8017B36C SetSprt8  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x3E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetSprt16 0x8017B380u
+#define func_8017B380 SetSprt16  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x3FC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetSprt 0x8017B394u
+#define func_8017B394 SetSprt  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x410: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTile1 0x8017B3A8u
+#define func_8017B3A8 SetTile1  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x424: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTile8 0x8017B3BCu
+#define func_8017B3BC SetTile8  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x438: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTile16 0x8017B3D0u
+#define func_8017B3D0 SetTile16  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x44C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTile 0x8017B3E4u
+#define func_8017B3E4 SetTile  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x460: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineF2 0x8017B3F8u
+#define func_8017B3F8 SetLineF2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x474: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineG2 0x8017B40Cu
+#define func_8017B40C SetLineG2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x488: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineF3 0x8017B420u
+#define func_8017B420 SetLineF3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x4A8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineG3 0x8017B440u
+#define func_8017B440 SetLineG3  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x4C8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineF4 0x8017B460u
+#define func_8017B460 SetLineF4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x4E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetLineG4 0x8017B480u
+#define func_8017B480 SetLineG4  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x508: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawTPage 0x8017B4A0u
+#define func_8017B4A0 SetDrawTPage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x5BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawMove 0x8017B554u
+#define func_8017B554 SetDrawMove  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x61C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawLoad 0x8017B5B4u
+#define func_8017B5B4 SetDrawLoad  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x688: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_MargePrim 0x8017B620u
+#define func_8017B620 MargePrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x6C0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DumpDrawEnv 0x8017B658u
+#define func_8017B658 DumpDrawEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB PRIM.OBJ +0x840: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DumpDispEnv 0x8017B7D8u
+#define func_8017B7D8 DumpDispEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ResetGraph 0x8017B884u
+#define func_8017B884 ResetGraph  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x184: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetGraphReverse 0x8017BA08u
+#define func_8017BA08 SetGraphReverse  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x298: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetGraphDebug 0x8017BB1Cu
+#define func_8017BB1C SetGraphDebug  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2FC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetGraphQueue 0x8017BB80u
+#define func_8017BB80 SetGraphQueue  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x3A8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetGraphType 0x8017BC2Cu
+#define func_8017BC2C GetGraphType  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x3B8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetGraphDebug 0x8017BC3Cu
+#define func_8017BC3C GetGraphDebug  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x3C8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DrawSyncCallback 0x8017BC4Cu
+#define func_8017BC4C DrawSyncCallback  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x424: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDispMask 0x8017BCA8u
+#define func_8017BCA8 SetDispMask  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x4C0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DrawSync 0x8017BD44u
+#define func_8017BD44 DrawSync  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x52C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_checkRECT 0x8017BDB0u
+#define func_8017BDB0 checkRECT  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x654: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ClearImage 0x8017BED8u
+#define func_8017BED8 ClearImage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x6E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ClearImage2 0x8017BF6Cu
+#define func_8017BF6C ClearImage2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x784: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_LoadImage 0x8017C008u
+#define func_8017C008 LoadImage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x7E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StoreImage 0x8017C06Cu
+#define func_8017C06C StoreImage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x84C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_MoveImage 0x8017C0D0u
+#define func_8017C0D0 MoveImage  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x910: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ClearOTag 0x8017C194u
+#define func_8017C194 ClearOTag  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x9C8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ClearOTagR 0x8017C24Cu
+#define func_8017C24C ClearOTagR  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xA60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DrawPrim 0x8017C2E4u
+#define func_8017C2E4 DrawPrim  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xAC0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DrawOTag 0x8017C344u
+#define func_8017C344 DrawOTag  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xB34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PutDrawEnv 0x8017C3B8u
+#define func_8017C3B8 PutDrawEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xC38: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DrawOTagEnv 0x8017C4BCu
+#define func_8017C4BC DrawOTagEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xD54: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetDrawEnv 0x8017C5D8u
+#define func_8017C5D8 GetDrawEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0xD8C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PutDispEnv 0x8017C610u
+#define func_8017C610 PutDispEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1234: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetDispEnv 0x8017CAB8u
+#define func_8017CAB8 GetDispEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x126C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetODE 0x8017CAF0u
+#define func_8017CAF0 GetODE  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x129C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetTexWindow 0x8017CB20u
+#define func_8017CB20 SetTexWindow  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x12D8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawArea 0x8017CB5Cu
+#define func_8017CB5C SetDrawArea  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x135C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawOffset 0x8017CBE0u
+#define func_8017CBE0 SetDrawOffset  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x13A0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPriority 0x8017CC24u
+#define func_8017CC24 SetPriority  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x13CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawMode 0x8017CC50u
+#define func_8017CC50 SetDrawMode  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1424: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawEnv 0x8017CCA8u
+#define func_8017CCA8 SetDrawEnv  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x163C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetDrawEnv2 0x8017CEC0u
+#define func_8017CEC0 SetDrawEnv2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x18CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_mode 0x8017D150u
+#define func_8017D150 get_mode  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1924: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_cs 0x8017D1A8u
+#define func_8017D1A8 get_cs  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x19F0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_ce 0x8017D274u
+#define func_8017D274 get_ce  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1ABC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_ofs 0x8017D340u
+#define func_8017D340 get_ofs  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1B00: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_tw 0x8017D384u
+#define func_8017D384 get_tw  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1B84: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_dx 0x8017D408u
+#define func_8017D408 get_dx  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1C34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__status 0x8017D4B8u
+#define func_8017D4B8 _status  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1C4C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__otc 0x8017D4D0u
+#define func_8017D4D0 _otc  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1D34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__clr 0x8017D5B8u
+#define func_8017D5B8 _clr  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x1F90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__dws 0x8017D814u
+#define func_8017D814 _dws  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x21CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__drs 0x8017DA50u
+#define func_8017DA50 _drs  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2450: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__ctl 0x8017DCD4u
+#define func_8017DCD4 _ctl  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2478: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__getctl 0x8017DCFCu
+#define func_8017DCFC _getctl  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x248C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__cwb 0x8017DD10u
+#define func_8017DD10 _cwb  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x24DC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__cwc 0x8017DD60u
+#define func_8017DD60 _cwc  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2528: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__param 0x8017DDACu
+#define func_8017DDAC _param  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2558: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__addque 0x8017DDDCu
+#define func_8017DDDC _addque  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x257C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__addque2 0x8017DE00u
+#define func_8017DE00 _addque2  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x285C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__exeque 0x8017E0E0u
+#define func_8017E0E0 _exeque  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2B48: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__reset 0x8017E3CCu
+#define func_8017E3CC _reset  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2CA4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__sync 0x8017E528u
+#define func_8017E528 _sync  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2DEC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_set_alarm 0x8017E670u
+#define func_8017E670 set_alarm  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2E20: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_get_alarm 0x8017E6A4u
+#define func_8017E6A4 get_alarm  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x2F8C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__version 0x8017E810u
+#define func_8017E810 _version  /* alias */
+
+/* confirmed: Psy-Q LIBGPU.LIB SYS.OBJ +0x3068: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memset 0x8017E8ECu
+#define func_8017E8EC memset  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C112.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017E918, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__bu_init 0x8017E918u
+#define func_8017E918 _bu_init  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C171.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E928, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__card_info 0x8017E928u
+#define func_8017E928 _card_info  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C172.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E938, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__card_load 0x8017E938u
+#define func_8017E938 _card_load  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB CARD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017E948, 56 B, 50 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__card_clear 0x8017E948u
+#define func_8017E948 _card_clear  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A78.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E980, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__card_write 0x8017E980u
+#define func_8017E980 _card_write  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A80.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E990, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__new_card 0x8017E990u
+#define func_8017E990 _new_card  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitCARD 0x8017E9A0u
+#define func_8017E9A0 InitCARD  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB INIT.OBJ +0x54: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StartCARD 0x8017E9F4u
+#define func_8017E9F4 StartCARD  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB INIT.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopCARD 0x8017EA2Cu
+#define func_8017EA2C StopCARD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A74.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA5C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitCARD_2 0x8017EA5Cu
+#define func_8017EA5C InitCARD_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A75.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA6C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StartCARD_2 0x8017EA6Cu
+#define func_8017EA6C StartCARD_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A76.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA7C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopCARD_2 0x8017EA7Cu
+#define func_8017EA7C StopCARD_2  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB PATCH.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017EA8C, 416 B, 356 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__patch_card 0x8017EAE4u
+#define func_8017EAE4 _patch_card  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB PATCH.OBJ +0x110: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017EA8C, 416 B, 356 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__patch_card2 0x8017EB9Cu
+#define func_8017EB9C _patch_card2  /* alias */
+
+/* confirmed: Psy-Q LIBCARD.LIB END.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8017EC2C, 128 B, 103 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__ExitCard 0x8017EC2Cu
+#define func_8017EC2C _ExitCard  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A63.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECB4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_puts 0x8017ECB4u
+#define func_8017ECB4 puts  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C19.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECCC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_setjmp 0x8017ECCCu
+#define func_8017ECCC setjmp  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C21.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECDC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strcat 0x8017ECDCu
+#define func_8017ECDC strcat  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C23.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECEC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strcmp 0x8017ECECu
+#define func_8017ECEC strcmp  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C24.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECFC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strncmp 0x8017ECFCu
+#define func_8017ECFC strncmp  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C25.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED0C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strcpy 0x8017ED0Cu
+#define func_8017ED0C strcpy  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C26.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED1C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strncpy 0x8017ED1Cu
+#define func_8017ED1C strncpy  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C27.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED2C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_strlen 0x8017ED2Cu
+#define func_8017ED2C strlen  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C42.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED3C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memcpy_2 0x8017ED3Cu
+#define func_8017ED3C memcpy_2  /* alias */
+
 /* confirmed: BIOS thunk: li t2,0xA0; jr t2; li t1,0x2F = A0:2F rand() (psx-spx), read from the disc EXE 2026-09-05. Result mod 8 indexes the damage-variance tables (0x801D0C7C, 0x801EAF50), &1 the +0/+1 base term, %100 the hit rolls; 30 call sites in BATTLE.EMI#3, 32 in #15. Ghidra needs it marked returning or every caller's decompile truncates here (tools/ghidra/seed_overlay.py) */
 #define PSX_FN_Rand 0x8017ED4Cu
 #define func_8017ED4C Rand  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C63.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED5C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_printf 0x8017ED5Cu
+#define func_8017ED5C printf  /* alias */
+
+/* confirmed: Psy-Q LIBC.LIB SPRINTF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017ED6C, 2140 B, 2046 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_sprintf 0x8017ED6Cu
+#define func_8017ED6C sprintf  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C46.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017F5C8, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memchr 0x8017F5C8u
+#define func_8017F5C8 memchr  /* alias */
+
+/* confirmed: Psy-Q LIBC2.LIB MEMMOVE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017F5D8, 108 B, 105 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_memmove 0x8017F5D8u
+#define func_8017F5D8 memmove  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C57.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F644, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitHeap 0x8017F644u
+#define func_8017F644 InitHeap  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C67.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F654, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_Exec 0x8017F654u
+#define func_8017F654 Exec  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C68.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F664, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_FlushCache 0x8017F664u
+#define func_8017F664 FlushCache  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C73.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F674, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GPU_cw 0x8017F674u
+#define func_8017F674 GPU_cw  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB C114.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350, object at 0x8017F68C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__96_remove 0x8017F68Cu
+#define func_8017F68C _96_remove  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A07.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6A4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DeliverEvent 0x8017F6A4u
+#define func_8017F6A4 DeliverEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A08.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6B4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_OpenEvent 0x8017F6B4u
+#define func_8017F6B4 OpenEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A09.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6C4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CloseEvent 0x8017F6C4u
+#define func_8017F6C4 CloseEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6D4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_WaitEvent 0x8017F6D4u
+#define func_8017F6D4 WaitEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A11.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6E4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_TestEvent 0x8017F6E4u
+#define func_8017F6E4 TestEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6F4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_EnableEvent 0x8017F6F4u
+#define func_8017F6F4 EnableEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A13.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F704, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DisableEvent 0x8017F704u
+#define func_8017F704 DisableEvent  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A14.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F714, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_OpenTh 0x8017F714u
+#define func_8017F714 OpenTh  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A15.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F724, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_CloseTh 0x8017F724u
+#define func_8017F724 CloseTh  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A16.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F734, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ChangeTh 0x8017F734u
+#define func_8017F734 ChangeTh  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A22.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F744, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PAD_dr 0x8017F744u
+#define func_8017F744 PAD_dr  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A23.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F754, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ReturnFromException 0x8017F754u
+#define func_8017F754 ReturnFromException  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A24.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F764, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ResetEntryInt 0x8017F764u
+#define func_8017F764 ResetEntryInt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A25.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F774, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_HookEntryInt 0x8017F774u
+#define func_8017F774 HookEntryInt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A36.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F784, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_EnterCriticalSection 0x8017F784u
+#define func_8017F784 EnterCriticalSection  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A37.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F794, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ExitCriticalSection 0x8017F794u
+#define func_8017F794 ExitCriticalSection  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A39.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7A4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetSp 0x8017F7A4u
+#define func_8017F7A4 SetSp  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A50.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7B4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_open 0x8017F7B4u
+#define func_8017F7B4 open  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A51.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7C4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_lseek 0x8017F7C4u
+#define func_8017F7C4 lseek  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A52.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7D4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_read 0x8017F7D4u
+#define func_8017F7D4 read  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A53.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7E4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_write 0x8017F7E4u
+#define func_8017F7E4 write  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A54.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7F4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_close 0x8017F7F4u
+#define func_8017F7F4 close  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A65.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F804, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_format 0x8017F804u
+#define func_8017F804 format  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A66.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F814, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_firstfile 0x8017F814u
+#define func_8017F814 firstfile  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A67.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F824, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_nextfile 0x8017F824u
+#define func_8017F824 nextfile  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A91.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F834, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ChangeClearPAD 0x8017F834u
+#define func_8017F834 ChangeClearPAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A95.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F844, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetSp 0x8017F844u
+#define func_8017F844 GetSp  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB L10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F854, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ChangeClearRCnt 0x8017F854u
+#define func_8017F854 ChangeClearRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB COUNTER.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetRCnt 0x8017F864u
+#define func_8017F864 SetRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB COUNTER.OBJ +0x9C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_GetRCnt 0x8017F900u
+#define func_8017F900 GetRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB COUNTER.OBJ +0xD4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StartRCnt 0x8017F938u
+#define func_8017F938 StartRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB COUNTER.OBJ +0x108: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopRCnt 0x8017F96Cu
+#define func_8017F96C StopRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB COUNTER.OBJ +0x140: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ResetRCnt 0x8017F9A4u
+#define func_8017F9A4 ResetRCnt  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetInitPadFlag 0x8017F9DCu
+#define func_8017F9DC SetInitPadFlag  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x10: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_ReadInitPadFlag 0x8017F9ECu
+#define func_8017F9EC ReadInitPadFlag  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PAD_init 0x8017F9FCu
+#define func_8017F9FC PAD_init  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitPAD 0x8017FA88u
+#define func_8017FA88 InitPAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x138: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StartPAD 0x8017FB14u
+#define func_8017FB14 StartPAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopPAD 0x8017FB44u
+#define func_8017FB44 StopPAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x198: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SetPatchPad 0x8017FB74u
+#define func_8017FB74 SetPatchPad  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x218: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_RemovePatchPad 0x8017FBF4u
+#define func_8017FBF4 RemovePatchPad  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x250: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__Pad1 0x8017FC2Cu
+#define func_8017FC2C _Pad1  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PAD.OBJ +0x2B8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__IsVSync 0x8017FC94u
+#define func_8017FC94 _IsVSync  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A18.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCD4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_InitPAD_2 0x8017FCD4u
+#define func_8017FCD4 InitPAD_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A19.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCE4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StartPAD_2 0x8017FCE4u
+#define func_8017FCE4 StartPAD_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A20.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCF4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_StopPAD_2 0x8017FCF4u
+#define func_8017FCF4 StopPAD_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB A21.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD04, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_PAD_init_2 0x8017FD04u
+#define func_8017FD04 PAD_init_2  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB L02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD14, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SysEnqIntRP 0x8017FD14u
+#define func_8017FD14 SysEnqIntRP  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB L03.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD24, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_SysDeqIntRP 0x8017FD24u
+#define func_8017FD24 SysDeqIntRP  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PATCH.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_EnablePAD 0x8017FD34u
+#define func_8017FD34 EnablePAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PATCH.OBJ +0x14: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN_DesablePAD 0x8017FD48u
+#define func_8017FD48 DesablePAD  /* alias */
+
+/* confirmed: Psy-Q LIBAPI.LIB PATCH.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all */
+#define PSX_FN__patch_pad 0x8017FD5Cu
+#define func_8017FD5C _patch_pad  /* alias */

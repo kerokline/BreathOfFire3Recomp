@@ -78,7 +78,11 @@ evidence rule applied to names.
 - **Routes that produced them:** route 3 (differential traces) named the
   first twelve; route 4 (data anchors: `ramdiff` -> `capture --watch` ->
   decompile) named everything since and is the productive route. Route 2
-  (Psy-Q signatures) is still unrun.
+  (Psy-Q signatures) ran 2026-09-05: `tools/psyq_sigs.py` matched 246
+  whole object files from lab313ru/psx_psyq_signatures against the boot EXE
+  (SDK **3.70** by a wide margin, build stamp Jul 16 1997) and appended
+  **500** library names to `symbols.toml` as `confirmed` -- libgpu, libgte,
+  libcd, libspu, libsnd, libetc, libcard, libapi thunks -- see STATUS Log.
 
 ## Gathering evidence — savestates vs. live commands
 
@@ -144,10 +148,13 @@ nested under `ring`; fixed.
    so the banner is read from the screenshot, not from a string log. Offline
    cross-check: the per-EMI dialogue corpus in `D:\BoFIII\_claude_work` names
    speakers and places per section.
-2. **Psy-Q signatures → boot-EXE library names.** The boot EXE links libgpu /
-   libspu / libcd. FLIRT-style byte signatures name hundreds of functions at
-   once and expose which game functions are thin wrappers. Lands in
-   `symbols.toml` via the Ghidra round-trip (`ghidra-mcp` is connected).
+2. ~~**Psy-Q signatures → boot-EXE library names.**~~ **DONE 2026-09-05** --
+   `python tools/psyq_sigs.py scan` (every SDK folder, per-lib match table)
+   then `apply` (largest object wins per span; 16-byte BIOS thunks accepted
+   only when wildcard-free and unique). 500 names, no Ghidra involved. The
+   signature repo is a sibling checkout, `../psx_psyq_signatures` or
+   `$PSYQ_SIGS`; it is not vendored. Re-run `apply` only after deleting the
+   previous block from `symbols.toml` (it appends).
 3. **Differential traces → behavior classes.** "Does Attack always enter the
    same way": load the battle-menu savestate, press Attack, record the entry
    sequence from the caller ring; reload, press Defend, record again; the set
