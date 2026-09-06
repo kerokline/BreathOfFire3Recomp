@@ -39,7 +39,7 @@ the task touches.
 | [`ENHANCEMENTS.md`](ENHANCEMENTS.md) | plan | Post-faithfulness work: scanlines (shipped upstream), pause/frame-advance (designed), costed backlog |
 | [`vblank-pacing-bug.md`](vblank-pacing-bug.md) | investigation | The Capcom FMV slowdown: root cause (SPU snapshot gate), fix, and the two wrong theses |
 | [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md) | investigation | One unreproduced fail-fast into kernel RAM on a savestate resume |
-| [`battle-icon-strip-rows.md`](battle-icon-strip-rows.md) | investigation | Enlarged command icon loses its top six texture rows: VRAM vs disc vs Beetle oracle, loss localised to the boot-time load of `FIRST.EMI` |
+| [`battle-icon-strip-rows.md`](battle-icon-strip-rows.md) | investigation | **RESOLVED 2026-09-06.** Enlarged command icon lost its top six texture rows; VRAM vs disc vs Beetle oracle traced it to the GP0 polyline terminator bug, fixed upstream and confirmed by player retest |
 | [`battle-depth-order.md`](battle-depth-order.md) | investigation | Sprites lunging behind the battle doorway: list order honoured, Beetle shows the same, game behaviour |
 | [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md) | investigation + proposal | build-dbg "crashes" were the starvation watchdog exiting on a cross-thread clock race and reporting itself as `atexit`; evidence, upstream diff, verification plan |
 | [`pr302-dma2-ot-cost-review.md`](pr302-dma2-ot-cost-review.md) | review + evidence | Cross-title check of upstream psxrecomp #302 (DMA2 linked-list cost 8+5 → 1+0): BoF3 A/B census, no regression, plus the hardware argument the PR is missing |

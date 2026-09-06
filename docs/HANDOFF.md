@@ -742,20 +742,27 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` as of 2026-09-05.
-  **A bump to `155e269b` was attempted on 2026-09-06 and rolled back — upstream
-  master does not currently build against any published `recomp-ui`.** Upstream
-  psxrecomp `8f266efe` (netplay: BYO memory card, lobby chat, fullscreen lobby)
-  and `5e1b7d33` use launcher-ABI fields — `guest_memcard`, `is_spectator`,
-  `spectator_wire_slot`, `host_spectates`, `slot_port` / `slot_port_valid` on
-  `RecompLauncherCNetplayLaunch` — that exist in **no** recomp-ui ref except
-  mstan's unmerged WIP branch `origin/merge/frameblend-localization` (still
-  churning: `bba6266`, 2026-09-06). `main.cpp` fails to compile without them.
-  `8f266efe` is an **ancestor of all three of our merge commits**
-  (`git merge-base --is-ancestor 8f266efe d485a751` → true), so there is no
-  upstream commit that carries #321/#324/#325 and still builds. Re-try the bump
-  once the recomp-ui netplay half is merged to its `master`; until then this pin
-  stays, and #321/#324/#325 are in upstream history but not in the pin.
+- `psxrecomp` **`2fa3472a`** = upstream `17f49ad3` + our two commits
+  (`6e760748` enrichment, `2fa3472a` per-variant static fragments), i.e. the tip
+  of the fork branch `fix/static-fragments-per-variant`, which is a
+  **fast-forward** of the old pin — no merge commit exists or is needed. Also
+  pushed as `pin/bof3-fragments-17f49ad3` on `kerokline/psxrecomp` so the SHA
+  survives deletion of the PR branch. Chosen 2026-09-06 because it is the only
+  reproducible pin that carries our work: **upstream master still does not build
+  against any published `recomp-ui`.** psxrecomp master reads 20 fields off
+  `RecompLauncherCNetplayLaunch`, and six — `guest_memcard`, `is_spectator`,
+  `spectator_wire_slot`, `host_spectates`, `slot_port`, `slot_port_valid` —
+  exist in **no** recomp-ui ref except mstan's unmerged WIP branch
+  `origin/merge/frameblend-localization` (`bba6266`, still committing
+  2026-09-06). That branch is 37 commits ahead of master and 5 behind it, with
+  the header changes spread across ~13 commits interleaved with lobby chat,
+  seat swaps and frame blending — so there is no clean cherry-pick, and
+  bumping our own #48 onto master does **not** help (the fields are not ours
+  and not master's). `8f266efe` is an ancestor of all three of our merge
+  commits, so no upstream commit carries #321/#324/#325 *and* builds.
+  **Verified:** `build-relprof` compiles `runtime/src/main.cpp` — the exact
+  file that failed the `155e269b` attempt — and links in 17 s on this pin.
+  Re-pin to plain upstream master once the recomp-ui netplay half merges.
 - All three of our PRs **are merged upstream** ([#321](https://github.com/mstan/psxrecomp/pull/321),
   [#324](https://github.com/mstan/psxrecomp/pull/324),
   [#325](https://github.com/mstan/psxrecomp/pull/325)) and the old pin leaves
@@ -763,10 +770,17 @@ Order matters, and each of these cost a session once:
   branches `feat/dirty-pc-enrichment` / `fix/static-fragments-per-variant` are
   kept until the pin can move, because `generated/` was compiled with #325 and
   a checkout of the gitlink alone cannot reproduce it.
-- `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
-  (`kerokline/recomp-ui`) = upstream `master` + the launcher UI work
-  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48), still
-  **open**). #42 (the standalone Scanlines toggle) was **closed unmerged on
+- `recomp-ui` **`db12620`** = a commit on fork branch
+  `feat/additional-ui-functionality` (`kerokline/recomp-ui`) = upstream `master`
+  + the launcher UI work ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48),
+  still **open**). The pin sits 3 commits behind that branch's tip. The branch
+  was refreshed 2026-09-06 (`4071e37` → `69eecdc`) by **merging** upstream
+  master in — not rebasing, so the open PR's review history survives; it had
+  fallen 5 commits behind (the SBI picker series, #50). Auto-merge was clean,
+  and `ctest` gives an identical 9/11 on the merged branch and on plain master
+  (`recomp-ui-psx-asset-staging` needs staged fonts this out-of-tree config
+  never produces; `recomp-ui-launcher-setup-bios` fails upstream too) — the
+  merge introduces no regression. #42 (the standalone Scanlines toggle) was **closed unmerged on
   purpose** — its card was folded into #48, so #48 is the only launcher PR to
   track. Pin back to upstream `master` when it merges. #42 conflicted once
   against upstream #46 in `recomp_launcher.h` (both appended to `Settings` /

@@ -84,8 +84,10 @@ of three.
 - The earlier icon-strip damage ([`battle-icon-strip-rows.md`](battle-icon-strip-rows.md))
   is a zero band in a texture that appears later in a session. The player
   confirmed (2026-09-03) it first appeared right after a **heal spell** effect,
-  the same style of shaded-polyline animation, so the same de-phasing is the
-  probable cause. Retest once `build-dbg` is rebuilt with the fix.
+  the same style of shaded-polyline animation, so the same de-phasing was the
+  probable cause. **Confirmed 2026-09-06:** a player retest on the fixed build
+  held the icon intact across several heal spells and item uses in several
+  areas. This fix covers both symptoms; that investigation is closed.
 - `tools/pst_tool.py` (new): parse `.pst` offline — `info`, `vram` (PNG),
   `ram`, `diff` (VRAM zero-map / diff-map / RAM ranges). Lets two states be
   compared without loading them into a running game.
