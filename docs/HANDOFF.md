@@ -723,37 +723,44 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` (re-pinned
-  2026-09-05). Everything the fork ever carried is merged: #289/#290/#292
-  (residency signal, scanlines, SPUCNT gate), #296 (parallel static overlay
-  compile), #307 (fast-forward pad chord), #313 (GP0 polyline terminator),
-  #318 (fast-forward toggle), #319/#320 (explicit keymap unbind). Bump recipe:
-  `git -C psxrecomp fetch upstream`, check nothing in the old pin is missing
-  from `upstream/master` (`git log upstream/master..<old pin>` must be empty),
-  fast-forward the submodule's `master`, commit the gitlink. Never float.
-  After a bump: `build_emitters.sh` → `generate` (usually a no-op) →
+- `psxrecomp` **`155e269b`** = plain upstream `mstan/master` (re-pinned
+  2026-09-06). **No fork-only psxrecomp work remains.** Everything the fork ever
+  carried is merged: #289/#290/#292 (residency signal, scanlines, SPUCNT gate),
+  #296 (parallel static overlay compile), #307 (fast-forward pad chord), #313
+  (GP0 polyline terminator), #318 (fast-forward toggle), #319/#320 (explicit
+  keymap unbind), and on 2026-09-06 #321 (starvation-watchdog cross-thread
+  wrap), #324 (per-PC enrichment), #325 (per-variant static fragments). Bump
+  recipe: `git -C psxrecomp fetch upstream`, check nothing in the old pin is
+  missing from `upstream/master` (`git log upstream/master..<old pin>` must be
+  empty), check out the new commit, `git -C psxrecomp submodule update --init
+  --recursive` (nested `lib/recomp-net` moves too), commit the gitlink. Never
+  float. After a bump: `build_emitters.sh` → `generate` (usually a no-op) →
   `psxrecomp_codegen_hash` → overlays → runtime, in that order.
+- **New upstream surface arriving with `155e269b`**, none of it exercised by
+  this title yet: a large netplay/lobby series (BYO memory card, lobby chat,
+  spectator columns, gallery hosting, seat swaps), SBI companion preservation
+  through disc setup, Authenticode signing in release CI, `tools/generate_ci`,
+  and **`ExitCriticalSection` register preservation (#322)**. The last one
+  touches the interrupt path this title exercises constantly, so treat the first
+  boot on this pin as a verification run, not a formality.
 - `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
-  (`kerokline/recomp-ui`) = upstream `master` + the Scanlines toggle
-  ([mstan/recomp-ui#42](https://github.com/mstan/recomp-ui/pull/42)) + the
-  host-shortcut Select labels
-  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48)). Pin back
-  to upstream `master` when both merge. #42 conflicted once against upstream
-  #46 in `recomp_launcher.h` (both appended to `Settings` / `GameInfo`);
-  resolved upstream-first (`virtual_stylus` before the scanline fields) —
-  rebase the same way if it conflicts again. #47 was redundant with #46.
-- **Open fork branches (2026-09-05, pushed, no PR yet):**
-  `feat/dirty-pc-enrichment` `6e760748` (= `17f49ad3` + 1, the tier-1/2
-  per-PC enrichment) and `fix/static-fragments-per-variant` `2fa3472a`
-  (= `6e760748` + 1, the compile-side fragment fix; see "Enrichment"). The
-  submodule working tree is checked out on the fix branch so `build-dbg`
-  carries both; the gitlink still says `17f49ad3`. `generated/` was compiled
-  with the fix — a checkout of the gitlink alone cannot reproduce it.
-- **Open fork branch:** `fix/starvation-watchdog-wrap` `430c93b8` (= `17f49ad3` + 1)
-  = [mstan/psxrecomp#321](https://github.com/mstan/psxrecomp/pull/321) — the starvation-watchdog cross-thread wrap fix + exit-origin labels
-  ([`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md)).
-  When it merges: bump the pin per the recipe above and
-  `setx PSX_STARVATION_TIMEOUT_US ""` to re-enable the watchdog.
+  (`kerokline/recomp-ui`) = upstream `master` + the launcher UI work
+  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48), still
+  **open**). #42 (the standalone Scanlines toggle) was **closed unmerged on
+  purpose** — its card was folded into #48, so #48 is the only launcher PR to
+  track. Pin back to upstream `master` when it merges. #42 conflicted once
+  against upstream #46 in `recomp_launcher.h` (both appended to `Settings` /
+  `GameInfo`); resolved upstream-first (`virtual_stylus` before the scanline
+  fields) — rebase the same way if it conflicts again. #47 was redundant with #46.
+- **Open fork branches: none.** The walk-HLE prototype `d725af45` (the refuted
+  `fix/vblank-cadence-pacing`) was retired 2026-09-05; its two reusable mechanics
+  live in [`vblank-pacing-bug.md`](vblank-pacing-bug.md) → *Reusable mechanics*
+  and the commit is parked on the fork as `archive/vblank-intrp-hle-prototype`.
+- **`PSX_STARVATION_TIMEOUT_US=0` can now be cleared.** It was persisted with
+  `setx` on 2026-09-02 to work around the false trips #321 fixes, and that fix is
+  in this pin. `setx PSX_STARVATION_TIMEOUT_US ""` (new shell to take effect)
+  puts the watchdog back — see
+  [`starvation-watchdog-false-trip.md`](starvation-watchdog-false-trip.md).
 - Fork branches on `kerokline/psxrecomp` that are now history (all merged):
   `fix/static-overlay-residency-signal`, `feat/present-scanlines`,
   `perf/spu-sample-event-gate`, `perf/static-overlay-parallel`,
