@@ -684,6 +684,25 @@ and 11,491 aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
 
 ## Building against the pin
 
+**Trap (paid for 2026-09-06): stale overlay objects survive a regeneration.**
+`build-relprof` failed to link with `multiple definition of
+ov_frag_001F6C00_1E5EE588_801F6C90_func_801F6C90` across
+`overlays_static_0478.c.obj` and `overlays_static_0760.c.obj`, although **one**
+source defines that symbol. #325 regroups fragments one translation unit per
+image, which **renumbers every `overlays_static_NNNN.c`**; objects from the old
+numbering stayed in the tree with mtimes newer than the regenerated sources, so
+ninja considered them current and linked them in. It is not a codegen bug — do
+not go looking for one. Clear them and rebuild (ccache makes it cheap: 779 units
+relinked in ~15 s):
+
+```bash
+rm -f build-<tree>/CMakeFiles/psx-runtime.dir/generated/overlays_static_*.obj
+cmake --build build-<tree> --target psx-runtime
+```
+
+Do this in **every** tree after any run that changes the unit count or numbering.
+
+
 ```bash
 export PATH="/c/msys64/mingw64/bin:$PATH"          # or cc1 crashes silently
 ./psxrecomp/tools/ci/build_emitters.sh              # → build-recompiler/
@@ -723,26 +742,27 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`155e269b`** = plain upstream `mstan/master` (re-pinned
-  2026-09-06). **No fork-only psxrecomp work remains.** Everything the fork ever
-  carried is merged: #289/#290/#292 (residency signal, scanlines, SPUCNT gate),
-  #296 (parallel static overlay compile), #307 (fast-forward pad chord), #313
-  (GP0 polyline terminator), #318 (fast-forward toggle), #319/#320 (explicit
-  keymap unbind), and on 2026-09-06 #321 (starvation-watchdog cross-thread
-  wrap), #324 (per-PC enrichment), #325 (per-variant static fragments). Bump
-  recipe: `git -C psxrecomp fetch upstream`, check nothing in the old pin is
-  missing from `upstream/master` (`git log upstream/master..<old pin>` must be
-  empty), check out the new commit, `git -C psxrecomp submodule update --init
-  --recursive` (nested `lib/recomp-net` moves too), commit the gitlink. Never
-  float. After a bump: `build_emitters.sh` → `generate` (usually a no-op) →
-  `psxrecomp_codegen_hash` → overlays → runtime, in that order.
-- **New upstream surface arriving with `155e269b`**, none of it exercised by
-  this title yet: a large netplay/lobby series (BYO memory card, lobby chat,
-  spectator columns, gallery hosting, seat swaps), SBI companion preservation
-  through disc setup, Authenticode signing in release CI, `tools/generate_ci`,
-  and **`ExitCriticalSection` register preservation (#322)**. The last one
-  touches the interrupt path this title exercises constantly, so treat the first
-  boot on this pin as a verification run, not a formality.
+- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` as of 2026-09-05.
+  **A bump to `155e269b` was attempted on 2026-09-06 and rolled back — upstream
+  master does not currently build against any published `recomp-ui`.** Upstream
+  psxrecomp `8f266efe` (netplay: BYO memory card, lobby chat, fullscreen lobby)
+  and `5e1b7d33` use launcher-ABI fields — `guest_memcard`, `is_spectator`,
+  `spectator_wire_slot`, `host_spectates`, `slot_port` / `slot_port_valid` on
+  `RecompLauncherCNetplayLaunch` — that exist in **no** recomp-ui ref except
+  mstan's unmerged WIP branch `origin/merge/frameblend-localization` (still
+  churning: `bba6266`, 2026-09-06). `main.cpp` fails to compile without them.
+  `8f266efe` is an **ancestor of all three of our merge commits**
+  (`git merge-base --is-ancestor 8f266efe d485a751` → true), so there is no
+  upstream commit that carries #321/#324/#325 and still builds. Re-try the bump
+  once the recomp-ui netplay half is merged to its `master`; until then this pin
+  stays, and #321/#324/#325 are in upstream history but not in the pin.
+- All three of our PRs **are merged upstream** ([#321](https://github.com/mstan/psxrecomp/pull/321),
+  [#324](https://github.com/mstan/psxrecomp/pull/324),
+  [#325](https://github.com/mstan/psxrecomp/pull/325)) and the old pin leaves
+  nothing behind (`git log upstream/master..17f49ad3` is empty). The fork
+  branches `feat/dirty-pc-enrichment` / `fix/static-fragments-per-variant` are
+  kept until the pin can move, because `generated/` was compiled with #325 and
+  a checkout of the gitlink alone cannot reproduce it.
 - `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
   (`kerokline/recomp-ui`) = upstream `master` + the launcher UI work
   ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48), still
