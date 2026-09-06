@@ -475,6 +475,26 @@ search for one known name in the encoding, read the stride.
 
 ## I5 — Faster save / load / memory-card screens (BIOS + card paths)
 
+> **CLOSED 2026-09-06 — measured, not a shipping-build problem.** Matched
+> uncapped windowed runs (`PSX_FAST_FORWARD_SPEED=max` + `PSX_VSYNC=0`, FF
+> latched) put the card screens at **5x** on `build-release` against **1.75x**
+> on `build-relprof` — 5x headroom over the 60 fps cap for a player. The
+> premise below ("Release is fine today; the concern is margin") is confirmed,
+> and the margin is large.
+>
+> The slowness that motivated this item is **debug instrumentation, and it is
+> multiplicative rather than per-frame**: across four scenes the relprof->release
+> ratio holds 2.11-2.86x (CV 0.14) while a fixed ms/frame offset scatters 3.6x
+> (CV 0.66). The card screen carries the *highest* ratio (2.86x) precisely
+> because its `TestEvent` poll maximises function-entry rate per unit of real
+> work, so the per-call hooks (`debug_server_log_call_entry`, and
+> `card_mgr_trace_record` specifically) dominate. That is a property of the
+> measurement build, not of the BIOS card path.
+>
+> **Retest before reopening**, on `build-release` and uncapped — a capped or
+> vsync-locked run reads a meaningless flat 4.00x. Evidence and method:
+> [`OVERLAY_SIZE.md`](OVERLAY_SIZE.md).
+
 **Ask (2026-09-05):** the save screen, memory-card read, and saving a game
 are slow — the player meets them in the first minute and we want real
 headroom, not "just barely 60." Investigate the BIOS and card paths.
