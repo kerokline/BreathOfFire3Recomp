@@ -325,6 +325,28 @@ def cmd_export(a):
     return rc_all
 
 
+# ---------------------------------------------------------------- names
+
+def cmd_names(a):
+    """symbols.toml -> function names on existing programs (boot program and
+    the overlay programs' boot_* mapping).  Route for names that arrive after
+    an import: the Psy-Q signature pass (tools/psyq_sigs.py), hand names."""
+    import tomllib
+    check_lock(a.force)
+    data = tomllib.loads(open(SYMBOLS_TOML, encoding="utf-8").read())
+    names = {}
+    for f in data.get("func", []):
+        pc = f["pc"] if isinstance(f["pc"], int) else int(f["pc"], 0)
+        names["0x%08X" % (pc & 0xFFFFFFFF)] = f["name"]
+    os.makedirs(OUT, exist_ok=True)
+    spec = os.path.join(OUT, "_apply_names.json")
+    json.dump({"names": names, "overwrite": bool(a.overwrite)}, open(spec, "w", encoding="utf-8"))
+    print("%d names from symbols.toml" % len(names))
+    args = ["-process"] + ([a.program] if a.program else []) + (["-recursive"] if not a.program else []) +            ["-noanalysis", "-scriptPath", SCRIPTS, "-postScript", "apply_names.py", spec]
+    rc, _ = headless(args, show=("NAMES", "ERROR", "Exception", "REPORT SCRIPT ERROR"), verbose=a.verbose)
+    return rc
+
+
 # ---------------------------------------------------------------- report
 
 def load_export(name):
@@ -554,6 +576,11 @@ def main():
     m.add_argument("--apply", action="store_true")
     m.add_argument("--symbols", action="store_true", help="also merge boot-EXE names into symbols.toml")
     m.set_defaults(fn=cmd_merge)
+
+    n = sub.add_parser("names", help="symbols.toml names -> existing program(s) (boot program + overlay boot_* maps)")
+    n.add_argument("--program", default=None, help="one program (default: every program in the project)")
+    n.add_argument("--overwrite", action="store_true", help="replace hand-set names too (symbols.toml wins)")
+    n.set_defaults(fn=cmd_names)
 
     a = ap.parse_args()
     return a.fn(a)

@@ -835,6 +835,15 @@ note = "overlay by --overlay"
 
 [[function]]
 overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801A27A8
+name = "Script_ShowMessage"
+args = ["obj"]
+status = "evidence"
+evidence = "wtrace npc_talk.json 2026-09-05 (slot04, AREA000 NPC): ra 0x801A2858 inside this body calls boot Msg_OpenScript(3) at f+1, the only writer of 0x801490A4/A8 during the open; ghidra decomp GAME.EMI: u16 msg id at obj+8, bit 0x8000 = run script callback 0x801A4F44 first, bit 0x2000 = system pool via Msg_OpenSystem(id & 0xFFF) else Msg_OpenScript(id); sets 0x80143BB0 = 2"
+note = "overlay by --overlay"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
 pc = 0x801AEDD4
 name = "Char_LevelUp"
 args = ["roster"]

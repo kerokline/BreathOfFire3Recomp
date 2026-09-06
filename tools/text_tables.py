@@ -246,6 +246,12 @@ class Glossary:
         if not official or self._is_note(official):
             en = literal
             note = official or None
+        # A wiki row whose romaji and translation cells were merged shifts the
+        # note into the literal column (Miyakuri, 2026-09-05): never let a
+        # sentence through as a name; fall back to the romaji.
+        if en and self._is_note(en):
+            note = en
+            en = (r.get("romaji") or "").strip()
         return en or None, r["section"], note
 
 

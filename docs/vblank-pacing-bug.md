@@ -110,14 +110,62 @@ Two durable findings from that detour:
   "native handoff for relocated kernel code by ROM byte-match" is dead. The
   static dispatch table has no kernel-RAM entries and the `overlay_loader`
   runtime cache is inert here (`active:0, registered:0`).
-- **Prototype lessons (walk-HLE, `PSX_HLE_INTRP_WALK=1`, `d725af45` on fork
-  branch `fix/vblank-cadence-pacing`, not upstream, not needed).** Calling a
-  guest callback from a native hook via `psx_dispatch_call` needs (1)
-  `g_precise_mode` / `g_dirty_interp_active` cleared around the call — in
-  precise mode the callee's `jr ra` surfaces instead of returning — and (2)
-  `cpu->gpr[31]` (ra) set before the call, as the real `jalr` would. With those
-  the native walk fired cleanly (`bails=0`, 200–2000 walks/s post-FMV). Reuse
-  the pattern if a faithful HLE is ever the right shape.
+- **Prototype lessons (walk-HLE, `PSX_HLE_INTRP_WALK=1`).** The prototype that
+  disproved this thesis is retired; the two mechanics worth keeping — how to
+  call a guest callback from a native hook, and how to make a prototype disprove
+  its own premise — are transcribed below under
+  [Reusable mechanics](#reusable-mechanics-from-the-retired-hle-prototype).
+
+## Reusable mechanics from the retired HLE prototype
+
+The walk-HLE prototype (`PSX_HLE_INTRP_WALK=1`, commit `d725af45`, fork branch
+`fix/vblank-cadence-pacing`) is **retired** — the branch was deleted 2026-09-05
+after the thesis above was refuted; the commit is archived on the fork as
+`archive/vblank-intrp-hle-prototype` (`kerokline/psxrecomp`), never upstream. It
+was never wired into a fix and its runtime code was env-gated scaffolding, so
+nothing of it should be revived wholesale. Two mechanics are worth keeping.
+
+### 1. Calling a guest callback from a native hook
+
+`psx_dispatch_call` does **not** work from inside a precise slice as written.
+The contract the prototype established:
+
+```c
+extern int g_precise_mode;
+int prev_phase   = g_exec_phase;
+int prev_precise = g_precise_mode;
+int prev_interp  = g_dirty_interp_active;
+g_precise_mode        = 0;   /* in precise mode the callee's `jr ra` surfaces  */
+g_dirty_interp_active = 0;   /* instead of returning → psx_dispatch_call hangs */
+g_exec_phase          = 3;   /* dirty/native callees re-tag inside             */
+cpu->gpr[31] = ret_pc;       /* ra: what the real `jalr` would have set        */
+cpu->pc = 0;
+psx_dispatch_call(cpu, target, ret_pc);
+g_exec_phase          = prev_phase;
+g_dirty_interp_active = prev_interp;
+g_precise_mode        = prev_precise;
+if (g_psx_call_bail) g_psx_call_bail = 0;   /* stack-watermark bail: clear, continue */
+cpu->pc = 0;
+```
+
+Result lands in `v0` (`cpu->gpr[2]`); arguments go in `a0`–`a3` before the call.
+With both fixes the native walk ran clean — `bails=0`, 200–2000 walks/s. Cycle
+accounting is the caller's job: the callees self-charge inside dispatch, so only
+the loop-control instructions the hook *replaced* need `psx_advance_cycles()`.
+
+### 2. Make the prototype disprove its own premise
+
+The hook matched the target loop by exact opcode signature — a cheap first-word
+test (`lw s6,0(s3)` = `0x8E760000`) then six confirming words at fixed offsets —
+and incremented a `..._seen` counter **on match, before the enable check**, with
+`_runs` / `_calls` / `_bails` counted only when enabled. All four were exported
+through `dirty_ram_stats` over TCP.
+
+That ordering is what killed the thesis cheaply: with the HLE *off*, `seen`
+showed the walk firing only during FMV startup and taking **zero hits** in
+steady playback. The optimisation never had to work to be measured. Build the
+counter into the match, not into the replacement, and a disabled prototype still
+answers the question.
 
 ## Pointers
 

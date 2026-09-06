@@ -129,8 +129,12 @@ was `MAGIC069`. Row corrected to md5 `c39f0a09…`.
 the game-mode overlay calls 29 engine entries (`0x800A0680` most). Both call
 the boot EXE's `0x8014E494` (36 constant-`a0` sites in the game-mode
 overlay), `0x8017ED4C`, `0x8017AF98`, `0x8017CC50`, `0x801503F8`, `0x8015E908`
-(69 calls from the engine). Those six boot functions are the next Psy-Q /
-signature targets.
+(69 calls from the engine). Psy-Q signatures (2026-09-05) resolved two of the
+six: `0x8017AF98` = `GetTPage`, `0x8017CC50` = `SetDrawMode`; `0x801503F8` is
+`Msg_SystemPtr` (text engine). The "file-API wrappers" at `0x8017F7B0-0x8017F830` are the LIBAPI BIOS
+thunks, now named (`open` `0x8017F7B4`, `lseek`, `read`, `write`, `close`,
+`format`, `firstfile`, `nextfile`). Still game code, unnamed: `0x8014E494`
+and `0x8015E908` (sound trigger, called by the message stepper's `0x0A` code).
 
 **Rules vs draw.** Neither battle overlay touches the GTE (0 cop2
 functions in each); the 52 GTE functions are all in the boot EXE. The
@@ -193,4 +197,4 @@ vector at `0x801D0C04`. All of it is in [`BATTLE_RAM.md`](BATTLE_RAM.md).
 2. Import `PLP034`, `MAGIC069`, `BOSS001`, `STATUS`; read one actor entry
    vector to get the schema for all occupants.
 3. Seed the `0x801D0C00` header region; re-export; `merge --apply`.
-4. Psy-Q signatures on the boot EXE, then `merge --symbols`.
+4. ~~Psy-Q signatures on the boot EXE~~ **DONE 2026-09-05** via `tools/psyq_sigs.py` (no Ghidra; 500 names in `symbols.toml`). Pushed onto every program the same day with the new `python tools/ghidra_run.py names [--program P] [--overwrite]` (`tools/ghidra/apply_names.py`: symbols.toml → function names on the boot program and on the overlay programs' `boot_*` mapping; `--overwrite` lets symbols.toml replace hand names such as the stale `Save_FlagsChecksum`). `Window_DrawFrame` now decompiles as `GetGraphType(); SetDrawMode(...); SetTile(...); SetSemiTrans(...)`. Run `names` after any symbols.toml change; `import` seeds them for new programs on its own.

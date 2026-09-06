@@ -153,6 +153,18 @@ def merge_row(old, new, session=None, area=None):
         for k in ("entries", "insns", "entry_hits", "hits"):
             if k in new or k in old:
                 out[k] = max(int(new.get(k, 0)), int(old.get(k, 0)))
+        # Enrichment (runtime occ_crc / ext_ra, psxrecomp feat/dirty-pc-enrichment):
+        # not counts -- keep the newest non-zero observation, so a PC seen this
+        # session with a resident occupant does not lose it to an older 0 row.
+        for k in ("occ_crc", "ext_ra"):
+            v = new.get(k) or old.get(k)
+            if v and str(v) != "0x00000000":
+                out[k] = v
+        # occ_ok travels with occ_crc: take it from whichever row supplied the CRC.
+        if new.get("occ_crc") and str(new.get("occ_crc")) != "0x00000000" and "occ_ok" in new:
+            out["occ_ok"] = int(new["occ_ok"])
+        elif "occ_ok" in old and "occ_ok" not in out:
+            out["occ_ok"] = int(old["occ_ok"])
     if session:
         out["sessions"] = sorted(set(out.get("sessions") or []) | {session})
     if area:
@@ -199,6 +211,27 @@ def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
         print("aborts      : %s   dispatch misses: %s" % (d["aborts"], s["miss_total"]))
 
     per_pc = d.get("per_pc") or []
+
+    # Enrichment split (occ_crc / occ_ok, psxrecomp feat/dirty-pc-enrichment):
+    # what KIND of gap each entered PC is, which decides what fixes it.
+    #   seed   occ_ok=1  interior gap inside live native code -> an alias
+    #                    seed (this harvest) makes it native next loop
+    #   attrib occ_ok=0  a compiled piece spans the PC but it was built from
+    #          + crc     another section's bytes: the resident section has no
+    #                    piece here. Fixed on the compile side (per-variant
+    #                    fragments), not by harvesting more.
+    #   none   crc=0     nothing compiled spans the PC (BIOS / kernel / boot)
+    # Rows from a build without the enrichment carry no occ_crc key; report
+    # nothing rather than an all-zero split that reads as "no gaps".
+    occ = occ_split(per_pc)
+    if occ and not quiet:
+        print("enrichment  : %d seedable interior gaps, %d attribution gaps "
+              "(resident section has no piece), %d outside any compiled piece"
+              "  [entered PCs; by entries: %s / %s / %s]"
+              % (occ["seed"], occ["attrib"], occ["none"],
+                 "{:,}".format(occ["seed_entries"]),
+                 "{:,}".format(occ["attrib_entries"]),
+                 "{:,}".format(occ["none_entries"])))
 
     # Union this session's rows into the accumulated distinct set.
     existing = load_existing(save_json)
@@ -285,7 +318,34 @@ def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
     return {"interp": interp, "native": native, "aborts": d["aborts"],
             "misses": s["miss_total"], "before": before, "after": len(merged_rows),
             "new": len(existing) - before, "entered": entered,
-            "newly_seen": shown, "session": session, "coverage": rep}
+            "newly_seen": shown, "session": session, "coverage": rep,
+            "occ": occ}
+
+
+def occ_split(rows):
+    """Classify entered per_pc rows by their enrichment fields.
+
+    Returns None when no row carries `occ_crc` (a build without the
+    enrichment), else counts and entry sums for seed / attrib / none as
+    documented in harvest()."""
+    if not any("occ_crc" in r for r in rows):
+        return None
+    out = {"seed": 0, "attrib": 0, "none": 0,
+           "seed_entries": 0, "attrib_entries": 0, "none_entries": 0}
+    for r in rows:
+        ent = int(r.get("entries", 0))
+        if ent <= 0:
+            continue
+        crc = int(str(r.get("occ_crc") or "0"), 16)
+        if crc == 0:
+            k = "none"
+        elif int(r.get("occ_ok", 0)):
+            k = "seed"
+        else:
+            k = "attrib"
+        out[k] += 1
+        out[k + "_entries"] += ent
+    return out
 
 
 def main():

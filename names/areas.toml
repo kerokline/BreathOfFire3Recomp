@@ -126,6 +126,15 @@ sightings = ["20260902T071817:f172958", "20260902T071817:f183882", "20260902T071
 shots = ["analysis/area_shots/AREA014_f173216.png", "analysis/area_shots/AREA014_f184144.png", "analysis/area_shots/AREA014_f185744.png"]
 
 [[area]]
+file = "BIN/WORLD00/AREA015.EMI"
+script_md5 = "7516bae4e517c1221e065b39b4bfde98"
+alias = "Farm (Outside Manor) - Night"
+status = "evidence"
+evidence = "named live by player during session 20260905T153507 at frame 333996; shot analysis/area_shots/AREA015_f333996.png"
+sightings = ["20260905T153507:f333996"]
+shots = ["analysis/area_shots/AREA015_f333996.png"]
+
+[[area]]
 file = "BIN/WORLD00/AREA016.EMI"
 script_md5 = "6800b4b11eed5d580bfcce9a78ca675c"
 alias = "World Map - Yraall Region - Spring"
@@ -137,7 +146,7 @@ shots = ["analysis/area_shots/AREA016_f192463.png"]
 [[area]]
 file = "BIN/WORLD00/AREA017.EMI"
 script_md5 = "83d61dad6af3dcabd23bdfd26fc01616"
-alias = "Farm - Outside Manor"
+alias = "Farm (Outside Manor)"
 status = "evidence"
 evidence = "screenshot"
 sightings = ["20260902T071817:f181774", "20260902T071817:f184933"]
@@ -178,6 +187,24 @@ status = "evidence"
 evidence = "Screenshot [alias carried from names/overlays.toml code overlay]"
 sightings = ["20260901T231848:f4809", "20260902T071817:f38212"]
 shots = ["analysis/area_shots/AREA024_f38466.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA026.EMI"
+script_md5 = "ef52e75865733eef34fa24624a2067b3"
+alias = "McNeil Manor (Gardens)"
+status = "evidence"
+evidence = "named live by player during session 20260905T153507 at frame 348806; shot analysis/area_shots/AREA026_f348806.png"
+sightings = ["20260905T153507:f348806"]
+shots = ["analysis/area_shots/AREA026_f348806.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA027.EMI"
+script_md5 = "d974533d7088442d24b34f3590361ec5"
+alias = "McNeil Manor"
+status = "evidence"
+evidence = "named live by player during session 20260905T161917 at frame 467998; shot analysis/area_shots/AREA027_f467998.png"
+sightings = ["20260905T161917:f467998"]
+shots = ["analysis/area_shots/AREA027_f467998.png"]
 
 [[area]]
 file = "BIN/WORLD00/AREA030.EMI"

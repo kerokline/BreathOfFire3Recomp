@@ -100,3 +100,3598 @@ name = "AbilityList_ForType"
 emit = false
 status = "confirmed"
 note = "AbilityList_ForType(index, ability_id, working) -> pointer to one of four 10-slot lists inside a character record: base = 0x80144964 + index*0xA4 (persistent) or 0x80145F00 + index*0x140 (working, when a2 != 0); type = (byte at 0x801CB231 + ability_id*16) & 3 selects +0x5C / +0x66 / +0x70 / +0x7A. Called by AbilityList_Add 0x80165BCC, which then fills the first zero slot of ten. Disassembled 2026-09-05; the card1 saves show the lists populated (Momo +0x5C/+0x66, Teepo +0x70, Rei +0x70/+0x7A)"
+
+# --- text engine (dialogue box) — npc_talk.json 2026-09-05 + ghidra decompiles ---
+
+[[func]]
+pc = 0x8015034C
+name = "Msg_OpenScript"
+emit = false
+status = "confirmed"
+note = "wtrace npc_talk.json 2026-09-05 (slot04, AREA000 NPC talk): the only writer of the box string base 0x801490A8 / stepper pointer 0x801490AC (store pcs 0x8015037C/84) and of the message index 0x801490A4 (0x80150394), a0=3 from GAME.EMI Script_ShowMessage 0x801A2858; ghidra: (u16 idx) ptr = 0x80010000 + u16[0x80010000 + 2*idx] (area script block, table at +0), MsgBox_Reset(), index stored last. 0 boot-EXE callers: only overlays open messages. Message 3 decoded off the disc at 0x245 = the taxes/Windia line, two pages split by code 0x02"
+
+[[func]]
+pc = 0x801503AC
+name = "Msg_OpenSystem"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05: (u16 id) ptr = Msg_SystemPtr(id), 0x801490A4 = id, 0x801490A8 = 0x801490AC = ptr, MsgBox_Reset(). Twin of Msg_OpenScript for the 0x80014000 system/UI/item pool; Script_ShowMessage selects it with bit 0x2000 of the message id (id & 0xFFF). 0 boot-EXE callers; BATL_END BattleResult_Setup uses Msg_SystemPtr(6) directly"
+
+[[func]]
+pc = 0x801503F8
+name = "Msg_SystemPtr"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05: (u16 id) block = 0x80014000 + u32[0x80014000 + ((id >> 12) & 0xC)] (sub-block select from id bits 14-15), returns block + u16[block + 2*(id & 0x3FFF)] — the W-header pool formula of TEXT_ENGINE.md, with the header word chosen by the id's top bits"
+
+[[func]]
+pc = 0x8015042C
+name = "MsgBox_Reset"
+emit = false
+status = "confirmed"
+note = "wtrace npc_talk.json 2026-09-05: writes 0x801490A6 (store pc 0x8015046C) at the open, ra 0x80150390 (inside Msg_OpenScript); ghidra: zeroes the interpreter state block 0x8014909C..9F, A2, A6, B4..B7, C4, keeps only flag 0x40 of 0x801490A0, a leading 0x0C byte in the string sets 0x801490CA = next byte (speaker/portrait id) and skips both, Window_Alloc(0, 0), window 0 state byte 0x8014833B = 2"
+
+[[func]]
+pc = 0x8015096C
+name = "MsgBox_Step"
+emit = false
+status = "confirmed"
+note = "wtrace npc_talk.json 2026-09-05: advances 0x801490AC by one glyph every 6 frames (store pcs 0x80150E28 / 0x80150F04, 36 steps f+17..+173), ra 0x8015095C; ghidra: the control-code stepper — 0x00 end (state 2) or return from substitution, 0x02 page break (state 3), 0x0B prompt (state 1, y += 8), 0x03/0x04 name insert from the character record (0x80182488[char id] * 0xA4 + 0x80144963, 6 glyphs), 0x07 32-byte table 0x801490D3, 0x08 sub-message via the 0x80010004 table (0x11 glyphs), 0x0A sound 0x8015E908(byte | 0x200), 0x0F style from 0x8017FF30[byte*4], 0x10 toggles flag 0x10, 0x14 choice menu (0x801490C0..C2, state 5 when no choices); every other byte >= 0x12 is a glyph"
+
+[[func]]
+pc = 0x80150598
+name = "MsgBox_Render"
+emit = false
+status = "confirmed"
+note = "TEXT_ENGINE.md renderer (lead 0x80150770); npc_talk.json 2026-09-05: entered every frame from MsgBox_FrameTask 0x80150578 while the box is open (6 per 6-frame group), interior 0x80150870 calls 0x80150664/0x80150688/0x801507A4 per glyph"
+
+[[func]]
+pc = 0x80150508
+name = "MsgBox_FrameTask"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05 + npc_talk.json: called from Window_Task 0x80159F60 each frame; box origin 0x801490BC/BE = (window x >> 4) + 10, (window y >> 4) + 6 from window record 0 (0x80148330/32), then MsgBox_StateDispatch, the 0x8014909E table 0x80149AB4, and MsgBox_Render unless flag 4; returns !(flag 2)"
+
+[[func]]
+pc = 0x801508EC
+name = "MsgBox_StateDispatch"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05: jumps through the 8-entry table at 0x80149A5C indexed by the stepper state 0x8014909C — state 0 = 0x80149A5C (calls MsgBox_Step, TEXT_ENGINE.md caller), 1 = 0x80150F3C, 4 = 0x80151204, 5 = 0x80151660 (choice), 6 = 0x80151948"
+
+[[func]]
+pc = 0x80159874
+name = "Window_Alloc"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05: (slot, kind) claims window record 0x8014832C + slot*0x24 if its byte 0 is free (sets 1, +1 = kind, +2/+3 = 0), returns slot or 0xFF; MsgBox_Reset calls it as (0, 0). The record holds the box position (+4/+6, 12.4 fixed) and size (+0x10/+0x12) that Window_Task draws"
+
+[[func]]
+pc = 0x80159F00
+name = "Window_Task"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05 + npc_talk.json (ra 0x80159F60 into MsgBox_FrameTask every frame): if window record 0x80148644 flag byte +0xD bit 0 is clear, Window_DrawFrame(x >> 4, y >> 4, w >> 4, h >> 4) from +4/+6/+0x10/+0x12, then MsgBox_FrameTask. 0 static callers — reached by pointer (task list)"
+
+[[func]]
+pc = 0x8015A58C
+name = "Window_DrawFrame"
+emit = false
+status = "confirmed"
+note = "ghidra 2026-09-05 (confidence verified): (x, y, w, h) builds the dialogue-box frame primitives on the ordering table 0x80145988 — a (w+1) x (h+1) filled box, a 16x16 sprite set with TPage 0x8017AF98(0,0,0x3C0,0) and CLUT 0x8017B068(0x8014494E << 5 | 0x10, 0x1E1) for the border pieces; answers IDEAS.md I3 'what draws the box frame' — the frame size comes from window record +0x10/+0x12, not from the text"
+
+[[func]]
+pc = 0x8015AD34
+name = "Text_DrawImmediate"
+emit = false
+status = "confirmed"
+note = "TEXT_ENGINE.md immediate draw (lead 0x8015AE78): byte *draw(short x, short y, byte *str), returns the pointer past the terminator; menu/label path, not on the dialogue-box path (npc_talk.json 2026-09-05: never entered during an NPC talk)"
+
+[[func]]
+pc = 0x80151F4C
+name = "Font_MapGlyph"
+emit = false
+status = "confirmed"
+note = "TEXT_ENGINE.md font-atlas mapper: (palette, charptr) -> sprite UVs on the 21-glyph-wide 12 px atlas; lead 0x13 = +0x100, 0x15 = +0x5B"
+
+# --- Psy-Q library names, tools/psyq_sigs.py apply --version None ---
+
+[[func]]
+pc = 0x8014AA04
+name = "__main"
+emit = false
+status = "confirmed"
+note = "Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8014AA30
+name = "stup1"
+emit = false
+status = "confirmed"
+note = "Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0x2C: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8014AAAC
+name = "stup0"
+emit = false
+status = "confirmed"
+note = "Psy-Q 2MBYTE.OBJ 2MBYTE.OBJ +0xA8: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/430/440/450/460/470, object at 0x8014AA04, 196 B, 158 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80168C58
+name = "SpuGetKeyStatus"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_GKS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80168C58, 148 B, 131 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80168CEC
+name = "_spu_init"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80168F80
+name = "_spu_writeByIO"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x294: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016914C
+name = "_spu_FiDMA"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x460: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016921C
+name = "_spu_r_"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x530: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801692D8
+name = "_spu_t"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x5EC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169568
+name = "_spu_write"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x87C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801695F0
+name = "_spu_read"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x904: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169658
+name = "_spu_FsetRXX"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x96C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801696A0
+name = "_spu_FsetRXXa"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0x9B4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169744
+name = "_spu_FgetRXXa"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0xA58: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169780
+name = "_spu_FsetPCR"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0xA94: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801697E0
+name = "_spu_FsetDelayW"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0xAF4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016980C
+name = "_spu_FsetDelayR"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0xB20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169838
+name = "_spu_FwaitFs"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB SPU.OBJ +0xB4C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80168CEC, 2988 B, 2476 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169898
+name = "_SpuInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_INI.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169898, 372 B, 253 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169990
+name = "SpuStart"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_INI.OBJ +0xF8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169898, 372 B, 253 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169A0C
+name = "_SpuDataCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_DCB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169A0C, 36 B, 33 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169A30
+name = "SpuSetTransferMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_STM.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169A30, 52 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169A64
+name = "SpuSetVoiceVolume"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SVV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80169A64, 136 B, 129 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169AEC
+name = "SpuGetVoiceVolume"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_GVV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x80169AEC, 96 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169B4C
+name = "SpuSetVoiceAttr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169B4C, 1688 B, 1547 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80169B74
+name = "_SpuSetVoiceAttr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SVA.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80169B4C, 1688 B, 1547 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016A1E4
+name = "_spu_note2pitch"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_N2P.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A1E4, 588 B, 578 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016A2D4
+name = "_spu_pitch2note"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_N2P.OBJ +0xF0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A1E4, 588 B, 578 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016A430
+name = "_SsContDataEntry"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_6.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A430, 1072 B, 1015 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016A860
+name = "_SsContMainVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_7.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A860, 216 B, 206 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016A938
+name = "_SsContPanpot"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016A938, 208 B, 198 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016AA08
+name = "_SsContDamper"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_64.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AA08, 176 B, 160 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016AAB8
+name = "_SsContNrpn1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_98.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AAB8, 312 B, 298 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016ABF0
+name = "_SsContNrpn2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_99.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016ABF0, 316 B, 282 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016AD2C
+name = "_SsContRpn1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_100.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AD2C, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016ADA4
+name = "_SsContRpn2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CC_101.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016ADA4, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016AE1C
+name = "_SsSetPitchBend"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIBEND.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AE1C, 184 B, 174 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016AED4
+name = "_SsSetControlChange"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDICC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016AED4, 576 B, 477 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B114
+name = "_SsGetMetaEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIMETA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B114, 472 B, 458 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B2EC
+name = "_SsNoteOn"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDINOTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B2EC, 232 B, 219 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B3D4
+name = "_SsSetProgramChange"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIPROG.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B3D4, 120 B, 113 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B44C
+name = "_SsReadDeltaValue"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDITIME.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B44C, 184 B, 177 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B504
+name = "_SsClose"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B680
+name = "SsSeqClose"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x17C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B6A4
+name = "SsSepClose"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCLOSE.OBJ +0x1A0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B504, 452 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B6C8
+name = "_SsSndSetCres"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B774
+name = "SsSeqSetCrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCRES.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B7F4
+name = "SsSepSetCrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCRES.OBJ +0x12C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B6C8, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B8A0
+name = "_SsSndSetDecres"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSDECRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B94C
+name = "SsSeqSetDecrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSDECRES.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016B9CC
+name = "SsSepSetDecrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSDECRES.OBJ +0x12C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016B8A0, 472 B, 451 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BA78
+name = "SsEnd"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSEND.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BA78, 196 B, 139 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BB3C
+name = "_SsInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSINIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BB3C, 232 B, 205 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BC24
+name = "SsInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSINIT_C.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420, object at 0x8016BC24, 48 B, 39 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BC74
+name = "SsSetLoop"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSLOOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BC74, 144 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BCBC
+name = "SsIsEos"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSLOOP.OBJ +0x48: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BC74, 144 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BD04
+name = "SsSepOpenJ"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSOPENPJ.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016BD04, 300 B, 275 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016BE30
+name = "_SsInitSoundSep"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SEPINIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016BE30, 944 B, 914 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C1E0
+name = "_SsSndSetPauseMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSPAUSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C2B8
+name = "SsSeqPause"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSPAUSE.OBJ +0xD8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C2E0
+name = "SsSepPause"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSPAUSE.OBJ +0x100: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C1E0, 300 B, 287 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C30C
+name = "SsSeqPlay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016C30C, 112 B, 106 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C344
+name = "SsSepPlay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSPLAY.OBJ +0x38: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016C30C, 112 B, 106 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C39C
+name = "SpuQuit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_Q.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C39C, 124 B, 85 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C418
+name = "_SsSndSetReplayMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSREPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C4BC
+name = "SsSeqReplay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSREPLAY.OBJ +0xA4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C4E4
+name = "SsSepReplay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSREPLAY.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C418, 248 B, 238 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C510
+name = "Snd_SetPlayMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB PLAYMODE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016C510, 256 B, 246 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C610
+name = "SsSetSerialAttr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSATTR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C610, 148 B, 145 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016C6A4
+name = "SpuSetCommonAttr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SCA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016C6A4, 916 B, 792 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CA38
+name = "SsSetMVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSMV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x8016CA38, 80 B, 77 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CA88
+name = "SsSetRVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSRV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CA88, 136 B, 133 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CB10
+name = "SpuSetReverbDepth"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SRD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x8016CB10, 120 B, 104 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CB88
+name = "_SsStart"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTART.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CDF0
+name = "SsStart"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTART.OBJ +0x268: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CE10
+name = "SsStart2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTART.OBJ +0x288: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CE30
+name = "_SsTrapIntrVSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTART.OBJ +0x2A8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CE70
+name = "_SsSeqCalledTbyT_1per2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTART.OBJ +0x2E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016CB88, 824 B, 672 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016CEC0
+name = "SsSeqCalledTbyT"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSCALL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016CEC0, 628 B, 565 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D134
+name = "_SsSndCrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB CRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D134, 736 B, 704 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D414
+name = "_SsSndDecrescendo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB DECRES.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D414, 672 B, 640 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D6B4
+name = "_SsSndPause"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB PAUSE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D6B4, 164 B, 157 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D758
+name = "Snd_play"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB PLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/350/3610/3611/370/400, object at 0x8016D758, 44 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D784
+name = "_SsSeqPlay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016D894
+name = "_SsSeqGetEof"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x110: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016DA58
+name = "_SsGetSeqData"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB MIDIREAD.OBJ +0x2D4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016D784, 1464 B, 1342 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016DD3C
+name = "_SsSndNextSep"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB NEXT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DD3C, 264 B, 260 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016DE44
+name = "_SsSndReplay"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB REPLAY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DE44, 104 B, 100 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016DEAC
+name = "_SsSndStop"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E014
+name = "SsSeqStop"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTOP.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E03C
+name = "SsSepStop"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSTOP.OBJ +0x190: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016DEAC, 444 B, 431 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E068
+name = "SsSetSerialVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSSV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016E068, 252 B, 249 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E164
+name = "SsSetTableSize"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSTABLE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E164, 480 B, 448 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E344
+name = "SsSetTickMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSTICK.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016E344, 364 B, 277 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E4B0
+name = "_SsSndSetVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSVOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E4E8
+name = "SsSeqSetVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSVOL.OBJ +0x38: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E518
+name = "SsSepSetVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSVOL.OBJ +0x68: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E550
+name = "SsSeqGetVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB SSVOL.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E4B0, 212 B, 200 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E584
+name = "_SsSndTempo"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB TEMPO.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E584, 480 B, 462 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E764
+name = "_SsSndSetVolData"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E764, 208 B, 201 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E834
+name = "SsUtAllKeyOff"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_AKO.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8016E834, 312 B, 257 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E96C
+name = "SsUtAutoPan"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016E96C, 100 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016E9D0
+name = "SsUtAutoPan_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8016E9D0, 100 B, 86 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016EA34
+name = "SsUtGetProgAtr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_GPA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016EA34, 264 B, 230 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016EB3C
+name = "SsUtGetVagAtr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_GVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016EB3C, 572 B, 498 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016ED78
+name = "SsUtKeyOnV"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_KEYV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016ED78, 1036 B, 805 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F10C
+name = "SsUtKeyOffV"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_KEYV.OBJ +0x394: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016ED78, 1036 B, 805 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F184
+name = "SsUtSetReverbDepth"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_RDEP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F184, 152 B, 137 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F21C
+name = "SpuSetReverbModeParam"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SRMP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F21C, 1272 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F714
+name = "_SpuIsInAllocateArea"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_UTIL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F714, 268 B, 244 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F794
+name = "_SpuIsInAllocateArea_"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_UTIL.OBJ +0x80: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016F714, 268 B, 244 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016F820
+name = "_spu_setReverbAttr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SRA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x8016F820, 1232 B, 1104 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016FCF0
+name = "SpuClearReverbWorkArea"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_CRWA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FCF0, 412 B, 340 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016FE8C
+name = "SsUtSetReverbType"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_REV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FE8C, 180 B, 152 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016FF30
+name = "SsUtGetReverbType"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_REV.OBJ +0xA4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FE8C, 180 B, 152 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8016FF40
+name = "SpuSetReverb"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8016FF40, 208 B, 160 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170050
+name = "SsUtSetVagAtr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_SVA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80170050, 456 B, 382 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170218
+name = "SsUtGetDetVVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170270
+name = "SsUtSetDetVVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801702DC
+name = "SsUtGetVVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_VVOL.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170368
+name = "SsUtSetVVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB UT_VVOL.OBJ +0x150: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170218, 476 B, 420 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801703F4
+name = "_SsVmDoAllocate"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_ALOC2.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801703F4, 532 B, 417 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170608
+name = "SeAutoPan"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_AUTOP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170608, 1268 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801707B8
+name = "SetAutoPan"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_AUTOP.OBJ +0x1B0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170608, 1268 B, 1111 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170AFC
+name = "SeAutoVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_AUTOV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170AFC, 1276 B, 1119 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80170CAC
+name = "SetAutoVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_AUTOV.OBJ +0x1B0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80170AFC, 1276 B, 1119 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017101C
+name = "_SsVmFlush"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_F.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017101C, 948 B, 781 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801713D0
+name = "SpuSetNoiseVoice"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SNV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801713D0, 36 B, 33 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801713F4
+name = "_SpuSetAnyVoice"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_SAV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801713F4, 520 B, 456 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801715FC
+name = "_SsVmInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801715FC, 784 B, 589 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017190C
+name = "SpuInitMalloc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017190C, 84 B, 65 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80171960
+name = "_spu_setInTransfer"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_IT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80171960, 68 B, 53 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017198C
+name = "_spu_getInTransfer"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_IT.OBJ +0x2C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80171960, 68 B, 53 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801719A4
+name = "_SsVmKeyOn"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_KEY.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80171EF4
+name = "_SsVmKeyOff"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_KEY.OBJ +0x550: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172040
+name = "_SsVmSeKeyOn"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_KEY.OBJ +0x69C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017212C
+name = "_SsVmSeKeyOff"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_KEY.OBJ +0x788: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172160
+name = "KeyOnCheck"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_KEY.OBJ +0x7BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801719A4, 1988 B, 1787 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172168
+name = "_SsVmAlloc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_ALOC1.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172168, 620 B, 536 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801723D4
+name = "note2pitch"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_N2P.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801723D4, 448 B, 410 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172498
+name = "note2pitch2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_N2P.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x801723D4, 448 B, 410 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172594
+name = "vmNoiseOn"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_NO1.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172594, 1228 B, 1050 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172A60
+name = "vmNoiseOff"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_NOFF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80172A60, 68 B, 56 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172AA4
+name = "_SsVmKeyOffNow"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_NOWOF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80172AA4, 208 B, 157 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80172B74
+name = "_SsVmKeyOnNow"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_NOWON.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80172B74, 1252 B, 1094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173058
+name = "_SsVmPBVoice"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_PB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173058, 752 B, 669 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173258
+name = "_SsVmPitchBend"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_PB.OBJ +0x200: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173058, 752 B, 669 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173348
+name = "_SsVmSetSeqVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173888
+name = "_SsVmGetSeqVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x540: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801738F4
+name = "_SsVmGetSeqLVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x5AC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173944
+name = "_SsVmGetSeqRVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x5FC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173994
+name = "_SsVmSeqKeyOff"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_SEQ.OBJ +0x64C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173348, 1768 B, 1633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173A30
+name = "_SsVmSelectToneAndVag"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_STAV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80173A30, 180 B, 172 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80173AE4
+name = "_SsVmSetVol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_VOL.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80173AE4, 1412 B, 1321 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174068
+name = "_SsVmVSetUp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VM_VSU.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174068, 196 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174160
+name = "SsSetReservedVoice"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_SRV.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174160, 48 B, 41 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174190
+name = "SsVabClose"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VAB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174190, 132 B, 109 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174214
+name = "SpuFree"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_F.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x80174214, 124 B, 110 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174290
+name = "_spu_gcSPU"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_INT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174290, 776 B, 699 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174598
+name = "SsVabOpenHead"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VH.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801745C8
+name = "SsVabOpenHeadSticky"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VH.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801745F8
+name = "SsVabFakeHead"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VH.OBJ +0x60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174628
+name = "SsVabOpenHeadWithMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VH.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174598, 1132 B, 1008 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174A04
+name = "SpuMalloc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_M_M.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174A04, 712 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174CCC
+name = "SsVabTransBodyPartly"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VTBP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174CCC, 352 B, 282 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174E2C
+name = "SpuSetTransferStartAddr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_STSA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174E2C, 88 B, 74 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174E84
+name = "SpuWritePartly"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_WP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80174E84, 140 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174F10
+name = "SsVabTransCompleted"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSND.LIB VS_VTC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/340/370/400, object at 0x80174F10, 40 B, 37 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174F38
+name = "SpuIsTransferCompleted"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBSPU.LIB S_ITC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174F38, 168 B, 136 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80174FE0
+name = "PadInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB PAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175030
+name = "PadRead"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB PAD.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175058
+name = "PadStop"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB PAD.OBJ +0x78: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80174FE0, 152 B, 121 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175078
+name = "VSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB VSYNC.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175078, 484 B, 396 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801751C0
+name = "v_wait"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB VSYNC.OBJ +0x148: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175078, 484 B, 396 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017525C
+name = "ResetCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017528C
+name = "InterruptCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801752BC
+name = "DMACallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801752EC
+name = "VSyncCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175320
+name = "VSyncCallbacks"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0xC4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175350
+name = "StopCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0xF4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175380
+name = "RestartCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x124: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801753B0
+name = "CheckCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801753C0
+name = "GetIntrMask"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x164: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801753D8
+name = "SetIntrMask"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x17C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801753F4
+name = "startIntr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x198: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801754D0
+name = "trapIntr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x274: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801756B8
+name = "setIntr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x45C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017580C
+name = "stopIntr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x5B0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801758B8
+name = "restartIntr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x65C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175940
+name = "memclr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR.OBJ +0x6E4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017525C, 1808 B, 1520 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017596C
+name = "startIntrVSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_VB.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801759C4
+name = "trapIntrVSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_VB.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175A3C
+name = "setIntrVSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_VB.OBJ +0xD0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175A68
+name = "memclr_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_VB.OBJ +0xFC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017596C, 296 B, 250 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175A94
+name = "startIntrDMA"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175AE4
+name = "trapIntrDMA"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175C68
+name = "setIntrDMA"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x1D4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175D10
+name = "memclr_3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBETC.LIB INTR_DMA.OBJ +0x27C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80175A94, 680 B, 605 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175D64
+name = "CdInit"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB EVENT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175DF4
+name = "def_cbsync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB EVENT.OBJ +0x90: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E1C
+name = "def_cbready"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB EVENT.OBJ +0xB8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E44
+name = "def_cbread"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB EVENT.OBJ +0xE0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175D64, 264 B, 221 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E6C
+name = "CdStatus"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E7C
+name = "CdMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x10: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E8C
+name = "CdLastCom"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175E9C
+name = "CdLastPos"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x30: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175EAC
+name = "CdReset"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x40: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175F18
+name = "CdFlush"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175F38
+name = "CdSetDebug"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175F50
+name = "CdComstr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0xE4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175F84
+name = "CdIntstr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x118: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175FB8
+name = "CdSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x14C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175FD8
+name = "CdReady"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x16C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80175FF8
+name = "CdSyncCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x18C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176010
+name = "CdReadyCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x1A4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176028
+name = "CdControl"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x1BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176160
+name = "CdControlF"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x2F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017628C
+name = "CdControlB"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x420: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801763D0
+name = "CdMix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x564: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801763F0
+name = "CdGetSector"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x584: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176410
+name = "CdDataCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x5A4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176434
+name = "CdDataSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x5C8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176454
+name = "CdIntToPos"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x5E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176558
+name = "CdPosToInt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB SYS.OBJ +0x6EC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80175E6C, 1900 B, 1700 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801765D8
+name = "getintr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176B60
+name = "CD_sync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x588: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80176DE0
+name = "CD_ready"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x808: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801770AC
+name = "CD_cw"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0xAD4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801774C8
+name = "CD_vol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0xEF0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177550
+name = "CD_flush"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0xF78: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177630
+name = "CD_initvol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x1058: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177724
+name = "CD_initintr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x114C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177774
+name = "CD_init"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x119C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177960
+name = "CD_datasync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x1388: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177ACC
+name = "CD_getsector"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x14F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177BCC
+name = "CD_set_test_parmnum"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x15F4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177BDC
+name = "callback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB BIOS.OBJ +0x1604: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x801765D8, 5864 B, 4777 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177CC0
+name = "CdSearchFile"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177F8C
+name = "_cmp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x2CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80177FAC
+name = "CD_newmedia"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x2EC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017828C
+name = "CD_searchdir"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x5CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178334
+name = "CD_cachefile"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x674: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801785E0
+name = "cd_read"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x920: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017864C
+name = "memcpy"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB ISO9660.OBJ +0x98C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80177CC0, 2496 B, 2094 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178680
+name = "cb_read"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178894
+name = "cd_read_retry"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x214: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178A60
+name = "CdReadBreak"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x3E0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178AB0
+name = "CdRead"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x430: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178B90
+name = "CdReadSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x510: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178C5C
+name = "CdReadCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCD.LIB CDREAD.OBJ +0x5DC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x80178680, 1524 B, 1165 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178C74
+name = "rsin"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB GEO_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178C74, 204 B, 170 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178CB0
+name = "sin_1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB GEO_00.OBJ +0x3C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178C74, 204 B, 170 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178D40
+name = "rcos"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB GEO_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400/410/420/430/440/450/460/470, object at 0x80178D40, 160 B, 135 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178DE0
+name = "csqrt_1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB COR_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178DE0, 496 B, 466 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178F34
+name = "csqrt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB COR_05.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x80178DE0, 496 B, 466 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80178FD8
+name = "InitGeom"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350, object at 0x80178FD8, 128 B, 117 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179060
+name = "SquareRoot0"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x80179060, 144 B, 140 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801790F0
+name = "InvSquareRoot"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017917C
+name = "VectorNormalS"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC02.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179190
+name = "VectorNormal"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC02.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801791BC
+name = "VectorNormalSS"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC02.OBJ +0xCC: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801792A8
+name = "MatrixNormal"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MSC02.OBJ +0x1B8: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x801790F0, 672 B, 649 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179390
+name = "ApplyMatrixLV"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_004.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x80179390, 352 B, 352 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801794F0
+name = "PushMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_006.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x801794F0, 320 B, 266 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179590
+name = "PopMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_006.OBJ +0xA0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x801794F0, 320 B, 266 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179630
+name = "MulMatrix2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179630, 272 B, 272 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179740
+name = "ApplyMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179740, 80 B, 80 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179790
+name = "ApplyMatrixSV"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_06.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179790, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801797F0
+name = "TransMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_07.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801797F0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179820
+name = "ScaleMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_08.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400, object at 0x80179820, 304 B, 304 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179950
+name = "SetRotMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_09.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179950, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179980
+name = "SetLightMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179980, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801799B0
+name = "SetColorMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_11.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801799B0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x801799E0
+name = "SetTransMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB MTX_12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x801799E0, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A00
+name = "SetBackColor"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB REG10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A00, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A20
+name = "SetGeomOffset"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB REG12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A20, 32 B, 32 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A40
+name = "SetGeomScreen"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB REG13.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179A40, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A50
+name = "LocalLight"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A74
+name = "DpqColor"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x24: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179A90
+name = "NormalColor"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x40: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179AAC
+name = "NormalColor3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x5C: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179AE8
+name = "NormalColorDpq"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x98: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179B0C
+name = "NormalColorDpq3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0xBC: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179B54
+name = "NormalColorCol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x104: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179B74
+name = "NormalColorCol3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x124: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179BB8
+name = "ColorDpq"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179BE0
+name = "ColorCol"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x190: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179C04
+name = "AverageSZ3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x1B4: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179C14
+name = "AverageSZ4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP.OBJ +0x1C4: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450, object at 0x80179A50, 480 B, 480 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179C30
+name = "LightColor"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179C58
+name = "DpqColorLight"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179C80
+name = "DpqColor3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x50: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179CBC
+name = "Intpl"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179CE0
+name = "Square12"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0xB0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179D08
+name = "Square0"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0xD8: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179D30
+name = "AverageZ3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x100: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179D50
+name = "AverageZ4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x120: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179D74
+name = "OuterProduct12"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x144: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179DCC
+name = "OuterProduct0"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x19C: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179E24
+name = "Lzc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_00.OBJ +0x1F4: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450, object at 0x80179C30, 528 B, 528 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179E40
+name = "RotTransPers"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179E40, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179E70
+name = "RotTransPers3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_03.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179E70, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179ED0
+name = "RotTrans"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB SMP_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179ED0, 48 B, 48 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179F00
+name = "RotTransPers4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB CMB_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179F00, 128 B, 128 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179F80
+name = "RotAverage3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB CMB_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179F80, 96 B, 96 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x80179FE0
+name = "RotAverage4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB CMB_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x80179FE0, 128 B, 128 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A060
+name = "TransposeMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_00.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370, object at 0x8017A060, 80 B, 80 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A0B0
+name = "RotMatrix"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_01.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A0B0, 656 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A340
+name = "RotMatrixYXZ"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A340, 656 B, 623 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A5D0
+name = "RotMatrixX"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_04.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A5D0, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A770
+name = "RotMatrixY"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_05.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A770, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017A910
+name = "RotMatrixZ"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB FGO_06.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017A910, 416 B, 405 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AAB0
+name = "ratan2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB RATAN.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017AAB0, 384 B, 364 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AC30
+name = "_patch_gte"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGTE.LIB PATCHGTE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017AC30, 160 B, 135 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ACD0
+name = "LoadTPage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB EXT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ADBC
+name = "LoadClut"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB EXT.OBJ +0xEC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AE24
+name = "LoadClut2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB EXT.OBJ +0x154: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AE8C
+name = "SetDefDrawEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB EXT.OBJ +0x1BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AF5C
+name = "SetDefDispEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB EXT.OBJ +0x28C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017ACD0, 712 B, 670 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017AF98
+name = "GetTPage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B068
+name = "GetClut"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0xD0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B080
+name = "DumpTPage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0xE8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B150
+name = "DumpClut"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x1B8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B190
+name = "NextPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x1F8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B1AC
+name = "IsEndPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x214: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B1C8
+name = "AddPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x230: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B204
+name = "AddPrims"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x26C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B240
+name = "CatPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x2A8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B264
+name = "TermPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x2CC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B27C
+name = "SetSemiTrans"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x2E4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B2A4
+name = "SetShadeTex"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x30C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B2CC
+name = "SetPolyF3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x334: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B2E0
+name = "SetPolyFT3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x348: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B2F4
+name = "SetPolyG3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x35C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B308
+name = "SetPolyGT3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x370: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B31C
+name = "SetPolyF4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x384: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B330
+name = "SetPolyFT4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x398: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B344
+name = "SetPolyG4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x3AC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B358
+name = "SetPolyGT4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x3C0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B36C
+name = "SetSprt8"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x3D4: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B380
+name = "SetSprt16"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x3E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B394
+name = "SetSprt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x3FC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B3A8
+name = "SetTile1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x410: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B3BC
+name = "SetTile8"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x424: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B3D0
+name = "SetTile16"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x438: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B3E4
+name = "SetTile"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x44C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B3F8
+name = "SetLineF2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x460: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B40C
+name = "SetLineG2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x474: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B420
+name = "SetLineF3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x488: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B440
+name = "SetLineG3"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x4A8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B460
+name = "SetLineF4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x4C8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B480
+name = "SetLineG4"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x4E8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B4A0
+name = "SetDrawTPage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x508: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B554
+name = "SetDrawMove"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x5BC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B5B4
+name = "SetDrawLoad"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x61C: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B620
+name = "MargePrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x688: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B658
+name = "DumpDrawEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x6C0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B7D8
+name = "DumpDispEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB PRIM.OBJ +0x840: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017AF98, 2284 B, 2127 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017B884
+name = "ResetGraph"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BA08
+name = "SetGraphReverse"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x184: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BB1C
+name = "SetGraphDebug"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x298: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BB80
+name = "SetGraphQueue"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2FC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BC2C
+name = "GetGraphType"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x3A8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BC3C
+name = "GetGraphDebug"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x3B8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BC4C
+name = "DrawSyncCallback"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x3C8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BCA8
+name = "SetDispMask"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x424: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BD44
+name = "DrawSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x4C0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BDB0
+name = "checkRECT"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x52C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BED8
+name = "ClearImage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x654: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017BF6C
+name = "ClearImage2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x6E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C008
+name = "LoadImage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x784: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C06C
+name = "StoreImage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x7E8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C0D0
+name = "MoveImage"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x84C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C194
+name = "ClearOTag"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x910: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C24C
+name = "ClearOTagR"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x9C8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C2E4
+name = "DrawPrim"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xA60: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C344
+name = "DrawOTag"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xAC0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C3B8
+name = "PutDrawEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xB34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C4BC
+name = "DrawOTagEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xC38: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C5D8
+name = "GetDrawEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xD54: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017C610
+name = "PutDispEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0xD8C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CAB8
+name = "GetDispEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1234: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CAF0
+name = "GetODE"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x126C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CB20
+name = "SetTexWindow"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x129C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CB5C
+name = "SetDrawArea"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x12D8: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CBE0
+name = "SetDrawOffset"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x135C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CC24
+name = "SetPriority"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x13A0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CC50
+name = "SetDrawMode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x13CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CCA8
+name = "SetDrawEnv"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1424: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017CEC0
+name = "SetDrawEnv2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x163C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D150
+name = "get_mode"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x18CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D1A8
+name = "get_cs"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1924: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D274
+name = "get_ce"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x19F0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D340
+name = "get_ofs"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1ABC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D384
+name = "get_tw"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1B00: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D408
+name = "get_dx"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1B84: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D4B8
+name = "_status"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1C34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D4D0
+name = "_otc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1C4C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D5B8
+name = "_clr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1D34: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017D814
+name = "_dws"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x1F90: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DA50
+name = "_drs"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x21CC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DCD4
+name = "_ctl"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2450: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DCFC
+name = "_getctl"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2478: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DD10
+name = "_cwb"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x248C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DD60
+name = "_cwc"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x24DC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DDAC
+name = "_param"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2528: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DDDC
+name = "_addque"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2558: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017DE00
+name = "_addque2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x257C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E0E0
+name = "_exeque"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x285C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E3CC
+name = "_reset"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2B48: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E528
+name = "_sync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2CA4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E670
+name = "set_alarm"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2DEC: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E6A4
+name = "get_alarm"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2E20: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E810
+name = "_version"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x2F8C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E8EC
+name = "memset"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBGPU.LIB SYS.OBJ +0x3068: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017B884, 12436 B, 10736 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E918
+name = "_bu_init"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C112.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017E918, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E928
+name = "_card_info"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C171.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E928, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E938
+name = "_card_load"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C172.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E938, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E948
+name = "_card_clear"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB CARD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017E948, 56 B, 50 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E980
+name = "_card_write"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A78.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E980, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E990
+name = "_new_card"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A80.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017E990, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E9A0
+name = "InitCARD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB INIT.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017E9F4
+name = "StartCARD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB INIT.OBJ +0x54: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EA2C
+name = "StopCARD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB INIT.OBJ +0x8C: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017E9A0, 188 B, 149 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EA5C
+name = "InitCARD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A74.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA5C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EA6C
+name = "StartCARD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A75.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA6C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EA7C
+name = "StopCARD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A76.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017EA7C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EAE4
+name = "_patch_card"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB PATCH.OBJ +0x58: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017EA8C, 416 B, 356 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EB9C
+name = "_patch_card2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB PATCH.OBJ +0x110: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370, object at 0x8017EA8C, 416 B, 356 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017EC2C
+name = "_ExitCard"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBCARD.LIB END.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 3610/3611/370/400, object at 0x8017EC2C, 128 B, 103 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ECB4
+name = "puts"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A63.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECB4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ECCC
+name = "setjmp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C19.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECCC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ECDC
+name = "strcat"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C21.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECDC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ECEC
+name = "strcmp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C23.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECEC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ECFC
+name = "strncmp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C24.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ECFC, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED0C
+name = "strcpy"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C25.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED0C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED1C
+name = "strncpy"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C26.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED1C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED2C
+name = "strlen"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C27.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED2C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED3C
+name = "memcpy_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C42.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED3C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED5C
+name = "printf"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C63.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017ED5C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017ED6C
+name = "sprintf"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBC.LIB SPRINTF.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017ED6C, 2140 B, 2046 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F5C8
+name = "memchr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C46.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260, object at 0x8017F5C8, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F5D8
+name = "memmove"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBC2.LIB MEMMOVE.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 330/340/350/3610/3611/370/400, object at 0x8017F5D8, 108 B, 105 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F644
+name = "InitHeap"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C57.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F644, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F654
+name = "Exec"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C67.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F654, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F664
+name = "FlushCache"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C68.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F664, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F674
+name = "GPU_cw"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C73.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F674, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F68C
+name = "_96_remove"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB C114.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350, object at 0x8017F68C, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6A4
+name = "DeliverEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A07.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6A4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6B4
+name = "OpenEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A08.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6B4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6C4
+name = "CloseEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A09.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6C4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6D4
+name = "WaitEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6D4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6E4
+name = "TestEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A11.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6E4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F6F4
+name = "EnableEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A12.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F6F4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F704
+name = "DisableEvent"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A13.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F704, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F714
+name = "OpenTh"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A14.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F714, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F724
+name = "CloseTh"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A15.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F724, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F734
+name = "ChangeTh"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A16.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F734, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F744
+name = "PAD_dr"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A22.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F744, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F754
+name = "ReturnFromException"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A23.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F754, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F764
+name = "ResetEntryInt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A24.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F764, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F774
+name = "HookEntryInt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A25.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F774, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F784
+name = "EnterCriticalSection"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A36.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F784, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F794
+name = "ExitCriticalSection"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A37.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F794, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7A4
+name = "SetSp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A39.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7A4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7B4
+name = "open"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A50.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7B4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7C4
+name = "lseek"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A51.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7C4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7D4
+name = "read"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A52.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7D4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7E4
+name = "write"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A53.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7E4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F7F4
+name = "close"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A54.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F7F4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F804
+name = "format"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A65.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F804, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F814
+name = "firstfile"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A66.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F814, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F824
+name = "nextfile"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A67.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F824, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F834
+name = "ChangeClearPAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A91.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F834, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F844
+name = "GetSp"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A95.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F844, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F854
+name = "ChangeClearRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB L10.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017F854, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F864
+name = "SetRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB COUNTER.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F900
+name = "GetRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB COUNTER.OBJ +0x9C: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F938
+name = "StartRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB COUNTER.OBJ +0xD4: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F96C
+name = "StopRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB COUNTER.OBJ +0x108: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F9A4
+name = "ResetRCnt"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB COUNTER.OBJ +0x140: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017F864, 376 B, 332 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F9DC
+name = "SetInitPadFlag"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F9EC
+name = "ReadInitPadFlag"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x10: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017F9FC
+name = "PAD_init"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x20: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FA88
+name = "InitPAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0xAC: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FB14
+name = "StartPAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x138: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FB44
+name = "StopPAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x168: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FB74
+name = "SetPatchPad"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x198: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FBF4
+name = "RemovePatchPad"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x218: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FC2C
+name = "_Pad1"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x250: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FC94
+name = "_IsVSync"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PAD.OBJ +0x2B8: whole-object signature match (lab313ru/psx_psyq_signatures 370, object at 0x8017F9DC, 760 B, 633 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FCD4
+name = "InitPAD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A18.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCD4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FCE4
+name = "StartPAD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A19.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCE4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FCF4
+name = "StopPAD_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A20.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FCF4, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD04
+name = "PAD_init_2"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB A21.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD04, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD14
+name = "SysEnqIntRP"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB L02.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD14, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD24
+name = "SysDeqIntRP"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB L03.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 260/300/330/340/350/3610/3611/370/400/410/420/430/440/450/460/470, object at 0x8017FD24, 16 B, 16 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD34
+name = "EnablePAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PATCH.OBJ +0x0: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD48
+name = "DesablePAD"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PATCH.OBJ +0x14: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all"
+
+[[func]]
+pc = 0x8017FD5C
+name = "_patch_pad"
+emit = false
+status = "confirmed"
+note = "Psy-Q LIBAPI.LIB PATCH.OBJ +0x28: whole-object signature match (lab313ru/psx_psyq_signatures 370/400, object at 0x8017FD34, 144 B, 114 fixed bytes) -- tools/psyq_sigs.py apply all"

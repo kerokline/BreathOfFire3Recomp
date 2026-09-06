@@ -277,16 +277,27 @@ def cmd_watch(a):
             return None
         print(f"[f{fr}]   harvest ({why}): {r['new']} new PCs, observed set {r['after']} "
               f"({r['entered']} entered)")
+        occ = r.get("occ")
+        if occ:
+            # Enriched build: say what kind of gaps this session is hitting.
+            # Seedable gaps shrink with the next loop; attribution gaps do not
+            # (compile-side fix); "outside" is BIOS/kernel/boot-EXE residue.
+            print(f"[f{fr}]   gaps: {occ['seed']} seedable, {occ['attrib']} attribution "
+                  f"(resident section has no piece), {occ['none']} outside compiled code")
         g = (r.get("coverage") or {}).get("global") or {}
         if g.get("coverage") is not None:
             print(f"[f{fr}]   estimated coverage {100.0 * g['coverage']:.1f}% "
                   f"({g['s_obs']} of ~{g['estimate']:.0f}); "
                   f"python tools/pc_coverage.py for the per-band table")
-        return {"session": session, "event": "harvest", "frame": fr, "why": why,
-                "t": dt.datetime.now().isoformat(timespec="seconds"),
-                "new": r["new"], "total": r["after"], "entered": r["entered"],
-                "interp": r["interp"], "native": r["native"],
-                "coverage": g.get("coverage"), "est_total": g.get("estimate")}
+        row = {"session": session, "event": "harvest", "frame": fr, "why": why,
+               "t": dt.datetime.now().isoformat(timespec="seconds"),
+               "new": r["new"], "total": r["after"], "entered": r["entered"],
+               "interp": r["interp"], "native": r["native"],
+               "coverage": g.get("coverage"), "est_total": g.get("estimate")}
+        if occ:
+            row.update({"occ_seed": occ["seed"], "occ_attrib": occ["attrib"],
+                        "occ_none": occ["none"]})
+        return row
 
     fr = 0
     try:

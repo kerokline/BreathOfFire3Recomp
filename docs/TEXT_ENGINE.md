@@ -1,7 +1,8 @@
 # BoF3 text engine — the message interpreter, renderer and glyph path
 
-**Status:** STABLE (established and confirmed live 2026-08-30; the open items
-at the end are translation work, not engine identification)
+**Status:** STABLE (established and confirmed live 2026-08-30; the open path
+— who sets the string pointer — traced live and named 2026-09-05; the open
+items at the end are translation work, not engine identification)
 
 This resolved the localization blocker *"nothing can identify which code draws
 text."* Three entry points, one shared control-code vocabulary, one glyph
@@ -32,7 +33,9 @@ the terminator. It is the menu/immediate path; the other two are the
 typewriter-style dialogue box, split renderer/stepper.
 
 Callers: `0x80150598` ← `0x80150570`; `0x8015096C` ← `0x80149A5C`, `0x80150910`;
-`0x8015AD34` ← `0x8015AB2C`, `0x8015AB94`.
+`0x8015AD34` ← `0x8015AB2C`, `0x8015AB94`. All of these are now named in
+`symbols.toml` (`MsgBox_Render`, `MsgBox_Step`, `Text_DrawImmediate`, …); the
+functions that *set the string pointer* are in *The resolver* below.
 
 ## The message table — the answer to `0x80010004`
 
@@ -69,15 +72,22 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 |---|---|
 | `0x00` | terminator (or return from substitution) |
 | `0x01` | newline — `y += 0x0E` (box) / `0x0D` (immediate), `x` = left margin |
+| `0x02` | **page break** — stepper state 3; waits for confirm, then a fresh page. One byte per break, no page count anywhere: AREA000's 256 messages have 199 / 45 / 10 / 1 messages with 0 / 1 / 2 / 3 breaks, and a three-break message is just four text runs (npc_talk 2026-09-05 + disc scan) |
 | `0x03` | insert current-character name — record at `0x80144963 + 0xA4 * DAT_80145F05` |
 | `0x04` | insert named character — record at `0x80144963 + 0xA4 * next_byte` |
 | `0x05` | set colour/palette from next byte |
 | `0x06` | reset colour |
 | `0x07` | insert from 32-byte record table at `0x801490D3 + 0x20 * next_byte` |
 | `0x08` | **insert message by index** — see the table formula above |
-| `0x0B` | page break / prompt (`0x8015096C` sets state 1, `y += 8`) |
+| `0x0A` | play sound — `0x8015E908(next_byte \| 0x200)` |
+| `0x0C` | (string head only) speaker/portrait id in the next byte → `0x801490CA`; consumed by `MsgBox_Reset`, never seen by the stepper |
+| `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1, `y += 8`) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
 | `0x0D` / `0x0E` | enable / disable drawing |
+| `0x0F` | text style from the 4-byte table `0x8017FF30[next_byte]` (state byte `0x8014909E`, `0x801490A6`, `0x801490C4`) |
+| `0x10` | toggle flag `0x10` of `0x801490A0` |
+| `0x14` | **choice menu** — `0x801490C0` = next byte, then count/cursor nibbles at `+3` (`0x801490C1/C2`); state 5 when the count is 0 |
 | `0x12`, `0x13`, `0x15` | **multi-byte character lead bytes** — consume one extra byte |
+| everything else `>= 0x12` | a **glyph** — the stepper's control switch covers `0x00..0x11` and `0x14` only, so `0x3E`/`0x3F`/`0x40` and the `0x48 0x50` of `HP` are single-byte atlas indices, not controls (settles the *Latin/digit bytes* question below for the box path) |
 | `0x2A` `'*'`, `0x3B` `';'` | at line start, `x -= 0x0C` (hanging punctuation) |
 
 Substitution is a single-level return: the interpreter saves the resume pointer,
@@ -224,6 +234,65 @@ externally confirmed twice. The `0x80010004` half is not: that address is a `W`
 header only in the header-bearing block shape, and the area script does not have
 one. **An interception must take `table_base` from the caller.**
 
+## The resolver — who sets the string pointer (live, 2026-09-05)
+
+Traced with `tools/callstack_diff.py capture --watch 0x801490A4-0x801490B0`
+on `slot04` (MacNeil village, AREA000, Circle to open an NPC line, Circle to
+turn the page); 40 writes, 3 writers, `analysis/npc_talk.json`. Decompiles
+in `analysis/ghidra/SLPS_009.90_decomp/` and `GAME_EMI0_80196800_decomp/`.
+
+```
+GAME.EMI  Script_ShowMessage(obj)  0x801A27A8        u16 id = obj+8
+   ├─ id & 0x8000 → run script callback 0x801A4F44 first
+   ├─ id & 0x2000 → Msg_OpenSystem(id & 0xFFF)   0x801503AC   (0x80014000 pool)
+   └─ else        → Msg_OpenScript(id)           0x8015034C   (0x80010000 area script)
+                       ptr = 0x80010000 + u16[0x80010000 + 2*id]
+                       0x801490A8 = 0x801490AC = ptr          ← the box-string writers
+                       MsgBox_Reset()            0x8015042C   (clears state, eats a leading 0x0C speaker byte,
+                                                               Window_Alloc(0,0), window 0 state = 2)
+                       0x801490A4 = id
+   then 0x80143BB0 = 2
+per frame: Window_Task 0x80159F00 → Window_DrawFrame 0x8015A58C (the box) → MsgBox_FrameTask 0x80150508
+           → MsgBox_StateDispatch 0x801508EC (state table 0x80149A5C) → MsgBox_Step 0x8015096C / MsgBox_Render 0x80150598
+```
+
+Facts that matter for the translation hook:
+
+- **One writer, two pools.** Both resolvers are boot-EXE functions with **zero
+  boot-EXE callers**; every message open comes from an overlay through one of
+  them. `Msg_OpenScript` uses the area block with the table at `+0`;
+  `Msg_SystemPtr` (`0x801503F8`) uses `0x80014000 + u32[0x80014000 + ((id >> 12) & 0xC)]`
+  as the table base — the `W` header, with the header *word* chosen by id bits
+  14–15 — then `+ u16[base + 2*(id & 0x3FFF)]`. That is the two-block-shape
+  model above, read off the code.
+- **The string pointer is never a dispatch argument.** The resolver takes an
+  *index* and stores the pointer into globals; the stepper reads it back from
+  `0x801490AC`. The framework's a0..a3 arg-scan apply hook
+  (`psxrecomp/docs/STRING_TRANSLATION.md` §3.4) therefore cannot see BoF3
+  dialogue. Its *in-place message patch* (`MsgInplace`, keyed by resident JP
+  bytes at a VA, length-capped to the source) is the shape that fits, but it
+  transcodes to Shift-JIS with Tsumu's framing and would need a BoF3
+  `EncodingProfile` (this game's own byte table, `0x01`/`0x02` breaks) —
+  an upstream change. The alternative that keeps "not bound by the JP byte
+  budget" true is a repoint at `MsgBox_Reset` entry (read `0x801490AC`,
+  translate, rewrite `A8`/`AC` to a scratch buffer). Either way the anchor is
+  `Msg_OpenScript` / `Msg_OpenSystem`.
+- **A whole multi-page message is one string.** The second Circle re-entered
+  `MsgBox_Step` (36 glyph steps, one per 6 frames) — no second resolver call.
+  Pages are split by `0x02` inside the string.
+- **Worked example.** AREA000 section 11 (dest `0x80010000`), `u16[3] = 0x245`,
+  62 bytes: `不作のつぎは 税金が / 気になるのよね。。 / イナカは大変 ⏎ ウインディアみたいな
+  / 大きな町に 住みたいわ` = `pairs.json` block `AREA000/AREA000.12.bin` row 3,
+  *"Not only do we have to worry about bad crops... In the country, we've got
+  taxes to worry about too... I wish I could move to a real city... like
+  Wyndia"*. The corpus's block numbering is the `.EMI` section index **+1**.
+- **The box frame is drawn from the window record, not the text.**
+  `Window_DrawFrame(x, y, w, h)` takes position `+4/+6` and size `+0x10/+0x12`
+  (12.4 fixed) of the window record at `0x80148644`; text origin is
+  `(x >> 4) + 10, (y >> 4) + 6`. That is the IDEAS.md I3 "what draws the box"
+  question — the geometry lives in the window record set up around
+  `Window_Alloc`, so a 1.5× box is a record change plus the origin constants.
+
 ## What this unblocks and what is still open
 
 Unblocks [`LOCALIZATION.md`](LOCALIZATION.md) §4.3.
@@ -241,4 +310,10 @@ Still open, in order:
 3. **Line-break policy.** Code `0x01` is explicit in the script, so JP line
    breaks are authored. English re-wrapping needs re-authored breaks or a
    word-wrap pass in the interpreter.
-4. **Name these in `symbols.toml`** and re-run `tools/sync_symbols.py`.
+4. ~~**Name these in `symbols.toml`** and re-run `tools/sync_symbols.py`.~~
+   **DONE 2026-09-05** — 13 text-engine functions (`Msg_*`, `MsgBox_*`,
+   `Window_*`, `Text_DrawImmediate`, `Font_MapGlyph`), all `confirmed`.
+5. **Hook shape.** Decide between an upstream BoF3 encoding profile for the
+   framework's in-place patch and a pointer repoint at `MsgBox_Reset` (see
+   *The resolver*). The disc-section replacement route
+   ([`regional-builds.md`](regional-builds.md)) needs neither.

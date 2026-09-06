@@ -25,7 +25,18 @@ the player to load one.
 | 2 | `slot01` | 2026-09-05 | **Just before the intro-boss battle** | Auto-advances into the battle; after it, any command auto-advances through several scene transitions of auto-playing dialogue and areas — a long scripted stretch from one load |
 | 3 | `slot02` | 2026-09-05 | **Inside the Nu boss fight** | Boss-battle anchor |
 | 4 | `slot03` | 2026-09-05 | **Inside a regular field battle** | `tools/callstack_diff.py` differential anchor (Attack / Defend / Watch / Auto / Run — see the command-menu note below) |
-| 5–12 | `slot04`–`slot11` | earlier | **Overwritten or stale** (user, 2026-09-05) — the 2026-09-03/04 anchors listed in the Log below no longer hold what they said | Re-save before use |
+| 7 | `slot06` | 2026-09-05 | **NEW GAME / LOAD GAME menu** (after the card check, from `slot00` + Start) | Front-end menu; from here Down + Circle → LOAD-GAME card select |
+| 12 | `slot11` | 2026-09-05 | **LOAD-GAME card-select screen** (「どのカードからロードしますか」) — from `slot06` + Down + Circle | Near-floor-in-dbg screen; in relprof ~418 fps (floor 355), **99% BIOS/boot-EXE, ~0 overlays** |
+| 5, 8–12 | `slot04`, `slot07`–`slot11` | earlier | **Overwritten or stale** — the 2026-09-03/04 anchors listed in the Log below no longer hold what they said; `slot07`/`slot10` were overwritten 2026-09-05 with throwaway title/name-entry states during the perf-A/B nav | Re-save before use |
+
+**Reaching the memory-card / load screen headless.** The front-end needs the
+disc and card: launch `--disc "isos/Breath of Fire III (Japan).cue"` (the card
+is `saves/card1.mcd` via `game.toml memcard_dir`). Load `slot00`, inject Start
+(pad mask `0xFFF7`) — the title advances to the card check. The **Capcom logo
+never runs headless** even with `--disc` and `PSX_BIOS_HLE_KEEP_INTRO=1`: it is
+a CD-XA FMV (`LOGO/LOGO.EXE`) the headless harness does not stream, so boot
+races to the title. Confirm any state offline with `tools/pst_tool.py vram
+<file> out.png` (needs the Anaconda `python`, not the mingw one — no numpy).
 
 **Hidden command-menu entries.** Auto-attack and Run do not appear in the
 battle command list: **hold L1** to hover Auto-attack, **hold R1** to hover
