@@ -1,16 +1,20 @@
 @echo off
-rem Launch the build-dbg runtime under a classic conhost window, detached from
+rem Launch the runtime under a classic conhost window, detached from
 rem whatever terminal you typed this in (a Windows Terminal crash took a
 rem 74-minute session with it on 2026-09-02), with stderr kept in
-rem build-dbg\stderr.log so a startup failure is readable afterwards.
+rem the tree's stderr.log so a startup failure is readable afterwards.
 rem
 rem   tools\run_dbg.cmd                 -> --no-launcher, debug port 4370
 rem   tools\run_dbg.cmd --launcher      -> go through the launcher instead
-rem   tools\run_dbg.cmd relprof         -> same for build-relprof
+rem   tools
+un_dbg.cmd dbg             -> build-dbg, if you reconfigure one
+rem
+rem Defaults to build-relprof: same PSX_DEBUG_TOOLS server, holds 60 fps, and
+rem carries the dirty-PC enrichment. build-dbg was retired 2026-09-06.
 rem Any extra arguments are passed to the runtime.
 setlocal
 set "ROOT=%~dp0.."
-set "TREE=build-dbg"
+set "TREE=build-relprof"
 set "MODE=--no-launcher"
 :args
 if "%~1"=="" goto run

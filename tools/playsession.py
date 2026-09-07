@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Drive a BreathOfFire3_Recompiled debug session while you play.
 
-Talks to the runtime's TCP debug server (build-dbg only -- a Release build has
-PSX_DEBUG_TOOLS=OFF and no server at all).
+Talks to the runtime's TCP debug server. Needs a PSX_DEBUG_TOOLS build --
+build-relprof is the one to use; a Release build has the tools OFF and no
+server at all.
 
     python tools/playsession.py arm      # watch writes into the text buffer
     python tools/playsession.py status   # is it alive, what frame, what's armed

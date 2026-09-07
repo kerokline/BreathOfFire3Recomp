@@ -18,7 +18,7 @@ code. Those are the handlers. Output is the observed schema, so
 `extract_logo_overlay.py --observed` registers them as dispatch entries and
 `compile_overlays.py` re-validates each (a bad read is dropped, not fabricated).
 
-    # with a headless build-dbg sitting on the Capcom logo (LOGO resident):
+    # with a headless debug-tools build sitting on the Capcom logo (LOGO resident):
     python tools/harvest_logo_handlers.py --port 4370 \
         --merge analysis/logo_observed.json
 

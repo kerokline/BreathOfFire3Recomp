@@ -167,7 +167,7 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
   if [ "$NEW_PCS" = "0" ] && [ "$FORCE" -eq 0 ]; then
     say "0 new PCs — nothing to add"
     echo "This session covered only already-seen content, so a rebuild would be"
-    echo "wasted (~90 s on build-dbg). Play into NEW content and re-run, or pass --force to"
+    echo "wasted (~90 s). Play into NEW content and re-run, or pass --force to"
     echo "rebuild anyway. Observed set on disk is unchanged in substance."
     coverage_report
     exit 0

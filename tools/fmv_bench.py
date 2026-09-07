@@ -15,7 +15,7 @@ What it does:
      that actually found the spu_get_global_state hotspot.
 
 Usage:
-  python tools/fmv_bench.py                          # build-dbg, port 4370
+  python tools/fmv_bench.py                          # build-relprof, port 4370
   python tools/fmv_bench.py --exe build-relprof/BreathOfFire3_Recompiled.exe
   python tools/fmv_bench.py --window 4 --gdb 25
   python tools/fmv_bench.py --no-launch              # attach to a running boot
@@ -114,7 +114,7 @@ def gdb_sample(pid, n, outpath):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--exe", default="build-dbg/BreathOfFire3_Recompiled.exe")
+    ap.add_argument("--exe", default="build-relprof/BreathOfFire3_Recompiled.exe")
     ap.add_argument("--port", type=int, default=4370)
     ap.add_argument("--window", type=float, default=4.0,
                     help="measurement window inside the FMV, seconds")
