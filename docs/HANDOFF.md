@@ -667,8 +667,10 @@ not counts); `analysis/observed_interp_pcs.json` rows carry them from the
 first harvest against an enriched build. The debug-server reply buffer grew
 32 → 64 KiB for the wider rows. Play/harvest builds must be rebuilt from the
 branch (`build-enrich` = Debug, mirrors build-dbg, was the test bed; headless
-TCP savestate loads wedge on this pin, so scenes were reached by injected
-input from a cold boot). `docs/TCP_COMMANDS.md` in the submodule documents
+TCP savestate loads wedged on that Debug tree, so scenes were reached by
+injected input from a cold boot — **that no longer applies**: the wedge does
+not reproduce on `build-relprof`, 11 of 12 slots load and resume headless, and
+`tools/scene.py` drives them, 2026-09-06). `docs/TCP_COMMANDS.md` in the submodule documents
 the fields. **Branch state: committed as `6e760748` and pushed to
 `kerokline/psxrecomp`; the fragment fix `2fa3472a` sits on top.** Open the
 two upstream PRs (rebase the fix onto `mstan/master` if they should be
@@ -920,10 +922,12 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
   vblank/s windowed and always will — judge the intro on `build-relprof`.
 - **`playsession.send()` takes a dict**, not a string.
 - **In-game savestate slot N is file `slotN-1`.** Load with Enter/Start; the
-  windowed TCP `state load` wedges the listener (it works headless). Savestates
-  survive a rebuild, but a `savestate.c` rework once made old files load
-  `last_ok: 0` — re-save rather than investigate; every anchor is minutes from
-  boot ([`SAVESTATES.md`](SAVESTATES.md)).
+  windowed TCP `state load` wedges the listener (it works headless — that is
+  the starvation watchdog, which `scene.py` disables). Savestates carry a
+  build stamp and are refused outright when it mismatches, with **no reason
+  over TCP** — run `python tools/scene.py preflight` to see why offline, then
+  re-save rather than investigate; every anchor is minutes from boot
+  ([`SAVESTATES.md`](SAVESTATES.md)).
 - **Kernel-RAM `jalr` targets can fail-fast** once (`0x00002934`, not
   reproduced) — [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md).
 
@@ -942,6 +946,7 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/emi_survey.py` | Walk every `.EMI`, hash every section, code-test RAM-bound ones → `analysis/emi_sections.json`. Per region. |
 | `tools/fmv_bench.py` | Clean-boot headless FMV benchmark (vblank/present window) with optional gdb sampling of the emu thread. |
 | `tools/headless_ab.py` | Headless A/B on a savestate workload (skip the load step for the boot workload). |
+| `tools/scene.py` | **Headless scene harness** — boots the runtime, lands it on a savestate, proves the guest resumed, and hands the live debug port to any other tool (`{port}` / `PSX_SCENE_PORT`). `preflight` checks every `.pst` header offline against this build (names a stale slot before a 13 s boot is spent on it); `check` boots+loads+resumes every slot as the savestate regression test; `run --slot N [--press ...] [--shot p.png] [-- CMD]` is the one to reach for. Every load is followed by a VSync-advance check, so a wedge is reported as a wedge instead of a `last_ok: 1` poisoning the next measurement. |
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
 | `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
