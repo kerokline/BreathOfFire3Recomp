@@ -2,10 +2,17 @@
 #
 # axis_b_loop.sh — one-shot Axis B data-gathering loop (steps 2-5 of HANDOFF.md).
 #
-# Run this AFTER a live build-dbg play session, with the game still up and its
-# debug server listening (launch:  BreathOfFire3_Recompiled.exe --game game.toml
+# Run this AFTER a live play session, with the game still up and its debug
+# server listening (launch:  BreathOfFire3_Recompiled.exe --game game.toml
 # --no-launcher --debug-port 4370). This script does NOT launch or play the game
 # — a play session reaching new content is the one manual input the loop needs.
+#
+# PLAY ON build-relprof. The harvest is port-based, so it reads whatever build
+# is live; but only a tree built since 2026-09-05 carries the dirty-PC
+# enrichment (occ_crc / occ_ok / ext_ra), and without it harvest_interp_pcs.py
+# silently degrades to bare PCs and the enrichment gap-split cannot be read.
+# build-relprof also holds 60 fps; build-dbg runs below real time. Use --build
+# to point the REBUILD phase at the same tree you played.
 #
 # The phases, straight from docs/HANDOFF.md "The next task":
 #   2. harvest   — union this session's proven interpreted entry PCs into
@@ -35,7 +42,7 @@ set -euo pipefail
 # ---- config / defaults ------------------------------------------------------
 PORT=4370
 CUE="isos/Breath of Fire III (Japan).cue"
-BUILD_DIR="build-dbg"
+BUILD_DIR="build-relprof"
 GCC="C:/msys64/mingw64/bin/gcc.exe"
 MSYS_BIN="/c/msys64/mingw64/bin"          # cmake/ninja/gcc live here (env note)
 OBSERVED="analysis/observed_interp_pcs.json"
@@ -60,12 +67,14 @@ usage() {
 Usage: tools/axis_b_loop.sh [options]
 
   --port N          debug port of the live session (default 4370)
+  --build DIR       build tree for the rebuild phase (default build-relprof;
+                    must be the tree you played, or the rebuild lands elsewhere)
   --cue PATH        disc .cue for extraction (default the Japan disc)
   --skip-harvest    start from extract; reuse the observed file as-is
   --harvest-only    run only the harvest phase, then stop
   --skip-hash       skip the codegen-hash rebuild (only safe with no framework bump)
   --force           rebuild even when harvest reports 0 new PCs
-  --no-prune        keep build-dbg freeze dumps (default: prune them at the end)
+  --no-prune        keep the build tree's freeze dumps (default: prune at the end)
   --no-mixed        extract only 'code' sections, dropping the 'mixed' ones that
                     are the ONLY code in 58 of 200 AREA files (A/B experiments
                     only; mixed sections are included by default)
@@ -80,6 +89,7 @@ EOF
 while [ $# -gt 0 ]; do
   case "$1" in
     --port)         PORT="$2"; shift 2 ;;
+    --build)        BUILD_DIR="$2"; shift 2 ;;
     --cue)          CUE="$2";  shift 2 ;;
     --skip-harvest) SKIP_HARVEST=1; shift ;;
     --harvest-only) HARVEST_ONLY=1; shift ;;
@@ -157,7 +167,7 @@ if [ "$SKIP_HARVEST" -eq 0 ]; then
   if [ "$NEW_PCS" = "0" ] && [ "$FORCE" -eq 0 ]; then
     say "0 new PCs — nothing to add"
     echo "This session covered only already-seen content, so a rebuild would be"
-    echo "wasted (~90 s on build-dbg). Play into NEW content and re-run, or pass --force to"
+    echo "wasted (~90 s). Play into NEW content and re-run, or pass --force to"
     echo "rebuild anyway. Observed set on disk is unchanged in substance."
     coverage_report
     exit 0

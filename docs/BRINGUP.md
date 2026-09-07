@@ -209,6 +209,10 @@ context to read back. With the software rasteriser the frames are correct:
 | `shot_sw_later.png` | Title screen — logo, `PRESS START BUTTON`, Capcom 1997 notice |
 | `shot_after_start.png` | Opening prologue, Japanese text rendering correctly |
 
+These were written into `build-dbg/`, which was retired 2026-09-06; the images
+were preserved to `analysis/session_shots/` (gitignored, like the build tree
+they came from). A fresh run writes them to whatever tree it runs in.
+
 `press` with `buttons=0x0008` (Start, PSX pad bit 3) advances the title; on the
 press `display_y` begins alternating `0`/`240`, i.e. the buffer flip engages.
 

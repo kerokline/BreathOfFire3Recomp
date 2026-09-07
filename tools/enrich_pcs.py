@@ -7,7 +7,8 @@
   4. REACH     — callers + args from the live dirty_block_log ring, transfer type
 
 This is the OFFLINE slice (no framework change): it reads the captures we already
-have and queries a LIVE build-dbg game over TCP for RAM bytes and the caller ring.
+have and queries a LIVE debug-tools game (build-relprof) over TCP for RAM bytes
+and the caller ring.
 Reach data is only as deep as the ring (recent entries), so run it against a game
 that just exercised the code you care about.
 

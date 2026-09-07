@@ -1,12 +1,20 @@
 # Battle command icon: top rows of the enlarged icon missing
 
-**Status:** IN PROGRESS (2026-09-03) — probable cause identified: the GP0
-polyline de-phasing fixed in [`gpu-polyline-terminator.md`](gpu-polyline-terminator.md).
-The player confirmed (2026-09-03) that the icon damage first appeared right
-after a **heal spell** effect, the same style of shaded-polyline animation as
-the herb effect that wiped the terrain texture. Awaiting a retest on a build
-carrying the fix; the savestate-load theory below is superseded unless the
-retest reproduces.
+**Status:** RESOLVED (2026-09-06) — fixed by the GP0 polyline terminator fix
+([`gpu-polyline-terminator.md`](gpu-polyline-terminator.md),
+[mstan/psxrecomp#313](https://github.com/mstan/psxrecomp/pull/313), in the
+`17f49ad3` pin).
+
+**Retest, 2026-09-06 (player).** The enlarged command icon holds its full
+24×24 texture across **several heal spells and item uses in several areas** —
+the exact effect class that first produced the damage. No recurrence. The
+probable cause identified 2026-09-03 is therefore confirmed: the icon strip was
+collateral from the same shaded-polyline de-phasing that wiped terrain texture
+after the herb effect, and one fix settles both.
+
+The savestate-load theory recorded at the end of this file is **superseded and
+not worth pursuing** — it was the fallback if the retest reproduced, and it did
+not. Reopen only on a fresh sighting with a frame capture.
 
 ## Symptom
 

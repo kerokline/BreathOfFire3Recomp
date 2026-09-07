@@ -224,6 +224,18 @@ def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
     # Rows from a build without the enrichment carry no occ_crc key; report
     # nothing rather than an all-zero split that reads as "no gaps".
     occ = occ_split(per_pc)
+    if occ is None and per_pc and not quiet:
+        # Silence here used to look like "no gaps". It actually means the live
+        # build predates the dirty-PC enrichment, so this session cannot answer
+        # what KIND of gap each PC is -- the whole point of the harvest. Say so
+        # loudly while the session is still up and can be re-harvested from a
+        # tree that has it (build-relprof).
+        print("WARNING     : this build carries NO dirty-PC enrichment "
+              "(no occ_crc on any row).")
+        print("              The PCs are still unioned, but the seedable / "
+              "attribution / outside split")
+        print("              cannot be computed. Play on build-relprof -- "
+              "build-dbg predates it.")
     if occ and not quiet:
         print("enrichment  : %d seedable interior gaps, %d attribution gaps "
               "(resident section has no piece), %d outside any compiled piece"

@@ -135,7 +135,15 @@ insns/#1 sink) **native**, the same mechanism that resolved §9's `0x801CEEDC`.
 
 The loop is mechanical and self-improving:
 
-1. Play a live `build-dbg` session covering as much as possible.
+1. Play a live session covering as much as possible. **Play `build-relprof`,
+   not `build-dbg`** (corrected 2026-09-06): the harvest is port-based and reads
+   whichever build is live, but only a tree built since 2026-09-05 carries the
+   dirty-PC enrichment (`occ_crc` / `occ_ok` / `ext_ra`). `build-dbg` predates
+   it, so a session there yields bare PCs and the seedable / attribution /
+   outside split — the reason the enrichment exists — cannot be computed.
+   `harvest_interp_pcs.py` now prints a loud WARNING instead of falling silent.
+   `build-relprof` also holds 60 fps; `build-dbg` runs below real time.
+   `axis_b_loop.sh` defaults to `build-relprof` and takes `--build DIR`.
 2. `python tools/harvest_interp_pcs.py` — **unions** this session's entered PCs
    into `analysis/observed_interp_pcs.json` as a distinct set (one row per PC,
    no duplicates), and reports how many are newly seen.
@@ -659,8 +667,10 @@ not counts); `analysis/observed_interp_pcs.json` rows carry them from the
 first harvest against an enriched build. The debug-server reply buffer grew
 32 → 64 KiB for the wider rows. Play/harvest builds must be rebuilt from the
 branch (`build-enrich` = Debug, mirrors build-dbg, was the test bed; headless
-TCP savestate loads wedge on this pin, so scenes were reached by injected
-input from a cold boot). `docs/TCP_COMMANDS.md` in the submodule documents
+TCP savestate loads wedged on that Debug tree, so scenes were reached by
+injected input from a cold boot — **that no longer applies**: the wedge does
+not reproduce on `build-relprof`, 11 of 12 slots load and resume headless, and
+`tools/scene.py` drives them, 2026-09-06). `docs/TCP_COMMANDS.md` in the submodule documents
 the fields. **Branch state: committed as `6e760748` and pushed to
 `kerokline/psxrecomp`; the fragment fix `2fa3472a` sits on top.** Open the
 two upstream PRs (rebase the fix onto `mstan/master` if they should be
@@ -742,20 +752,27 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`17f49ad3`** = plain upstream `mstan/master` as of 2026-09-05.
-  **A bump to `155e269b` was attempted on 2026-09-06 and rolled back — upstream
-  master does not currently build against any published `recomp-ui`.** Upstream
-  psxrecomp `8f266efe` (netplay: BYO memory card, lobby chat, fullscreen lobby)
-  and `5e1b7d33` use launcher-ABI fields — `guest_memcard`, `is_spectator`,
-  `spectator_wire_slot`, `host_spectates`, `slot_port` / `slot_port_valid` on
-  `RecompLauncherCNetplayLaunch` — that exist in **no** recomp-ui ref except
-  mstan's unmerged WIP branch `origin/merge/frameblend-localization` (still
-  churning: `bba6266`, 2026-09-06). `main.cpp` fails to compile without them.
-  `8f266efe` is an **ancestor of all three of our merge commits**
-  (`git merge-base --is-ancestor 8f266efe d485a751` → true), so there is no
-  upstream commit that carries #321/#324/#325 and still builds. Re-try the bump
-  once the recomp-ui netplay half is merged to its `master`; until then this pin
-  stays, and #321/#324/#325 are in upstream history but not in the pin.
+- `psxrecomp` **`2fa3472a`** = upstream `17f49ad3` + our two commits
+  (`6e760748` enrichment, `2fa3472a` per-variant static fragments), i.e. the tip
+  of the fork branch `fix/static-fragments-per-variant`, which is a
+  **fast-forward** of the old pin — no merge commit exists or is needed. Also
+  pushed as `pin/bof3-fragments-17f49ad3` on `kerokline/psxrecomp` so the SHA
+  survives deletion of the PR branch. Chosen 2026-09-06 because it is the only
+  reproducible pin that carries our work: **upstream master still does not build
+  against any published `recomp-ui`.** psxrecomp master reads 20 fields off
+  `RecompLauncherCNetplayLaunch`, and six — `guest_memcard`, `is_spectator`,
+  `spectator_wire_slot`, `host_spectates`, `slot_port`, `slot_port_valid` —
+  exist in **no** recomp-ui ref except mstan's unmerged WIP branch
+  `origin/merge/frameblend-localization` (`bba6266`, still committing
+  2026-09-06). That branch is 37 commits ahead of master and 5 behind it, with
+  the header changes spread across ~13 commits interleaved with lobby chat,
+  seat swaps and frame blending — so there is no clean cherry-pick, and
+  bumping our own #48 onto master does **not** help (the fields are not ours
+  and not master's). `8f266efe` is an ancestor of all three of our merge
+  commits, so no upstream commit carries #321/#324/#325 *and* builds.
+  **Verified:** `build-relprof` compiles `runtime/src/main.cpp` — the exact
+  file that failed the `155e269b` attempt — and links in 17 s on this pin.
+  Re-pin to plain upstream master once the recomp-ui netplay half merges.
 - All three of our PRs **are merged upstream** ([#321](https://github.com/mstan/psxrecomp/pull/321),
   [#324](https://github.com/mstan/psxrecomp/pull/324),
   [#325](https://github.com/mstan/psxrecomp/pull/325)) and the old pin leaves
@@ -763,10 +780,17 @@ Order matters, and each of these cost a session once:
   branches `feat/dirty-pc-enrichment` / `fix/static-fragments-per-variant` are
   kept until the pin can move, because `generated/` was compiled with #325 and
   a checkout of the gitlink alone cannot reproduce it.
-- `recomp-ui` **`db12620`** = fork branch `feat/additional-ui-functionality`
-  (`kerokline/recomp-ui`) = upstream `master` + the launcher UI work
-  ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48), still
-  **open**). #42 (the standalone Scanlines toggle) was **closed unmerged on
+- `recomp-ui` **`db12620`** = a commit on fork branch
+  `feat/additional-ui-functionality` (`kerokline/recomp-ui`) = upstream `master`
+  + the launcher UI work ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48),
+  still **open**). The pin sits 3 commits behind that branch's tip. The branch
+  was refreshed 2026-09-06 (`4071e37` → `69eecdc`) by **merging** upstream
+  master in — not rebasing, so the open PR's review history survives; it had
+  fallen 5 commits behind (the SBI picker series, #50). Auto-merge was clean,
+  and `ctest` gives an identical 9/11 on the merged branch and on plain master
+  (`recomp-ui-psx-asset-staging` needs staged fonts this out-of-tree config
+  never produces; `recomp-ui-launcher-setup-bios` fails upstream too) — the
+  merge introduces no regression. #42 (the standalone Scanlines toggle) was **closed unmerged on
   purpose** — its card was folded into #48, so #48 is the only launcher PR to
   track. Pin back to upstream `master` when it merges. #42 conflicted once
   against upstream #46 in `recomp_launcher.h` (both appended to `Settings` /
@@ -898,10 +922,12 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
   vblank/s windowed and always will — judge the intro on `build-relprof`.
 - **`playsession.send()` takes a dict**, not a string.
 - **In-game savestate slot N is file `slotN-1`.** Load with Enter/Start; the
-  windowed TCP `state load` wedges the listener (it works headless). Savestates
-  survive a rebuild, but a `savestate.c` rework once made old files load
-  `last_ok: 0` — re-save rather than investigate; every anchor is minutes from
-  boot ([`SAVESTATES.md`](SAVESTATES.md)).
+  windowed TCP `state load` wedges the listener (it works headless — that is
+  the starvation watchdog, which `scene.py` disables). Savestates carry a
+  build stamp and are refused outright when it mismatches, with **no reason
+  over TCP** — run `python tools/scene.py preflight` to see why offline, then
+  re-save rather than investigate; every anchor is minutes from boot
+  ([`SAVESTATES.md`](SAVESTATES.md)).
 - **Kernel-RAM `jalr` targets can fail-fast** once (`0x00002934`, not
   reproduced) — [`crash-kernel-ram-2934.md`](crash-kernel-ram-2934.md).
 
@@ -920,6 +946,7 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/emi_survey.py` | Walk every `.EMI`, hash every section, code-test RAM-bound ones → `analysis/emi_sections.json`. Per region. |
 | `tools/fmv_bench.py` | Clean-boot headless FMV benchmark (vblank/present window) with optional gdb sampling of the emu thread. |
 | `tools/headless_ab.py` | Headless A/B on a savestate workload (skip the load step for the boot workload). |
+| `tools/scene.py` | **Headless scene harness** — boots the runtime, lands it on a savestate, proves the guest resumed, and hands the live debug port to any other tool (`{port}` / `PSX_SCENE_PORT`). `preflight` checks every `.pst` header offline against this build (names a stale slot before a 13 s boot is spent on it); `check` boots+loads+resumes every slot as the savestate regression test; `run --slot N [--press ...] [--shot p.png] [-- CMD]` is the one to reach for. Every load is followed by a VSync-advance check, so a wedge is reported as a wedge instead of a `last_ok: 1` poisoning the next measurement. |
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
 | `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
@@ -942,9 +969,11 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 - The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.
 - Why `DEMO.EMI` §5 ships the JP image on the PAL English disc.
 - Whether the Western builds use proportional glyph advance.
-- **211 of 8,694 dispatch addresses are zero-fill** (18 `low` seeds) —
-  registered native entries compiled from nothing; dirty-RAM invalidation masks
-  them today.
+- ~~**211 of 8,694 dispatch addresses are zero-fill**~~ — **RESOLVED 2026-09-06**,
+  [`zero-fill-dispatch-audit.md`](zero-fill-dispatch-audit.md): 182 of the 211
+  are now compiled as real overlay code, the dispatch guard is sound against the
+  rest, and the entry-word metric that suggests 275 misclassifies 64 NOP delay
+  slots as fabrications.
 - Text paths not yet seen live: a shop, an equipment menu, battle text.
 - ~~`--include-mixed`~~ — **RESOLVED 2026-09-04, mixed is now the default.**
   See "Mixed sections are extracted by default" below.

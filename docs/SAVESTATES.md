@@ -25,9 +25,35 @@ the player to load one.
 | 2 | `slot01` | 2026-09-05 | **Just before the intro-boss battle** | Auto-advances into the battle; after it, any command auto-advances through several scene transitions of auto-playing dialogue and areas — a long scripted stretch from one load |
 | 3 | `slot02` | 2026-09-05 | **Inside the Nu boss fight** | Boss-battle anchor |
 | 4 | `slot03` | 2026-09-05 | **Inside a regular field battle** | `tools/callstack_diff.py` differential anchor (Attack / Defend / Watch / Auto / Run — see the command-menu note below) |
-| 7 | `slot06` | 2026-09-05 | **NEW GAME / LOAD GAME menu** (after the card check, from `slot00` + Start) | Front-end menu; from here Down + Circle → LOAD-GAME card select |
+| 7 | `slot06` | 2026-09-05 | **NEW GAME / LOAD GAME menu** (after the card check, from `slot00` + Start) | Front-end menu. ⚠ Down + Circle from here lands on **name entry**, not the LOAD-GAME card select as this row used to say (observed headless 2026-09-06, `scene.py run --slot 6 --press down --press circle`) — the state has moved, or the row was always wrong |
 | 12 | `slot11` | 2026-09-05 | **LOAD-GAME card-select screen** (「どのカードからロードしますか」) — from `slot06` + Down + Circle | Near-floor-in-dbg screen; in relprof ~418 fps (floor 355), **99% BIOS/boot-EXE, ~0 overlays** |
 | 5, 8–12 | `slot04`, `slot07`–`slot11` | earlier | **Overwritten or stale** — the 2026-09-03/04 anchors listed in the Log below no longer hold what they said; `slot07`/`slot10` were overwritten 2026-09-05 with throwaway title/name-entry states during the perf-A/B nav | Re-save before use |
+
+## Driving a scene headlessly
+
+`tools/scene.py` boots a headless runtime, lands it on a slot, **proves the
+guest resumed**, and hands the live debug port to anything else. One capture
+answers questions forever; no scene-specific question needs another play
+session.
+
+```bash
+python tools/scene.py preflight              # offline: which slots can load at all
+python tools/scene.py check                  # boot+load+resume every slot
+python tools/scene.py run --slot 2           # land on a scene, hold the port open
+python tools/scene.py run --slot 6 --press down --press circle --shot menu.png
+python tools/scene.py run --slot 3 --     python tools/callstack_diff.py capture --label attack --port {port} --press circle
+```
+
+Verified 2026-09-06 on `build-relprof`: **11 of 12 slots load and resume**
+headless at 300-460 emulated fps, restores taking 8-9 ms. Slot 8 is refused
+(see below). `savestate_status` reporting `last_ok: 1` only means the sections
+restored — `scene.py` follows every load with a VSync-advance check, because a
+Debug tree once acked `last_ok: 1` and then froze (STATUS.md, Known issues).
+
+Two gotchas the harness now surfaces rather than swallows: the runtime's
+`screenshot` fails with `cannot open file` for paths over ~260 characters
+(MAX_PATH), and killing the process instead of sending `quit` loses the
+runtime's own `savestate:` diagnostics to stdio buffering.
 
 **Reaching the memory-card / load screen headless.** The front-end needs the
 disc and card: launch `--disc "isos/Breath of Fire III (Japan).cue"` (the card
@@ -61,6 +87,7 @@ Enter/Start loads correctly in-game. The **X** key killed the process on the
 2026-08-30 build, and the TCP `state load` path (`tools/playsession.py state
 load`) wedges the listener on a *windowed* run — both are the **starvation
 watchdog** (`exit(2)` after a 4 s emu-thread stall), not a savestate bug.
+(`scene.py` sets `PSX_STARVATION_TIMEOUT_US=0` for you.)
 Launch with `PSX_STARVATION_TIMEOUT_US=0` (PowerShell:
 `$env:PSX_STARVATION_TIMEOUT_US = "0"` on its own line first). Headless, the
 TCP load works and returns immediately with `last_ok=1`, which is what
@@ -82,12 +109,22 @@ an equipment menu, and battle text.
 
 ## Caveats
 
-- **States survive a rebuild** (verified 2026-08-30 across a pin reset +
-  regenerate + relink), but the header carries only magic + version + BIOS
-  checksum — **no build or recompiler-layout stamp** — so a mismatched binary
-  is not refused at load. The 2026-09-01 framework merge reworked
-  `savestate.c` and one pre-merge file loaded `last_ok: 0`. Treat a strange
-  post-load state as suspect rather than assuming the file is bad.
+- **The header IS build-stamped** (corrected 2026-09-06; the old text here
+  said it carried only magic + version + BIOS checksum). Since format v7 it
+  carries `bios_checksum`, `entry_pc`, `codegen_hash`, `abi_tag` and
+  `codegen_ver`, and `boot_state_load` rejects on **any** mismatch — so a
+  mismatched binary is refused, not silently mis-restored. The refusal reason
+  is *not* exposed over TCP (a bare `last_ok: 0`), which is why
+  `scene.py preflight` reads the headers offline and names it:
+
+  ```
+  slot 8  STALE: version=5(want 7..7), codegen_hash=A4319B6F(want EA3D3259)
+  ```
+
+  That is `slot08` today — a 2026-09-01 file, and the one that made the
+  2026-09-05 "headless load wedges" report look like two failing slots when it
+  was one wedge and one stale file. **Re-save it.** States otherwise do survive
+  a rebuild, as long as the recompiler codegen has not changed.
 - **Saving can still refuse** where an interrupt lands inside the dirty-RAM
   interpreter (`psx_irq_resume_context_snapshot_safe()`); rare now that the
   overlay bands are compiled. In-game memory-card saves (`saves/card1.mcd`)

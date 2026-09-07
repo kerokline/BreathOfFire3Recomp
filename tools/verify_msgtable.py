@@ -7,7 +7,8 @@ docs/TEXT_ENGINE.md derives, statically:
     base   = 0x80010000 + W
     string = base + *(u16 *)(base + 2 * index)
 
-This reads the running game over the debug server (build-dbg, --debug-port),
+This reads the running game over the debug server (a debug-tools build such as
+build-relprof, --debug-port),
 walks the table, and decodes the first N messages with the D:BoFIII table.
 If the decoded text matches what is on screen, the formula holds.
 
