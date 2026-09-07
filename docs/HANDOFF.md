@@ -956,9 +956,11 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 - The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.
 - Why `DEMO.EMI` §5 ships the JP image on the PAL English disc.
 - Whether the Western builds use proportional glyph advance.
-- **211 of 8,694 dispatch addresses are zero-fill** (18 `low` seeds) —
-  registered native entries compiled from nothing; dirty-RAM invalidation masks
-  them today.
+- ~~**211 of 8,694 dispatch addresses are zero-fill**~~ — **RESOLVED 2026-09-06**,
+  [`zero-fill-dispatch-audit.md`](zero-fill-dispatch-audit.md): 182 of the 211
+  are now compiled as real overlay code, the dispatch guard is sound against the
+  rest, and the entry-word metric that suggests 275 misclassifies 64 NOP delay
+  slots as fabrications.
 - Text paths not yet seen live: a shop, an equipment menu, battle text.
 - ~~`--include-mixed`~~ — **RESOLVED 2026-09-04, mixed is now the default.**
   See "Mixed sections are extracted by default" below.

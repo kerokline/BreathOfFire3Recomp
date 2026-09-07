@@ -87,10 +87,12 @@ Two experiments confirm it:
   at frame ~328 of every launch (`slow_frames` then `hard_freeze`), and 4 s
   stalls trip `starvation_ring.c`'s `exit(2)`.
 - **211 of 8,694 dispatch addresses are zero-fill**, from 18 of 523 seeds (3.4%,
-  all `low` confidence). Those are registered native entries compiled from
-  nothing. Dirty-RAM invalidation masks them today; it is the OV-1
-  stale-registration failure mode in `psxrecomp/docs/overlay-status.md` sitting
-  armed. Worth auditing before native dispatch is trusted in that range.
+  all `low` confidence). **Audited 2026-09-06 and closed** —
+  [`zero-fill-dispatch-audit.md`](zero-fill-dispatch-audit.md). They are overlay
+  landing zones, not fabrications: **182 of the 211 now carry real compiled
+  overlay code** (`0x801A27A8` is `Script_ShowMessage`), and the dispatch guard
+  decides on live bytes, so a resident overlay always blocks the stale boot-EXE
+  entry. OV-1 is not reachable from correct execution here.
 
 ## 5. The overlays are statically extractable — capture is NOT required
 

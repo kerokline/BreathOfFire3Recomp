@@ -313,8 +313,17 @@ pin on 2026-09-01 (see Log).
    widths in `names/*.toml` ([`TEXT_TABLES.md`](TEXT_TABLES.md)).
 4. ~~Name the text-engine functions in `symbols.toml`~~ **DONE 2026-09-05**
    (13 `confirmed` rows, `psx_symbols.h` regenerated).
-5. **Audit the 211 zero-fill dispatch addresses** (from 18 `low`-confidence
-   seeds) before trusting native dispatch in that range.
+5. ~~**Audit the 211 zero-fill dispatch addresses**~~ **DONE 2026-09-06 — not a
+   live bug** ([`zero-fill-dispatch-audit.md`](zero-fill-dispatch-audit.md)).
+   All three 2026-08-30 figures reproduce (211 entries, 18 seeds, 1,187,899
+   zero bytes), but **182 of the 211 (86%) are now compiled as real overlay
+   code** — they were overlay landing zones, not fabrications; `0x801A27A8` is
+   `Script_ShowMessage`. Of the 29 left, 22 are in the `0x801F2C00` WORLD band
+   already tracked by Axis B. The dispatch guard decides on live bytes, so a
+   resident overlay always blocks the stale entry; the failure window needs a
+   call into a never-loaded overlay, i.e. already-invalid execution. Optional
+   cleanup: drop the 18 seeds at the next regeneration (no coverage lost, but
+   it costs a full rebuild — not worth a cycle of its own).
 6. **Name the two game helpers Psy-Q did not cover**: `0x8014E494` (called as
    `(1, 0xC)` / `(1, 0x10)` between primitive builds in `Window_DrawFrame` —
    an OT/primitive allocator?) and `0x8015E908` (sound trigger). Ghidra shows
