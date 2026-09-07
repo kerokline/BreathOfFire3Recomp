@@ -347,8 +347,17 @@ pin on 2026-09-01 (see Log).
   only the env var. Re-enable with `setx PSX_STARVATION_TIMEOUT_US ""` if a
   genuine emu-thread stall needs the SIO ring dump.
 - **Two ~87 MB freeze dumps at every boot** (frame ~328, `slow_frames` then
-  `hard_freeze` false positive). Prune `build-*/psx_freeze_dump_*.json`;
-  `axis_b_loop.sh` does this for `build-dbg`.
+  `hard_freeze` false positive). They land in the **process working directory**,
+  which for a launcher or shell run is the **repo root**, not the build tree —
+  the 2026-09-06 cleanup found 37 of 45 sitting in the root (3.2 GB total), so
+  the old advice to prune `build-*/` alone missed most of them. Prune both:
+
+  ```bash
+  find . -maxdepth 2 -name 'psx_freeze_dump_*.json'     -not -path './psxrecomp/*' -not -path './recomp-ui/*' -delete
+  ```
+
+  `axis_b_loop.sh` still handles `build-dbg` only. At ~174 MB per boot this
+  accumulates fast — worth running after any session.
 - **Headless TCP `savestate load` wedges emulation on the current pin** (seen
   2026-09-05 on `build-enrich` = `17f49ad3` + enrichment): `load` returns
   `ok`, `savestate_status` says `last_ok: 1`, but the VSync counter and
