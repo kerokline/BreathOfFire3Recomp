@@ -273,14 +273,45 @@ def stratify(rows, by, spans):
             for a in areas:
                 out[a].append(r)
         return out
+    # Bands OVERLAP in RAM -- the Capcom logo band (0x801CE000, 118 KB) covers
+    # PLCHAR (0x801CE400) entirely and 107 KB of the 0x801D0C00 swap slot,
+    # because those occupants are resident at different times. Matching in dict
+    # order therefore handed every shared address to whichever band the
+    # captures file happened to list first, and left the widest band unable to
+    # win a single PC no matter how often it was played. Match the NARROWEST
+    # containing band instead: deterministic, and the most specific claim on an
+    # address is the least wrong one available from the address alone. True
+    # attribution needs residency (the occ_crc enrichment), not arithmetic.
+    by_width = sorted(spans.items(), key=lambda kv: (kv[1][1] - kv[1][0], kv[0]))
     for r in rows:
         pc = int(r["pc"], 16) & 0x1FFFFFFF
         label = "(outside every band)"
-        for base, (lo, hi) in spans.items():
+        for base, (lo, hi) in by_width:
             if lo <= pc < hi:
                 label = band_label(base)
                 break
         out[label].append(r)
+    return out
+
+
+def exclusive_share(spans):
+    """{band base: fraction of its span no other band claims}.
+
+    A band with ~no exclusive space cannot be credited a PC from the address
+    alone, so "NEVER SAMPLED" against it is a property of the report, not a
+    gap in what was played. Reporting it as a gap sends someone to replay
+    content that can never move the number."""
+    out = {}
+    for b, (lo, hi) in spans.items():
+        others = [v for k, v in spans.items() if k != b]
+        if hi <= lo:
+            out[b] = 0.0
+            continue
+        excl = 0
+        for a in range(lo, hi, 4):
+            if all(not (l <= a < h) for l, h in others):
+                excl += 4
+        out[b] = excl / float(hi - lo)
     return out
 
 
@@ -289,6 +320,7 @@ def stratify(rows, by, spans):
 def build(rows, by="band", captures=None):
     captures = load_captures() if captures is None else captures
     spans = band_ranges(captures)
+    excl_by_label = {band_label(b): v for b, v in exclusive_share(spans).items()}
     ent = entered_rows(rows)
 
     all_sessions = set()
@@ -319,6 +351,7 @@ def build(rows, by="band", captures=None):
             base = int(label, 16) & 0x1FFFFFFF
             est["fn_starts"] = fn_counts.get(base)
             est["registered"] = entry_counts.get(base)
+            est["exclusive"] = excl_by_label.get(label)
         table.append(est)
 
     # Names are attached here, not at print time, so the harvest one-liner and
@@ -518,8 +551,15 @@ def print_report(rep):
                 e["fn_starts"] if e.get("fn_starts") is not None else "-",
                 e["registered"] if e.get("registered") is not None else "-")
         if e["s_obs"] == 0:
-            line += ("   (%d legacy-only)" % e["legacy_only"] if e["legacy_only"]
-                     else "   NEVER SAMPLED")
+            ex = e.get("exclusive")
+            if e["legacy_only"]:
+                line += "   (%d legacy-only)" % e["legacy_only"]
+            elif ex is not None and ex < 0.05:
+                # Not a gap in what was played: no address here belongs to this
+                # band alone, so address-only binning can never credit it.
+                line += "   SHADOWED (%.0f%% exclusive) -- not playable-to-fix" % (100 * ex)
+            else:
+                line += "   NEVER SAMPLED"
         print(line)
 
     print("\ncoverage = harvest completeness, NOT nativeness. A band at 100% can "
@@ -531,7 +571,10 @@ def print_report(rep):
     # A stratum with no draws is a bigger gap than a stratum at 40%, so the
     # unsampled ones lead. Recommending the well-covered bands because the
     # empty ones have no coverage number to sort by would be exactly backwards.
-    unsampled = [e for e in rep["strata"] if e["s_obs"] == 0]
+    # A shadowed band is excluded from the recommendations: replaying it cannot
+    # move its number, because no address in its span is exclusively its own.
+    unsampled = [e for e in rep["strata"] if e["s_obs"] == 0
+                 and not (e.get("exclusive") is not None and e["exclusive"] < 0.05)]
     partial = sorted((e for e in rep["strata"] if e["coverage"] is not None),
                      key=lambda e: e["coverage"])
     if rep["by"] != "none" and (unsampled or len(partial) > 1):
