@@ -135,7 +135,15 @@ insns/#1 sink) **native**, the same mechanism that resolved §9's `0x801CEEDC`.
 
 The loop is mechanical and self-improving:
 
-1. Play a live `build-dbg` session covering as much as possible.
+1. Play a live session covering as much as possible. **Play `build-relprof`,
+   not `build-dbg`** (corrected 2026-09-06): the harvest is port-based and reads
+   whichever build is live, but only a tree built since 2026-09-05 carries the
+   dirty-PC enrichment (`occ_crc` / `occ_ok` / `ext_ra`). `build-dbg` predates
+   it, so a session there yields bare PCs and the seedable / attribution /
+   outside split — the reason the enrichment exists — cannot be computed.
+   `harvest_interp_pcs.py` now prints a loud WARNING instead of falling silent.
+   `build-relprof` also holds 60 fps; `build-dbg` runs below real time.
+   `axis_b_loop.sh` defaults to `build-relprof` and takes `--build DIR`.
 2. `python tools/harvest_interp_pcs.py` — **unions** this session's entered PCs
    into `analysis/observed_interp_pcs.json` as a distinct set (one row per PC,
    no duplicates), and reports how many are newly seen.
