@@ -1,0 +1,33 @@
+# names/readings.toml -- chosen readings for words SudachiPy reads by convention
+# rather than by context.  tools/build_ruby_script.py consults this before the
+# dictionary; the reading is the whole word's kana (okurigana on the page is
+# trimmed the same way as a dictionary reading).  The audit list of candidates:
+#
+#     python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --scope every \
+#         --ambiguous analysis/ruby_ambiguous.txt
+#
+# An entry keys on the exact token surface, or on a verb's dictionary form
+# (言う covers 言っ / 言わ / 言え; the kana tail is swapped for the conjugated
+# one, so irregulars like 来る -> 来 need their own surface).  A surface key
+# cannot separate context readings of one surface (何 = なに / なん); those
+# stay with the dictionary.
+
+[[reading]]
+surface = "私"
+reading = "わたし"
+note = "SudachiDict's cheapest entry is ワタクシ; the script's speakers say わたし"
+
+[[reading]]
+surface = "言う"
+reading = "いう"
+note = "ゆう 59 times in the every-word audit; keyed on the dictionary form, so 言っ / 言わ / 言え follow"
+
+# A phrase rule: `next` lists the token that must follow.  Rules with `next`
+# are tried before the plain entry for the same surface; with no plain entry
+# the dictionary's reading stands (何だ / 何で / 何と stay なん).
+[[reading]]
+surface = "何"
+reading = "なに"
+next = ["を", "が", "も", "か", "に", "は", "から", "まで", "より", "って",
+        "かしら", "し", "する", "やっ", "よ", "？", "！", "‥‥", "‥", "、", "。", ""]
+note = "SudachiDict reads 何 as なん everywhere; before a particle it is なに"
