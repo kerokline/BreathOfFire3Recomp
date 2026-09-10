@@ -28,6 +28,14 @@ Seeds are call-edge evidence read out of the bytes themselves:
     STATIC_DISCOVERY_ROOT, so a bad guess is dropped, not fabricated.
   * `dispatch_entry_pcs` -- PCs a live session actually interpreted, if
     analysis/observed_interp_pcs.json exists. Optional; purely additive.
+  * `header_entry_pcs` -- the overlay's own exported entry table. Every .EMI
+    overlay opens with a u32 registry id and then a run of pointers into its
+    image (docs/OVERLAY_HEADERS.md); the game reaches these by dispatch, so
+    they are exactly the interior entries a play session would otherwise have
+    to harvest. Unioned into `dispatch_entry_pcs` and declared in
+    `static_dispatch_entry_pcs` (compile_overlays classifies them
+    STATIC_DISPATCH_ENTRY). `--no-header-seeds` drops them for A/B work.
+    The registry id itself is emitted as `registry_id`.
 
 Nothing here invents bytes: every capture is a verbatim disc section whose
 TOC preview checksum matched (tools/emi_survey.py records `preview_ok`).
@@ -77,6 +85,28 @@ def prologue_roots(data, load_addr):
     return out
 
 
+def header_entries(data, load_addr):
+    """(registry_id, [entry pcs]) from the overlay header.
+
+    +0x00 is the u32 registry id; from +0x04 the words are entry pointers for
+    as long as they are 4-byte-aligned addresses inside this image. A word
+    that fails the test ends the run (32 of 124 BMAGIC images have no run at
+    all). LOGO.EXE has no such header and never reaches here (it is captured
+    by tools/extract_logo_overlay.py).
+    """
+    if len(data) < 8:
+        return None, []
+    lo, hi = load_addr, load_addr + len(data)
+    reg_id = struct.unpack_from("<I", data, 0)[0]
+    out = []
+    for off in range(4, len(data) - 3, 4):
+        w = struct.unpack_from("<I", data, off)[0]
+        if not (lo <= w < hi) or w & 3:
+            break
+        out.append(w)
+    return reg_id, out
+
+
 def load_observed(path):
     """Physical PCs a live session actually *entered* (entries > 0).
 
@@ -119,6 +149,9 @@ def main():
                          "now (kept so existing scripts and muscle memory "
                          "keep working)")
     ap.add_argument("--observed", default="analysis/observed_interp_pcs.json")
+    ap.add_argument("--no-header-seeds", action="store_true",
+                    help="do not seed the header entry table (A/B experiments "
+                         "only; header seeds are included by default)")
     args = ap.parse_args()
 
     with open(args.survey) as fh:
@@ -175,22 +208,29 @@ def main():
         load = s["dest"]
         roots = jal_targets(blob, load) | prologue_roots(blob, load)
         phys = load & 0x1FFFFFFF
-        hits = sorted((load & 0xF0000000) | p for p in observed
-                      if phys <= p < phys + s["size"])
+        hits = set((load & 0xF0000000) | p for p in observed
+                   if phys <= p < phys + s["size"])
+        reg_id, hdr = header_entries(blob, load)
+        hdr_set = set() if args.no_header_seeds else set(hdr)
+        dispatch = sorted(hits | hdr_set)
         captures.append({
             "schema": "static-emi-v1",
             "load_addr": "0x%08X" % load,
             "size": s["size"],
             "bytes_b64": base64.b64encode(blob).decode("ascii"),
+            "registry_id": "0x%03X" % reg_id,
+            "header_entry_pcs": ["0x%08X" % a for a in hdr],
             "static_discovery_entry_pcs": ["0x%08X" % a for a in sorted(roots)],
-            "dispatch_entry_pcs": ["0x%08X" % a for a in hits],
+            "dispatch_entry_pcs": ["0x%08X" % a for a in dispatch],
+            "static_dispatch_entry_pcs": ["0x%08X" % a for a in sorted(hdr_set)],
             "source_file": s["file"],
             "source_index": s["index"],
             "source_md5": s["md5"],
             "crc32": "0x%08X" % (binascii.crc32(blob) & 0xFFFFFFFF),
         })
-        print("0x%08X  %8d bytes  %5d static roots  %4d observed  %s#%d"
-              % (load, s["size"], len(roots), len(hits), s["file"], s["index"]))
+        print("0x%08X  %8d bytes  id 0x%03X  %5d static roots  %4d observed  %3d header  %s#%d"
+              % (load, s["size"], reg_id, len(roots), len(hits), len(hdr),
+                 s["file"], s["index"]))
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w") as out:

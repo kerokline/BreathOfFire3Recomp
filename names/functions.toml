@@ -853,6 +853,33 @@ note = "overlay by --overlay"
 
 [[function]]
 overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801B3FC0
+name = "Field_SearchSpot"
+args = []
+status = "evidence"
+evidence = "dresser_flag.json 2026-09-07 (slot 3, AREA027, Circle x2): the only writer of the world-item counter 0x80145030 (store pc 0x801B4028) and the caller of boot Flag_Set 0x8015BF70 at ra 0x801B4044 (set bit 0x11 -> 0x80145002 |= 2) and of Field_GiveZenny at ra 0x801B6EA0 (Zenny_Add(120,0), 0x80144F4C 0x108->0x180); disasm 0x801B3FC0..0x801B4150: rec = Field_FindSearchSpot(); if Flag_Test(0x80145000, rec[4]) msg 1; rec[6]==0xFF -> Field_GiveZenny(rec[5]*40) else Inventory_Add(rec[6], rec[5], 1) + msg 2/3; on success and rec[4]!=0xFF Flag_Set + counter++"
+note = "overlay by only captured occupant of that address"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801B6C4C
+name = "Field_FindSearchSpot"
+args = []
+status = "evidence"
+evidence = "disasm 2026-09-07: p = *(u32*)(0x801802EC + *(u16*)0x80143F00 * 4) (boot-EXE table, 200 static entries into the 0x801F2C00 area section); records = *(u32*)(p+0x2C), count = *(u8*)(p+0x31) + 1, stride 8. Walks the array backwards, skips rec[3]==0, and matches the player's facing tile (scratchpad 0x1F800044 +0x34..+0x3A, direction deltas from boot table 0x80182478) against the run rec[0],rec[1] extended rec[3] tiles along X, or along Y when rec[2] & 0x80. Returns the record or 0. Verified live on AREA027: struct 0x801F4D20, array 0x801F3BBC, 72 records"
+note = "overlay by only captured occupant of that address"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
+pc = 0x801B6E50
+name = "Field_GiveZenny"
+args = ["amount"]
+status = "evidence"
+evidence = "dresser_flag.json 2026-09-07: ra 0x801B6EA0 on the Zenny_Add(120,0) that moved 0x80144F4C 0x108->0x180 and 0x8014502C +120; ghidra decomp: sound 0x8015E908(0x106), sprintf 0x8017ED6C(0x801490D4, fmt 0x80196FBC, amount) into the message buffer, 0x801503AC(5), 0x80143BB0 = 2, Zenny_Add(amount, 0). Called by Field_SearchSpot with rec[5]*40"
+note = "overlay by only captured occupant of that address"
+
+[[function]]
+overlay = "9d00fd19af78fbe9c0a411ef3ae2a810"
 pc = 0x801C0114
 name = "Encounter_PlaceParty"
 args = []
@@ -993,3 +1020,22 @@ name = "Examine_EnemyMove_Begin"
 args = []
 status = "hypothesis"
 evidence = "overlay corrected 2026-09-04: 0x801EF188 is in the 0x801EEC00 BMAGIC band (BATTLE.EMI#3 ends 0x801ED93F), resident MAGIC069 at capture; callstack_diff venn 2026-09-04, two Watch-trigger captures (file slot 11, different enemies) vs attack/defend/watch rounds; in both trigger runs and nothing else, same shape 9 frames apart: once at +133/+124, at the start of the observed enemy skill (Nu Stomp)"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800AB120
+name = "Magic_LoadForAbility"
+args = ["ability_id"]
+status = "verified"
+evidence = "read from BATTLE.EMI#15 2026-09-08: row = u8[0x800B3450 + (a0 & 0xFF)]; file = u16[0x800B3538 + row*8]; if file != 0xFFFF -> File_LoadRequest(file) (boot 0x801629CC); then sets 0x801462E4. Static chain verified three ways: MAGIC001/003/004/045 are loaded by abilities 1/3/4/45, every row's entry pc lies inside its file's code section (222/222), and the file ids resolve through the LBA table. tools/magic_map.py, names/magic.toml"
+note = "VERIFIED cast_magic.json 2026-09-08 (file slot 1, Ryu+Nina, hold Up + Circle x6): File_LoadRequest store 0x801629F0 wrote file id 0x156 (MAGIC070) at f+336 and 0x170 (MAGIC100) at f+724, both with ra = 0x800AB160 inside Magic_LoadForAbility; the band header word 0x801EEC00 then went 0x142 -> 0x16E (MAGIC070's registry id) at f+362 and -> 0x186 (MAGIC100's) at f+744, written by CD_getsector 0x80177ACC from CdReadyCallback -- the section lands straight from the CD buffer, header first"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800AB1FC
+name = "Magic_LoadForItem"
+args = ["item_id16"]
+status = "evidence"
+evidence = "read from BATTLE.EMI#15 2026-09-08: sub = u32[0x800B39F0 + ((a0 >> 8) & 0xFF)*4] (four u8 sub-tables 0x800B3A00 n=100, 0x800B3A64 n=92, 0x800B3AC0 n=72, 0x800B3B08 n=96); row = u8[sub + (a0 & 0xFF)]; then the same 0x800B3538 row -> File_LoadRequest as Magic_LoadForAbility. BATTLE.EMI#3 0x801D3ED0 repeats the lookup inline"
+note = "which item category each sub-table is (the sizes match no items.toml table exactly) is open"
+

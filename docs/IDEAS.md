@@ -351,6 +351,11 @@ with the deck tooling that already exists.
 
 ### Part 2 — box geometry (MEDIUM, needs one investigation)
 
+Row budget, settled 2026-09-09: the shipped script prints **three** 14 px rows
+on 1,215 confirm-advance pages across 122 areas, and never four, so two text
+rows plus two half-height ruby rows fit inside proven behaviour
+([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Rows per page", `tools/page_rows.py`).
+
 Known constants: 12 px glyph advance, **14 px line height** in the box
 (`y += 0x0E` in the stepper/renderer), origin at `0x801490BC/BE`, cursor at
 `0x801490B8/BA` ([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Interpreter state
@@ -368,12 +373,16 @@ be costed. Static route: Ghidra xrefs from the box origin globals; live
 route: `gpu_frame_dump` on a dialogue frame and match the frame quad to
 its emitting PC via the GP0 attribution.
 
-Also unknown: the glyph primitive. `0x8014F708` builds one primitive per
-glyph through `0x8014FCE8` → `0x8017BC2C` / `0x8017CC50` (Psy-Q-region
-helpers). Whether that is `SPRT` (unscalable) or a textured quad (UVs can be
-mapped to a smaller output) decides whether half-height kana are free or
-need a second, smaller font in VRAM. The atlas already holds full-size
-hiragana (`0x5B+`, 12 px cells, 21 wide).
+**Answered 2026-09-09: the glyph primitive is both, and the scalable one
+already ships.** `0x8014F708` builds a Psy-Q `SPRT` (`w` at `+16` a literal
+`0x0C`), which cannot scale; but the renderer switches to `0x80151F4C`, a
+`POLY_FT4` whose vertex X is `cursor + 0x0C + P`, whenever a `0x0F` size
+preset is active (bit 3 of `0x801490A0`). `P` comes from the 26-entry table at
+`0x8017FF30`: grow +6/+11/+24 px, shrink -3/-6/-9 px. So half-size kana need
+**no** second font in VRAM and no new primitive. What is left is the 12 px
+advance (`addiu 0xC` at `0x801508A0`, a single immediate), per-row metrics
+instead of one global `P`, and the quality cost of point-sampling a 12 px cell
+down to half height. See [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Two blitters".
 
 ### Part 3 — rendering furigana at runtime (LOW today)
 
@@ -602,3 +611,49 @@ Windowed `build-dbg` launch with `--debug-port`; during the Capcom logo poll
 FMV — use the debug frame counter). Classify pace- vs CPU-bound, then follow
 the matching lever above. Compare against `build-relprof` to separate the
 `-O0`/debug-interpreter tax from the real ceiling.
+
+---
+
+## I7 — Native loader hook (per-file load events without the debug port)
+
+**Ask (2026-09-08):** once the loader is named, hook `File_LoadRequest`
+`0x801629CC` natively so every disc-file load is seen with its id — for
+per-overlay perf attribution, a resident readout, and later swap-by-id.
+
+**Kind:** framework runtime. **Feasibility: LOW today** (upstream change; and
+the enhancement-phase gate for anything that *redirects* a load).
+
+### What already exists
+
+- The debug port's write trace on the loader's argument cell `0x80146464` is
+  a loader hook with no framework change: [`tools/load_watch.py`](../tools/load_watch.py)
+  records every load with file id, store PC, caller `ra`, `a0..a3` and
+  `s0..s3` (six loads in one battle round, 2026-09-08). Only debug-tools
+  builds carry the write trace.
+- [`tools/resident.py`](../tools/resident.py) reads the resident set from the
+  band header words (one u32 per band) and the loader cells, and
+  `area_poller.py watch` stamps that set on harvested PCs.
+
+### What is missing
+
+- A named-PC call hook at the `psx_dispatch` chokepoint (the mechanism the
+  text apply hook uses, [`STRING_TRANSLATION.md`](../psxrecomp/docs/STRING_TRANSLATION.md)
+  §3.1) feeding a small ring of `(frame, pc, a0..a3)` for a list of PCs from
+  `game.toml`, readable over the debug port and in Release builds.
+- Swap-by-id: intercept `File_LoadRequest(file_id)` and redirect to a mod
+  file (`MOD_PACKAGES.md` territory). Enhancement phase only.
+
+### First step
+
+Upstream: a generic `[[hooks.call]] pc = 0x801629CC` ring in psxrecomp, then
+`load_watch.py` gains a `--native` source. Not before the faithful core is
+proven.
+
+## I8 — "resident: BOSS 0x120" readout in the runtime overlay / launcher
+
+**Ask (2026-09-08):** show the resident overlay set on screen.
+
+**Kind:** runtime overlay + launcher (recomp-ui). **Feasibility: LOW** (both
+submodules). Everything it would show is already computed title-side by
+`tools/resident.py --watch`; the readout is UI.
+

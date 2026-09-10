@@ -50,6 +50,7 @@ NAMES_DIR = os.path.join(ROOT, "names")
 OVERLAYS_TOML = os.path.join(NAMES_DIR, "overlays.toml")
 FUNCTIONS_TOML = os.path.join(NAMES_DIR, "functions.toml")
 AREAS_TOML = os.path.join(NAMES_DIR, "areas.toml")
+DATA_TOML = os.path.join(NAMES_DIR, "data.toml")
 SYMBOLS_TOML = os.path.join(ROOT, "symbols.toml")
 CATALOG = os.path.join(ROOT, "analysis", "overlay_catalog.json")
 
@@ -90,8 +91,11 @@ def _read(path, key):
 OVERLAYS_HEADER = """\
 # names/overlays.toml — human names for the .EMI overlays (see tools/name_map.py).
 # Keyed by md5 of the section bytes, NOT by load address (bands overlap).
-# Edit alias / role / status / evidence by hand. `name`, `family`, `source`
-# are seeded from analysis/overlay_catalog.json and are informational.
+# Edit alias / role / status / evidence by hand. `name`, `family`, `source`,
+# `id` are seeded from analysis/overlay_catalog.json and are informational.
+# `id` is the game's own registry id, the u32 at +0x00 of the overlay image
+# (docs/OVERLAY_HEADERS.md): unique across all 405 overlays, NOT derivable
+# from the filename, so it is read from the bytes, never computed.
 #
 #   status:   unnamed | hypothesis | evidence | verified
 #   evidence: how the alias was established (trace, rendered string, data doc)
@@ -133,6 +137,15 @@ def load_overlay_names():
     return {r["md5"]: r for r in _read(OVERLAYS_TOML, "overlay")}
 
 
+def load_overlay_ids():
+    """registry id (int) -> overlay row, for tools that key by the game's id."""
+    out = {}
+    for r in load_overlay_names().values():
+        if r.get("id"):
+            out[int(str(r["id"]), 16)] = r
+    return out
+
+
 def load_function_names():
     """(overlay_key, pc) -> entry dict, overlay_key = md5 or 'boot'.
     Merges symbols.toml (boot) and names/functions.toml (overlays)."""
@@ -150,9 +163,15 @@ def load_function_names():
     return out
 
 
+def load_data_names():
+    """(overlay md5, pc) -> entry dict for named DATA inside overlays
+    (tables / strings; docs/DATA_ISLANDS.md, written by hand)."""
+    return {(r["overlay"], int(r["pc"])): r for r in _read(DATA_TOML, "data")}
+
+
 def load_names():
     return {"overlays": load_overlay_names(), "functions": load_function_names(),
-            "areas": load_area_names()}
+            "areas": load_area_names(), "data": load_data_names()}
 
 
 # ---------------------------------------------------------------- commands
@@ -168,13 +187,25 @@ def cmd_init(args):
             continue
         seen.add(md5)
         if md5 in existing:
-            rows.append(existing[md5])
+            row = dict(existing[md5])
+            if o.get("registry_id") and row.get("id") != o["registry_id"]:
+                # back-fill (or correct) the informational id; keep the order
+                # stable so the diff is one line per row
+                items = list(row.items())
+                row = {}
+                for k, v in items:
+                    row[k] = v
+                    if k == "source":
+                        row["id"] = o["registry_id"]
+                row.setdefault("id", o["registry_id"])
+            rows.append(row)
             continue
         rows.append({
             "md5": md5,
             "name": o["name"],
             "family": o["family"],
             "source": f"{o['source_file']}#{o['source_index']}",
+            "id": o.get("registry_id"),
             "alias": "",
             "role": "",
             "status": "unnamed",
@@ -216,6 +247,11 @@ def cmd_check(args):
             print(f"functions.toml: overlay {ov} unknown (pc 0x{pc:08X})"); bad += 1
         if e.get("status") not in STATUSES:
             print(f"functions.toml: 0x{pc:08X} bad status {e.get('status')!r}"); bad += 1
+    for (ov, pc), e in load_data_names().items():
+        if ov not in names:
+            print(f"data.toml: overlay {ov} unknown (pc 0x{pc:08X})"); bad += 1
+        if e.get("status") not in STATUSES:
+            print(f"data.toml: 0x{pc:08X} bad status {e.get('status')!r}"); bad += 1
     for f, e in load_area_names().items():
         if e.get("status") not in STATUSES:
             print(f"areas.toml: {f} bad status {e.get('status')!r}"); bad += 1

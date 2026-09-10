@@ -1,12 +1,13 @@
 # BoF3 text engine — the message interpreter, renderer and glyph path
 
 **Status:** STABLE (established and confirmed live 2026-08-30; the open path
-— who sets the string pointer — traced live and named 2026-09-05; the open
-items at the end are translation work, not engine identification)
+— who sets the string pointer — traced live and named 2026-09-05; the two
+blitters, the `0x0F` size presets and the rows-per-page census added 2026-09-09;
+the open items at the end are translation work, not engine identification)
 
 This resolved the localization blocker *"nothing can identify which code draws
-text."* Three entry points, one shared control-code vocabulary, one glyph
-blitter.
+text."* Three entry points, one shared control-code vocabulary, and **two**
+glyph blitters — an unscalable sprite and a scalable quad, chosen per glyph.
 
 ## How it was established
 
@@ -72,7 +73,7 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 |---|---|
 | `0x00` | terminator (or return from substitution) |
 | `0x01` | newline — `y += 0x0E` (box) / `0x0D` (immediate), `x` = left margin |
-| `0x02` | **page break** — stepper state 3; waits for confirm, then a fresh page. One byte per break, no page count anywhere: AREA000's 256 messages have 199 / 45 / 10 / 1 messages with 0 / 1 / 2 / 3 breaks, and a three-break message is just four text runs (npc_talk 2026-09-05 + disc scan) |
+| `0x02` | **page break, waits for confirm** — stepper state 3, then a fresh page. One byte per break, no page count anywhere: AREA000's 256 messages have 199 / 45 / 10 / 1 messages with 0 / 1 / 2 / 3 breaks, and a three-break message is just four text runs (npc_talk 2026-09-05 + disc scan). It is not the only page break — see `0x16` |
 | `0x03` | insert current-character name — record at `0x80144963 + 0xA4 * DAT_80145F05` |
 | `0x04` | insert named character — record at `0x80144963 + 0xA4 * next_byte` |
 | `0x05` | set colour/palette from next byte |
@@ -82,8 +83,9 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 | `0x0A` | play sound — `0x8015E908(next_byte \| 0x200)` |
 | `0x0C` | (string head only) speaker/portrait id in the next byte → `0x801490CA`; consumed by `MsgBox_Reset`, never seen by the stepper |
 | `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1, `y += 8`) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
-| `0x0D` / `0x0E` | enable / disable drawing |
-| `0x0F` | text style from the 4-byte table `0x8017FF30[next_byte]` (state byte `0x8014909E`, `0x801490A6`, `0x801490C4`) |
+| `0x0D` / `0x0E` | **open / close an emphasis span** (flag `0x8014909D` / `0x801490A0`). Read statically as enable/disable drawing; the script says otherwise — 105 opens, 105 closes, 106 `0x0F` uses, and every `0x0F` in the disc follows a closed span (`<0d>えらいっ<40><0e><0f><0a>`). The span is what the effect is applied to |
+| `0x0F` | **text effect preset** from the 4-byte table `0x8017FF30[next_byte]` = `{type, param, u16 duration}`, unpacked at `0x80150D34` into type `0x8014909E`, duration `0x801490A6`, param `0x801490C4`. Types 2 and 3 are **grow and shrink** — see *Two blitters, and the only font sizing there is* |
+| `0x16` | **timed page break** — `0x16 <frames>`; the narration/cutscene form of `0x02`, ends the page and advances itself. 670 uses, most often 0x20 or 0x30 frames. `TEXT_TABLES.md` already used this shape for the area caption banner |
 | `0x10` | toggle flag `0x10` of `0x801490A0` |
 | `0x14` | **choice menu** — `0x801490C0` = next byte, then count/cursor nibbles at `+3` (`0x801490C1/C2`); state 5 when the count is 0 |
 | `0x12`, `0x13`, `0x15` | **multi-byte character lead bytes** — consume one extra byte |
@@ -94,8 +96,11 @@ Substitution is a single-level return: the interpreter saves the resume pointer,
 walks the inserted record for a fixed count (6 for names, 0x11 for messages,
 0x21 for the 32-byte table), then restores.
 
-Layout constants: **12 px** per glyph advance (`x += 0x0C`), **14 px** line
-height in the box, 13 px in the immediate path.
+Layout constants: **12 px** per glyph advance (`addiu 0xC` at `0x801508A0`),
+**14 px** line height in the box (`addiu 0xE` at `0x80150690`), 13 px in the
+immediate path. Both are single immediates, so both are in reach of
+`[[recompiler.patch]]`. The advance does **not** track the glyph's drawn size:
+a scaled glyph still moves the cursor 12 px.
 
 ## Glyph path
 
@@ -122,6 +127,137 @@ atlas page:
 That `21 × 12px` cell geometry is the bridge to the 435-character table in
 `D:\BoFIII` (see [`LOCALIZATION.md`](LOCALIZATION.md) §4.2): the table's ordinal
 is this atlas index.
+
+## Two blitters, and the only font sizing there is
+
+**Status:** established 2026-09-09 by disassembling the boot EXE
+(`tools/disasm_exe.py`); the script-side census is `tools/page_rows.py styles`.
+
+The box does not have one glyph path, it has two, and the renderer picks
+between them on **bit 3 of `0x801490A0`** (`andi 0x8` at `0x801507EC`):
+
+| Path | Primitive | Size |
+|---|---|---|
+| default — `0x8014F6BC` → `0x8014F708` | Psy-Q **`SPRT`**: `u0`/`v0` at `+12`/`+13`, `w` at `+16`, `h` at `+18` | `w` is a literal `0x0C`; `h` is `0x0C` minus a crop from the pair table at `0x8017FEF8`. PSX rectangles sample texels 1:1, so this path **cannot scale** — the crop is the appear/disappear wipe, in 7 steps of 2 px |
+| effect — `0x80151F4C` | **`POLY_FT4`**: `u0v0` `+12`, clut `+14`, `u1v1` `+20`, tpage `+22`, vertex XY at `+8`/`+16`/`+24`/`+32` | vertex X is `cursor + 0x0C + P` (`0x80152C5C`) and the Y extents carry the same `P`, while the UV extent stays 11 or 12 texels (`0x80151FCC`). This is **true scaling** out of the same 12 px atlas cell |
+
+`P` is `0x801490C4`, the param byte of the `0x0F` preset. The effect types are
+dispatched per frame through the six handlers at `0x80149AB4`
+(`0x80151A8C`, `0x80151A94`, `0x80151BC0` twice, `0x80151D28`, `0x80151E64`),
+with the duration counting down at `0x801490A6` and `0xFFFF` meaning never.
+Handler `0x80151BC0`, shared by types 2 and 3, is the one that sets bit 3 of
+`0x801490A0` — that is, **asking for a size change is what switches the box to
+the scalable quad**.
+
+The 26 presets, read out of the EXE at `0x8017FF30`, are three sizes by three
+durations in each direction, plus a reset:
+
+| preset group | size delta | durations | uses in the JP script |
+|---|---|---|---|
+| type 1, reset to 12 px | — | 60 f, 120 f, forever | 58 |
+| type 2, grow | +6, +11, +24 px | 30 f, 60 f, forever | 34 |
+| type 3, shrink | −3, −6, −9 px | 30 f, 60 f, forever | 2 |
+| types 4 and 5 | not the size effect; the last two bytes do not read as a frame count | — | 12 |
+
+So there **is** font sizing, it is per emphasis span, and it is used 106 times
+in the whole 200-area script. It is the shout: AREA000 msg 42, the old man's
+`<0d>えらいっ<40><0e><0f><0a>` = grow +11 px and stay there; AREA011 msg 5,
+`<0d>殺してやるッ<40><0e><0f><03>` = grow +6 px for 30 frames. Shrink ships but is
+used twice, both in AREA008 (−3 px, forever).
+
+**Why this matters for furigana** ([`IDEAS.md`](IDEAS.md) Part 2/3): the
+primitive is not the blocker. A smaller glyph is already a shipped code path —
+no new primitive, no second font in VRAM, no engine surgery to get a 6 px quad.
+What is still missing is a 6 px **advance** (the 12 px add at `0x801508A0` is
+shared by both paths), per-row metrics rather than one global `P`, and a source
+better than point-sampling a 12 px cell down to half height.
+
+## Rows per page — what the script actually asks the box for
+
+**Status:** established 2026-09-09, whole-disc census; reproduce with
+`python tools/page_rows.py rows`. Rows = `0x01` newlines + 1, pages split at
+`0x02` and `0x16`, counted once per *distinct* message (the offset tables point
+many slots at the same string and at suffixes of longer ones).
+
+| rows | pages | ended by `0x02` | by `0x16` | no break | areas |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 2,421 | 478 | 74 | 1,869 | 139 |
+| 2 | 5,215 | 2,100 | 209 | 2,906 | 146 |
+| 3 | 3,439 | 1,215 | 368 | 1,856 | 141 |
+| 4 | 29 | 0 | 1 | 28 | 4 |
+| 5 | 33 | 0 | 7 | 26 | 6 |
+| 7–9 | 22 | 0 | 11 | 11 | 6 |
+
+Two things follow. **Three rows is ordinary** — 1,215 confirm-advance pages
+across 122 areas print three, so the box is at least three rows tall in
+shipped content (AREA000 msg 3, a plain villager). And **no confirm page ever
+prints four**: every 4+ row page ends at the terminator or a timed break, which
+is the full-screen narration path, not the talk box (AREA144 and AREA055 draw
+7–9 rows by interleaving blank rows, `<01><ff><01>`). Treat "the box holds
+three" as evidence and "the box would clip a fourth" as untested inference.
+The areas column counts areas holding a page of that height by any break; the
+three-row *confirm* pages specifically are spread over 122 areas.
+
+## The single-byte codes
+
+**Status:** established 2026-09-09 off the disc; regenerate with
+`python tools/font_sheet.py table` → [`names/font.toml`](../names/font.toml).
+
+The kanji half of the encoding was decoded by the prior work; the single-byte
+half was not, which is what stopped anyone *writing* text. It is now read
+directly off the font sheet, using the mapper's own arithmetic rather than a
+guess.
+
+**The sheet.** `BIN/ETC/ENDKANJI.EMI` section 0 (32 KiB, VRAM `1E000200`) is
+4bpp, low-nibble-first, stride 64 bytes, 512 rows, stored as two interleaved
+streams of 2048-byte chunks — even chunks the left half, odd the right. De-
+interleaved it is the 21-cell × 12 px atlas this document already described.
+
+**The index rules**, from the box mapper:
+
+| byte | cell | evidence |
+|---|---|---|
+| `< 0x5B` | the byte | `sltiu 0x5B` at `0x80152740`, then ÷ 21 |
+| `>= 0x5B` | byte + `0x23` | `addiu 0x23` at `0x801529B8` |
+| `0x15 nn` | nn + `0x5B` | third-page bias |
+
+The two rules meet exactly where they should: `0x5A` = `Z` is the last cell
+before the symbol block, and `0x5B` = `あ` lands on row 6 column 0, which is
+where the sheet puts it. That coincidence is the check.
+
+| codes | contents |
+|---|---|
+| `0x00`–`0x27` | the small 8 px UI font (`START`, `SELECT`, button labels) on a different pitch. **No area script uses one as a glyph** |
+| `0x28` `0x29` | `(` `)` |
+| `0x2A` `0x2B` | `「` `」` — `0x2A` is the hanging-punctuation case in the table above |
+| `0x2C`–`0x2F` | `,` `ー` `.` `/` (`0x2D` is the long-vowel bar the name fields already showed) |
+| `0x30`–`0x39` | `0`–`9` |
+| `0x3A`–`0x3D` | `・` `『` `』` `=` — `0x3B` is the other hanging-punctuation case |
+| `0x3E`–`0x40` | `‥` `？` `！`, **not** ASCII `>?@`. `0x3E` alone is 8,974 uses |
+| `0x41`–`0x5A` | `A`–`Z` |
+| `0x5B`–`0xFC` | the kana, in the prior work's order |
+| `0xFD` `0xFE` | `。` `、` |
+| `0xFF` | special-cased at `0x80152010`; reads as a word separator, 8,389 uses |
+| `0x15 nn` | symbols: `↑↓←→` `♥` `♪` `～` `○×△□★▶` and UI icons. `0x15 0x07` = `～` is 387 of the 487 uses |
+
+Five kanji past `0x13AD`, where the prior table stopped, are pinned by context
+and carried in `names/font.toml` too: `0x13AF` 問, `0x13B1` 志, `0x13B3` 星,
+`0x13B7` 愛, `0x13B8` 管.
+
+**Coverage: 100.00%.** Of the 204,356 glyph cells in the 200 area scripts,
+36,064 (17.65%) had no mapping before this and **none remain**. The script
+decodes end to end: `「不作のつぎは 税金が / 気になるのよね‥‥ / イナカは大変`.
+
+The last nine codes were the interesting ones, and they say something about the
+sheet. **Six are kanji sitting on the symbol page** — `0x15 0x0E` 護, `0x10` 放,
+`0x18` 早, `0x1D` 消, `0x1E` 新, `0x1F` 業 — not in the `0x12xx`/`0x13xx` space
+at all, so no amount of walking the kanji sheet could find them. The reason is
+capacity, not cost: the kanji sheet is **21 × 21 = 441 slots and the code space
+`0x1200`..`0x13B8` is exactly 441 codes, with zero empty cells**. It was full,
+and late additions went where there was room. It was not a frequency ranking
+either — 8 kanji that never appear in area dialogue hold slots (芸雷拾単野属盾皮,
+battle and menu words) while 新 at 25 uses sits on the symbol page. The other
+three are `0x15 0x06` the zenny mark, `0x15 0x1A` `＆`, and `0x13B5` 可.
 
 ## Interpreter state block
 
@@ -191,13 +327,12 @@ a hard-coded `0x80010000`; it just is not the only one.
 
 ### Two incidental findings that matter for translation
 
-1. **Latin letters and digits may be raw ASCII — unconfirmed.** In the item
-   pool `HP` decodes as `<48><50>` and `20` as `<32><30>`, which reads as
-   literal ASCII. **Do not rely on this yet:** the area script uses `<3e>` and
-   `<40>` heavily at sentence boundaries, and those are ASCII `>` and `@`, so
-   the same byte range is plainly also carrying control codes. Whether the
-   engine disambiguates by context or the decoder's control range is simply
-   wrong needs settling against `0x8015AD34` before any encoder is written.
+1. ~~**Latin letters and digits may be raw ASCII — unconfirmed.**~~
+   **SETTLED 2026-09-09, and the answer is "half".** `0x41`..`0x5A` really are
+   `A`..`Z` and `0x30`..`0x39` really are `0`..`9`, so `<48><50>` is `HP`; but
+   `0x3E`/`0x3F`/`0x40` are **not** `>?@` — they are `‥`, `？` and `！`. The
+   whole range is one atlas row read straight off the font sheet; see *The
+   single-byte codes* above.
 2. **Name-entry text is not in the area script.** It lives in the
    `0x80014000` pool alongside config strings (`コンフィグを終了します`,
    `設定を初期化します`) and item descriptions. A translation that only

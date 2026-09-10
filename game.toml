@@ -34,6 +34,12 @@ known_sha1 = [
 seeds = "seeds/ghidra_funcs.txt"
 out_dir = "generated"
 strict = true
+# Script localization hook (docs/LOCALIZATION_APPLY.md): the recompiler emits
+# psx_mod_function_entry() at the entry of MsgBox_Reset 0x8015042C, where the
+# resolver has just stored the message pointer into 0x801490A8/AC. The
+# title plugin src/bof3_localize.c repoints both at a translated copy.
+# Changing this list changes the overlay config hash -- recompile overlays.
+mod_function_entry_funcs = ["0x8015042C"]
 
 [runtime]
 window_title = "BreathOfFire3 Recompiled"
@@ -44,15 +50,18 @@ memcard_dir = "saves"
 # text_xlate substituting into the game's own draw calls. The disc is never
 # modified, so the [prepare_disc] digests above stay valid.
 #
-# Capture runs unconditionally -- including under "jp"/"off", which disable
-# only substitution -- so a Phase 0 soak builds the string inventory and the
-# text-draw PC census before any translation exists.
+# The framework's own capture/apply hook never sees BoF3 dialogue (the string
+# pointer is not a dispatch argument -- docs/TEXT_ENGINE.md "The resolver");
+# the script is delivered by the MsgBox_Reset plugin instead, which reads the
+# resolved language back from text_xlate, so this dropdown still governs it.
 # `languages` drives the launcher's Localization dropdown.
 [localization]
 language = "en"
 languages = [
     { code = "en", label = "English" },
     { code = "jp", label = "Japanese" },
+    { code = "jp_ruby", label = "Japanese (Ruby)" },
+    { code = "jp_ruby_all", label = "Japanese (Ruby, every word)" },
 ]
 
 [video]

@@ -1,0 +1,3190 @@
+# names/magic.toml -- which BMAGIC overlay each ability loads, read off the disc
+# by tools/magic_map.py (docs/OVERLAY_HEADERS.md "The loader and the spell->overlay link").
+#
+#   id        ability id (names/abilities.toml)
+#   row       u8[0x800B3450 + id] -> row of the engine's effect table 0x800B3538
+#   file_id   u16 in that row = index into the boot LBA table 0x80182DBC (tools/file_ids.py)
+#   file      the BIN/BMAGIC/*.EMI it names ("" when file_id = 0xFFFF: engine-side handler)
+#   section   md5 of that file's code section = the overlay row in names/overlays.toml
+#   overlay_id  the registry id at +0x00 of that section
+#   entry     u32 in the row: the handler pc (inside the loaded image, or the engine)
+#   status    evidence = static chain, three-way consistent (file numbering, entry inside
+#             the image, LBA table); verified = a live cast seen loading the file
+
+[[ability]]
+id = 0
+jp = "ぬえストンピング"
+en = "Nue Stomp"
+type = 0
+row = 0
+file_id = "0xFFFF"
+file = ""
+section = ""
+overlay_id = ""
+entry = "0x800AAF44"
+status = "engine"
+
+[[ability]]
+id = 1
+jp = "会心撃"
+en = "Gambit"
+type = 3
+row = 1
+file_id = "0x125"
+file = "MAGIC001.EMI"
+section = "76152e6e1aa93fa80113bad5977b81f5"
+overlay_id = "0x144"
+entry = "0x801EEC64"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 2
+jp = "スーパーコンボ"
+en = "Super Combo"
+type = 2
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 3
+jp = "雷鳴撃"
+en = "ThundrStrike"
+type = 3
+row = 3
+file_id = "0x127"
+file = "MAGIC003.EMI"
+section = "49ad39290802fdd19ea4dd3c083fb90c"
+overlay_id = "0x146"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 4
+jp = "火炎撃"
+en = "Flame Strike"
+type = 3
+row = 88
+file_id = "0x128"
+file = "MAGIC004.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 5
+jp = "マインドソード"
+en = "Mind Sword"
+type = 3
+row = 98
+file_id = "0x129"
+file = "MAGIC005.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 6
+jp = "のうけずり"
+en = "Mind Flay"
+type = 3
+row = 109
+file_id = "0x12A"
+file = "MAGIC006.EMI"
+section = "90f0182fdb7700e5ed23c48e18d621a9"
+overlay_id = "0x148"
+entry = "0x801EEC38"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 7
+jp = "目つぶし"
+en = "Blind"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 8
+jp = "毒撃"
+en = "Chlorine"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 9
+jp = "やる気なし"
+en = "Unmotivate"
+type = 3
+row = 51
+file_id = "0x12C"
+file = "MAGIC009.EMI"
+section = "b9a65a2b7d17b9dd21bcc65e35b973b5"
+overlay_id = "0x149"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 10
+jp = "みだれうち"
+en = "Multistrike"
+type = 3
+row = 9
+file_id = "0x12D"
+file = "MAGIC010.EMI"
+section = "cbe4575fedfd94164a4d84dffac1b1e3"
+overlay_id = "0x14A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 11
+jp = "あばれる"
+en = "Blitz"
+type = 3
+row = 68
+file_id = "0x133"
+file = "MAGIC018.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFA74"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 12
+jp = "かみつき"
+en = "Snap"
+type = 3
+row = 71
+file_id = "0x12E"
+file = "MAGIC012.EMI"
+section = "b5fb99d05085cad8a318f0b76dd9af2d"
+overlay_id = "0x14B"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 13
+jp = "とびげり"
+en = "Flying Kick"
+type = 3
+row = 50
+file_id = "0x12F"
+file = "MAGIC013.EMI"
+section = "5f5441433b4ccf5e5f3380e2bf3f0316"
+overlay_id = "0x14C"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 14
+jp = "とっしん"
+en = "Charge"
+type = 3
+row = 55
+file_id = "0x130"
+file = "MAGIC015.EMI"
+section = "ce0e10a4336beef5b72840497746b8b5"
+overlay_id = "0x14D"
+entry = "0x801EF644"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 15
+jp = "エアレイド"
+en = "Air Raid"
+type = 3
+row = 4
+file_id = "0x130"
+file = "MAGIC015.EMI"
+section = "ce0e10a4336beef5b72840497746b8b5"
+overlay_id = "0x14D"
+entry = "0x801EECA0"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 16
+jp = "アストラルワープ"
+en = "Astral Warp"
+type = 3
+row = 58
+file_id = "0x131"
+file = "MAGIC016.EMI"
+section = "ce0e10a4336beef5b72840497746b8b5"
+overlay_id = "0x14D"
+entry = "0x801EF248"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 17
+jp = "ふくれる"
+en = "Giant Growth"
+type = 3
+row = 43
+file_id = "0x132"
+file = "MAGIC017.EMI"
+section = "1e32c9ff8aac3e42d1d5ee99950e7050"
+overlay_id = "0x14E"
+entry = "0x801EEC38"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 18
+jp = "オーラスマッシュ"
+en = "Aura"
+type = 3
+row = 5
+file_id = "0x133"
+file = "MAGIC018.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EECF0"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 19
+jp = "滅殺"
+en = "Disembowel"
+type = 3
+row = 6
+file_id = "0x134"
+file = "MAGIC019.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EF058"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 20
+jp = "テラブレイク"
+en = "Bonebreak"
+type = 3
+row = 8
+file_id = "0x135"
+file = "MAGIC020.EMI"
+section = "f168a5242e4729af0f5f6752b52e2908"
+overlay_id = "0x150"
+entry = "0x801EEC48"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 21
+jp = "くうきうち"
+en = "SpiritBlast"
+type = 2
+row = 33
+file_id = "0x136"
+file = "MAGIC021.EMI"
+section = "6d140b36f225074b5f0baf4894cd755e"
+overlay_id = "0x151"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 22
+jp = "コシが痛い"
+en = ""
+type = 3
+row = 53
+file_id = "0x133"
+file = "MAGIC018.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EF384"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 23
+jp = "様子を見る"
+en = "Watch Enemy"
+type = 3
+row = 9
+file_id = "0x12D"
+file = "MAGIC010.EMI"
+section = "cbe4575fedfd94164a4d84dffac1b1e3"
+overlay_id = "0x14A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 24
+jp = "しろはた"
+en = "White Flag"
+type = 3
+row = 9
+file_id = "0x12D"
+file = "MAGIC010.EMI"
+section = "cbe4575fedfd94164a4d84dffac1b1e3"
+overlay_id = "0x14A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 25
+jp = "カウンター"
+en = "Counter"
+type = 3
+row = 9
+file_id = "0x12D"
+file = "MAGIC010.EMI"
+section = "cbe4575fedfd94164a4d84dffac1b1e3"
+overlay_id = "0x14A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 26
+jp = "つぶらなひとみ"
+en = ""
+type = 3
+row = 81
+file_id = "0x13C"
+file = "MAGIC042.EMI"
+section = "4de9567b699cb39b3915a686359825f0"
+overlay_id = "0x156"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 27
+jp = "たべる"
+en = "Devour"
+type = 3
+row = 25
+file_id = "0x178"
+file = "MAGIC108.EMI"
+section = "4e8841df45b825f011421d462d9d693f"
+overlay_id = "0x18E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 28
+jp = "烈風撃"
+en = "Wind Strike"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 29
+jp = "ネバネバ"
+en = "Molasses"
+type = 3
+row = 100
+file_id = "0x137"
+file = "MAGIC029.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 30
+jp = "タールづけ"
+en = "Tarbaby"
+type = 3
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 31
+jp = "光合成"
+en = "Absorb"
+type = 3
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 32
+jp = "薬草"
+en = "Healing Herb"
+type = 3
+row = 44
+file_id = "0x156"
+file = "MAGIC070.EMI"
+section = "c33cfc4d1c1a74eabce7c31996ea0ec6"
+overlay_id = "0x16E"
+entry = "0x801EEC28"
+status = "verified"
+live = "cast_magic.json 2026-09-08 f+336 (Nina, Rejuvenate)"
+entry_in_image = true
+
+[[ability]]
+id = 33
+jp = "ドーピング"
+en = "Steroids"
+type = 3
+row = 45
+file_id = "0x157"
+file = "MAGIC071.EMI"
+section = "bdb70023060265d6052ac855e473b412"
+overlay_id = "0x16F"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 34
+jp = "マジックベルト"
+en = "Magic Belt"
+type = 3
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 35
+jp = "思い出す"
+en = "Recall"
+type = 3
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 36
+jp = "シャッフルページ"
+en = "MagicShuffle"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 37
+jp = "バトルソング"
+en = "War Shout"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 38
+jp = "気合ため"
+en = "Focus"
+type = 3
+row = 121
+file_id = "0x138"
+file = "MAGIC038.EMI"
+section = "6b37d2d379d209fe471dc7b22666ec00"
+overlay_id = "0x152"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 39
+jp = "チャクラ"
+en = "Enlighten"
+type = 3
+row = 78
+file_id = "0x139"
+file = "MAGIC039.EMI"
+section = "8d9cc182c2d069ba40e217c63f272016"
+overlay_id = "0x153"
+entry = "0x801EEC34"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 40
+jp = "バーサーク"
+en = "Berserk"
+type = 3
+row = 79
+file_id = "0x13A"
+file = "MAGIC040.EMI"
+section = "f7006983f07c5373a8d0909635f98dfc"
+overlay_id = "0x154"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 41
+jp = "しんがん"
+en = "Mind's Eye"
+type = 3
+row = 80
+file_id = "0x13B"
+file = "MAGIC041.EMI"
+section = "198524f487c67a0bcc04ee4bec742b64"
+overlay_id = "0x155"
+entry = "0x801EEC38"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 42
+jp = "オーラバリア"
+en = "WardOfLight"
+type = 3
+row = 81
+file_id = "0x13C"
+file = "MAGIC042.EMI"
+section = "4de9567b699cb39b3915a686359825f0"
+overlay_id = "0x156"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 43
+jp = "イーブルアイ"
+en = "Evil Eye"
+type = 3
+row = 110
+file_id = "0x13D"
+file = "MAGIC043.EMI"
+section = "639fdce0ba6951f0de96d2d73590c9fa"
+overlay_id = "0x157"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 44
+jp = "ボーンダート"
+en = "Bone Dart"
+type = 3
+row = 96
+file_id = "0x13E"
+file = "MAGIC044.EMI"
+section = "cd6a65f3dc86569ed22babf7e31117a7"
+overlay_id = "0x158"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 45
+jp = "ファイアブレス"
+en = "Firebreath"
+type = 3
+row = 61
+file_id = "0x13F"
+file = "MAGIC045.EMI"
+section = "485c0336ecbafb10f0a8bc3c0a138c23"
+overlay_id = "0x159"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 46
+jp = "アイスブレス"
+en = "Icebreath"
+type = 2
+row = 62
+file_id = "0x140"
+file = "MAGIC046.EMI"
+section = "534e52e7e317a59d807342aed6a932f2"
+overlay_id = "0x15A"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 47
+jp = "スイートブレス"
+en = "Dream Breath"
+type = 2
+row = 63
+file_id = "0x141"
+file = "MAGIC047.EMI"
+section = "534e52e7e317a59d807342aed6a932f2"
+overlay_id = "0x15A"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 48
+jp = "夢氷撃"
+en = "Frost Strike"
+type = 1
+row = 41
+file_id = "0x142"
+file = "MAGIC048.EMI"
+section = "ee74c68bf53e5930015e1148039e0676"
+overlay_id = "0x15B"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 49
+jp = "かふん"
+en = "Pollen"
+type = 3
+row = 99
+file_id = "0x143"
+file = "MAGIC049.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 50
+jp = "毒ブレス"
+en = "Venom Breath"
+type = 3
+row = 31
+file_id = "0x144"
+file = "MAGIC050.EMI"
+section = "9dfde857fbfcd17b8c27916ccd86a2ef"
+overlay_id = "0x15C"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 51
+jp = "たまご"
+en = "Ovum"
+type = 1
+row = 31
+file_id = "0x144"
+file = "MAGIC050.EMI"
+section = "9dfde857fbfcd17b8c27916ccd86a2ef"
+overlay_id = "0x15C"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 52
+jp = "だいふんか"
+en = "Lavaburst"
+type = 3
+row = 107
+file_id = "0x145"
+file = "MAGIC052.EMI"
+section = "bcee8841d466f64cc2f4c3c712b8d1fc"
+overlay_id = "0x15D"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 53
+jp = "ハウリング"
+en = "Howling"
+type = 3
+row = 134
+file_id = "0x146"
+file = "MAGIC053.EMI"
+section = "72bc7be8cbcc3956cca1af4389d8f57d"
+overlay_id = "0x15E"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 54
+jp = "黒の炎"
+en = "Ebonfire"
+type = 3
+row = 56
+file_id = "0x147"
+file = "MAGIC054.EMI"
+section = "f0151eaeae01426b3127e49f69b87ee0"
+overlay_id = "0x15F"
+entry = "0x801EEC2C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 55
+jp = "自爆"
+en = "Sacrifice"
+type = 3
+row = 65
+file_id = "0x148"
+file = "MAGIC055.EMI"
+section = "6bdc2d45ec1fa395bd629ef862948813"
+overlay_id = "0x160"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 56
+jp = "ほねおとし"
+en = "Bone Dance"
+type = 3
+row = 112
+file_id = "0x149"
+file = "MAGIC056.EMI"
+section = "3f0893a5fa7b3c356d4500e65bcce519"
+overlay_id = "0x161"
+entry = "0x801EEC34"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 57
+jp = "けっかい"
+en = "Sanctuary"
+type = 3
+row = 84
+file_id = "0x14A"
+file = "MAGIC057.EMI"
+section = "fa5c4c7162bcf1f47ab6200b39ee8161"
+overlay_id = "0x162"
+entry = "0x801EEC50"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 58
+jp = "たつまき"
+en = "Tornado"
+type = 3
+row = 82
+file_id = "0x14B"
+file = "MAGIC058.EMI"
+section = "666e578dac4c852ce4956e2aee4aa118"
+overlay_id = "0x163"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 59
+jp = "しきべつ"
+en = "Identify"
+type = 3
+row = 83
+file_id = "0x14C"
+file = "MAGIC059.EMI"
+section = "ec739b611831c16e0da81cd71e2ac171"
+overlay_id = "0x164"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 60
+jp = "ねらい撃ち"
+en = ""
+type = 1
+row = 39
+file_id = "0x14D"
+file = "MAGIC060.EMI"
+section = "197a8ed0c829edcb87eddd8b282f3733"
+overlay_id = "0x165"
+entry = "0x801EEC34"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 61
+jp = "セブンセンシズ"
+en = "Celerity"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 62
+jp = "サドンデス"
+en = "Sudden Death"
+type = 3
+row = 95
+file_id = "0x14E"
+file = "MAGIC062.EMI"
+section = "a0737054983c5d3c5d4be55146ffe51b"
+overlay_id = "0x166"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 63
+jp = "ワータイガー"
+en = "Weretiger"
+type = 3
+row = 143
+file_id = "0x14F"
+file = "MAGIC063.EMI"
+section = "6638dcb8ac11259c9896019058cb4e62"
+overlay_id = "0x167"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 64
+jp = "ぶんどり"
+en = "Pilfer"
+type = 2
+row = 77
+file_id = "0x150"
+file = "MAGIC064.EMI"
+section = "01d2522615b2707cc578978a83141f67"
+overlay_id = "0x168"
+entry = "0x801EEC7C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 65
+jp = "つなみ"
+en = "Tsunami"
+type = 2
+row = 70
+file_id = "0x151"
+file = "MAGIC065.EMI"
+section = "9ad40d9e42e5282e6136f8d7a98913c3"
+overlay_id = "0x169"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 66
+jp = "れいき"
+en = "Chill"
+type = 3
+row = 17
+file_id = "0x152"
+file = "MAGIC066.EMI"
+section = "42c40f1b85520e502a1a317fe3634987"
+overlay_id = "0x16A"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 67
+jp = "うらない"
+en = "Foretell"
+type = 3
+row = 18
+file_id = "0x153"
+file = "MAGIC067.EMI"
+section = "b84fcd08dd28e5e341dd802bad82438d"
+overlay_id = "0x16B"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 68
+jp = "めいれい"
+en = "Influence"
+type = 1
+row = 40
+file_id = "0x154"
+file = "MAGIC068.EMI"
+section = "8a282f5fe17e60e389ea96aa4c9b5e67"
+overlay_id = "0x16C"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 69
+jp = "リリフ"
+en = "Heal"
+type = 3
+row = 75
+file_id = "0x155"
+file = "MAGIC069.EMI"
+section = "c39f0a09914873fc3e73d8b1300dc381"
+overlay_id = "0x16D"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 70
+jp = "アプリフ"
+en = "Rejuvenate"
+type = 0
+row = 44
+file_id = "0x156"
+file = "MAGIC070.EMI"
+section = "c33cfc4d1c1a74eabce7c31996ea0ec6"
+overlay_id = "0x16E"
+entry = "0x801EEC28"
+status = "verified"
+live = "cast_magic.json 2026-09-08 f+336 (Nina, Rejuvenate)"
+entry_in_image = true
+
+[[ability]]
+id = 71
+jp = "トプリフ"
+en = "Restore"
+type = 0
+row = 45
+file_id = "0x157"
+file = "MAGIC071.EMI"
+section = "bdb70023060265d6052ac855e473b412"
+overlay_id = "0x16F"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 72
+jp = "リフラル"
+en = "Vitalize"
+type = 0
+row = 113
+file_id = "0x158"
+file = "MAGIC072.EMI"
+section = "ec8538b676104310d7ce74fe35a045d7"
+overlay_id = "0x170"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 73
+jp = "リフレスト"
+en = "Vigor"
+type = 0
+row = 47
+file_id = "0x159"
+file = "MAGIC073.EMI"
+section = "bf2be76e6be1211a00262b14d26ffd92"
+overlay_id = "0x171"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 74
+jp = "ヤクリ"
+en = "Purify"
+type = 0
+row = 114
+file_id = "0x15A"
+file = "MAGIC074.EMI"
+section = "c3ba2129b8bc4f3ca605429e64ad9972"
+overlay_id = "0x172"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 75
+jp = "リバル"
+en = "Raise Dead"
+type = 0
+row = 46
+file_id = "0x15B"
+file = "MAGIC075.EMI"
+section = "aefacfd076129591d644dd00a3b651ef"
+overlay_id = "0x173"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 76
+jp = "リバルラ"
+en = "Resurrect"
+type = 0
+row = 30
+file_id = "0x15D"
+file = "MAGIC077.EMI"
+section = "a224f4411f8c106564a750a631559e33"
+overlay_id = "0x174"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 77
+jp = "マレクタ"
+en = "Leech Power"
+type = 0
+row = 30
+file_id = "0x15D"
+file = "MAGIC077.EMI"
+section = "a224f4411f8c106564a750a631559e33"
+overlay_id = "0x174"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 78
+jp = "レクタ"
+en = "Drain"
+type = 0
+row = 15
+file_id = "0x15E"
+file = "MAGIC078.EMI"
+section = "81aa3136c747af2add85076b0c9b18f7"
+overlay_id = "0x175"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 79
+jp = "ラーク"
+en = "Lark"
+type = 0
+row = 52
+file_id = "0x15F"
+file = "MAGIC079.EMI"
+section = "18bdd21a00ab17c6b8d6144efe1342f3"
+overlay_id = "0x176"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 80
+jp = "ロトンブレス"
+en = "RottenBreath"
+type = 1
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 81
+jp = "カテクト"
+en = "Protect"
+type = 3
+row = 85
+file_id = "0x161"
+file = "MAGIC081.EMI"
+section = "c32a4c3e5481515ed74a612a837df74e"
+overlay_id = "0x177"
+entry = "0x801EEC30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 82
+jp = "ミカテクト"
+en = "Shield"
+type = 1
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 83
+jp = "ハサート"
+en = "Speed"
+type = 1
+row = 94
+file_id = "0x163"
+file = "MAGIC083.EMI"
+section = "5f9de7c641828fc516e36aedb2081069"
+overlay_id = "0x179"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 84
+jp = "ギガート"
+en = "Might"
+type = 1
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 85
+jp = "パリア"
+en = ""
+type = 1
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 86
+jp = "ペポーパ"
+en = "Silence"
+type = 1
+row = 28
+file_id = "0x164"
+file = "MAGIC086.EMI"
+section = "c2714c0bb1856c6c651ca7ab016528ef"
+overlay_id = "0x17A"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 87
+jp = "ダール"
+en = "Slow"
+type = 1
+row = 48
+file_id = "0x165"
+file = "MAGIC087.EMI"
+section = "257b96595dfe29533203082199577beb"
+overlay_id = "0x17B"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 88
+jp = "ストール"
+en = "Blunt"
+type = 1
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 89
+jp = "ディル"
+en = "Weaken"
+type = 1
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 90
+jp = "パダム"
+en = "Flare"
+type = 1
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 91
+jp = "パダーマ"
+en = "Fireblast"
+type = 2
+row = 21
+file_id = "0x167"
+file = "MAGIC091.EMI"
+section = "04b565fa78f0a34af68d67e98ecfa620"
+overlay_id = "0x17D"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 92
+jp = "パドラーマ"
+en = "Inferno"
+type = 2
+row = 49
+file_id = "0x168"
+file = "MAGIC092.EMI"
+section = "b543c72c3a00a16f33032368515b2bcf"
+overlay_id = "0x17E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 93
+jp = "レイガ"
+en = "Frost"
+type = 2
+row = 103
+file_id = "0x169"
+file = "MAGIC093.EMI"
+section = "a8fe11958296416435ecd19567f6c382"
+overlay_id = "0x17F"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 94
+jp = "レイギル"
+en = "Iceblast"
+type = 2
+row = 20
+file_id = "0x16A"
+file = "MAGIC094.EMI"
+section = "68c20bab1c66fada5f73f7239480a6fb"
+overlay_id = "0x180"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 95
+jp = "グレイゴル"
+en = "Blizzard"
+type = 2
+row = 22
+file_id = "0x16B"
+file = "MAGIC095.EMI"
+section = "5afd774e508fd6ddb7e78fb2dda173ce"
+overlay_id = "0x181"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 96
+jp = "バル"
+en = "Jolt"
+type = 2
+row = 102
+file_id = "0x16C"
+file = "MAGIC096.EMI"
+section = "2e9ba91fb7396540b8273ff2ea7c26f0"
+overlay_id = "0x182"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 97
+jp = "ババル"
+en = "Lightning"
+type = 2
+row = 19
+file_id = "0x16D"
+file = "MAGIC097.EMI"
+section = "b8f20b056aefdb79753571a38d4d0c81"
+overlay_id = "0x183"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 98
+jp = "バルハラー"
+en = "Myollnir"
+type = 2
+row = 37
+file_id = "0x16E"
+file = "MAGIC098.EMI"
+section = "3c7e3400d7ca410538150a0b14ccdc5e"
+overlay_id = "0x184"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 99
+jp = "シェーザ"
+en = "Cyclone"
+type = 2
+row = 36
+file_id = "0x16F"
+file = "MAGIC099.EMI"
+section = "68805d028c8dca541f4b855db2f055ac"
+overlay_id = "0x185"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 100
+jp = "シェザーガ"
+en = "Typhoon"
+type = 2
+row = 13
+file_id = "0x170"
+file = "MAGIC100.EMI"
+section = "33569cd4ed32da8d40485261f6d064ae"
+overlay_id = "0x186"
+entry = "0x801EEC10"
+status = "verified"
+live = "cast_magic.json 2026-09-08 f+724 (Nina, Typhoon)"
+entry_in_image = true
+
+[[ability]]
+id = 101
+jp = "ガダブレダ"
+en = "Quake"
+type = 2
+row = 26
+file_id = "0x171"
+file = "MAGIC101.EMI"
+section = "d862e3feca5c3ea5c6a012dc2df6f1af"
+overlay_id = "0x187"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 102
+jp = "メガ"
+en = "Simoon"
+type = 2
+row = 69
+file_id = "0x172"
+file = "MAGIC102.EMI"
+section = "ad944490ce465373fe7b84bab785961c"
+overlay_id = "0x188"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 103
+jp = "ドメガ"
+en = "Sirocco"
+type = 2
+row = 57
+file_id = "0x173"
+file = "MAGIC103.EMI"
+section = "b52cb176c3b24098a206da988d8f1b3e"
+overlay_id = "0x189"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 104
+jp = "キリエ"
+en = "Kyrie"
+type = 2
+row = 14
+file_id = "0x174"
+file = "MAGIC104.EMI"
+section = "612c1e44bbadf07dc2cdf853f25dcf63"
+overlay_id = "0x18A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 105
+jp = "ワース"
+en = "Death"
+type = 2
+row = 64
+file_id = "0x175"
+file = "MAGIC105.EMI"
+section = "15ddc7171d841cc08b310c419a4e2c55"
+overlay_id = "0x18B"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 106
+jp = "ネムリィ"
+en = "Sleep"
+type = 2
+row = 104
+file_id = "0x176"
+file = "MAGIC106.EMI"
+section = "ef147fab2145ffc76ab7dd0ccb6a583a"
+overlay_id = "0x18C"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 107
+jp = "ポワン"
+en = "Confuse"
+type = 1
+row = 24
+file_id = "0x177"
+file = "MAGIC107.EMI"
+section = "df60ed334f2e655dfb53fee92e2c0f82"
+overlay_id = "0x18D"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 108
+jp = "ギュガガン"
+en = "Depress"
+type = 1
+row = 25
+file_id = "0x178"
+file = "MAGIC108.EMI"
+section = "4e8841df45b825f011421d462d9d693f"
+overlay_id = "0x18E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 109
+jp = "メコム"
+en = "Ragnarok"
+type = 2
+row = 12
+file_id = "0x179"
+file = "MAGIC109.EMI"
+section = "97f6d77234924a4c9c4b0c40c75473e6"
+overlay_id = "0x18F"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 110
+jp = "ザワルド"
+en = "The World"
+type = 2
+row = 38
+file_id = "0x17A"
+file = "MAGIC110.EMI"
+section = "bf5b65ec3ca8d8ce99e121b93f158e3c"
+overlay_id = "0x190"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 111
+jp = "サラニ"
+en = "Again"
+type = 1
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 112
+jp = "ゴボウセイ"
+en = "Pentagram"
+type = 1
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 113
+jp = "なぎはらえ"
+en = "Fire Whip"
+type = 2
+row = 10
+file_id = "0x17D"
+file = "MAGIC113.EMI"
+section = "7ec2038422163549c9b3f5dc6bffd05f"
+overlay_id = "0x192"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 114
+jp = "ヤクリフ"
+en = "Remedy"
+type = 2
+row = 11
+file_id = "0x17E"
+file = "MAGIC114.EMI"
+section = "9bfe9b4f6fc143802b3b1defd404646d"
+overlay_id = "0x193"
+entry = "0x801EEC44"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 115
+jp = "ウペシウム"
+en = "UtmostAttack"
+type = 0
+row = 115
+file_id = "0x17F"
+file = "MAGIC115.EMI"
+section = "ed9e42e51597d4fb60a94641c6984019"
+overlay_id = "0x194"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 116
+jp = "休む"
+en = "Rest"
+type = 2
+row = 59
+file_id = "0x180"
+file = "MAGIC116.EMI"
+section = "e12c0077a01b74e00efe0dc18530596c"
+overlay_id = "0x195"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 117
+jp = "パム"
+en = "Burn"
+type = 3
+row = 73
+file_id = "0x181"
+file = "MAGIC117.EMI"
+section = "4d8e1d00bf50105b387fc52f8fd08e67"
+overlay_id = "0x196"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 118
+jp = "ダブルヒット"
+en = "Double Blow"
+type = 3
+row = 60
+file_id = "0x182"
+file = "MAGIC118.EMI"
+section = "3d8ffff8b6d7c361875b35b507128fe8"
+overlay_id = "0x197"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 119
+jp = "プチ・ブレス"
+en = "Whelp Breath"
+type = 3
+row = 54
+file_id = "0x133"
+file = "MAGIC018.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EF75C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 120
+jp = "ドラゴンブレス"
+en = "DragonBreath"
+type = 2
+row = 16
+file_id = "0x183"
+file = "MAGIC120.EMI"
+section = "475473eaa1d0cd5dab9f88274d8004c4"
+overlay_id = "0x198"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 121
+jp = "ファイアブレス"
+en = "Firebreath"
+type = 2
+row = 122
+file_id = "0x184"
+file = "MAGIC121.EMI"
+section = "bcd8f84cb5fb542b547d896ccd657909"
+overlay_id = "0x199"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 122
+jp = "アイスブレス"
+en = "Icebreath"
+type = 2
+row = 74
+file_id = "0x185"
+file = "MAGIC122.EMI"
+section = "0f200fd61a74639635b9c371f0d35b4a"
+overlay_id = "0x19A"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 123
+jp = "サンダーブレス"
+en = "ThundrBreath"
+type = 2
+row = 76
+file_id = "0x186"
+file = "MAGIC123.EMI"
+section = "b49a01584135efe7083efa4e1fbaca5a"
+overlay_id = "0x19B"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 124
+jp = "シャインブレス"
+en = "DivineBreath"
+type = 2
+row = 124
+file_id = "0x187"
+file = "MAGIC124.EMI"
+section = "e1a4656bf525d3fe094b87ddab90ca2e"
+overlay_id = "0x19C"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 125
+jp = "ダークブレス"
+en = "ShadowBreath"
+type = 2
+row = 125
+file_id = "0x188"
+file = "MAGIC125.EMI"
+section = "078b955ad4d0891512429738bac3f03a"
+overlay_id = "0x19D"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 126
+jp = "とつげき"
+en = ""
+type = 2
+row = 127
+file_id = "0x189"
+file = "MAGIC126.EMI"
+section = "4e0b1025a99822a6eb876e3a8f3c38e9"
+overlay_id = "0x19E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 127
+jp = "ブレインバースト"
+en = "Head Cracker"
+type = 2
+row = 126
+file_id = "0xFFFF"
+file = ""
+section = ""
+overlay_id = ""
+entry = "0x800AAF44"
+status = "engine"
+
+[[ability]]
+id = 128
+jp = "破滅の光"
+en = "Holocaust"
+type = 2
+row = 128
+file_id = "0xFFFF"
+file = ""
+section = ""
+overlay_id = ""
+entry = "0x800C19C4"
+status = "engine"
+
+[[ability]]
+id = 129
+jp = "ベノムワース"
+en = "Venom"
+type = 3
+row = 145
+file_id = "0x18A"
+file = "MAGIC129.EMI"
+section = "1b45b4630f0a083bafc8d96ddf8af103"
+overlay_id = "0x19F"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 130
+jp = "カイザーブレス"
+en = "KaiserBreath"
+type = 3
+row = 141
+file_id = "0x18B"
+file = "MAGIC130.EMI"
+section = "fa513fbfcaaa31c8df465b5657b67b3b"
+overlay_id = "0x1A0"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 131
+jp = "ゲノサイドブレス"
+en = "Doom Breath"
+type = 2
+row = 144
+file_id = "0x18C"
+file = "MAGIC131.EMI"
+section = "c333c325dab14cb0c6e81c1e5bff416c"
+overlay_id = "0x1A1"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 132
+jp = "ファイアクロー"
+en = "Flame Claw"
+type = 2
+row = 139
+file_id = "0x18D"
+file = "MAGIC132.EMI"
+section = "006046346887f2b3cb859d48faec1a99"
+overlay_id = "0x1A2"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 133
+jp = "アイスクロー"
+en = "Frost Claw"
+type = 2
+row = 129
+file_id = "0x18E"
+file = "MAGIC133.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 134
+jp = "サンダークロー"
+en = "Thunder Claw"
+type = 2
+row = 130
+file_id = "0x18F"
+file = "MAGIC134.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 135
+jp = "シャインクロー"
+en = "Shining Claw"
+type = 2
+row = 131
+file_id = "0x190"
+file = "MAGIC135.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 136
+jp = "爆炎"
+en = "Corona"
+type = 2
+row = 132
+file_id = "0x191"
+file = "MAGIC136.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 137
+jp = "えんごしゃげき"
+en = "Main Cannon"
+type = 2
+row = 101
+file_id = "0x192"
+file = "MAGIC137.EMI"
+section = "985330a28c7615c8d62394b8f296b6d8"
+overlay_id = "0x1A3"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 138
+jp = "パラライザー"
+en = "Paralyzer"
+type = 0
+row = 118
+file_id = "0x193"
+file = "MAGIC138.EMI"
+section = "af1b508e0c99b257036e61b868e806e8"
+overlay_id = "0x1A4"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 139
+jp = "おくの手"
+en = "Trump"
+type = 0
+row = 123
+file_id = "0xFFFF"
+file = ""
+section = ""
+overlay_id = ""
+entry = "0x800C19A8"
+status = "engine"
+
+[[ability]]
+id = 140
+jp = "3連撃"
+en = "Triple Blow"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 141
+jp = "きゅうけつ"
+en = "Syphon"
+type = 3
+row = 68
+file_id = "0x133"
+file = "MAGIC018.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFA74"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 142
+jp = "雷撃"
+en = "Thunder Clap"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 143
+jp = "炎のかべ"
+en = "Wall of Fire"
+type = 3
+row = 66
+file_id = "0x194"
+file = "MAGIC143.EMI"
+section = "f4557ad84a764fe1e5b37760c3306887"
+overlay_id = "0x1A5"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 144
+jp = "すみ"
+en = "Ink"
+type = 3
+row = 67
+file_id = "0x195"
+file = "MAGIC144.EMI"
+section = "8860046c08bfba57dbd1543350cd50b0"
+overlay_id = "0x1A6"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 145
+jp = "すみすみ"
+en = "Ink Ink"
+type = 3
+row = 149
+file_id = "0x196"
+file = "MAGIC145.EMI"
+section = "7a866db9ec5a40051c5f183a621bff99"
+overlay_id = "0x1A7"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 146
+jp = "死の爆弾"
+en = "Death Bomb"
+type = 3
+row = 150
+file_id = "0x197"
+file = "MAGIC146.EMI"
+section = "dd8f9c58b525ac80471ccb177a4d0cac"
+overlay_id = "0x1A8"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 147
+jp = "ルーレット"
+en = "Roulette"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 148
+jp = "あぶら"
+en = "Douse"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 149
+jp = "めだまビーム"
+en = "Eye Beam"
+type = 3
+row = 106
+file_id = "0x181"
+file = "MAGIC117.EMI"
+section = "4d8e1d00bf50105b387fc52f8fd08e67"
+overlay_id = "0x196"
+entry = "0x801EF000"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 150
+jp = "竜変身"
+en = "Accession"
+type = 2
+row = 72
+file_id = "0x198"
+file = "MAGIC150.EMI"
+section = "33cf826749bc94f0186ac2d7d46e4f53"
+overlay_id = "0x1A9"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 151
+jp = "ねる"
+en = "Snooze"
+type = 2
+row = 86
+file_id = "0x199"
+file = "MAGIC151.EMI"
+section = "e1bf5661481a9629942bc8d7a97e0537"
+overlay_id = "0x1AA"
+entry = "0x801EEC50"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 152
+jp = "大防御"
+en = "Resist"
+type = 3
+row = 73
+file_id = "0x181"
+file = "MAGIC117.EMI"
+section = "4d8e1d00bf50105b387fc52f8fd08e67"
+overlay_id = "0x196"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 153
+jp = "せんぎり"
+en = "Mighty Chop"
+type = 3
+row = 110
+file_id = "0x13D"
+file = "MAGIC043.EMI"
+section = "639fdce0ba6951f0de96d2d73590c9fa"
+overlay_id = "0x157"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 154
+jp = "炎のやり"
+en = "Pyrokinesis"
+type = 3
+row = 35
+file_id = "0x19A"
+file = "MAGIC154.EMI"
+section = "703d46ce456a52e7d24a82fdb1f88e12"
+overlay_id = "0x1AB"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 155
+jp = "神撃"
+en = "Holy Strike"
+type = 2
+row = 98
+file_id = "0x129"
+file = "MAGIC005.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 156
+jp = "悪魔ぎり"
+en = "Demonbane"
+type = 3
+row = 92
+file_id = "0x19B"
+file = "MAGIC156.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 157
+jp = "おまじない"
+en = "Charm"
+type = 3
+row = 93
+file_id = "0x19C"
+file = "MAGIC157.EMI"
+section = "995dbefa1d320a8a185d7f80a61275c4"
+overlay_id = "0x147"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 158
+jp = "凶気"
+en = ""
+type = 3
+row = 89
+file_id = "0x19D"
+file = "MAGIC158.EMI"
+section = "71c6eb705ce4c8880a36391e4400d608"
+overlay_id = "0x1AC"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 159
+jp = "ジャンプ"
+en = "Jump"
+type = 3
+row = 120
+file_id = "0x19E"
+file = "MAGIC159.EMI"
+section = "66238d2afe77cd4d82023d65e3ed2b05"
+overlay_id = "0x1AD"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 160
+jp = "あいうち"
+en = "Timed Blow"
+type = 3
+row = 105
+file_id = "0x125"
+file = "MAGIC001.EMI"
+section = "76152e6e1aa93fa80113bad5977b81f5"
+overlay_id = "0x144"
+entry = "0x801EF72C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 161
+jp = "タクレマ"
+en = "Transfer"
+type = 3
+row = 111
+file_id = "0x19F"
+file = "MAGIC161.EMI"
+section = "d740b7cf7f31d0571844d59f804563f8"
+overlay_id = "0x1AE"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 162
+jp = "魔法ため"
+en = "Meditation"
+type = 3
+row = 116
+file_id = "0x1A0"
+file = "MAGIC162.EMI"
+section = "0666e45a67f9b40775c73aa7f64db93b"
+overlay_id = "0x1AF"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 163
+jp = "すぶり"
+en = "Feign Swing"
+type = 3
+row = 78
+file_id = "0x139"
+file = "MAGIC039.EMI"
+section = "8d9cc182c2d069ba40e217c63f272016"
+overlay_id = "0x153"
+entry = "0x801EEC34"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 164
+jp = "みねうち"
+en = "Backhand"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 165
+jp = "そうどり"
+en = "Monopolize"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 166
+jp = "はいすいのじん"
+en = "Last Resort"
+type = 3
+row = 90
+file_id = "0x1A1"
+file = "MAGIC166.EMI"
+section = "57def2e245e4b1ec1de1b1efebb64a39"
+overlay_id = "0x1B0"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 167
+jp = "ヤプリフ"
+en = "Cure"
+type = 3
+row = 91
+file_id = "0x1A2"
+file = "MAGIC167.EMI"
+section = "3d210dbc6aea41bf2a614e209ec29d01"
+overlay_id = "0x1B1"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 168
+jp = "ベネディクション"
+en = "Benediction"
+type = 3
+row = 117
+file_id = "0x1A3"
+file = "MAGIC168.EMI"
+section = "da43dff0d55625f08ac9899dfa185ce9"
+overlay_id = "0x1B2"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 169
+jp = "オーガーぎり"
+en = "Risky Blow"
+type = 3
+row = 97
+file_id = "0x1A4"
+file = "MAGIC169.EMI"
+section = "a9abef67616430e44e513432c3d661cb"
+overlay_id = "0x1B3"
+entry = "0x801EEC38"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 170
+jp = "シャドウウォーク"
+en = "Shadowwalk"
+type = 3
+row = 42
+file_id = "0x12B"
+file = "MAGIC008.EMI"
+section = "a1c5f2f68b154071346f12ee8aeced49"
+overlay_id = "0x14F"
+entry = "0x801EFD30"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 171
+jp = "マジックボール"
+en = "Magic Ball"
+type = 3
+row = 43
+file_id = "0x132"
+file = "MAGIC017.EMI"
+section = "1e32c9ff8aac3e42d1d5ee99950e7050"
+overlay_id = "0x14E"
+entry = "0x801EEC38"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 172
+jp = "ガンとばし"
+en = "Intimidate"
+type = 3
+row = 23
+file_id = "0x1A5"
+file = "MAGIC172.EMI"
+section = "25baa0a5c8024f5ba46b451677c64e66"
+overlay_id = "0x1B4"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 173
+jp = "リリフ"
+en = "Heal"
+type = 3
+row = 34
+file_id = "0x1A6"
+file = "MAGIC173.EMI"
+section = "6e00cf4c20bf9391854479d963aa094e"
+overlay_id = "0x1B5"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 174
+jp = "アプリフ"
+en = "Rejuvenate"
+type = 3
+row = 44
+file_id = "0x156"
+file = "MAGIC070.EMI"
+section = "c33cfc4d1c1a74eabce7c31996ea0ec6"
+overlay_id = "0x16E"
+entry = "0x801EEC28"
+status = "verified"
+live = "cast_magic.json 2026-09-08 f+336 (Nina, Rejuvenate)"
+entry_in_image = true
+
+[[ability]]
+id = 175
+jp = "トプリフ"
+en = "Restore"
+type = 3
+row = 45
+file_id = "0x157"
+file = "MAGIC071.EMI"
+section = "bdb70023060265d6052ac855e473b412"
+overlay_id = "0x16F"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 176
+jp = "リフラル"
+en = "Vitalize"
+type = 3
+row = 113
+file_id = "0x158"
+file = "MAGIC072.EMI"
+section = "ec8538b676104310d7ce74fe35a045d7"
+overlay_id = "0x170"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 177
+jp = "リフレスト"
+en = "Vigor"
+type = 3
+row = 47
+file_id = "0x159"
+file = "MAGIC073.EMI"
+section = "bf2be76e6be1211a00262b14d26ffd92"
+overlay_id = "0x171"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 178
+jp = "ヤクリ"
+en = "Purify"
+type = 3
+row = 114
+file_id = "0x15A"
+file = "MAGIC074.EMI"
+section = "c3ba2129b8bc4f3ca605429e64ad9972"
+overlay_id = "0x172"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 179
+jp = "リバル"
+en = "Raise Dead"
+type = 3
+row = 46
+file_id = "0x15B"
+file = "MAGIC075.EMI"
+section = "aefacfd076129591d644dd00a3b651ef"
+overlay_id = "0x173"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 180
+jp = "リバルラ"
+en = "Resurrect"
+type = 3
+row = 30
+file_id = "0x15D"
+file = "MAGIC077.EMI"
+section = "a224f4411f8c106564a750a631559e33"
+overlay_id = "0x174"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 181
+jp = "マレクタ"
+en = "Leech Power"
+type = 3
+row = 30
+file_id = "0x15D"
+file = "MAGIC077.EMI"
+section = "a224f4411f8c106564a750a631559e33"
+overlay_id = "0x174"
+entry = "0x801EEC28"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 182
+jp = "レクタ"
+en = "Drain"
+type = 3
+row = 15
+file_id = "0x15E"
+file = "MAGIC078.EMI"
+section = "81aa3136c747af2add85076b0c9b18f7"
+overlay_id = "0x175"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 183
+jp = "カテクト"
+en = "Protect"
+type = 3
+row = 52
+file_id = "0x15F"
+file = "MAGIC079.EMI"
+section = "18bdd21a00ab17c6b8d6144efe1342f3"
+overlay_id = "0x176"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 184
+jp = "ミカテクト"
+en = "Shield"
+type = 3
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 185
+jp = "ハサート"
+en = "Speed"
+type = 3
+row = 94
+file_id = "0x163"
+file = "MAGIC083.EMI"
+section = "5f9de7c641828fc516e36aedb2081069"
+overlay_id = "0x179"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 186
+jp = "ギガート"
+en = "Might"
+type = 3
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 187
+jp = "パリア"
+en = ""
+type = 3
+row = 32
+file_id = "0x162"
+file = "MAGIC082.EMI"
+section = "b48a0774c7bea3199e8d3cfc6f03708b"
+overlay_id = "0x178"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 188
+jp = "ペポーパ"
+en = "Silence"
+type = 3
+row = 28
+file_id = "0x164"
+file = "MAGIC086.EMI"
+section = "c2714c0bb1856c6c651ca7ab016528ef"
+overlay_id = "0x17A"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 189
+jp = "ダール"
+en = "Slow"
+type = 3
+row = 48
+file_id = "0x165"
+file = "MAGIC087.EMI"
+section = "257b96595dfe29533203082199577beb"
+overlay_id = "0x17B"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 190
+jp = "ストール"
+en = "Blunt"
+type = 3
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 191
+jp = "ディル"
+en = "Weaken"
+type = 3
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 192
+jp = "パダム"
+en = "Flare"
+type = 3
+row = 29
+file_id = "0x166"
+file = "MAGIC088.EMI"
+section = "6c01ecf75456229f4937d152e2cdf8f5"
+overlay_id = "0x17C"
+entry = "0x801EEC20"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 193
+jp = "パダーマ"
+en = "Fireblast"
+type = 3
+row = 21
+file_id = "0x167"
+file = "MAGIC091.EMI"
+section = "04b565fa78f0a34af68d67e98ecfa620"
+overlay_id = "0x17D"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 194
+jp = "パドラーマ"
+en = "Inferno"
+type = 3
+row = 49
+file_id = "0x168"
+file = "MAGIC092.EMI"
+section = "b543c72c3a00a16f33032368515b2bcf"
+overlay_id = "0x17E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 195
+jp = "レイガ"
+en = "Frost"
+type = 3
+row = 103
+file_id = "0x169"
+file = "MAGIC093.EMI"
+section = "a8fe11958296416435ecd19567f6c382"
+overlay_id = "0x17F"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 196
+jp = "レイギル"
+en = "Iceblast"
+type = 3
+row = 20
+file_id = "0x16A"
+file = "MAGIC094.EMI"
+section = "68c20bab1c66fada5f73f7239480a6fb"
+overlay_id = "0x180"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 197
+jp = "グレイゴル"
+en = "Blizzard"
+type = 3
+row = 22
+file_id = "0x16B"
+file = "MAGIC095.EMI"
+section = "5afd774e508fd6ddb7e78fb2dda173ce"
+overlay_id = "0x181"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 198
+jp = "バル"
+en = "Jolt"
+type = 3
+row = 102
+file_id = "0x16C"
+file = "MAGIC096.EMI"
+section = "2e9ba91fb7396540b8273ff2ea7c26f0"
+overlay_id = "0x182"
+entry = "0x801EEC24"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 199
+jp = "ババル"
+en = "Lightning"
+type = 3
+row = 19
+file_id = "0x16D"
+file = "MAGIC097.EMI"
+section = "b8f20b056aefdb79753571a38d4d0c81"
+overlay_id = "0x183"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 200
+jp = "バルハラー"
+en = "Myollnir"
+type = 3
+row = 37
+file_id = "0x16E"
+file = "MAGIC098.EMI"
+section = "3c7e3400d7ca410538150a0b14ccdc5e"
+overlay_id = "0x184"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 201
+jp = "シェーザ"
+en = "Cyclone"
+type = 3
+row = 36
+file_id = "0x16F"
+file = "MAGIC099.EMI"
+section = "68805d028c8dca541f4b855db2f055ac"
+overlay_id = "0x185"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 202
+jp = "シェザーガ"
+en = "Typhoon"
+type = 3
+row = 13
+file_id = "0x170"
+file = "MAGIC100.EMI"
+section = "33569cd4ed32da8d40485261f6d064ae"
+overlay_id = "0x186"
+entry = "0x801EEC10"
+status = "verified"
+live = "cast_magic.json 2026-09-08 f+724 (Nina, Typhoon)"
+entry_in_image = true
+
+[[ability]]
+id = 203
+jp = "ガダブレダ"
+en = "Quake"
+type = 3
+row = 26
+file_id = "0x171"
+file = "MAGIC101.EMI"
+section = "d862e3feca5c3ea5c6a012dc2df6f1af"
+overlay_id = "0x187"
+entry = "0x801EEC18"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 204
+jp = "メガ"
+en = "Simoon"
+type = 3
+row = 69
+file_id = "0x172"
+file = "MAGIC102.EMI"
+section = "ad944490ce465373fe7b84bab785961c"
+overlay_id = "0x188"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 205
+jp = "ドメガ"
+en = "Sirocco"
+type = 3
+row = 57
+file_id = "0x173"
+file = "MAGIC103.EMI"
+section = "b52cb176c3b24098a206da988d8f1b3e"
+overlay_id = "0x189"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 206
+jp = "キリエ"
+en = "Kyrie"
+type = 3
+row = 14
+file_id = "0x174"
+file = "MAGIC104.EMI"
+section = "612c1e44bbadf07dc2cdf853f25dcf63"
+overlay_id = "0x18A"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 207
+jp = "ワース"
+en = "Death"
+type = 3
+row = 64
+file_id = "0x175"
+file = "MAGIC105.EMI"
+section = "15ddc7171d841cc08b310c419a4e2c55"
+overlay_id = "0x18B"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 208
+jp = "ネムリィ"
+en = "Sleep"
+type = 3
+row = 104
+file_id = "0x176"
+file = "MAGIC106.EMI"
+section = "ef147fab2145ffc76ab7dd0ccb6a583a"
+overlay_id = "0x18C"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 209
+jp = "ポワン"
+en = "Confuse"
+type = 3
+row = 24
+file_id = "0x177"
+file = "MAGIC107.EMI"
+section = "df60ed334f2e655dfb53fee92e2c0f82"
+overlay_id = "0x18D"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 210
+jp = "ギュガガン"
+en = "Depress"
+type = 3
+row = 25
+file_id = "0x178"
+file = "MAGIC108.EMI"
+section = "4e8841df45b825f011421d462d9d693f"
+overlay_id = "0x18E"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 211
+jp = "メコム"
+en = "Ragnarok"
+type = 3
+row = 12
+file_id = "0x179"
+file = "MAGIC109.EMI"
+section = "97f6d77234924a4c9c4b0c40c75473e6"
+overlay_id = "0x18F"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 212
+jp = "ミヤクリ"
+en = "Miyakuri"
+type = 3
+row = 38
+file_id = "0x17A"
+file = "MAGIC110.EMI"
+section = "bf5b65ec3ca8d8ce99e121b93f158e3c"
+overlay_id = "0x190"
+entry = "0x801EEC1C"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 213
+jp = "サラニ"
+en = "Again"
+type = 3
+row = 148
+file_id = "0x1A7"
+file = "MAGIC213.EMI"
+section = "e21cc53e93e35637e1a0a63b9af9dc5b"
+overlay_id = "0x1B6"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 214
+jp = "ヤクリフ"
+en = "Remedy"
+type = 3
+row = 27
+file_id = "0x160"
+file = "MAGIC080.EMI"
+section = "3c56e1f6af05c5c2c8598cee9a0afec7"
+overlay_id = "0x1BF"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 215
+jp = "盗む"
+en = "Steal"
+type = 3
+row = 115
+file_id = "0x17F"
+file = "MAGIC115.EMI"
+section = "ed9e42e51597d4fb60a94641c6984019"
+overlay_id = "0x194"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 216
+jp = "へんしんかいじょ"
+en = "Restore Form"
+type = 3
+row = 87
+file_id = "0x1A8"
+file = "MAGIC216.EMI"
+section = "3670ab98a13f4788ba56a23079896417"
+overlay_id = "0x1B7"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 217
+jp = "オーラバースト"
+en = "Aura Breath"
+type = 3
+row = 108
+file_id = "0xFFFF"
+file = ""
+section = ""
+overlay_id = ""
+entry = "0x800A5360"
+status = "engine"
+
+[[ability]]
+id = 218
+jp = "火流"
+en = "Magma Breath"
+type = 2
+row = 142
+file_id = "0x1A9"
+file = "MAGIC218.EMI"
+section = "254deae01dfcd1cec22b2e03fbb90b5c"
+overlay_id = "0x1B8"
+entry = "0x801EEC04"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 219
+jp = "ジオブレス"
+en = "Geo Breath"
+type = 2
+row = 138
+file_id = "0x1AA"
+file = "MAGIC219.EMI"
+section = "13ed478c2f2d37eafbfb2ff4898f33be"
+overlay_id = "0x1B9"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 220
+jp = "ガイアブレス"
+en = "Gaea´sBreath"
+type = 2
+row = 136
+file_id = "0x1AB"
+file = "MAGIC220.EMI"
+section = "ba2f762814c34b2d56de7eefd98d73b0"
+overlay_id = "0x1BA"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 221
+jp = "ナパーム"
+en = "Combustion"
+type = 2
+row = 146
+file_id = "0x1AC"
+file = "MAGIC221.EMI"
+section = "ba2f762814c34b2d56de7eefd98d73b0"
+overlay_id = "0x1BA"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 222
+jp = "テンペスト"
+en = "Tempest"
+type = 2
+row = 133
+file_id = "0x1AD"
+file = "MAGIC222.EMI"
+section = "c04464acf61fb46063a6294b5df4e736"
+overlay_id = "0x1BB"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 223
+jp = "ディザスタ"
+en = "Hurricane"
+type = 2
+row = 137
+file_id = "0x1AE"
+file = "MAGIC223.EMI"
+section = "5986c69a900388ed74900cb97f9a28fb"
+overlay_id = "0x1BC"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 224
+jp = "テンプテーション"
+en = ""
+type = 2
+row = 137
+file_id = "0x1AE"
+file = "MAGIC223.EMI"
+section = "5986c69a900388ed74900cb97f9a28fb"
+overlay_id = "0x1BC"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 225
+jp = "メテオダイブ"
+en = "MeteorStrike"
+type = 2
+row = 140
+file_id = "0x1AF"
+file = "MAGIC225.EMI"
+section = "4f4848ab03ec2519857ced361ac1ce1a"
+overlay_id = "0x1BD"
+entry = "0x801EEC14"
+status = "evidence"
+entry_in_image = true
+
+[[ability]]
+id = 226
+jp = "メテオダイブ"
+en = "MeteorStrike"
+type = 2
+row = 135
+file_id = "0x1B0"
+file = "MAGIC226.EMI"
+section = "8247741283b0cde2e2bb6c152c370c6b"
+overlay_id = "0x1BE"
+entry = "0x801EEC10"
+status = "evidence"
+entry_in_image = true
