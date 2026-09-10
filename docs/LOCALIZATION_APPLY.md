@@ -200,7 +200,12 @@ taps and check the message globals rather than the frame.
    lead byte) — engine surgery under the enhancement gate; (c) live with
    capitals. Decide after seeing (c) on screen.
 2. **Ruby readings are not proofread.** SudachiPy mode C over 11,070 words;
-   `tools/build_ruby_script.py --review` writes the side-by-side to read.
+   `tools/build_ruby_script.py --review` writes the side-by-side to read,
+   `--ambiguous FILE` the audit list of words the lexicon reads more than one
+   way, and `names/readings.toml` fixes a choice (FURIGANA.md "Reading
+   quality"). Tables are compiled into the plugin: a regenerated table needs
+   `cmake --build build-relprof --target psx-runtime` and a relaunch, and the
+   link fails with *Permission denied* while the game is running.
    Also the `(`/`)` cells are the sheet's ASCII parens, drawn full-cell; a
    thinner pair would save two cells per word if one is ever painted.
 3. **Apostrophe.** One placeholder cell (`0x15 0x20`, an X box on the JP

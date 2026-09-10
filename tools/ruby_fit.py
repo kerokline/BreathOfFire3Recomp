@@ -21,8 +21,8 @@ This measures it against the shipped script, page by page.
 
 Readings come from **SudachiPy** (mode C) over the decoded page text, so each
 annotation is its real length rather than an average; okurigana already on the
-page is trimmed off the reading.  Text decodes through the character table of
-the prior decode work (`BOF3_DECODER`, default D:\BoFIII).  Roughly 14% of
+page is trimmed off the reading.  Text decodes through the in-tree tables
+(`tools/jptext.py`: names/kanji.toml, names/font.toml).  Roughly 14% of
 glyphs have no entry there -- single-byte punctuation, digits and the `0x15`
 atlas page -- and they are counted as one glyph each (correct for width) and
 shown to the tokenizer as a full stop so they end a token instead of splitting
@@ -43,34 +43,48 @@ sys.path.insert(0, HERE)
 import page_rows                                    # noqa: E402
 from text_tables import Disc, default_cue           # noqa: E402
 
-DECODER_DIR = os.environ.get("BOF3_DECODER", r"D:\BoFIII")
 KANJI_RE = re.compile(r"[\u4e00-\u9fff\u3005]")
 HIRA_RE = re.compile(r"[\u3040-\u309f\u30fc]+")
 UNKNOWN = "\u3013"          # geta mark: a glyph the character table does not cover
 CONFIRM = 0x02
 
-_tok = None
+_tok = {}
+_dict = {}
 
 
-def tokenizer():
-    """SudachiPy, mode C.  Loud if it is not installed -- there is no fallback
-    worth having: an averaged reading length would be a guess wearing a number."""
-    global _tok
-    if _tok is None:
+def sudachi_dictionary(name="core"):
+    """The SudachiPy Dictionary object (for lexicon lookups), one per name."""
+    if name not in _dict:
         try:
-            from sudachipy import dictionary, tokenizer as sudachi_tokenizer
+            from sudachipy import dictionary
         except ImportError:
             raise SystemExit("ruby_fit needs SudachiPy: pip install sudachipy sudachidict_core")
-        _tok = (dictionary.Dictionary(dict="core").create(),
-                sudachi_tokenizer.Tokenizer.SplitMode.C)
-    return _tok
+        try:
+            _dict[name] = dictionary.Dictionary(dict=name)
+        except Exception as e:                      # the dictionary package is separate
+            raise SystemExit("SudachiPy dictionary %r is not installed (pip install sudachidict_%s): %s"
+                             % (name, name, e))
+    return _dict[name]
+
+
+def tokenizer(name="core"):
+    """SudachiPy, mode C, over the named dictionary.  Loud if it is not
+    installed -- there is no fallback worth having: an averaged reading length
+    would be a guess wearing a number.
+
+    `core` and `full` give the same readings (measured over the whole script,
+    0 kanji read differently); `full` knows more compounds, so in mode C it
+    yields 武器屋 where core yields 武器 + 屋 -- one reading for the word."""
+    if name not in _tok:
+        from sudachipy import tokenizer as sudachi_tokenizer
+        _tok[name] = (sudachi_dictionary(name).create(), sudachi_tokenizer.Tokenizer.SplitMode.C)
+    return _tok[name]
 
 
 def load_decoder():
-    if DECODER_DIR not in sys.path:
-        sys.path.insert(0, DECODER_DIR)
-    import decode_text
-    return decode_text
+    """The in-tree decoder module (KANA, KANJI, decode): tools/jptext.py."""
+    import jptext
+    return jptext
 
 
 def glyphs(dec, data, start):
@@ -126,19 +140,33 @@ def kata_to_hira(s):
     return "".join(chr(ord(c) - 0x60) if "\u30a1" <= c <= "\u30f6" else c for c in s)
 
 
-def ruby_for(surface, reading):
-    """The kana to print for `surface`, with kana it already shows trimmed off."""
+def inner_kana(surface):
+    """True when kana sits between the first and last kanji (最後の夜, 会いに行こう):
+    the reading belongs to the whole token, not to a stem."""
+    ks = [i for i, c in enumerate(surface) if KANJI_RE.match(c)]
+    return bool(ks) and any(not KANJI_RE.match(c) for c in surface[ks[0]:ks[-1] + 1])
+
+
+def ruby_for(surface, reading, trim=True):
+    """The kana to print for `surface`, with kana it already shows trimmed off
+    the reading's ends.  The surface is compared in hiragana so katakana on
+    the page (方向キー) trims like hiragana does; before that fix the キ leaked
+    into the reading as 方向（ほうこうき）キー.  `trim=False` keeps the whole
+    reading (a token with kana between its kanji prints it after the token)."""
     r = kata_to_hira(reading or "")
     if not r:
         return None
+    if not trim:
+        return r
+    sf = kata_to_hira(surface)
     tail = 0
-    while tail < len(surface) and tail < len(r) - 1 and surface[-1 - tail] == r[-1 - tail]:
-        if KANJI_RE.match(surface[-1 - tail]):
+    while tail < len(sf) and tail < len(r) - 1 and sf[-1 - tail] == r[-1 - tail]:
+        if KANJI_RE.match(sf[-1 - tail]):
             break
         tail += 1
     head = 0
-    while head < len(surface) and head < len(r) - 1 and surface[head] == r[head]:
-        if KANJI_RE.match(surface[head]):
+    while head < len(sf) and head < len(r) - 1 and sf[head] == r[head]:
+        if KANJI_RE.match(sf[head]):
             break
         head += 1
     core = r[head:len(r) - tail] if tail else r[head:]

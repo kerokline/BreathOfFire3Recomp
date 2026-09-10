@@ -235,8 +235,11 @@ python tools/ruby_fit.py sample AREA000:19 AREA001:33 --bin-root D:\BoFIII\BIN
 python tools/page_rows.py rows                     # the rows-per-page census
 ```
 
-`ruby_fit` needs SudachiPy (`pip install sudachipy sudachidict_core`) and the
-character table of the prior decode work (`BOF3_DECODER`, default `D:\BoFIII`).
+`ruby_fit` needs SudachiPy (`pip install sudachipy sudachidict_core`; the
+every-word scope also `sudachidict_full`). Text decodes through the in-tree
+tables, `names/kanji.toml` (the 441 two-byte codes, moved in from the prior
+decode work 2026-09-10 with one correction: `0x132C` is 代, not 賃) and
+`names/font.toml`, via `tools/jptext.py`; nothing outside the repo is read.
 Disc bytes come from the `.cue` in `game.toml` or an extracted `BIN/` tree; the
 disc is never written.
 
@@ -272,6 +275,46 @@ second.
   finding the box frame's width where `Window_DrawFrame` `0x8015A58C` draws it,
   or by putting one over-long line on screen once delivery exists. If the real
   width is 16–18, the overflow numbers above all improve.
-- **Reading quality.** The Sudachi pass is costed, not proofread: `言う` comes
-  out `ゆ`, and mode C sometimes splits a compound. Fine for measuring rows,
-  not fine for a reader learning from it.
+- **Reading quality.** The Sudachi pass is costed, not proofread. Since
+  2026-09-10 the tool has the levers for it: `names/readings.toml` overrides
+  a word's reading before the dictionary (keyed on the surface or on a verb's
+  dictionary form, so `言う = いう` also reads 言っ / 言わ / 言え, or on the
+  surface plus a `next` list of following tokens or a `prev` list of text
+  the line must end with before the word, for a phrase rule: `何 = なに`
+  before を / が / も / か / a particle or punctuation, なん otherwise; `方 =
+  かた` after 旅の or 若い, where the lexicon's ほう is the direction sense;
+  seeded with 私, 言う, 何 and 方), and `--ambiguous FILE` writes the audit list — every annotated
+  surface the lexicon reads more than one way, most frequent first, with the
+  candidates and what was printed (540 surfaces on the every-word table; 何,
+  事, 船, 竜, 様, 力, 人 at the top). A surface key cannot split context
+  readings (何 = なに / なん); those stay with the dictionary. Dictionary
+  choice: `core` and `full` give identical readings over the whole script (0
+  kanji differ), `full` only merges compounds (武器屋 as one token, 130 runs
+  of 43,075), so the every-word table uses `full` and first-per-area stays on
+  `core` (a merged surface would count as a new first occurrence). A token
+  with kana between its kanji prints its whole reading after the whole token
+  (最後の夜（さいごのよる）, 会いに行こう（あいにいこう）) instead of a
+  stem split. Also fixed: katakana on the page was not trimmed from the
+  reading (方向キー printed ほうこうき).
+- **Rows break between phrases (2026-09-10).** Every Sudachi token is a
+  re-flow unit, and particles, auxiliaries and suffixes attach to the word
+  before them, so a row never opens on は or splits つぎは / くれる the way
+  the glyph-level fill did. Cost, at width 16: page splits 399 → 554
+  (first-per-area) and 1,097 → 1,471 (every word); table entries 5,926 →
+  5,835 and 6,063 → 6,042 because more pages now re-flow back to their
+  authored breaks. Left: a split can strand one phrase on a page of its
+  own (イナカは大変 → 大変 alone); balancing rows across the split would
+  fix that.
+- **Out-of-vocabulary words (2026-09-10).** A token the lexicon does not
+  hold comes back with its own surface as the reading, which the kana check
+  rejects, so the word printed bare. Two causes, both closed: dialect
+  stretching glued to a kanji (気ィ, 設備ーい, 起動ーう) broke the token
+  boundary, so the annotator now tokenizes with a ー / small kana after a
+  kanji stripped and hands the glyphs back after the reading (気（き）ィ,
+  設備（せつび）ーい); and coinages (闘場, 闘都) are sidecar entries. The
+  sweep over the whole script (every kanji token Sudachi marks OOV, and
+  every kanji seen only inside one) found no further misread cells after
+  0x132C; what it did find is the numeral handler: 一 reads いち and the
+  counter tokenizes separately, so 一回戦 / 一戦 / 一発 lost the sokuon and
+  一晩 its native reading — two `next` rules on 一 cover the counters the
+  script uses. Unread words: 45 → 0.

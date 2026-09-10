@@ -40,6 +40,7 @@ import os
 import re
 import struct
 import sys
+import tomllib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -55,19 +56,59 @@ HIRA_RE = re.compile(r"[\u3040-\u309f\u30fc]+")
 # Characters that must not begin a row: they cling to the unit before them.
 CLOSERS = set("」』）。、‥？！ー")
 OPEN_BRACKET, CLOSE_BRACKET = 0x28, 0x29      # ( ) on the JP sheet
+STRETCH = set("ーァィゥェォぁぃぅぇぉ")          # glued to a kanji: dialect stretching
+READINGS_TOML = os.path.join(ROOT, "names", "readings.toml")
+DICT_FOR_SCOPE = {"area": "core", "every": "full"}
+
+
+def load_overrides(path=READINGS_TOML):
+    """surface -> hiragana reading, from names/readings.toml ([[reading]]
+    entries).  Consulted before SudachiPy; the auditable answer to the words
+    the dictionary reads by convention rather than by context (私 -> ワタクシ)."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, "rb") as f:
+        doc = tomllib.load(f)
+    out = {}                    # surface -> [(next_set | None, prev_tuple | None, reading)]
+    for row in doc.get("reading", []):
+        surface, reading = row["surface"], ruby_fit.kata_to_hira(row["reading"])
+        if not HIRA_RE.fullmatch(reading):
+            raise SystemExit("%s: reading for %s is not kana: %r" % (path, surface, row["reading"]))
+        nxt = row.get("next")
+        nxt = frozenset(nxt) if nxt is not None else None
+        prv = row.get("prev")
+        prv = tuple(prv) if prv is not None else None
+        rules = out.setdefault(surface, [])
+        if any((n, p) == (nxt, prv) for n, p, _ in rules):
+            raise SystemExit("%s: %s listed twice for the same context" % (path, surface))
+        rules.append((nxt, prv, reading))
+    for rules in out.values():                      # context rules first, the default last
+        rules.sort(key=lambda r: r[0] is None and r[1] is None)
+    return out
+
+
+def override_lookup(overrides, surface, next_surface, prev_text):
+    """The sidecar reading for `surface` in context, or None: the first rule
+    whose `next` list holds the following token and whose `prev` list holds
+    a suffix of the text before the word (旅の方: `prev = ["旅の"]`), else the
+    rule with neither."""
+    for nxt, prv, reading in overrides.get(surface, ()):
+        if nxt is not None and next_surface not in nxt:
+            continue
+        if prv is not None and not any(prev_text.endswith(p) for p in prv):
+            continue
+        return reading
+    return None
 
 
 def load_maps():
     """char -> bytes for what the annotator emits (kana), and the full decode."""
-    dec = page_rows.load_decoder()
-    if dec is None:
-        raise SystemExit("needs the prior decode work (BOF3_DECODER, default D:\\BoFIII)")
-    import decode_text
+    import jptext
     kana_enc = {}
-    for code, ch in decode_text.KANA.items():
+    for code, ch in jptext.KANA.items():
         kana_enc.setdefault(ch, bytes([code]))
     single, page15, _ = load_jp_tables()
-    kanji_dec = dict(decode_text.KANJI)
+    kanji_dec = dict(jptext.KANJI)
     return kana_enc, single, page15, kanji_dec
 
 
@@ -114,33 +155,112 @@ def parse(raw, single, page15, kanji_dec):
 
 
 class Annotator:
-    def __init__(self, width, rows, annotate=True, reflow=True):
+    def __init__(self, width, rows, annotate=True, reflow=True, dict_name="core",
+                 overrides=None, ambiguous=None):
         self.kana_enc, self.single, self.page15, self.kanji_dec = load_maps()
         self.width, self.rows = width, rows
         self.do_annotate, self.do_reflow = annotate, reflow
         self.stats = collections.Counter()
-        self.tok, self.mode = ruby_fit.tokenizer()
+        self.dict_name = dict_name
+        self.tok, self.mode = ruby_fit.tokenizer(dict_name)
+        self.overrides = overrides or {}
+        self.override_hits = collections.Counter()
+        # surface -> Counter(reading printed) over every annotated occurrence,
+        # for the ambiguity report (None = not collecting)
+        self.ambiguous = ambiguous
+        self._lexicon_readings = {}
+
+    def lexicon_readings(self, surface):
+        """Distinct readings the dictionary holds for this exact surface."""
+        if surface not in self._lexicon_readings:
+            seen = []
+            for m in ruby_fit.sudachi_dictionary(self.dict_name).lookup(surface):
+                r = ruby_fit.kata_to_hira(m.reading_form())
+                if r not in seen:
+                    seen.append(r)
+            self._lexicon_readings[surface] = seen
+        return self._lexicon_readings[surface]
 
     # -- readings -------------------------------------------------------------
+    def override_for(self, surface, token, next_surface="", prev_text=""):
+        """The sidecar reading for this token, or None.  An entry keys on the
+        exact surface, or on the token's dictionary form: `言う = いう` then
+        also reads 言っ / 言わ / 言え, by swapping the dictionary form's kana
+        tail for the conjugated surface's (来る = くる gives 来 -> く, not き:
+        list the irregular surfaces themselves).  An entry with `next` applies
+        only when the following token is listed (何 + を = なに)."""
+        r = override_lookup(self.overrides, surface, next_surface, prev_text)
+        if r is not None:
+            return r
+        base = token.dictionary_form()
+        r = override_lookup(self.overrides, base, next_surface, prev_text)
+        if r is None or base == surface:
+            return r
+        cut = max((k for k, c in enumerate(base) if KANJI_RE.match(c)), default=-1) + 1
+        scut = max((k for k, c in enumerate(surface) if KANJI_RE.match(c)), default=-1) + 1
+        if not cut or base[:cut] != surface[:scut]:
+            return None                             # different stem: not this word
+        base_tail = base[cut:]
+        if base_tail and not r.endswith(base_tail):
+            return None                             # the override's kana do not end like the word
+        stem = r[:len(r) - len(base_tail)] if base_tail else r
+        return stem + surface[scut:]
+
+    # Tokens that hang off the word before them: a row never opens on one.
+    ATTACH_POS = ("助詞", "助動詞", "接尾辞")
+
     def annotate_run(self, run, seen):
         """run: list of glyph items.  Returns a list of units, each a list of
-        items; a kanji word and its reading form one unit."""
-        text = "".join(it[2] for it in run)
-        if not self.do_annotate or not KANJI_RE.search(text):
+        items.  A unit is one Sudachi token -- a kanji word carries its
+        reading -- with particles, auxiliaries and suffixes attached to the
+        word before them, so the re-flow breaks rows between phrases
+        (つぎは / やっつけて くれるんじゃ), never inside a word."""
+        if not self.do_annotate:
             return [[it] for it in run]
-        units, pos = [], 0
-        for t in self.tok.tokenize(text, self.mode):
+        # A long-vowel mark or small kana glued to a kanji (気ィ, 設備ーい,
+        # 起動ーう: dialect stretching) is not in any lexicon and breaks the
+        # token boundary (設 + 備ーい).  Tokenize with it stripped and hand the
+        # glyphs back to the token they followed, after the reading.
+        chars = [it[2] for it in run]
+        keep = []                                   # run indices the tokenizer sees
+        for k, c in enumerate(chars):
+            stretched = k and c in STRETCH and (KANJI_RE.match(chars[k - 1]) or (k - 1) not in keep)
+            if not stretched:
+                keep.append(k)
+        text = "".join(chars[k] for k in keep)
+        units, attach, pos = [], [], 0
+        tokens = list(self.tok.tokenize(text, self.mode))
+        for ti, t in enumerate(tokens):
             surface = t.surface()
-            word = run[pos:pos + len(surface)]
+            next_surface = tokens[ti + 1].surface() if ti + 1 < len(tokens) else ""
+            prev_text = text[:pos]
+            span = keep[pos:pos + len(surface)]
             pos += len(surface)
+            if not span:                            # Sudachi can emit an empty token
+                continue
+            end = span[-1] + 1                      # then the stripped glyphs that followed
+            stop = keep[pos] if pos < len(keep) else len(run)
+            word = [run[k] for k in span] + run[end:stop]
+            attach.append(t.part_of_speech()[0] in self.ATTACH_POS)
             if not KANJI_RE.search(surface):
-                units.extend([it] for it in word)
+                units.append(word)
                 continue
             if surface in seen:
                 self.stats["repeat"] += 1
                 units.append(word)
                 continue
-            ruby = ruby_fit.ruby_for(surface, t.reading_form())
+            # A token with kana between its kanji (最後の夜, 会いに行こう) is one
+            # concept: its whole reading follows the whole token.  Otherwise the
+            # reading follows the kanji stem with the page's own kana trimmed.
+            whole = ruby_fit.inner_kana(surface)
+            reading = self.override_for(surface, t, next_surface, prev_text)
+            if reading is not None:
+                self.override_hits[surface] += 1
+            else:
+                reading = t.reading_form()
+            ruby = ruby_fit.ruby_for(surface, reading, trim=not whole)
+            if self.ambiguous is not None:
+                self.ambiguous.setdefault(surface, collections.Counter())[ruby] += 1
             if not ruby or not HIRA_RE.fullmatch(ruby):
                 self.stats["unread"] += 1
                 units.append(word)
@@ -155,15 +275,24 @@ class Annotator:
             self.stats["kana"] += len(ruby)
             # The reading follows the kanji stem: `\u8d77(\u304a)\u304d\u308b`, not `\u8d77\u304d\u308b(\u304a)`.
             # Head kana (rare, e.g. \u304a\u5ba2\u69d8) stay in front of it.
-            last_kanji = max(k for k, c in enumerate(surface) if KANJI_RE.match(c))
+            last_kanji = len(surface) - 1 if whole else \
+                max(k for k, c in enumerate(surface) if KANJI_RE.match(c))
             unit = list(word[:last_kanji + 1])
             unit.append(("g", bytes([OPEN_BRACKET]), "\uff08"))
             unit.extend(("g", e, c) for e, c in zip(enc, ruby))
             unit.append(("g", bytes([CLOSE_BRACKET]), "\uff09"))
             unit.extend(word[last_kanji + 1:])
             units.append(unit)
-        units.extend([it] for it in run[pos:])
-        return units
+        merged = []
+        for u, hang in zip(units, attach):
+            prev = merged[-1] if merged else None
+            if hang and prev and not (len(prev) == 1 and prev[0][2] == " "):
+                merged[-1] = prev + u
+            else:
+                merged.append(u)
+        done = keep[pos - 1] + 1 if pos else 0
+        merged.extend([it] for it in run[done:])
+        return merged
 
     # -- layout ---------------------------------------------------------------
     def units_for_page(self, items, seen):
@@ -278,6 +407,33 @@ class Annotator:
         return bytes(out)
 
 
+def write_ambiguous(path, ann, overrides):
+    """The audit list: every annotated surface the lexicon reads more than one
+    way, most frequent first, with the candidates and what was printed.  The
+    printed reading is after the trim (良い -> い); the candidates are whole."""
+    rows = []
+    for surface, used in ann.ambiguous.items():
+        cands = ann.lexicon_readings(surface)
+        if len(cands) < 2 and surface not in overrides:
+            continue
+        rows.append((sum(used.values()), surface, cands, used))
+    rows.sort(key=lambda r: (-r[0], r[1]))
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("# Ambiguous readings -- %d surfaces the %s lexicon reads more than one way\n"
+                "# (annotated occurrences, surface, candidates | printed reading x count | override)\n"
+                "# Choose in names/readings.toml: [[reading]] surface = \"...\" reading = \"...\"\n"
+                "# Surface-only overrides cannot separate context readings (何 = なに / なん).\n\n"
+                % (len(rows), ann.dict_name))
+        for n, surface, cands, used in rows:
+            printed = " ".join("%s x%d" % (r, c) for r, c in used.most_common())
+            ov = "  override=%s" % " ".join(
+                "%s%s%s" % (r, "" if n is None else "(before %s)" % "/".join(sorted(n)),
+                            "" if p is None else "(after %s)" % "/".join(p))
+                for n, p, r in overrides[surface]) if surface in overrides else ""
+            f.write("%6d  %s\t%s\t| %s%s\n" % (n, surface, " / ".join(cands), printed, ov))
+    print("ambiguity list: %d surfaces -> %s" % (len(rows), path))
+
+
 class _NeverSeen(set):
     """A `seen` set that forgets: every occurrence gets its reading."""
     def add(self, item):
@@ -299,13 +455,23 @@ def main(argv=None):
     ap.add_argument("--selftest", action="store_true",
                     help="no annotation, no reflow: every message must come back byte-identical")
     ap.add_argument("--max-len", type=int, default=2040)
+    ap.add_argument("--dict", choices=["core", "full"],
+                    help="SudachiPy dictionary; default core for --scope area, full for "
+                         "--scope every (full merges compounds: 武器屋 as one word)")
+    ap.add_argument("--ambiguous", help="write the audit list of annotated words whose surface "
+                         "has more than one lexicon reading (candidates, the reading used, count)")
     args = ap.parse_args(argv)
+    if not args.dict:
+        args.dict = DICT_FOR_SCOPE[args.scope]
 
     code = {"area": "jp_ruby", "every": "jp_ruby_all"}[args.scope]
     if not args.out:
         args.out = os.path.join(ROOT, "generated", "bof3_xlate_%s.c" % code)
     disc = Disc(cue=args.cue, bin_root=args.bin_root)
-    ann = Annotator(args.width, args.rows, annotate=not args.selftest, reflow=not args.selftest)
+    overrides = load_overrides()
+    ann = Annotator(args.width, args.rows, annotate=not args.selftest, reflow=not args.selftest,
+                    dict_name=args.dict, overrides=overrides,
+                    ambiguous={} if args.ambiguous else None)
     review = open(args.review, "w", encoding="utf-8") if args.review else None
     entries, seen_hash = [], set()
     stats = collections.Counter()
@@ -352,6 +518,8 @@ def main(argv=None):
                 review.write("RUBY  " + decode_jp(enc, ann.single, ann.page15) + "\n\n")
     if review:
         review.close()
+    if args.ambiguous:
+        write_ambiguous(args.ambiguous, ann, overrides)
 
     if args.selftest:
         print("selftest: %d slots, %d distinct messages checked, %d mismatches"
@@ -366,9 +534,11 @@ def main(argv=None):
     print("slots %d, empty %d, duplicate %d, unchanged (no kanji, fits) %d, too long %d"
           % (stats["slots"], stats["empty"], stats["duplicate"], stats["unchanged"], stats["too_long"]))
     print("annotated %d words (%.2f kana each), %d repeats suppressed, %d without a usable "
-          "reading, %d with a kana the sheet cannot encode"
+          "reading, %d with a kana the sheet cannot encode; dictionary %s, %d overrides "
+          "applied to %d words (%d listed)"
           % (ann.stats["words"], ann.stats["kana"] / max(1, ann.stats["words"]),
-             ann.stats["repeat"], ann.stats["unread"], ann.stats["unencodable"]))
+             ann.stats["repeat"], ann.stats["unread"], ann.stats["unencodable"],
+             args.dict, sum(ann.override_hits.values()), len(ann.override_hits), len(overrides)))
     print("pages split for exceeding %d rows at width %d: %d; narration pages left verbatim: %d"
           % (args.rows, args.width, ann.stats["split_pages"], ann.stats["narration_pages"]))
     print("longest encoded message: %d bytes (%s); slot cap %d" % (longest + (args.max_len,)))
