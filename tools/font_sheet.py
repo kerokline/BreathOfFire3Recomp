@@ -10,6 +10,9 @@ emits `names/font.toml`.
     python tools/font_sheet.py render --bin-root D:\BoFIII\BIN    # labelled PNGs
     python tools/font_sheet.py table  --bin-root D:\BoFIII\BIN    # -> names/font.toml
     python tools/font_sheet.py show 3b --bin-root D:\BoFIII\BIN   # one glyph, big
+    python tools/font_sheet.py kanji --bin-root D:\BoFIII\BIN     # kanji proof page:
+        # every 0x12xx/0x13xx cell beside the kanji names/kanji.toml claims,
+        # in a real font -> analysis/font/kanji_proof.png (docs/TEXT_ENGINE.md)
 
 ## The sheet
 
@@ -99,14 +102,17 @@ PAGE15 = {
 }
 
 
-def sheet(disc):
-    """The de-interleaved 256 x 252 sheet as a list of rows of nibbles."""
+def sheet(disc, block=None):
+    """The de-interleaved 256 x 252 sheet as a list of rows of nibbles.
+    block 0 is the single-byte sheet, block 1 the kanji sheet (same storage:
+    two interleaved 32-row streams; logically 21 cells of 12 px, column 10
+    straddling the 128 px cut, which the concatenation reassembles)."""
     try:
         import numpy as np
     except ImportError:
         raise SystemExit("font_sheet needs numpy")
     emi = Emi(disc.read(EMI_PATH), EMI_PATH)
-    data = emi.data(BLOCK)
+    data = emi.data(BLOCK if block is None else block)
     if len(data) != 0x8000:
         raise SystemExit("%s section %d is %d bytes, expected 32768"
                          % (EMI_PATH, BLOCK, len(data)))
@@ -173,6 +179,68 @@ def cmd_show(disc, args):
     return 0
 
 
+KANJI_BLOCK = 1
+KANJI_BASE = 0x1200
+CJK_FONTS = [r"C:\Windows\Fonts\msgothic.ttc", r"C:\Windows\Fonts\meiryo.ttc",
+             r"C:\Windows\Fonts\YuGothM.ttc",
+             "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"]
+
+
+def cmd_kanji(disc, args):
+    """The kanji proof page: every 0x12xx / 0x13xx cell of the sheet next to
+    the kanji names/kanji.toml says it is, drawn in a real CJK font, so a
+    transcription slip (0x1354 冒 for 探, 0x132C 賃 for 代) is one glance
+    instead of a reading caught in play. A pixel-overlap ranking against the
+    font was tried and dropped: at 12 px it ranks by stroke weight (二, 川
+    came out "worst"), not by identity. Eyes do this job; the page makes it
+    a four-crop job instead of a 441-cell one."""
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    import jptext
+    grid = sheet(disc, KANJI_BLOCK)
+    font = None
+    for path in CJK_FONTS:
+        if os.path.exists(path):
+            font = path
+            break
+    if not font:
+        raise SystemExit("no CJK font found (looked at %s)" % ", ".join(CJK_FONTS))
+    S = args.scale
+    big = ImageFont.truetype(font, CELL * S - 4)
+    label = ImageFont.truetype(font, 11)
+    last = jptext.KANJI_LAST
+    codes = list(range(KANJI_BASE, last + 1))
+
+    def cell(code):
+        i = code - KANJI_BASE
+        r, c = divmod(i, COLS)
+        return grid[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL]
+
+    CW, CH = 2 * CELL * S + 8, CELL * S + 18
+    im = Image.new("RGB", (COLS * CW + 8, ((len(codes) + COLS - 1) // COLS) * CH + 8), (255, 255, 255))
+    d = ImageDraw.Draw(im)
+    for n, code in enumerate(codes):
+        gy, gx = divmod(n, COLS)
+        X, Y = 8 + gx * CW, 8 + gy * CH
+        # ink is nibble 7 (stroke) with 1 as the light edge level; paint the
+        # stroke black and the edge pale so the 12 px glyph reads next to the font
+        g = Image.fromarray((255 - np.minimum(cell(code) * 36, 255)).astype("uint8"), "L")
+        g = g.resize((CELL * S, CELL * S), Image.NEAREST).convert("RGB")
+        im.paste(g, (X, Y))
+        ch = jptext.KANJI.get("%04x" % code)
+        if ch:
+            d.text((X + CELL * S + 2, Y - 2), ch, fill=(0, 0, 160), font=big)
+        d.text((X, Y + CELL * S + 2), "%04x %s" % (code, ch or "??"),
+               fill=(0, 0, 0) if ch else (200, 0, 0), font=label)
+    out = os.path.join(args.out_dir, "kanji_proof.png")
+    os.makedirs(args.out_dir, exist_ok=True)
+    im.save(out)
+    print("%s  (%d cells, %d named, font %s)"
+          % (out, len(codes), sum(1 for c in codes if "%04x" % c in jptext.KANJI),
+             os.path.basename(font)))
+    return 0
+
+
 def cmd_table(disc, args):
     grid = sheet(disc)
     rows = grid.shape[0] // CELL
@@ -219,18 +287,21 @@ def cmd_table(disc, args):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["render", "table", "show"])
+    ap.add_argument("command", choices=["render", "table", "show", "kanji"])
     ap.add_argument("code", nargs="?", help="show: a hex byte, e.g. 3b")
     ap.add_argument("--page15", action="store_true", help="show: the byte after a 0x15 lead")
     ap.add_argument("--cue", default=default_cue())
     ap.add_argument("--bin-root", help="extracted BIN/ directory instead of the .cue")
-    ap.add_argument("--scale", type=int, default=8, help="render: pixel scale")
+    ap.add_argument("--scale", type=int, default=8, help="render / kanji: pixel scale")
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "analysis", "font"))
     args = ap.parse_args(argv)
     if args.command == "show" and not args.code:
         ap.error("show needs a hex code")
+    if args.command == "kanji" and args.scale == 8:
+        args.scale = 4
     disc = Disc(cue=args.cue, bin_root=args.bin_root)
-    return {"render": cmd_render, "table": cmd_table, "show": cmd_show}[args.command](disc, args)
+    return {"render": cmd_render, "table": cmd_table, "show": cmd_show,
+            "kanji": cmd_kanji}[args.command](disc, args)
 
 
 if __name__ == "__main__":

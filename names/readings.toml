@@ -70,3 +70,28 @@ surface = "一"
 reading = "ひと"
 next = ["晩", "月", "目", "言", "息", "口", "休", "安", "際", "筋", "粒", "声", "夏", "冬", "雨", "眠"]
 note = "一晩 = ひとばん"
+
+# Item / ability names (the 0x07 insert table, docs/INSERT_RUBY.md): the
+# tokenizer sees a bare name with no sentence around it.
+[[reading]]
+surface = "光"
+reading = "こう"
+next = ["合成"]
+note = "光合成 (Peco's ability, こうごうせい): both dictionaries split it as 光 + 合成 and read the first ひかり"
+
+[[reading]]
+surface = "お頭"
+reading = "おかしら"
+note = "さかなのお頭 (Fish Head): the dictionary's one token お頭 is オツム"
+
+[[reading]]
+surface = "薬"
+reading = "やく"
+prev = ["とっこう"]
+note = "とっこう薬 = 特効薬 (とっこうやく); the dictionary reads a bare 薬 as くすり"
+
+[[reading]]
+surface = "薬"
+reading = "ぐすり"
+prev = ["気つけ"]
+note = "気つけ薬 = 気付け薬 (きつけぐすり), rendaku"

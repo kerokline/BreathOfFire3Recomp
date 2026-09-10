@@ -128,6 +128,10 @@
 #define PSX_FN_Stat_AddClamped 0x80165EE4u
 #define func_80165EE4 Stat_AddClamped  /* alias */
 
+/* confirmed: disasm GAME.EMI 0x801B4094 (the search-spot item branch) and 0x801B3870 (2026-09-10, docs/INSERT_RUBY.md): (category, item_id) -> pointer to the 8-byte name in the item table; both callers copy 8 bytes from it into the 0x07 insert record 0 at 0x801490D4, store a NUL at 0x801490DC, then Inventory_Add and Msg_OpenSystem(2). The insert record is filled BEFORE the message opens, which is what the Ruby insert write-back relies on */
+#define PSX_FN_Item_NamePtr 0x80166720u
+#define func_80166720 Item_NamePtr  /* alias */
+
 /* confirmed: equip3.json 2026-09-05: on weapon swap (record +0x0E 3->0x1C) START.EMI 0x801D6E70 calls it with (count ptr 0x801452CA, item 0x1C, 1, id ptr 0x801450CA) and the count went 2->1 at store pc 0x80166F94; then Inventory_Add(1, 3, 1) put the old weapon back (slot 5) and the menu wrote the record byte at 0x801D6EA4 */
 #define PSX_FN_Inventory_Remove 0x80166F30u
 #define func_80166F30 Inventory_Remove  /* alias */

@@ -346,4 +346,10 @@ second.
   309 slots) after the 200 area scripts: a slot the box draws always
   matches, a slot a menu draws never does. +57 / +101 entries; selftest
   7,014 messages, 0 mismatches. The same holds for the English table when
-  menus come into scope.
+  menus come into scope. **Trap paid for:** the plugin gated the pointer to
+  the area block (`0x80010000`–`0x80014000`) and skipped every system-block
+  message before the lookup, so the new entries were inert until
+  `AREA_BLOCK_HI` became `0x80017628`, the end of the system section
+  (`src/bof3_localize.c`). Also checked on the way: a headless boot with only
+  `settings.toml` resolves `lang=jp_ruby_all` immediately (debug port
+  `{"cmd":"xlate"}`), and the plugin registers all three tables.

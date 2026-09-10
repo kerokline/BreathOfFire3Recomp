@@ -95,6 +95,13 @@ status = "confirmed"
 note = "shop buy trace buy.json 2026-09-05 (SHOP.EMI 0x801D1E98 jal, a0=item id byte 0x801E5F7C, a1=qty) + ghidra: (category, item_id, count): id list = *(0x801C9934 + cat*4), count list = *(0x801C9948 + cat*4), 128 slots; existing stack += count (cap 99, returns 0 when capped) else first slot with id 0 or count 0; scratchpad 0x1F800000 = 1 if a new slot was used"
 
 [[func]]
+pc = 0x80166720
+name = "Item_NamePtr"
+emit = false
+status = "confirmed"
+note = "disasm GAME.EMI 0x801B4094 (the search-spot item branch) and 0x801B3870 (2026-09-10, docs/INSERT_RUBY.md): (category, item_id) -> pointer to the 8-byte name in the item table; both callers copy 8 bytes from it into the 0x07 insert record 0 at 0x801490D4, store a NUL at 0x801490DC, then Inventory_Add and Msg_OpenSystem(2). The insert record is filled BEFORE the message opens, which is what the Ruby insert write-back relies on"
+
+[[func]]
 pc = 0x80166FCC
 name = "Zenny_Sub"
 emit = false

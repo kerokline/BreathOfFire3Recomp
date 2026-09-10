@@ -725,6 +725,32 @@ modding, performance and extensibility.
 
 ### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)
 
+**2026-09-10 — inserted names read too; see [`INSERT_RUBY.md`](INSERT_RUBY.md).**
+The Ruby tables are in play (user-verified in real play, both scopes, system
+block included), the readings have an override sidecar (`names/readings.toml`:
+surface / dictionary-form / `next` / `prev` rules) and an audit list
+(`--ambiguous`), the kanji table is in-tree (`names/kanji.toml`,
+`tools/jptext.py`, 0x132C corrected 賃 → 代), and unread words are 0. The
+text the box *inserts* at draw time — item and skill names through
+`<07><nn>`, a 32-byte scratch record at `0x801490D4 + 0x20*nn` — is now
+covered as well: `tools/build_ruby_script.py` emits a second table
+(`generated/bof3_insert_<code>.c`, hash of the record bytes → the name with
+readings, 109 names) next to each Ruby message table, and the plugin
+rewrites the record at `MsgBox_Reset` before the message opens. The two
+design checks were answered from the GAME.EMI disassembly (record filled
+before the open; no leading byte) and the whole path ran on a live guest:
+a synthetic pickup line drew 薬草（やくそう） を手に入れた (screenshot in
+`INSERT_RUBY.md`). **Left:** see one real pickup and one master's skill line
+on screen with *Japanese (Ruby)* selected — the skill line exercises record 1,
+which the area script fills through a pointer the immediate scan could not
+see. `build-relprof` is linked with all five tables.
+
+**Traps from 2026-09-10** (details in FURIGANA.md): the plugin's pointer
+gate must cover the system block (`0x80010000`–`0x80017628`); a regenerated
+table needs a rebuild *and* the game closed for the link; runtime inserts
+must carry a width in the re-flow or a line runs 19 cells; savestates from
+before the framework bump are refused (codegen hash), memcard saves are fine.
+
 **The apply path exists and is verified on screen (2026-09-09 afternoon):**
 [`LOCALIZATION_APPLY.md`](LOCALIZATION_APPLY.md). `game.toml` hooks
 `MsgBox_Reset` through `[recompiler].mod_function_entry_funcs`,
@@ -1061,7 +1087,7 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
 | `tools/save_tool.py` | **Save-file reader/verifier** over raw card images (`saves/*.mcd`, `*.mcr`): `list` (slots, SJIS title, checksum OK/BAD, play time, lead level, zenny, party), `dump SLOT` (summary block, all eight character records with the BATTLE_RAM offsets and kana-decoded names, equipment, the four ability lists, inventory by category, key items, slot summary — **item / ability / character names from `names/*.toml`** since 2026-09-05; `--raw` hexdumps the unlabelled ranges), `verify` (u16 byte-sum + every load-screen cross-check + title parse + the table cross-checks: every id is a record, ability list ↔ table type, ATK = base + weapon power, DEF = base + armour powers), `diff A B` (byte runs annotated with the RAM map; `--file2` for a second card). Read-only. Any FAIL is a RAM-map bug. |
 | `tools/text_tables.py` | **Id→name tables off the disc** ([`TEXT_TABLES.md`](TEXT_TABLES.md)): `extract` reads the five item tables, the ability table (GAME.EMI), the MTEST place list and the roster (COMMU02 / START templates) through the `.cue` into `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` with the wiki glossary's English; `show TABLE` prints one. Refuses to write if a table's count moves. `save_tool.py` reads the sidecars (`--names`). |
-| `tools/font_sheet.py` | **The single-byte encoding, off the disc** ([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "The single-byte codes"): de-interleaves `BIN/ETC/ENDKANJI.EMI` section 0 into the 21-cell x 12 px atlas, applies the mapper's index rules (`byte`, `byte + 0x23`, `0x15 nn + 0x5B`), and writes [`names/font.toml`](../names/font.toml). `render` produces the labelled sheet to re-check a row by eye; `show <hex>` blows up one glyph. |
+| `tools/font_sheet.py` | **The single-byte encoding, off the disc** ([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "The single-byte codes"): de-interleaves `BIN/ETC/ENDKANJI.EMI` section 0 into the 21-cell x 12 px atlas, applies the mapper's index rules (`byte`, `byte + 0x23`, `0x15 nn + 0x5B`), and writes [`names/font.toml`](../names/font.toml). `render` produces the labelled sheet to re-check a row by eye; `show <hex>` blows up one glyph. **`kanji` (2026-09-10): the kanji proof page** — every `0x12xx`/`0x13xx` cell of ENDKANJI section 1 beside the kanji `names/kanji.toml` claims, drawn in MS Gothic, `analysis/font/kanji_proof.png`; the check that would have caught `0x1354` (冒 for 探) and `0x132C` (賃 for 代) at transcription time. All 441 cells eyeballed against it 2026-09-10: no further mismatch. |
 | `tools/page_rows.py` | **How the script uses the box** ([`TEXT_ENGINE.md`](TEXT_ENGINE.md)): `rows` = lines-per-page census split by which page break ended the page (`0x02` confirm, `0x16` timed), `codes` = control-code frequency with argument histograms, `styles` = every `0x0F` text-effect use resolved against the preset table read out of the boot EXE. Counts distinct messages, not table slots. |
 | `tools/ruby_fit.py` | **What inline furigana costs, in rows** ([`FURIGANA.md`](FURIGANA.md)): `width` measures the box line capacity from shipped content, `cost` gives rows-before against rows-after for two layout policies and three annotation scopes, `sample` renders one page three ways. Readings from SudachiPy mode C with okurigana trimmed. |
 | `tools/plates.py` | **World-map name plates** ([`TEXT_TABLES.md`](TEXT_TABLES.md) "World-map plates"): decodes each world map's 8-bit texture page (tiled section `dest 0x0E001000`, CLUTs from `0x8002BE00`) off the disc, finds the painted place-name plates by their rim, joins the ones that wrap at texel 256, writes `analysis/plates/` (page PNGs, `plates.json`, a contact sheet). Transcriptions live in `names/plates.toml`. |

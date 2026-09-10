@@ -254,7 +254,7 @@ sheet. **Six are kanji sitting on the symbol page** — `0x15 0x0E` 護, `0x10` 
 at all, so no amount of walking the kanji sheet could find them. The reason is
 capacity, not cost: the kanji sheet is **21 × 21 = 441 slots and the code space
 `0x1200`..`0x13B8` is exactly 441 codes, with zero empty cells**. It was full,
-and late additions went where there was room. It was not a frequency ranking
+and late additions went where there was room. The table's cells are checked against the sheet with `tools/font_sheet.py kanji` (`analysis/font/kanji_proof.png`: each cell beside its claimed kanji in a real font); two transcription slips were found by reading before that page existed (`0x132C` 賃→代, `0x1354` 冒→探). It was not a frequency ranking
 either — 8 kanji that never appear in area dialogue hold slots (芸雷拾単野属盾皮,
 battle and menu words) while 新 at 25 uses sits on the symbol page. The other
 three are `0x15 0x06` the zenny mark, `0x15 0x1A` `＆`, and `0x13B5` 可.

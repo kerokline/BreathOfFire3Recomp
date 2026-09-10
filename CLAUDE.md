@@ -70,7 +70,11 @@ python tools/sync_symbols.py
   Anaconda 3.13.9. Framework docs say `python3` — translate as you go.
 - The toolchain is installed but **not on PATH**: prepend
   `/c/msys64/mingw64/bin` (GCC, CMake, Ninja) in every build shell, or `cc1`
-  crashes silently. `gh` is at `C:\Program Files\GitHub CLI`, authenticated.
+  crashes silently. **But** that prefix also shadows `python`: MSYS ships its
+  own interpreter (no SudachiPy, no tomllib extras), so run the Python tools
+  (table generation, `sync_symbols.py`) *before* prepending, or call the
+  Anaconda binary by absolute path (2026-09-10: a regenerate failed silently
+  this way and the build linked stale tables). `gh` is at `C:\Program Files\GitHub CLI`, authenticated.
 - Windows: both a PowerShell tool and a Git Bash tool are available. The
   framework's `.sh` scripts want bash; run the game exe from PowerShell with
   `$env:VAR = "x"` for environment variables.
