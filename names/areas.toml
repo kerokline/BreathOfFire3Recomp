@@ -65,7 +65,7 @@ shots = ["analysis/area_shots/AREA005_f164719.png"]
 [[area]]
 file = "BIN/WORLD00/AREA006.EMI"
 script_md5 = "1e479f6b379d817530f9580f88bfb1bb"
-alias = "Train Tracks / Cedar Woods Spring"
+alias = "Miscellaneous"
 status = "evidence"
 evidence = "screenshot"
 sightings = ["20260901T231848:f24551", "20260902T071817:f60620"]
@@ -106,6 +106,15 @@ status = "evidence"
 evidence = "screenshot"
 sightings = ["20260902T071817:f91162"]
 shots = ["analysis/area_shots/AREA010_f91419.png"]
+
+[[area]]
+file = "BIN/WORLD00/AREA011.EMI"
+script_md5 = "e79469ee6c6e9bd6958d664e83febb4b"
+alias = "Burning Treehouse"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 417886; shot analysis/area_shots/AREA011_f417886.png"
+sightings = ["20260907T200534:f417886"]
+shots = ["analysis/area_shots/AREA011_f417886.png"]
 
 [[area]]
 file = "BIN/WORLD00/AREA013.EMI"
@@ -162,6 +171,15 @@ sightings = ["20260902T071817:f188723"]
 shots = ["analysis/area_shots/AREA019_f188986.png"]
 
 [[area]]
+file = "BIN/WORLD00/AREA020.EMI"
+script_md5 = "79fa2b44484a07c01bd68a3efa1c5dbf"
+alias = "Wynda !"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 507307; shot analysis/area_shots/AREA020_f507307.png"
+sightings = ["20260907T200534:f507307"]
+shots = ["analysis/area_shots/AREA020_f507307.png"]
+
+[[area]]
 file = "BIN/WORLD00/AREA022.EMI"
 script_md5 = "ebd5f46f4759786e054de236aa7ba09b"
 alias = "Nu Cave"
@@ -207,6 +225,15 @@ sightings = ["20260905T161917:f467998"]
 shots = ["analysis/area_shots/AREA027_f467998.png"]
 
 [[area]]
+file = "BIN/WORLD00/AREA028.EMI"
+script_md5 = "cfb5246f47ed364f15ef1105d858371b"
+alias = "McNeil Rooftop"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 178067; shot analysis/area_shots/AREA028_f178067.png"
+sightings = ["20260907T200534:f178067"]
+shots = ["analysis/area_shots/AREA028_f178067.png"]
+
+[[area]]
 file = "BIN/WORLD00/AREA030.EMI"
 script_md5 = "2353c89a9d75f671e7044e2e8514393e"
 alias = "Fishing"
@@ -234,6 +261,69 @@ sightings = ["20260902T071817:f159977", "20260902T071817:f187331", "20260902T071
 shots = ["analysis/area_shots/AREA033_f160235.png", "analysis/area_shots/AREA033_f187589.png", "analysis/area_shots/AREA033_f270037.png"]
 
 [[area]]
+file = "BIN/WORLD01/AREA039.EMI"
+script_md5 = "7db9c62b69fbc6d37161dd4195d9a5d1"
+alias = "Wyndia Castle - Throne Room"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 856982; shot analysis/area_shots/AREA039_f856982.png"
+sightings = ["20260907T200534:f856982"]
+shots = ["analysis/area_shots/AREA039_f856982.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA041.EMI"
+script_md5 = "6cafa0398a8fec75748a52a43dab96d5"
+alias = "Wyndia Jail"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 934449; shot analysis/area_shots/AREA041_f934449.png"
+sightings = ["20260907T200534:f934449"]
+shots = ["analysis/area_shots/AREA041_f934449.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA045.EMI"
+script_md5 = "ed2f50753f0182fc2ed9686a3b6a4de6"
+alias = "Central Wyndia"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 458500; shot analysis/area_shots/AREA045_f458500.png"
+sightings = ["20260907T200534:f458500"]
+shots = ["analysis/area_shots/AREA045_f458500.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA051.EMI"
+script_md5 = "edd0b6bec16d90d41b11c62521bebcc4"
+alias = "Mount Mourangi"
+status = "evidence"
+evidence = "named live by player during session 20260907T200534 at frame 802860; shot analysis/area_shots/AREA051_f802860.png"
+sightings = ["20260907T200534:f802860"]
+shots = ["analysis/area_shots/AREA051_f802860.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA057.EMI"
+script_md5 = "85127d044625d85828e75eefd3f2a5dd"
+alias = "Rapala"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 505001; shot analysis/area_shots/AREA057_f505001.png"
+sightings = ["20260909T075022:f505001"]
+shots = ["analysis/area_shots/AREA057_f505001.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA058.EMI"
+script_md5 = "5ac2b2a92463725dd415dd4b872c52f1"
+alias = "Junk Town"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 434093; shot analysis/area_shots/AREA058_f434093.png"
+sightings = ["20260909T075022:f434093"]
+shots = ["analysis/area_shots/AREA058_f434093.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA059.EMI"
+script_md5 = "a5601235e33f1c3d2f2e6d6484476e0d"
+alias = "Wyndia ?"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 393226; shot analysis/area_shots/AREA059_f393226.png"
+sightings = ["20260909T075022:f393226"]
+shots = ["analysis/area_shots/AREA059_f393226.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA061.EMI"
 script_md5 = "6c5873d3e7f224794867b5ae9c0289d0"
 alias = "Magus's Grove"
@@ -241,6 +331,60 @@ status = "evidence"
 evidence = "named live by player during session 20260902T151658 at frame 225554; shot analysis/area_shots/AREA061_f225554.png"
 sightings = ["20260902T151658:f225554"]
 shots = ["analysis/area_shots/AREA061_f225554.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA065.EMI"
+script_md5 = "3a590514dd0fc8946cb47c3a44f5421d"
+alias = "World Map - Wyndia East"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 404480; shot analysis/area_shots/AREA065_f404480.png"
+sightings = ["20260909T075022:f404480"]
+shots = ["analysis/area_shots/AREA065_f404480.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA074.EMI"
+script_md5 = "be8f96473692c9e9084f8f42a726c31e"
+alias = "Urukan Tapa"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 439251; shot analysis/area_shots/AREA074_f439251.png"
+sightings = ["20260909T075022:f439251"]
+shots = ["analysis/area_shots/AREA074_f439251.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA075.EMI"
+script_md5 = "8251d475c7b461d99b2a1397124e8c3c"
+alias = "Machine Shores"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 464876; shot analysis/area_shots/AREA075_f464876.png"
+sightings = ["20260909T075022:f464876"]
+shots = ["analysis/area_shots/AREA075_f464876.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA086.EMI"
+script_md5 = "f08a69a7e5e3d7bd7b73bc1804fff2c4"
+alias = "Container Ship"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 488165; shot analysis/area_shots/AREA086_f488165.png"
+sightings = ["20260909T075022:f488165"]
+shots = ["analysis/area_shots/AREA086_f488165.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA087.EMI"
+script_md5 = "c789de0211e739ddd4fbd4004abc5548"
+alias = "World Map - Rhapala Region"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 407177; shot analysis/area_shots/AREA087_f407177.png"
+sightings = ["20260909T075022:f407177"]
+shots = ["analysis/area_shots/AREA087_f407177.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA088.EMI"
+script_md5 = "b835baa87892a6058696fefdd4494bb7"
+alias = "World Map - Urukan Region"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 422291; shot analysis/area_shots/AREA088_f422291.png"
+sightings = ["20260909T075022:f422291"]
+shots = ["analysis/area_shots/AREA088_f422291.png"]
 
 [[area]]
 file = "BIN/WORLD02/AREA090.EMI"
@@ -252,6 +396,15 @@ sightings = ["20260902T071817:f270980", "20260902T082638:f276241"]
 shots = ["analysis/area_shots/AREA090_f271238.png", "analysis/area_shots/AREA090_f276241.png"]
 
 [[area]]
+file = "BIN/WORLD02/AREA094.EMI"
+script_md5 = "e2778ee724a9824edb7cd185bcb466ee"
+alias = "Rapala Docks"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 508008; shot analysis/area_shots/AREA094_f508008.png"
+sightings = ["20260909T075022:f508008"]
+shots = ["analysis/area_shots/AREA094_f508008.png"]
+
+[[area]]
 file = "BIN/WORLD02/AREA095.EMI"
 script_md5 = "4c841ed8a16761da8b1cc77d26ba159d"
 alias = "Yraall ? - Spring"
@@ -259,3 +412,192 @@ status = "evidence"
 evidence = "named live by player during session 20260902T151658 at frame 217329; shot analysis/area_shots/AREA095_f217329.png"
 sightings = ["20260902T151658:f217329"]
 shots = ["analysis/area_shots/AREA095_f217329.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA098.EMI"
+script_md5 = "5f0bbe35d99146d8ae2c4ad53298e88d"
+alias = "Deis's Temple"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 495205; shot analysis/area_shots/AREA098_f495205.png"
+sightings = ["20260909T075022:f495205"]
+shots = ["analysis/area_shots/AREA098_f495205.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA100.EMI"
+script_md5 = "eca98fb491cfbe64030f99e2cd30fec7"
+alias = "Relay Point B / Rapala ?"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 376144; shot analysis/area_shots/AREA100_f376144.png"
+sightings = ["20260909T075022:f376144"]
+shots = ["analysis/area_shots/AREA100_f376144.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA105.EMI"
+script_md5 = "e95ac6aa2b985f513e64bd5b03d09402"
+alias = "Tide Palace"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 454142; shot analysis/area_shots/AREA105_f454142.png"
+sightings = ["20260909T075022:f454142"]
+shots = ["analysis/area_shots/AREA105_f454142.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA112.EMI"
+script_md5 = "c83e0781d17f3f6acf135bb9c19cf682"
+alias = "Relay Point A"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 330723; shot analysis/area_shots/AREA112_f330723.png"
+sightings = ["20260909T075022:f330723"]
+shots = ["analysis/area_shots/AREA112_f330723.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA114.EMI"
+script_md5 = "b3be9861a6d39fbab1f12f0d0e2e21c1"
+alias = "Urukan ?"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 461364; shot analysis/area_shots/AREA114_f461364.png"
+sightings = ["20260909T075022:f461364"]
+shots = ["analysis/area_shots/AREA114_f461364.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA120.EMI"
+script_md5 = "4bd555960347ee750f3a6ed91a797cfb"
+alias = "Cliff"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 450194; shot analysis/area_shots/AREA120_f450194.png"
+sightings = ["20260909T075022:f450194"]
+shots = ["analysis/area_shots/AREA120_f450194.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA128.EMI"
+script_md5 = "4b34dd9209f8f7cf39321437460f9b60"
+alias = "Dock"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 429752; shot analysis/area_shots/AREA128_f429752.png"
+sightings = ["20260909T075022:f429752"]
+shots = ["analysis/area_shots/AREA128_f429752.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA141.EMI"
+script_md5 = "6d8d0e431caa2eb63474688e948e2287"
+alias = "Ryu's Dream 1"
+status = "evidence"
+evidence = "named live by player during session 20260908T152313 at frame 4242; shot analysis/area_shots/AREA141_f4242.png"
+sightings = ["20260908T152313:f4242"]
+shots = ["analysis/area_shots/AREA141_f4242.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA142.EMI"
+script_md5 = "3c323eefcf040ec0d1b4efa0116b4b2f"
+alias = "Ryu's Dream 2"
+status = "evidence"
+evidence = "named live by player during session 20260908T152916 at frame 105896; shot analysis/area_shots/AREA142_f105896.png"
+sightings = ["20260908T152916:f105896"]
+shots = ["analysis/area_shots/AREA142_f105896.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA143.EMI"
+script_md5 = "d569b343b3563c3726897407267042d1"
+alias = "Dragonier"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 344616; shot analysis/area_shots/AREA143_f344616.png"
+sightings = ["20260909T075022:f344616"]
+shots = ["analysis/area_shots/AREA143_f344616.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA147.EMI"
+script_md5 = "eb9a4950fa4449905facca7a3d4d4549"
+alias = "Caer Xhan"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 281126; shot analysis/area_shots/AREA147_f281126.png"
+sightings = ["20260909T075022:f281126"]
+shots = ["analysis/area_shots/AREA147_f281126.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA148.EMI"
+script_md5 = "6a603288c95080e545e4fa413617fcd1"
+alias = "Caer Xhan - Elevator"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 276215; shot analysis/area_shots/AREA148_f276215.png"
+sightings = ["20260909T075022:f276215"]
+shots = ["analysis/area_shots/AREA148_f276215.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA150.EMI"
+script_md5 = "98dc81d4bc32bd2c0bb10a5cbca094bd"
+alias = "Oasis"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 318563; shot analysis/area_shots/AREA150_f318563.png"
+sightings = ["20260909T075022:f318563"]
+shots = ["analysis/area_shots/AREA150_f318563.png"]
+
+[[area]]
+file = "BIN/WORLD03/AREA151.EMI"
+script_md5 = "b2d27904008efa56d7bafa71f16f9339"
+alias = "World Map - His Lands"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 348569; shot analysis/area_shots/AREA151_f348569.png"
+sightings = ["20260909T075022:f348569"]
+shots = ["analysis/area_shots/AREA151_f348569.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA152.EMI"
+script_md5 = "3539088f57fc489950540a15eed6d7dc"
+alias = "World Map - Desert"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 311164; shot analysis/area_shots/AREA152_f311164.png"
+sightings = ["20260909T075022:f311164"]
+shots = ["analysis/area_shots/AREA152_f311164.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA167.EMI"
+script_md5 = "6dd1da20e26426a82887eb983555a4e1"
+alias = "Station Myria - Outside"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 272097; shot analysis/area_shots/AREA167_f272097.png"
+sightings = ["20260909T075022:f272097"]
+shots = ["analysis/area_shots/AREA167_f272097.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA168.EMI"
+script_md5 = "aa0dcb4992006c390d5f86508a106031"
+alias = "Station Myria"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 258600; shot analysis/area_shots/AREA168_f258600.png"
+sightings = ["20260909T075022:f258600"]
+shots = ["analysis/area_shots/AREA168_f258600.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA171.EMI"
+script_md5 = "1482cc6e8ea7dce2aab02303f1832a0e"
+alias = "Station Myria - Garden"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 219740; shot analysis/area_shots/AREA171_f219740.png"
+sightings = ["20260909T075022:f219740"]
+shots = ["analysis/area_shots/AREA171_f219740.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA172.EMI"
+script_md5 = "d076c07f218f641d445cae7dfea7863b"
+alias = "Teepo's Garden"
+status = "evidence"
+evidence = "named live by player during session 20260908T152916 at frame 148657; shot analysis/area_shots/AREA172_f148657.png"
+sightings = ["20260908T152916:f148657"]
+shots = ["analysis/area_shots/AREA172_f148657.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA175.EMI"
+script_md5 = "0a2bdce7e2af443bdeb1c06f462450a3"
+alias = "Fairy Village"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 366858; shot analysis/area_shots/AREA175_f366858.png"
+sightings = ["20260909T075022:f366858"]
+shots = ["analysis/area_shots/AREA175_f366858.png"]
+
+[[area]]
+file = "BIN/WORLD04/AREA195.EMI"
+script_md5 = "f58a1563a503f5b2db2fc772d31ff154"
+alias = "Zublo Volcano"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 417212; shot analysis/area_shots/AREA195_f417212.png"
+sightings = ["20260909T075022:f417212"]
+shots = ["analysis/area_shots/AREA195_f417212.png"]

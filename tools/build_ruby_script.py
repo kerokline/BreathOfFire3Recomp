@@ -68,29 +68,35 @@ def load_overrides(path=READINGS_TOML):
         return {}
     with open(path, "rb") as f:
         doc = tomllib.load(f)
-    out = {}                                        # surface -> [(next_set | None, reading)]
+    out = {}                    # surface -> [(next_set | None, prev_tuple | None, reading)]
     for row in doc.get("reading", []):
         surface, reading = row["surface"], ruby_fit.kata_to_hira(row["reading"])
         if not HIRA_RE.fullmatch(reading):
             raise SystemExit("%s: reading for %s is not kana: %r" % (path, surface, row["reading"]))
         nxt = row.get("next")
         nxt = frozenset(nxt) if nxt is not None else None
+        prv = row.get("prev")
+        prv = tuple(prv) if prv is not None else None
         rules = out.setdefault(surface, [])
-        if any(n == nxt for n, _ in rules):
+        if any((n, p) == (nxt, prv) for n, p, _ in rules):
             raise SystemExit("%s: %s listed twice for the same context" % (path, surface))
-        rules.append((nxt, reading))
-    for rules in out.values():                      # phrase rules first, the default last
-        rules.sort(key=lambda r: r[0] is None)
+        rules.append((nxt, prv, reading))
+    for rules in out.values():                      # context rules first, the default last
+        rules.sort(key=lambda r: r[0] is None and r[1] is None)
     return out
 
 
-def override_lookup(overrides, surface, next_surface):
-    """The sidecar reading for `surface` followed by `next_surface`, or None:
-    the first rule whose `next` list holds the following token, else the
-    rule with no `next`."""
-    for nxt, reading in overrides.get(surface, ()):
-        if nxt is None or next_surface in nxt:
-            return reading
+def override_lookup(overrides, surface, next_surface, prev_text):
+    """The sidecar reading for `surface` in context, or None: the first rule
+    whose `next` list holds the following token and whose `prev` list holds
+    a suffix of the text before the word (旅の方: `prev = ["旅の"]`), else the
+    rule with neither."""
+    for nxt, prv, reading in overrides.get(surface, ()):
+        if nxt is not None and next_surface not in nxt:
+            continue
+        if prv is not None and not any(prev_text.endswith(p) for p in prv):
+            continue
+        return reading
     return None
 
 
@@ -178,18 +184,18 @@ class Annotator:
         return self._lexicon_readings[surface]
 
     # -- readings -------------------------------------------------------------
-    def override_for(self, surface, token, next_surface=""):
+    def override_for(self, surface, token, next_surface="", prev_text=""):
         """The sidecar reading for this token, or None.  An entry keys on the
         exact surface, or on the token's dictionary form: `言う = いう` then
         also reads 言っ / 言わ / 言え, by swapping the dictionary form's kana
         tail for the conjugated surface's (来る = くる gives 来 -> く, not き:
         list the irregular surfaces themselves).  An entry with `next` applies
         only when the following token is listed (何 + を = なに)."""
-        r = override_lookup(self.overrides, surface, next_surface)
+        r = override_lookup(self.overrides, surface, next_surface, prev_text)
         if r is not None:
             return r
         base = token.dictionary_form()
-        r = override_lookup(self.overrides, base, next_surface)
+        r = override_lookup(self.overrides, base, next_surface, prev_text)
         if r is None or base == surface:
             return r
         cut = max((k for k, c in enumerate(base) if KANJI_RE.match(c)), default=-1) + 1
@@ -219,6 +225,7 @@ class Annotator:
         for ti, t in enumerate(tokens):
             surface = t.surface()
             next_surface = tokens[ti + 1].surface() if ti + 1 < len(tokens) else ""
+            prev_text = text[:pos]
             word = run[pos:pos + len(surface)]
             pos += len(surface)
             if not word:                            # Sudachi can emit an empty token
@@ -235,7 +242,7 @@ class Annotator:
             # concept: its whole reading follows the whole token.  Otherwise the
             # reading follows the kanji stem with the page's own kana trimmed.
             whole = ruby_fit.inner_kana(surface)
-            reading = self.override_for(surface, t, next_surface)
+            reading = self.override_for(surface, t, next_surface, prev_text)
             if reading is not None:
                 self.override_hits[surface] += 1
             else:
@@ -408,8 +415,9 @@ def write_ambiguous(path, ann, overrides):
         for n, surface, cands, used in rows:
             printed = " ".join("%s x%d" % (r, c) for r, c in used.most_common())
             ov = "  override=%s" % " ".join(
-                "%s%s" % (r, "" if n is None else "(before %s)" % "/".join(sorted(n)))
-                for n, r in overrides[surface]) if surface in overrides else ""
+                "%s%s%s" % (r, "" if n is None else "(before %s)" % "/".join(sorted(n)),
+                            "" if p is None else "(after %s)" % "/".join(p))
+                for n, p, r in overrides[surface]) if surface in overrides else ""
             f.write("%6d  %s\t%s\t| %s%s\n" % (n, surface, " / ".join(cands), printed, ov))
     print("ambiguity list: %d surfaces -> %s" % (len(rows), path))
 

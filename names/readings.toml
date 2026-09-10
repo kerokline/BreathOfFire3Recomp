@@ -22,12 +22,20 @@ surface = "言う"
 reading = "いう"
 note = "ゆう 59 times in the every-word audit; keyed on the dictionary form, so 言っ / 言わ / 言え follow"
 
-# A phrase rule: `next` lists the token that must follow.  Rules with `next`
-# are tried before the plain entry for the same surface; with no plain entry
-# the dictionary's reading stands (何だ / 何で / 何と stay なん).
+# A phrase rule: `next` lists the token that must follow, `prev` lists text
+# the line must end with just before the word (a suffix match, so it can
+# span tokens: "旅の").  Context rules are tried before the plain entry for
+# the same surface; with no plain entry the dictionary's reading stands
+# (何だ / 何で / 何と stay なん).
 [[reading]]
 surface = "何"
 reading = "なに"
 next = ["を", "が", "も", "か", "に", "は", "から", "まで", "より", "って",
         "かしら", "し", "する", "やっ", "よ", "？", "！", "‥‥", "‥", "、", "。", ""]
 note = "SudachiDict reads 何 as なん everywhere; before a particle it is なに"
+
+[[reading]]
+surface = "方"
+reading = "かた"
+prev = ["旅の", "若い"]
+note = "the person sense; after の the dictionary favours ほう (direction), right for places and wrong for people"
