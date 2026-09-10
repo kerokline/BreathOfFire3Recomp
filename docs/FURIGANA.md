@@ -318,3 +318,32 @@ second.
   counter tokenizes separately, so 一回戦 / 一戦 / 一発 lost the sokuon and
   一晩 its native reading — two `next` rules on 一 cover the counters the
   script uses. Unread words: 45 → 0.
+- **Runtime inserts have a width (2026-09-10, user screenshot).** The
+  skill-learned line `<0700> は<0502><0701><06> を教えてもらった！` came out 19
+  cells wide: the Ruby layout counted every control as zero width, so the
+  name and skill inserts (0x03 / 0x04 / 0x07 / 0x08) took no room in the
+  row. They are now budgeted at the widest name each can print (5 / 5 / 8 /
+  11 cells, `INSERT_WIDTH`, the English encoder's numbers) in row filling,
+  glyph splitting and the box-page test alike. That page re-flows back to
+  its authored rows: name は / skill を / 教（おし）えてもらった！. Splits
+  554 → 607 and 1,471 → 1,610 as pages with inserts now count them.
+- **The field system messages are covered (2026-09-10, user screenshot).**
+  何かないかな？ on examining furniture is not in any area script: it is slot
+  0 of the **system message block**, `BIN/ETC/AFLDKWA.EMI`'s one section
+  (also carried inside `FIRST.EMI`), dest `0x80014000`, an 8-byte header
+  then the same u16 offset table as an area script, 309 slots. Most of the
+  block is menu, shop and memory-card text (装備, いくつ買いますか, メモリ
+  ーカードがありません), left alone by the scope decision and possibly drawn
+  in windows of another size; the field-box slots are 0–7 (search / pickup),
+  160–165 (inn), 203–218 (save point, けむしにさされた), 241–250 (dragon
+  genes). A scan of every overlay for the openers settled how much of the
+  block to take: `Msg_OpenSystem` (64 call sites, constant ids 0–3, 5, 208,
+  209, 213, 215–217, 250, 262, plus one data-driven site in GAME.EMI = the
+  scripts' bit-0x2000 path) is the **only** way system text reaches
+  `MsgBox_Reset`, while menus / shops / battle read the block through
+  `Msg_SystemPtr` (1,879 sites) and never pass the hook. So the hook is the
+  filter, and `build_ruby_script.py` walks the **whole block** (`SYSTEM_BLOCK`,
+  309 slots) after the 200 area scripts: a slot the box draws always
+  matches, a slot a menu draws never does. +57 / +101 entries; selftest
+  7,014 messages, 0 mismatches. The same holds for the English table when
+  menus come into scope.
