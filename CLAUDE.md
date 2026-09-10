@@ -26,6 +26,7 @@ game_options.toml    native in-game OPTION persistence (template)
 symbols.toml    ──▶  tools/sync_symbols.py  ──▶  psx_symbols.h   (PSX_FN_*)
 seeds/ghidra_funcs.txt   523 first-pass JAL targets from the boot EXE
 codegen_setup.c/.h   setup-wizard host wiring
+src/bof3_localize.c  script plugin: hooks MsgBox_Reset, one table per language (docs/LOCALIZATION_APPLY.md)
 CMakeLists.txt       psxrecomp_add_game_runtime(psx-runtime …)
 disc/                staged boot EXE (gitignored)
 docs/                title-owned notes  ← put agent documents here
@@ -45,6 +46,16 @@ python psxrecomp/psxrecomp_cli.py generate \
   --config game.toml --project-root . --disc "<path to legal .cue>"
 cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --target psx-runtime
+```
+
+English script table (local, from the player's US dump; never committed;
+`docs/LOCALIZATION_APPLY.md`):
+
+```bash
+python tools/build_script_xlate.py --bin-root D:\BoFIII\BIN \
+    --us-cue "isos/Breath of Fire III (USA).cue"
+python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN                # Japanese (Ruby)
+python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --scope every  # ... every word
 ```
 
 Symbols, after editing `symbols.toml`:

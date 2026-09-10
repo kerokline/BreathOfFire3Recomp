@@ -265,11 +265,26 @@ if [ "$COMPILE_RC" -ne 0 ] && [ "$COMPILE_RC" -ne 2 ]; then
   die "overlay compile exited $COMPILE_RC (not the expected 0 or 2)"
 fi
 
-# The output file must have been (re)written.
+# The output file must exist. compile_overlays writes a translation unit only
+# when its content differs, so an unchanged mtime after a run whose inputs did
+# not touch the overlay set (a game.toml edit outside it, say) is not a
+# failure -- this tripped falsely on 2026-09-09 for exactly that case.
 OVERLAY_MTIME_AFTER=$(stat -c %Y "$OVERLAY_C" 2>/dev/null || echo 0)
-[ "$OVERLAY_MTIME_AFTER" -gt "$OVERLAY_MTIME_BEFORE" ] \
-  || die "$OVERLAY_C was not rewritten — overlay compile did not produce output"
+[ -s "$OVERLAY_C" ] || die "$OVERLAY_C is missing or empty — overlay compile did not produce output"
+if [ "$OVERLAY_MTIME_AFTER" -le "$OVERLAY_MTIME_BEFORE" ]; then
+  [ -n "$SHARD_RESULT" ]     || die "$OVERLAY_C was not rewritten and the compile reported no PSX_SHARD_RESULT"
+  echo "note: $OVERLAY_C unchanged (content-identical rewrite skipped)"
+fi
 echo "overlays ok — ${SHARD_RESULT:-(no PSX_SHARD_RESULT line)} (exit $COMPILE_RC, expected UNSUPPORTED_INSTRUCTION only)"
+
+# ---- phase 5a' : explain the [audit] rejections ---------------------------
+# "N unsupported" only says the walk from a shared-band entry hit a non-R3000
+# opcode. For the session's entries, say what the bytes ARE (pointer table,
+# strings, jp text, ...) and flag the one kind that matters: real code whose
+# walk failed downstream (docs/DATA_ISLANDS.md).
+say "phase 5a' — what the rejected entries are (tools/data_islands.py)"
+PYTHONIOENCODING=utf-8 python tools/data_islands.py \
+  || echo "WARN: data_islands failed; run it by hand: python tools/data_islands.py"
 
 # ---- phase 5b: build runtime ------------------------------------------------
 say "phase 5b/5 — build psx-runtime"

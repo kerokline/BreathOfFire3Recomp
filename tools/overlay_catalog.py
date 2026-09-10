@@ -141,9 +141,12 @@ def main():
             attribution = "band-shared(%d)" % bm["occupant_count"]
 
         sv = survey.get((c["source_file"].upper(), c["source_index"]), {})
+        hdr = c.get("header_entry_pcs") or []
+        static_disp = set(c.get("static_dispatch_entry_pcs") or [])
         overlays.append({
             "name": name_of(c["source_file"]),
             "content_md5": c["source_md5"],   # region-independent identity key
+            "registry_id": c.get("registry_id"),   # the game's own overlay id (OVERLAY_HEADERS.md)
             "crc32": c["crc32"],
             "family": family(c["source_file"]),
             "source_file": c["source_file"],
@@ -162,7 +165,9 @@ def main():
                 "prologue": len(pro),
                 "both": len(jal & pro),
                 "static_total": len(static),
-                "observed_entries": len(c["dispatch_entry_pcs"]),
+                "header_entries": len(hdr),
+                "observed_entries": len([p for p in c["dispatch_entry_pcs"]
+                                         if p not in static_disp]),
             },
             "function_count": len(static),
             "heat_attribution": attribution,

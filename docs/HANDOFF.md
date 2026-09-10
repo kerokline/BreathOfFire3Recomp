@@ -23,6 +23,11 @@ with certainty, plus screenshots), and the browsable
 `docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
 coverage inside the bands as new content is played, naming areas off their
 screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
+**2026-09-09:** the text encoding is fully readable *and writable* — the
+single-byte half was read off the font sheet (`tools/font_sheet.py` →
+[`names/font.toml`](../names/font.toml)) and 100% of the area scripts' glyph
+cells now decode — so the next deliverable is the **Japanese (Ruby)** script
+variant, costed end to end in [`FURIGANA.md`](FURIGANA.md) (section 3 below).
 **2026-09-05:** a second track produced most of the names so far: the
 data-anchor loop (section 0 below) decoded the damage formula, level-up,
 inventory, equipment and the save format in one weekend, with the RAM map in
@@ -676,21 +681,93 @@ the fields. **Branch state: committed as `6e760748` and pushed to
 two upstream PRs (rebase the fix onto `mstan/master` if they should be
 independent — the files are disjoint), then bump the pin. The `area_poller.py
 watch` / `harvest_interp_pcs.py` report now prints the gap split per harvest
-(`seedable` / `attribution` / `outside compiled code`, also stored on the
-timeline `harvest` row as `occ_seed`/`occ_attrib`/`occ_none`), so a session
-on an enriched build says at once whether the next loop will help. Endgame unchanged: once calls are grouped by
+(`seedable` / `new interior` / `attribution undemanded` / `attribution RESIDUAL` / owned
+`kernel` + `boot-EXE` / `outside compiled code`, stored on the timeline
+`harvest` row as `occ_seed` / `occ_interior_new` / `occ_attrib_new` / `occ_attrib_residual` (+
+`occ_residual_pcs`) / `occ_kernel` / `occ_bootexe` / `occ_none`), so a session
+on an enriched build says at once whether the next loop will help.
+**Reclassified 2026-09-07:** "attribution gap" used to mean "compile-side,
+harvesting won't help", which was true before #325 and wrong after it. Now
+an attribution gap whose PC no capture has demanded yet (`attrib_new`) is
+ordinary harvest work — the next extract demands it for every occupant and
+the per-variant compile serves the resident; 8 of the 9 so labelled on
+2026-09-07 were this. Only a PC already in `dispatch_entry_pcs` that still
+has no validated resident piece (`attrib_residual`) needs a compile-side
+answer (memo rejection, run-time-rewritten bytes, or an occupant the survey
+never compiled). Kernel RAM (`<0x10000`, 57 % of all interpreted
+instructions in the observed set) and boot-EXE dirty text (`0x80164E84..`,
+`0x8017EAA0..`) are OWNED by images that ship as-is: `pc_coverage.py` gives
+them their own strata, keeps them out of the overlay estimate and never
+recommends playing them. A zero `occ_crc` INSIDE a band is `interior_new` —
+a first-sighting interior entry no occupant has a piece for (the 12 "outside
+compiled code" rows of the 2026-09-07 evening summary were all this, 7 of
+them in the single-occupant battle engine band); `none` is reserved for no
+band and no owner. Caveat for the offline run over the accumulated
+file: `occ_*` fields are last-seen values, so rows last observed on a
+pre-fix build (the `0x801CE404` PLCHAR row, the `0x801EEExx` BATL_END rows
+from the 2026-09-07 morning session) read as residual until re-observed on
+the rebuilt tree — trust the live end-of-session harvest, not the file.
+The compile's `[audit] ... N unsupported` rejections are explained by
+`tools/data_islands.py` (loop phase 5a'): what the bytes are per occupant,
+with names from `names/data.toml`. **Retracted 2026-09-08:** this file used to
+say the tool's "code, walk failed downstream" list (23 pairs) was a real gap
+and the compile-side worklist. It was not — the row was a classifier artifact
+(zero fill scored as nops, tables decoding as `jal`/`beq`, one misattributed
+memo line), and the audited count of real gaps is **0**. The classifier and
+the join tiebreaker are fixed; nothing in the memo needs compile-side work —
+[`DATA_ISLANDS.md`](DATA_ISLANDS.md).
+Next on this track: stamp the *resident image* checksum at entry (today's
+`occ_crc` is the spanning piece's function-level CRC, by construction the
+wrong occupant whenever `occ_ok=0`), then key harvest rows and extract
+demands on (image, PC) instead of expanding every PC to every occupant. Endgame unchanged: once calls are grouped by
 shared caller/callee, the `.EMI`-shaped subsystems fall out — the unit for
 modding, performance and extensibility.
 
-### 3. Translation
+### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)
 
-The engine and the interception point are known ([`TEXT_ENGINE.md`](TEXT_ENGINE.md)).
-In order: settle whether Latin/digit bytes are raw ASCII (read `0x8015AD34`),
-variable-width glyph advance (the JP interpreter hard-codes 12 px — mine
-`SLUS_004.22` for Capcom's own answer), line-break policy, then the apply hook
-at the message-table lookup. Menus/items/name entry are a **separate** pool at
-`0x80014000`. The prior decode work at `D:\BoFIII` supplies the character table
-and 11,491 aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
+**The apply path exists and is verified on screen (2026-09-09 afternoon):**
+[`LOCALIZATION_APPLY.md`](LOCALIZATION_APPLY.md). `game.toml` hooks
+`MsgBox_Reset` through `[recompiler].mod_function_entry_funcs`,
+`src/bof3_localize.c` repoints the box, `tools/build_script_xlate.py` builds
+`generated/bof3_xlate_en.c` from the US disc (slot for slot, capitals, 16
+cells per line). Build recipe and the three traps paid for are in that doc.
+What is left on the English track: play through several areas and read the
+plugin's `miss` lines, decide lowercase (the sheet is full), give `'` a cell,
+key the 691 shared-string conflicts by area. **The ruby variant is built
+too** (`tools/build_ruby_script.py` → `jp_ruby`, verified on screen the same
+evening); what it needs is the reading review pass.
+
+The engine, the interception point and now the **whole encoding** are known
+([`TEXT_ENGINE.md`](TEXT_ENGINE.md)). The Latin/digit question is settled:
+`0x41`..`0x5A` and `0x30`..`0x39` really are ASCII letters and digits, but
+`0x3E`/`0x3F`/`0x40` are `‥`/`？`/`！`, and the single-byte table is
+[`names/font.toml`](../names/font.toml) via `tools/font_sheet.py`. **100% of the
+204,356 glyph cells in the 200 area scripts decode**, so text can now be written
+as well as read.
+
+The next concrete deliverable is the **Japanese (Ruby)** variant
+([`FURIGANA.md`](FURIGANA.md)): the JP script re-authored with the reading
+inline, `漢字（かんじ）`, as a third `[localization].languages` entry. It is
+measured, not speculative — box lines hold 15 glyphs, three rows is ordinary and
+four never appears on a confirm page, annotating first-occurrence-per-area and
+re-flowing pages leaves 4.3% of pages over three rows (spend a `0x02` page break
+on those, not a fourth row), and the whole thing costs +13.8% bytes with the
+worst block at 90% of the 16 KiB window. In order:
+
+1. The **reading sidecar** (per message, per word, reviewed — the Sudachi pass
+   is costed, not proofread).
+2. The **encoder**, whose acceptance test exists today: encode the *unmodified*
+   script and diff byte for byte against the disc.
+3. The **variant blocks**, checked against the window and the row budget.
+
+~~Still unbuilt: the apply path.~~ **Built 2026-09-09**: the `MsgBox_Reset`
+repoint is code now (above), shared with the English track. The box width is
+**measured on screen**: 192 px interior, 16 cells (window record `0x80148644`
+`+0x10` = 16 in 12.4 fixed), so the 15-glyph figure above was one cell
+inside the frame. Menus/items/name entry
+are a **separate** pool at `0x80014000`.
+The prior decode work at `D:\BoFIII` supplies the kanji table and 11,491
+aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
 
 ## Building against the pin
 
@@ -879,6 +956,20 @@ Pipeline:
   `(pc & 0x1FFFFFFF) | 0x80000000` before bucketing, or everything is "unmapped".
 - **Do not seed the `GAME.EMI` §0 header pointer table** — chained jump-table
   cases, not function starts; they would truncate their hosts.
+- **A loader immediate is a disc-file id, not a registry id** (2026-09-08):
+  `jal 0x801629CC` with `a0 = 0x125` means `MAGIC001.EMI` (file table
+  `0x80182DBC`), whose registry id is `0x144`. Resolve with
+  `tools/file_ids.py`; never search the ability tables for registry ids.
+- **`extract_overlays.py` dedups identical sections at one address**, so a
+  file can be compiled under a sibling's name (20 MAGIC files). Join
+  captures by `source_md5`, not by filename — [`OVERLAY_HEADERS.md`](OVERLAY_HEADERS.md).
+- **`dispatch_entry_pcs` is no longer "harvested PCs"** (2026-09-08): it also
+  carries every overlay's header entry table, declared in
+  `static_dispatch_entry_pcs`. Anything that wants *harvest evidence* must
+  subtract that set (catalog `observed_entries` and `pc_coverage.py` already
+  do). The overlay header table is a different thing from the GAME.EMI §0
+  table above: exported function entries, not jump-table cases —
+  [`OVERLAY_HEADERS.md`](OVERLAY_HEADERS.md).
 - **Seeding the boot EXE is a dead end, proven three ways** — byte-identical
   generate at 523 vs 868 seeds; interior seeds alias into zero-fill parents;
   static code has `entries = 0` ([`OVERLAYS.md`](OVERLAYS.md) §3).
@@ -946,12 +1037,21 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 | `tools/emi_survey.py` | Walk every `.EMI`, hash every section, code-test RAM-bound ones → `analysis/emi_sections.json`. Per region. |
 | `tools/fmv_bench.py` | Clean-boot headless FMV benchmark (vblank/present window) with optional gdb sampling of the emu thread. |
 | `tools/headless_ab.py` | Headless A/B on a savestate workload (skip the load step for the boot workload). |
+| `tools/interp_bench.py` | **Per-scene interpreted-work A/B**: `scene.py run --slot N -- python tools/interp_bench.py --port {port} --label A --slot N` appends one row (interp insns/frame, address misses/frame, emu fps); `compare FILE A B` prints the per-slot ratio table. Wall-clock independent, so it compares builds. |
+| `tools/interp_bucket.py` | **Where the residual interpreted work is**: buckets `dirty_ram_stats.per_pc` deltas by region (kernel / boot EXE / band) over a window and lists the hottest PCs with `occ_crc`. The bench says how much, this says where. |
+| `tools/file_ids.py` | **Disc-file id → path** from the boot LBA table `0x80182DBC` (the loader's argument space): `python tools/file_ids.py 0x262` → GAME.EMI; `--name MAGIC0` reverse; writes `analysis/file_ids.json`. |
+| `tools/resident.py` | **Resident overlay set from the header words**: one u32 per band base, validated against the 405 registry ids, plus the loader's file-id cell and the area number; `--watch` prints on change. Library for `area_poller.py`. |
+| `tools/load_watch.py` | **File-load timeline**: write trace on `0x80146464` = every `File_LoadRequest` with file id → path, caller `ra` (nearest known name), `a0..a3`; `--press/--hold` to drive a round; appends `analysis/load_timeline.jsonl`. |
+| `tools/magic_map.py` | **Ability → BMAGIC overlay** off the engine tables `0x800B3450` / `0x800B3538` → `names/magic.toml`; `--alias-overlays` writes the spell names into the BMAGIC rows of `names/overlays.toml`. |
 | `tools/scene.py` | **Headless scene harness** — boots the runtime, lands it on a savestate, proves the guest resumed, and hands the live debug port to any other tool (`{port}` / `PSX_SCENE_PORT`). `preflight` checks every `.pst` header offline against this build (names a stale slot before a 13 s boot is spent on it); `check` boots+loads+resumes every slot as the savestate regression test; `run --slot N [--press ...] [--shot p.png] [-- CMD]` is the one to reach for. Every load is followed by a VSync-advance check, so a wedge is reported as a wedge instead of a `last_ok: 1` poisoning the next measurement. |
 | `tools/verify_msgtable.py` | Walk the message table on a running game. |
 | `tools/mednafen_ctl.py` | Drive the stock Mednafen oracle in `./mednafen/`: `launch --card` boots from our `card1.mcd`, `press`/`hold`/`key` inject pad and hotkeys via scancodes read from its cfg, `snap`, `state save/load`, `frame`, `card export`, `quit`. See [`MEDNAFEN.md`](MEDNAFEN.md). |
 | `tools/playsession.py` | Debug-server wrapper: status, screenshot (`--renderer software`), savestates, traces. |
 | `tools/save_tool.py` | **Save-file reader/verifier** over raw card images (`saves/*.mcd`, `*.mcr`): `list` (slots, SJIS title, checksum OK/BAD, play time, lead level, zenny, party), `dump SLOT` (summary block, all eight character records with the BATTLE_RAM offsets and kana-decoded names, equipment, the four ability lists, inventory by category, key items, slot summary — **item / ability / character names from `names/*.toml`** since 2026-09-05; `--raw` hexdumps the unlabelled ranges), `verify` (u16 byte-sum + every load-screen cross-check + title parse + the table cross-checks: every id is a record, ability list ↔ table type, ATK = base + weapon power, DEF = base + armour powers), `diff A B` (byte runs annotated with the RAM map; `--file2` for a second card). Read-only. Any FAIL is a RAM-map bug. |
 | `tools/text_tables.py` | **Id→name tables off the disc** ([`TEXT_TABLES.md`](TEXT_TABLES.md)): `extract` reads the five item tables, the ability table (GAME.EMI), the MTEST place list and the roster (COMMU02 / START templates) through the `.cue` into `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` with the wiki glossary's English; `show TABLE` prints one. Refuses to write if a table's count moves. `save_tool.py` reads the sidecars (`--names`). |
+| `tools/font_sheet.py` | **The single-byte encoding, off the disc** ([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "The single-byte codes"): de-interleaves `BIN/ETC/ENDKANJI.EMI` section 0 into the 21-cell x 12 px atlas, applies the mapper's index rules (`byte`, `byte + 0x23`, `0x15 nn + 0x5B`), and writes [`names/font.toml`](../names/font.toml). `render` produces the labelled sheet to re-check a row by eye; `show <hex>` blows up one glyph. |
+| `tools/page_rows.py` | **How the script uses the box** ([`TEXT_ENGINE.md`](TEXT_ENGINE.md)): `rows` = lines-per-page census split by which page break ended the page (`0x02` confirm, `0x16` timed), `codes` = control-code frequency with argument histograms, `styles` = every `0x0F` text-effect use resolved against the preset table read out of the boot EXE. Counts distinct messages, not table slots. |
+| `tools/ruby_fit.py` | **What inline furigana costs, in rows** ([`FURIGANA.md`](FURIGANA.md)): `width` measures the box line capacity from shipped content, `cost` gives rows-before against rows-after for two layout policies and three annotation scopes, `sample` renders one page three ways. Readings from SudachiPy mode C with okurigana trimmed. |
 | `tools/plates.py` | **World-map name plates** ([`TEXT_TABLES.md`](TEXT_TABLES.md) "World-map plates"): decodes each world map's 8-bit texture page (tiled section `dest 0x0E001000`, CLUTs from `0x8002BE00`) off the disc, finds the painted place-name plates by their rim, joins the ones that wrap at texel 256, writes `analysis/plates/` (page PNGs, `plates.json`, a contact sheet). Transcriptions live in `names/plates.toml`. |
 | `tools/pst_tool.py` | Read `.pst` savestates offline: `info`, `vram` (1024×512 PNG), `ram` (raw 2 MB), `diff A B` (VRAM zero-map, per-block diff map, blocks that went populated→zero, RAM diff ranges). Compare two states without loading them into a running game. |
 | `tools/emi.py`, `tools/disc_ls.py`, `tools/disasm_exe.py` | Parse/extract `.EMI`; list the ISO9660 tree; disassemble the boot EXE with MMIO naming. |

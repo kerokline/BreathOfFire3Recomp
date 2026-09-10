@@ -84,9 +84,33 @@
 #define PSX_FN_Text_DrawImmediate 0x8015AD34u
 #define func_8015AD34 Text_DrawImmediate  /* alias */
 
-/* confirmed: Flag_Test(bits, index) -> (bits[index>>3] >> (index&7)) & 1 -- eight instructions, read from the disc EXE 2026-09-05 (tools/disasm_exe.py 8015BFC4:8); 0x8015BFE4 is the matching xor toggle. Save_BuildImage calls it as (0x80144F24, 0x92) and stores the BIT in the slot-summary byte 0x80145588 -- it was named Save_FlagsChecksum ('hash over 0x92 bytes') until tools/save_tool.py verify checked the byte against the flag array on all three card1 saves */
+/* confirmed: Flag_Set(bits, index) -> bits[index>>3] |= 1 << (index&7) -- ten instructions, disasm 2026-09-07 (tools/disasm_exe.py 8015BF70:10). One of four siblings sharing the (base, bit index) shape: 0x8015BF70 set / 0x8015BF98 clear / 0x8015BFC4 test / 0x8015BFE4 toggle. Caught live in dresser_flag.json (store pc 0x8015BF94, ra 0x801B4044) marking a searched world-item spot: Field_SearchSpot(0x801B3FC0) called it as (0x80145000, 0x11), setting 0x80145002 bit 1 */
+#define PSX_FN_Flag_Set 0x8015BF70u
+#define func_8015BF70 Flag_Set  /* alias */
+
+/* confirmed: Flag_Clear(bits, index) -> bits[index>>3] &= ~(1 << (index&7)) -- twelve instructions, disasm 2026-09-07 (tools/disasm_exe.py 8015BF98:12); the and-not sibling of Flag_Set / Flag_Test / Flag_Toggle */
+#define PSX_FN_Flag_Clear 0x8015BF98u
+#define func_8015BF98 Flag_Clear  /* alias */
+
+/* confirmed: Flag_Test(bits, index) -> (bits[index>>3] >> (index&7)) & 1 -- eight instructions, read from the disc EXE 2026-09-05 (tools/disasm_exe.py 8015BFC4:8); 0x8015BFE4 is the matching xor toggle. Save_BuildImage calls it as (0x80144F24, 0x92) and stores the BIT in the slot-summary byte 0x80145588 -- it was named Save_FlagsChecksum ('hash over 0x92 bytes') until tools/save_tool.py verify checked the byte against the flag array on all three card1 saves. Field_SearchSpot calls it as (0x80145000, rec[4]) -- the WORLD-ITEM array, a different base (docs/WORLD_ITEMS.md) */
 #define PSX_FN_Flag_Test 0x8015BFC4u
 #define func_8015BFC4 Flag_Test  /* alias */
+
+/* confirmed: Flag_Toggle(bits, index) -> bits[index>>3] ^= 1 << (index&7) -- eleven instructions, disasm 2026-09-07 (tools/disasm_exe.py 8015BFE4:11); the xor sibling the Flag_Test note already pointed at */
+#define PSX_FN_Flag_Toggle 0x8015BFE4u
+#define func_8015BFE4 Flag_Toggle  /* alias */
+
+/* confirmed: Disc-file loader entry, a0 = file id (2026-09-08, read from the EXE): stores a0 at 0x80146464, buffer 0x800E4800 at 0x80146460, fills the 24-byte slot array 0x8014649C with 0xFF, then File_LBA(a0) via 0x80162B50 -> 0x80146674/0x80146804 and kicks the CD state machine (0x80146490 = 0 until done). The file id indexes the LBA table 0x80182DBC (tools/file_ids.py). Called with immediates from every overlay: game-mode dispatcher 0x8014EB20 passes 0x262 = GAME.EMI, 0x8014E9A0 passes 0x261 = FIRST.EMI, BATL_END/BATTLE pass 0x80143F00 + 0x2AB = AREA<n>.EMI, the battle engine passes u16[0x800B3538 + row*8] = a BMAGIC file (tools/magic_map.py). LIVE: cast_magic.json 2026-09-08 (file slot 1, Ryu+Nina, hold Up + Circle x6): File_LoadRequest store 0x801629F0 wrote file id 0x156 (MAGIC070) at f+336 and 0x170 (MAGIC100) at f+724, both with ra = 0x800AB160 inside Magic_LoadForAbility; the band header word 0x801EEC00 then went 0x142 -> 0x16E (MAGIC070's registry id) at f+362 and -> 0x186 (MAGIC100's) at f+744, written by CD_getsector 0x80177ACC from CdReadyCallback -- the section lands straight from the CD buffer, header first */
+#define PSX_FN_File_LoadRequest 0x801629CCu
+#define func_801629CC File_LoadRequest  /* alias */
+
+/* confirmed: u32[0x80182DBC + file_id*4] (2026-09-08, read from the EXE): the disc LBA of file id. All 887 entries are exact LBAs of the disc directory in walk order (tools/file_ids.py verified 887/887); entry 0x125 = BIN/BMAGIC/MAGIC001.EMI, 0x2AB = BIN/WORLD00/AREA000.EMI, 0x262 = BIN/ETC/GAME.EMI */
+#define PSX_FN_File_LBA 0x80162B50u
+#define func_80162B50 File_LBA  /* alias */
+
+/* confirmed: Returns 1 when the loader state byte 0x80146490 == 3 (2026-09-08, read from the EXE); every File_LoadRequest caller spins on it (0x8014EB30 loop before entering the game-mode overlay at 0x801D0C04) */
+#define PSX_FN_File_LoadDone 0x801636F0u
+#define func_801636F0 File_LoadDone  /* alias */
 
 /* confirmed: wtrace levelup3.json 2026-09-05 + ghidra: (rec) copies base stats rec+0x3C..0x58 -> effective rec+0x1C..0x38, applies FUN_80166150/801662CC/8016651C/80165290 (equipment/modifiers via Stat_AddClamped), scales effective max HP rec+0x1C by (base * u8 rec+0x1A + 5)/10 and clamps HP rec+0x14, halves rec+0x2B..0x33 per status bits in rec+0x19, per-roster table 0x80148668 (5 B) vs rec+0x34..0x38; proves the persistent character records are &0x80144964 + roster*0xA4, 8 of them */
 #define PSX_FN_Char_RecalcStats 0x80165434u

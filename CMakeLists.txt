@@ -56,3 +56,35 @@ foreach(_PSX_RUNTIME_CONFIG game.toml game_options.toml)
             VERBATIM)
     endif()
 endforeach()
+
+# Script localization plugin (docs/LOCALIZATION_APPLY.md). The tables are
+# generated locally into generated/bof3_xlate_<code>.c -- English by
+# tools/build_script_xlate.py from the player's US disc, Japanese (Ruby) by
+# tools/build_ruby_script.py from the JP disc -- exactly like the game C:
+# never committed, never shipped by CI. Each table found defines
+# BOF3_XLATE_HAVE_<CODE> for the plugin, on that one source only (a
+# target-wide definition or include dir would recompile every overlay
+# object). Without any table the plugin is not built at all, and the hook
+# site in the generated C calls into an empty plugin registry (a no-op).
+file(GLOB _BOF3_XLATE_TABLES CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/generated/bof3_xlate_*.c")
+if(_BOF3_XLATE_TABLES)
+    set(_BOF3_XLATE_DEFS)
+    foreach(_t IN LISTS _BOF3_XLATE_TABLES)
+        get_filename_component(_n "${_t}" NAME_WE)
+        string(REPLACE "bof3_xlate_" "" _code "${_n}")
+        string(TOUPPER "${_code}" _CODE)
+        list(APPEND _BOF3_XLATE_DEFS "BOF3_XLATE_HAVE_${_CODE}")
+        message(STATUS "BoF3: script table '${_code}' (${_n}.c)")
+    endforeach()
+    target_sources(psx-runtime PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c" ${_BOF3_XLATE_TABLES})
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c" ${_BOF3_XLATE_TABLES}
+        PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c"
+        PROPERTIES COMPILE_DEFINITIONS "${_BOF3_XLATE_DEFS}")
+else()
+    message(STATUS "BoF3: no generated/bof3_xlate_*.c; script localization plugin not built")
+endif()

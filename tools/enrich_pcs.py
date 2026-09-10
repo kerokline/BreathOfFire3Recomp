@@ -120,8 +120,10 @@ def enrich_one(port, pc, bands, caps):
     tag = '0x%08X'%pc
     static_owners = [c['source_file'] for c in occ if tag in (c.get('static_discovery_entry_pcs') or [])]
     disp_owners   = [c['source_file'] for c in occ if tag in (c.get('dispatch_entry_pcs') or [])]
+    hdr_owners    = [c['source_file'] for c in occ if tag in (c.get('header_entry_pcs') or [])]
     out['is_static_root'] = len(static_owners)
     out['is_dispatch_entry'] = len(disp_owners)
+    out['is_header_entry'] = len(hdr_owners)
     # disasm window from the resident occupant (or first occupant)
     import base64
     src = res or (occ[0] if occ else None)

@@ -1,0 +1,68 @@
+# names/data.toml — human names for DATA that lives inside overlay images
+# (tables, strings, templates), found where the static walk from a shared-band
+# entry hit data instead of code. See docs/DATA_ISLANDS.md and
+# tools/data_islands.py, which prints `name` next to the classified bytes.
+#
+#   overlay:  md5 of the section bytes, from names/overlays.toml
+#   pc:       address of the data inside that overlay's resident image
+#   kind:     ascii strings | jp text | pointer table | halfword table |
+#             word table | zero fill | struct
+#   status:   unnamed | hypothesis | evidence | verified
+#   evidence: how the name was established (bytes read, cross-reference)
+
+[[data]]
+overlay = "b8cc1561528b84ba16fe96074dfee289"
+pc = 0x801D0ED4
+name = "SaveFile_NameTemplate"
+kind = "ascii strings"
+status = "evidence"
+evidence = "bytes at START.EMI#8 +0x2D4 (2026-09-07): a pointer 0x801E4A54 then, at +0x2D8, \"BISLPS-00990BOF3%02d\" -- the memory-card file name (BI + SLPS-00990 + BOF3 + two-digit slot), matching the card files save_tool.py reads"
+
+[[data]]
+overlay = "18ce968c71203c73e1230e19ebd640db"
+pc = 0x801EEC50
+name = "BattleResult_TallyFormats"
+kind = "ascii strings"
+status = "evidence"
+evidence = "bytes at BATL_END.EMI#0 +0x50 (2026-09-07): \"%7d\" and \"*%2d\" -- printf formats for the results-screen EXP/zenny totals and the x-count drop lines; the next function's prologue (addiu sp,-0x18) starts 12 bytes later at 0x801EEC5C, which is why a shared-band entry at 0x801EEC50 walks into a string"
+
+[[data]]
+overlay = "8a1ff74a3ada097cb9346004f3b02795"
+pc = 0x801F71FC
+name = "Credits_StaffRoll"
+kind = "ascii strings"
+status = "evidence"
+evidence = "bytes at SCENA17.EMI#0 +0x5FC (2026-09-07): \"Sound Design\", \"    YOSHINO AOKI\", \"    AKARI KAIDA\", \"Music Compo...\", \"    TADASHI SANZEN\", \"Magic Effect\", \"Battle Program\" -- the ending staff roll text; settles SCENA17 as the credits scenario"
+
+[[data]]
+overlay = "4ac89abdc7e506be23f7dc55cb659c78"
+pc = 0x800C1CC0
+name = "Boss021_HandlerTable"
+kind = "pointer table"
+status = "hypothesis"
+evidence = "bytes at BOSS021.EMI#16 +0x4C0 (2026-09-07): flag header 02 82 01 81 00 80, FF padding, then ~30 function pointers into the 0x801D0C00 battle overlay (0x801E5228, 0x801E3550, 0x801E35B0, 0x801E38F8 ...) and into BOSS021 itself (0x800C1860, 0x800C18B8); the same table shape recurs at the same offsets in BOSS015/017/023/029/030/031 -- a per-boss behaviour dispatch table; which handler is which is not yet read"
+
+[[data]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800B3450
+name = "Magic_AbilityRow"
+kind = "struct"
+status = "evidence"
+evidence = "u8[232] read 2026-09-08: ability id -> row of Magic_EffectTable (max 150, 5 zero = engine-side, 147 rows used); indexed by Magic_LoadForAbility 0x800AB120. names/magic.toml"
+
+[[data]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800B3538
+name = "Magic_EffectTable"
+kind = "struct"
+status = "evidence"
+evidence = "151 rows x 8 B read 2026-09-08: u16 disc file id (0xFFFF = none), u16 0, u32 handler pc. Row 0 = (none, engine 0x800AAF44); rows with a file name BIN/BMAGIC/*.EMI through the boot LBA table 0x80182DBC and their handler pc lies inside that file's code section at 0x801EEC00 (222/222 ability rows). tools/magic_map.py"
+
+[[data]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800B39F0
+name = "Magic_ItemSubTables"
+kind = "pointer table"
+status = "evidence"
+evidence = "4 pointers read 2026-09-08 -> u8 tables 0x800B3A00 (100), 0x800B3A64 (92), 0x800B3AC0 (72), 0x800B3B08 (96) mapping (item id16 >> 8, id16 & 0xFF) to a Magic_EffectTable row; read by Magic_LoadForItem 0x800AB1FC and BATTLE.EMI#3 0x801D3ED0"
+

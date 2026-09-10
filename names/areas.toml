@@ -288,6 +288,24 @@ sightings = ["20260907T200534:f458500"]
 shots = ["analysis/area_shots/AREA045_f458500.png"]
 
 [[area]]
+file = "BIN/WORLD01/AREA046.EMI"
+script_md5 = "bfd089f7c4fbbcdd3ea5c9874af797d8"
+alias = "Checkpoint"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 543484; shot analysis/area_shots/AREA046_f543484.png"
+sightings = ["20260909T075022:f543484"]
+shots = ["analysis/area_shots/AREA046_f543484.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA049.EMI"
+script_md5 = "99078881ac603a52b60710f996df4a14"
+alias = "Research Plant"
+status = "evidence"
+evidence = "named from the .EMI script section (dest 0x80010000): the area calls itself 研究プラント (research plant) in msgs 54/88, has the ghost-energy reactor モンデュ８, director ペレット (Pellet), mutant crops, the Wyndia-bound cart used to pass the checkpoint (msg 19), and Peco born here (msg 161). Tileset rendered from EMI section 7 (dest 0x0A081000): greenhouses and glasshouse frames."
+sightings = []
+shots = []
+
+[[area]]
 file = "BIN/WORLD01/AREA051.EMI"
 script_md5 = "edd0b6bec16d90d41b11c62521bebcc4"
 alias = "Mount Mourangi"
@@ -322,6 +340,15 @@ status = "evidence"
 evidence = "named live by player during session 20260909T075022 at frame 393226; shot analysis/area_shots/AREA059_f393226.png"
 sightings = ["20260909T075022:f393226"]
 shots = ["analysis/area_shots/AREA059_f393226.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA060.EMI"
+script_md5 = "ae8a29bf749eb9d004224132aacf4343"
+alias = "Bridge"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 541000; shot analysis/area_shots/AREA060_f541000.png"
+sightings = ["20260909T075022:f541000"]
+shots = ["analysis/area_shots/AREA060_f541000.png"]
 
 [[area]]
 file = "BIN/WORLD01/AREA061.EMI"
@@ -425,7 +452,7 @@ shots = ["analysis/area_shots/AREA098_f495205.png"]
 [[area]]
 file = "BIN/WORLD02/AREA100.EMI"
 script_md5 = "eca98fb491cfbe64030f99e2cd30fec7"
-alias = "Relay Point B / Rapala ?"
+alias = "Relay Point B"
 status = "evidence"
 evidence = "named live by player during session 20260909T075022 at frame 376144; shot analysis/area_shots/AREA100_f376144.png"
 sightings = ["20260909T075022:f376144"]
@@ -448,6 +475,15 @@ status = "evidence"
 evidence = "named live by player during session 20260909T075022 at frame 330723; shot analysis/area_shots/AREA112_f330723.png"
 sightings = ["20260909T075022:f330723"]
 shots = ["analysis/area_shots/AREA112_f330723.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA113.EMI"
+script_md5 = "fd91949e06dc6f7ea06c51edf60c5b1c"
+alias = "Rapala ?"
+status = "evidence"
+evidence = "named live by player during session 20260909T075022 at frame 536099; shot analysis/area_shots/AREA113_f536099.png"
+sightings = ["20260909T075022:f536099"]
+shots = ["analysis/area_shots/AREA113_f536099.png"]
 
 [[area]]
 file = "BIN/WORLD03/AREA114.EMI"
