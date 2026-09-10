@@ -39,3 +39,34 @@ surface = "方"
 reading = "かた"
 prev = ["旅の", "若い"]
 note = "the person sense; after の the dictionary favours ほう (direction), right for places and wrong for people"
+
+# Coinages the lexicon does not hold (out-of-vocabulary, no reading at all).
+[[reading]]
+surface = "闘場"
+reading = "とうじょう"
+note = "Genmel's arena (羅王の闘場); 63 uses"
+
+[[reading]]
+surface = "闘都"
+reading = "とうと"
+note = "闘都ジンメル"
+
+[[reading]]
+surface = "兄者"
+reading = "あにじゃ"
+note = "兄者ーっ！ (AREA051)"
+
+# Numerals: Sudachi's number handler reads 一 as いち and tokenizes the counter
+# separately, losing the sokuon (一回戦 -> いっかいせん) and the native reading
+# (一晩 -> ひとばん).  Counters listed are the ones the script uses.
+[[reading]]
+surface = "一"
+reading = "いっ"
+next = ["戦", "回", "回戦", "歩", "発", "本", "杯", "匹", "個", "週", "生", "切", "体", "軒", "度", "口", "足", "着", "枚", "気", "緒"]
+note = "一回戦, 一戦, 一歩, 一発 (2026-09-10 OOV sweep)"
+
+[[reading]]
+surface = "一"
+reading = "ひと"
+next = ["晩", "月", "目", "言", "息", "口", "休", "安", "際", "筋", "粒", "声", "夏", "冬", "雨", "眠"]
+note = "一晩 = ひとばん"

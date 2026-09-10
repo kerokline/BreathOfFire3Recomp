@@ -19,9 +19,8 @@ destination is 0x80010000, selected by destination, never by index):
 Disc bytes come from the .cue in game.toml or an already-extracted BIN/ tree,
 through the same read-only reader `tools/text_tables.py` uses.  The preset
 table is read from `disc/SLPS_009.90` at its load address, not hard-coded.
-Japanese is decoded with the character table of the prior decode work
-(BOF3_DECODER, default D:\BoFIII); without it the census still runs and the
-examples print as hex.
+Japanese is decoded with the in-tree tables (tools/jptext.py: names/kanji.toml,
+names/font.toml).
 
 Every number this prints is a byte count, not a hypothesis: the walker knows
 which codes carry an argument byte and which byte values are multi-byte glyph
@@ -48,7 +47,7 @@ EXE_HEADER = 0x800
 STYLE_TABLE = 0x8017FF30       # 4 bytes per preset: type, param, u16 duration
 STYLE_COUNT = 26               # entries 26.. are other tables, not presets
 
-DECODER_DIR = os.environ.get("BOF3_DECODER", r"D:\BoFIII")
+
 
 # Codes that consume one argument byte, and the multi-byte glyph lead bytes.
 ARG1 = {0x04, 0x05, 0x07, 0x08, 0x0A, 0x0C, 0x0F, 0x14, 0x16}
@@ -60,14 +59,9 @@ EFFECT = {1: "reset to normal", 2: "grow", 3: "shrink"}
 
 
 def load_decoder():
-    """The prior decode work's character table, or None if it is not here."""
-    if DECODER_DIR not in sys.path:
-        sys.path.insert(0, DECODER_DIR)
-    try:
-        import decode_text
-    except ImportError:
-        return None
-    return decode_text.decode
+    """The in-tree decoder (tools/jptext.py: names/kanji.toml + font.toml)."""
+    import jptext
+    return jptext.decode
 
 
 def tokens(buf, start):

@@ -21,8 +21,8 @@ This measures it against the shipped script, page by page.
 
 Readings come from **SudachiPy** (mode C) over the decoded page text, so each
 annotation is its real length rather than an average; okurigana already on the
-page is trimmed off the reading.  Text decodes through the character table of
-the prior decode work (`BOF3_DECODER`, default D:\BoFIII).  Roughly 14% of
+page is trimmed off the reading.  Text decodes through the in-tree tables
+(`tools/jptext.py`: names/kanji.toml, names/font.toml).  Roughly 14% of
 glyphs have no entry there -- single-byte punctuation, digits and the `0x15`
 atlas page -- and they are counted as one glyph each (correct for width) and
 shown to the tokenizer as a full stop so they end a token instead of splitting
@@ -43,7 +43,6 @@ sys.path.insert(0, HERE)
 import page_rows                                    # noqa: E402
 from text_tables import Disc, default_cue           # noqa: E402
 
-DECODER_DIR = os.environ.get("BOF3_DECODER", r"D:\BoFIII")
 KANJI_RE = re.compile(r"[\u4e00-\u9fff\u3005]")
 HIRA_RE = re.compile(r"[\u3040-\u309f\u30fc]+")
 UNKNOWN = "\u3013"          # geta mark: a glyph the character table does not cover
@@ -83,10 +82,9 @@ def tokenizer(name="core"):
 
 
 def load_decoder():
-    if DECODER_DIR not in sys.path:
-        sys.path.insert(0, DECODER_DIR)
-    import decode_text
-    return decode_text
+    """The in-tree decoder module (KANA, KANJI, decode): tools/jptext.py."""
+    import jptext
+    return jptext
 
 
 def glyphs(dec, data, start):

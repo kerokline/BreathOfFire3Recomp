@@ -56,6 +56,7 @@ HIRA_RE = re.compile(r"[\u3040-\u309f\u30fc]+")
 # Characters that must not begin a row: they cling to the unit before them.
 CLOSERS = set("」』）。、‥？！ー")
 OPEN_BRACKET, CLOSE_BRACKET = 0x28, 0x29      # ( ) on the JP sheet
+STRETCH = set("ーァィゥェォぁぃぅぇぉ")          # glued to a kanji: dialect stretching
 READINGS_TOML = os.path.join(ROOT, "names", "readings.toml")
 DICT_FOR_SCOPE = {"area": "core", "every": "full"}
 
@@ -102,15 +103,12 @@ def override_lookup(overrides, surface, next_surface, prev_text):
 
 def load_maps():
     """char -> bytes for what the annotator emits (kana), and the full decode."""
-    dec = page_rows.load_decoder()
-    if dec is None:
-        raise SystemExit("needs the prior decode work (BOF3_DECODER, default D:\\BoFIII)")
-    import decode_text
+    import jptext
     kana_enc = {}
-    for code, ch in decode_text.KANA.items():
+    for code, ch in jptext.KANA.items():
         kana_enc.setdefault(ch, bytes([code]))
     single, page15, _ = load_jp_tables()
-    kanji_dec = dict(decode_text.KANJI)
+    kanji_dec = dict(jptext.KANJI)
     return kana_enc, single, page15, kanji_dec
 
 
@@ -219,17 +217,30 @@ class Annotator:
         (つぎは / やっつけて くれるんじゃ), never inside a word."""
         if not self.do_annotate:
             return [[it] for it in run]
-        text = "".join(it[2] for it in run)
+        # A long-vowel mark or small kana glued to a kanji (気ィ, 設備ーい,
+        # 起動ーう: dialect stretching) is not in any lexicon and breaks the
+        # token boundary (設 + 備ーい).  Tokenize with it stripped and hand the
+        # glyphs back to the token they followed, after the reading.
+        chars = [it[2] for it in run]
+        keep = []                                   # run indices the tokenizer sees
+        for k, c in enumerate(chars):
+            stretched = k and c in STRETCH and (KANJI_RE.match(chars[k - 1]) or (k - 1) not in keep)
+            if not stretched:
+                keep.append(k)
+        text = "".join(chars[k] for k in keep)
         units, attach, pos = [], [], 0
         tokens = list(self.tok.tokenize(text, self.mode))
         for ti, t in enumerate(tokens):
             surface = t.surface()
             next_surface = tokens[ti + 1].surface() if ti + 1 < len(tokens) else ""
             prev_text = text[:pos]
-            word = run[pos:pos + len(surface)]
+            span = keep[pos:pos + len(surface)]
             pos += len(surface)
-            if not word:                            # Sudachi can emit an empty token
+            if not span:                            # Sudachi can emit an empty token
                 continue
+            end = span[-1] + 1                      # then the stripped glyphs that followed
+            stop = keep[pos] if pos < len(keep) else len(run)
+            word = [run[k] for k in span] + run[end:stop]
             attach.append(t.part_of_speech()[0] in self.ATTACH_POS)
             if not KANJI_RE.search(surface):
                 units.append(word)
@@ -279,7 +290,8 @@ class Annotator:
                 merged[-1] = prev + u
             else:
                 merged.append(u)
-        merged.extend([it] for it in run[pos:])
+        done = keep[pos - 1] + 1 if pos else 0
+        merged.extend([it] for it in run[done:])
         return merged
 
     # -- layout ---------------------------------------------------------------

@@ -24,16 +24,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playsession import send, need_ok      # noqa: E402
 
+HERE = os.path.dirname(os.path.abspath(__file__))
 TEXT_BASE = 0x80010000
-DECODER_DIR = r"D:\BoFIII"
 
 
 def load_decoder():
-    """Reuse the prior decode work rather than rebuilding the table."""
-    if DECODER_DIR not in sys.path:
-        sys.path.insert(0, DECODER_DIR)
-    import decode_text
-    return decode_text.decode
+    """The in-tree decoder (tools/jptext.py: names/kanji.toml + font.toml)."""
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    import jptext
+    return jptext.decode
 
 
 def read_ram(addr, length, port=None):
