@@ -157,9 +157,16 @@ def parse(raw, single, page15, kanji_dec):
 
 class Annotator:
     def __init__(self, width, rows, annotate=True, reflow=True, dict_name="core",
-                 overrides=None, ambiguous=None):
+                 overrides=None, ambiguous=None, insert_width=None):
         self.kana_enc, self.single, self.page15, self.kanji_dec = load_maps()
         self.width, self.rows = width, rows
+        # Cells budgeted for each runtime insert when a row is laid out.  The
+        # English encoder's numbers, with the Ruby scopes raising 0x07 to a
+        # whole row: an annotated item / skill name reaches 16 cells
+        # (docs/INSERT_RUBY.md), and the record is re-authored at runtime by
+        # the same plugin, so the message must leave the room.
+        self.insert_width = dict(INSERT_WIDTH)
+        self.insert_width.update(insert_width or {})
         self.do_annotate, self.do_reflow = annotate, reflow
         self.stats = collections.Counter()
         self.dict_name = dict_name
@@ -326,21 +333,42 @@ class Annotator:
                 merged.append(u)
         return merged
 
-    @staticmethod
-    def item_cells(it):
+    def item_cells(self, it, budget=None):
         """Width of one item: a glyph is one cell; a runtime insert (0x03 /
         0x04 / 0x07 / 0x08: character, item, skill, message) is budgeted at
         the widest name it can print, as the English encoder does -- a zero
-        here laid <0701> を教（おし）えてもらった！ out 19 cells wide."""
+        here laid <0701> を教（おし）えてもらった！ out 19 cells wide.
+        `budget` overrides the per-annotator table (is_box_page measures the
+        shipped layout with the shipped widths)."""
         if it[0] == "g":
             return 1
         if it[0] == "c":
-            return INSERT_WIDTH.get(it[1][0], 0)
+            return (budget or self.insert_width).get(it[1][0], 0)
         return 0
 
-    @classmethod
-    def cells(cls, unit):
-        return sum(cls.item_cells(it) for it in unit)
+    def cells(self, unit):
+        return sum(self.item_cells(it) for it in unit)
+
+    # -- runtime inserts (docs/INSERT_RUBY.md) --------------------------------
+    def annotate_name(self, nb):
+        """One 0x07 record: the name bytes the game copies from an item /
+        ability table (up to the first NUL), annotated the way a message word
+        is, every kanji word read.  Returns the new bytes, or None when the
+        name has nothing to read, would not fit the row (self.width cells),
+        or would overflow the 32-byte record (31 bytes + NUL)."""
+        nb = nb.split(b"\0", 1)[0]
+        if not nb:
+            return None
+        _, pages, _ = parse(nb, self.single, self.page15, self.kanji_dec)
+        items = pages[0][0] if pages else []
+        units = self.units_for_page(items, _NeverSeen())
+        out = b"".join(self.row_bytes([u]) for u in units)
+        if out == nb:
+            return None
+        if self.cells(sum(units, [])) > self.width or len(out) > 31:
+            self.stats["insert_too_wide"] += 1
+            return None
+        return out
 
     def rows_for(self, units):
         rows, row, used = [], [], 0
@@ -378,13 +406,17 @@ class Annotator:
         """The talk box holds up to self.rows rows of self.width cells. A page
         authored wider or taller than that is the full-screen narration path
         (docs/TEXT_ENGINE.md "Rows per page"), which is left exactly as shipped:
-        no readings, no re-flow, no split."""
+        no readings, no re-flow, no split.  Inserts count at the SHIPPED
+        widths here (INSERT_WIDTH), not the Ruby budget: a 16-cell 0x07
+        would push every authored row holding an item name past the frame
+        and misfile the message as narration (2026-09-10, caught on the
+        pickup line by the synthetic insert test)."""
         rows, cur = 1, 0
         for it in items:
             if it[0] == "nl":
                 rows += 1; cur = 0
             elif it[0] in ("g", "c"):
-                cur += self.item_cells(it)
+                cur += self.item_cells(it, INSERT_WIDTH)
                 if cur > self.width:
                     return False
         return rows <= self.rows
@@ -479,6 +511,44 @@ class _NeverSeen(set):
         pass
 
 
+def insert_entries(disc, ann, review=None):
+    """The runtime-insert table (docs/INSERT_RUBY.md): FNV-1a64 of the name
+    bytes a 0x07 record holds -> the same name with readings.  The bytes the
+    game copies into the record are the item tables' and the ability table's
+    name[8] fields (GAME.EMI, tools/text_tables.py), NUL-terminated at 8 by
+    the pickup code, so the hash is over the raw table bytes up to the first
+    NUL -- exactly what the plugin reads back from 0x801490D4 + 0x20 * n."""
+    import text_tables
+    sec = disc.section(*text_tables.GAME)
+    names = []
+    for t in text_tables.ITEM_TABLES:
+        for r in text_tables.scan_records(sec, t["start"], t["stride"], t["end"], t["name"], t["fields"]):
+            names.append((t["category"], r["id"], sec.at(r["ram"] + t["name"][0], t["name"][1])))
+    a = text_tables.ABILITY_TABLE
+    for r in text_tables.scan_records(sec, a["start"], a["stride"], a["end"], a["name"], a["fields"]):
+        names.append(("ability", r["id"], sec.at(r["ram"] + a["name"][0], a["name"][1])))
+    entries, seen, stats = [], {}, collections.Counter()
+    for cat, rid, nb in names:
+        nb = nb.split(b"\0", 1)[0]
+        if not nb:
+            continue
+        h = fnv1a64(nb)
+        if h in seen:
+            stats["duplicate"] += 1
+            continue
+        enc = ann.annotate_name(nb)
+        if enc is None:
+            stats["unchanged"] += 1
+            continue
+        seen[h] = enc
+        entries.append((h, enc))
+        stats["annotated"] += 1
+        if review:
+            review.write("%-10s %3d  %-16s -> %s\n" % (cat, rid, decode_jp(nb, ann.single, ann.page15),
+                                                      decode_jp(enc, ann.single, ann.page15)))
+    return entries, stats
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -499,6 +569,12 @@ def main(argv=None):
                          "--scope every (full merges compounds: 武器屋 as one word)")
     ap.add_argument("--ambiguous", help="write the audit list of annotated words whose surface "
                          "has more than one lexicon reading (candidates, the reading used, count)")
+    ap.add_argument("--insert-width", type=int, default=16,
+                    help="cells budgeted for a 0x07 item / skill insert when a row is laid out "
+                         "(16: an annotated name fills a row; docs/INSERT_RUBY.md)")
+    ap.add_argument("--insert-out", help="default generated/bof3_insert_<code>.c: the runtime-"
+                         "insert table (annotated item / ability names), built alongside")
+    ap.add_argument("--insert-review", help="write the name -> annotated name list here")
     args = ap.parse_args(argv)
     if not args.dict:
         args.dict = DICT_FOR_SCOPE[args.scope]
@@ -506,11 +582,14 @@ def main(argv=None):
     code = {"area": "jp_ruby", "every": "jp_ruby_all"}[args.scope]
     if not args.out:
         args.out = os.path.join(ROOT, "generated", "bof3_xlate_%s.c" % code)
+    if not args.insert_out:
+        args.insert_out = os.path.join(ROOT, "generated", "bof3_insert_%s.c" % code)
     disc = Disc(cue=args.cue, bin_root=args.bin_root)
     overrides = load_overrides()
     ann = Annotator(args.width, args.rows, annotate=not args.selftest, reflow=not args.selftest,
                     dict_name=args.dict, overrides=overrides,
-                    ambiguous={} if args.ambiguous else None)
+                    ambiguous={} if args.ambiguous else None,
+                    insert_width={0x07: args.insert_width})
     review = open(args.review, "w", encoding="utf-8") if args.review else None
     entries, seen_hash = [], set()
     stats = collections.Counter()
@@ -581,6 +660,20 @@ def main(argv=None):
     print("longest encoded message: %d bytes (%s); slot cap %d" % (longest + (args.max_len,)))
     top = sorted(((len(e), h) for h, e in entries), reverse=True)[:5]
     print("five longest: %s" % ", ".join("%d" % n for n, _ in top))
+
+    # The runtime-insert table: the same annotator over the item / ability
+    # names the game copies into the 0x07 records (docs/INSERT_RUBY.md).
+    ireview = open(args.insert_review, "w", encoding="utf-8") if args.insert_review else None
+    ientries, istats = insert_entries(disc, ann, ireview)
+    if ireview:
+        ireview.close()
+    iblob = emit_c(args.insert_out, ientries, code=code, tool="tools/build_ruby_script.py",
+                   what="Japanese (Ruby) runtime-insert table (item / ability names)",
+                   prefix="bof3_insert")
+    print("wrote %s: %d names annotated (%d blob bytes); %d unchanged (no kanji), "
+          "%d duplicates, %d too wide for a %d-cell row / 31 bytes"
+          % (args.insert_out, istats["annotated"], iblob, istats["unchanged"], istats["duplicate"],
+             ann.stats["insert_too_wide"], args.width))
     return 0
 
 

@@ -68,6 +68,11 @@ endforeach()
 # site in the generated C calls into an empty plugin registry (a no-op).
 file(GLOB _BOF3_XLATE_TABLES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/generated/bof3_xlate_*.c")
+# A Ruby language may also carry a runtime-insert table (item / ability
+# names with readings, generated/bof3_insert_<code>.c, docs/INSERT_RUBY.md);
+# BOF3_INSERT_HAVE_<CODE> tells the plugin which languages have one.
+file(GLOB _BOF3_INSERT_TABLES CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/generated/bof3_insert_*.c")
 if(_BOF3_XLATE_TABLES)
     set(_BOF3_XLATE_DEFS)
     foreach(_t IN LISTS _BOF3_XLATE_TABLES)
@@ -77,10 +82,19 @@ if(_BOF3_XLATE_TABLES)
         list(APPEND _BOF3_XLATE_DEFS "BOF3_XLATE_HAVE_${_CODE}")
         message(STATUS "BoF3: script table '${_code}' (${_n}.c)")
     endforeach()
+    foreach(_t IN LISTS _BOF3_INSERT_TABLES)
+        get_filename_component(_n "${_t}" NAME_WE)
+        string(REPLACE "bof3_insert_" "" _code "${_n}")
+        string(TOUPPER "${_code}" _CODE)
+        list(APPEND _BOF3_XLATE_DEFS "BOF3_INSERT_HAVE_${_CODE}")
+        message(STATUS "BoF3: insert table '${_code}' (${_n}.c)")
+    endforeach()
     target_sources(psx-runtime PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c" ${_BOF3_XLATE_TABLES})
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c"
+        ${_BOF3_XLATE_TABLES} ${_BOF3_INSERT_TABLES})
     set_source_files_properties(
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c" ${_BOF3_XLATE_TABLES}
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c"
+        ${_BOF3_XLATE_TABLES} ${_BOF3_INSERT_TABLES}
         PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src")
     set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_localize.c"

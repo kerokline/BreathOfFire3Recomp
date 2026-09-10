@@ -45,8 +45,12 @@
 #define MSGBOX_RESET_PC 0x8015042Cu
 #define MSG_STR_BASE    0x801490A8u    /* renderer's string base */
 #define MSG_STR_CUR     0x801490ACu    /* stepper's current pointer */
+/* The two message pools the box reads: the area script at 0x80010000 (16 KiB
+ * window) and, right after it, the system block AFLDKWA.EMI at 0x80014000
+ * (13,864 bytes: search / pickup / inn / save-point lines and the menu strings,
+ * which never reach this hook -- docs/FURIGANA.md).  One contiguous gate. */
 #define AREA_BLOCK_LO   0x80010000u
-#define AREA_BLOCK_HI   0x80014000u
+#define AREA_BLOCK_HI   0x80017628u
 
 /* One message is at most a couple of KiB after re-wrapping (the build tool
  * refuses anything over --max-len); eight slots ring so a message that is
@@ -77,13 +81,50 @@ static const Bof3XlateTable g_tables[] = {
 };
 #define TABLE_COUNT (sizeof g_tables / sizeof g_tables[0])
 
+/* Runtime inserts (docs/INSERT_RUBY.md). An item, skill or zenny amount is
+ * not in the message: the box carries <07><nn> and the stepper (MsgBox_Step
+ * 0x8015096C, case 7) reads the name at draw time from a 32-byte scratch
+ * record at 0x801490D4 + 0x20*nn, NUL-terminated, at most 32 bytes. Every
+ * caller fills the record BEFORE opening the message (the pickup path at
+ * GAME.EMI 0x801B4094 copies the 8 name bytes from Item_NamePtr(cat, id)
+ * 0x80166720, NULs byte 8, then Msg_OpenSystem(2); Field_GiveZenny and the
+ * battle-result tick sprintf the digits first, likewise), so at this hook
+ * the record already holds the bytes the player will read. For a Ruby
+ * language the plugin hashes those bytes, looks them up in the language's
+ * insert table (the same names, with readings) and writes the annotated
+ * name back into the record -- the stepper's own scratch for the message
+ * being opened, not game state. A record that misses (digits, a name with
+ * no kanji, a record already rewritten) is left untouched. */
+#define INSERT_RECORD_BASE 0x801490D4u
+#define INSERT_RECORD_SIZE 0x20u
+#define INSERT_MAX 16u                 /* distinct <07><nn> in one message */
+
+#ifdef BOF3_INSERT_HAVE_JP_RUBY
+BOF3_INSERT_DECLARE(jp_ruby)
+#endif
+#ifdef BOF3_INSERT_HAVE_JP_RUBY_ALL
+BOF3_INSERT_DECLARE(jp_ruby_all)
+#endif
+static const Bof3XlateTable g_inserts[] = {
+#ifdef BOF3_INSERT_HAVE_JP_RUBY
+    BOF3_INSERT_TABLE("jp_ruby", jp_ruby),
+#endif
+#ifdef BOF3_INSERT_HAVE_JP_RUBY_ALL
+    BOF3_INSERT_TABLE("jp_ruby_all", jp_ruby_all),
+#endif
+    { NULL, NULL, NULL, NULL, NULL, NULL }   /* keeps the array non-empty */
+};
+#define INSERT_TABLE_COUNT (sizeof g_inserts / sizeof g_inserts[0] - 1u)
+
 static uint32_t g_ring;                /* guest address of the slot ring, 0 until first use */
 static uint32_t g_next_slot;
 static const Bof3XlateTable *g_table;  /* the active language's table, NULL = leave JP */
+static const Bof3XlateTable *g_insert; /* its insert table, NULL = leave the records */
 static int      g_lang_known;          /* 0 until the first readback */
 static char     g_lang[16];
 static uint32_t g_lang_tick;
 static uint32_t g_hits, g_misses, g_skipped;
+static uint32_t g_ins_hits, g_ins_misses;
 
 /* The runtime's stdout is a pipe or a file under the harness (fully
  * buffered) and a killed process never flushes it, so every line is flushed. */
@@ -103,6 +144,13 @@ static const Bof3XlateTable *table_for(const char *code) {
     return NULL;
 }
 
+static const Bof3XlateTable *insert_table_for(const char *code) {
+    size_t i;
+    for (i = 0; i < INSERT_TABLE_COUNT; i++)
+        if (strcmp(g_inserts[i].code, code) == 0) return &g_inserts[i];
+    return NULL;
+}
+
 /* Re-read every 64 opens so a launcher-side switch is picked up without a
  * restart; the JSON is ~300 bytes, the parse is a strstr. */
 static const Bof3XlateTable *active_table(void) {
@@ -118,6 +166,7 @@ static const Bof3XlateTable *active_table(void) {
             g_lang[k] = '\0';
         }
         g_table = table_for(g_lang);
+        g_insert = insert_table_for(g_lang);
         g_lang_known = 1;
     }
     return g_table;
@@ -127,8 +176,12 @@ static const Bof3XlateTable *active_table(void) {
 /* Length of the message at `p`, control-aware. Mirrors message_extent() in
  * tools/build_script_xlate.py -- the hash covers exactly these bytes on both
  * sides, so the two walkers must agree. Copies the bytes into `out`. Returns
- * 0 if the message is unterminated within `cap` bytes. */
-static uint32_t msg_extent(uint32_t p, uint8_t *out, uint32_t cap) {
+ * 0 if the message is unterminated within `cap` bytes. The record index of
+ * every <07><nn> met on the way goes into `ins` (at most INSERT_MAX, counted
+ * in *nins) for the insert pass -- the walker already knows which 0x07 is a
+ * control and which is the second byte of a kanji pair. */
+static uint32_t msg_extent(uint32_t p, uint8_t *out, uint32_t cap,
+                           uint8_t *ins, uint32_t *nins) {
     uint32_t i = 0;
     while (i < cap) {
         uint8_t b = psx_mod_read_byte(p + i);
@@ -155,6 +208,7 @@ static uint32_t msg_extent(uint32_t p, uint8_t *out, uint32_t cap) {
         case 0x0F: case 0x16: case 0x12: case 0x13: case 0x15:
             if (i + 1 >= cap) return 0;
             out[i + 1] = psx_mod_read_byte(p + i + 1);
+            if (b == 0x07 && ins && *nins < INSERT_MAX) ins[(*nins)++] = out[i + 1];
             i += 2;
             break;
         default:
@@ -183,10 +237,52 @@ static int lookup(const Bof3XlateTable *t, uint64_t h, uint32_t *off, uint32_t *
     return 0;
 }
 
+/* --- the insert pass ----------------------------------------------------- */
+/* Rewrite the <07><nn> records the message about to open will read, when the
+ * active language has an insert table. Runs on the miss path too: a message
+ * with no kanji of its own still carries the insert. A record is read to its
+ * NUL (the stepper stops there, or after 32 bytes -- a record with no NUL in
+ * 32 is not a name and is skipped), hashed as-is, and rewritten only on a
+ * table hit that fits 31 bytes + NUL. Rewriting is idempotent: the annotated
+ * bytes hash to nothing, so a message re-opened on the same record is left
+ * as it is. */
+static void apply_inserts(const uint8_t *ins, uint32_t nins) {
+    uint8_t rec[INSERT_RECORD_SIZE];
+    uint32_t k, j, n, off, len, base;
+    uint64_t h;
+    const Bof3XlateTable *t = g_insert;
+    if (!t || !nins) return;
+    for (k = 0; k < nins; k++) {
+        for (j = 0; j < k; j++) if (ins[j] == ins[k]) break;
+        if (j < k) continue;                   /* same record twice in one message */
+        base = INSERT_RECORD_BASE + INSERT_RECORD_SIZE * ins[k];
+        for (n = 0; n < INSERT_RECORD_SIZE; n++) {
+            rec[n] = psx_mod_read_byte(base + n);
+            if (rec[n] == 0) break;
+        }
+        if (n == 0 || n == INSERT_RECORD_SIZE) continue;
+        h = fnv1a64(rec, n);
+        if (!lookup(t, h, &off, &len) || len + 1 > INSERT_RECORD_SIZE) {
+            g_ins_misses++;
+            if (g_ins_misses <= 10)
+                say("bof3_localize: insert miss #%u rec=%u len=%u hash=%016llx head=%02x %02x %02x %02x\n",
+                    g_ins_misses, ins[k], n, (unsigned long long)h, rec[0], rec[1], rec[2], rec[3]);
+            continue;
+        }
+        for (j = 0; j < len; j++) psx_mod_write_byte(base + j, t->blob[off + j]);
+        psx_mod_write_byte(base + len, 0);
+        g_ins_hits++;
+        if (g_ins_hits <= 5)
+            say("bof3_localize: insert hit #%u rec=%u at %08X (%u -> %u bytes)\n",
+                g_ins_hits, ins[k], base, n, len);
+    }
+}
+
 /* --- the hook ------------------------------------------------------------ */
 static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
     uint8_t jp[JP_MAX];
-    uint32_t ptr, n, off, len, dst, i;
+    uint8_t ins[INSERT_MAX];
+    uint32_t ptr, n, off, len, dst, i, nins = 0;
     uint64_t h;
     const Bof3XlateTable *t;
     (void)cpu; (void)address;
@@ -194,13 +290,16 @@ static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
     ptr = psx_mod_read_word(MSG_STR_CUR);
     t = active_table();
     if (g_hits + g_misses + g_skipped == 0)
-        say("bof3_localize: first MsgBox_Reset, ptr=%08X, language \"%s\" -> %s\n", ptr,
-            g_lang, t ? t->code : "no table, leaving JP");
+        say("bof3_localize: first MsgBox_Reset, ptr=%08X, language \"%s\" -> %s%s\n", ptr,
+            g_lang, t ? t->code : "no table, leaving JP",
+            g_insert ? " (+ insert table)" : "");
     if (!t) { g_skipped++; return; }
     if (ptr < AREA_BLOCK_LO || ptr >= AREA_BLOCK_HI) { g_skipped++; return; }
 
-    n = msg_extent(ptr, jp, (AREA_BLOCK_HI - ptr < JP_MAX) ? AREA_BLOCK_HI - ptr : JP_MAX);
+    n = msg_extent(ptr, jp, (AREA_BLOCK_HI - ptr < JP_MAX) ? AREA_BLOCK_HI - ptr : JP_MAX,
+                   ins, &nins);
     if (!n) { g_skipped++; return; }
+    apply_inserts(ins, nins);
     h = fnv1a64(jp, n);
     if (!lookup(t, h, &off, &len)) {
         g_misses++;
@@ -239,4 +338,6 @@ PSX_MOD_CONSTRUCTOR(bof3_register_localize_plugin) {
         ok ? "registered at MsgBox_Reset" : "REGISTRATION FAILED", (unsigned)TABLE_COUNT);
     for (i = 0; i < TABLE_COUNT; i++)
         say("bof3_localize:   %s: %u messages\n", g_tables[i].code, (unsigned)*g_tables[i].count);
+    for (i = 0; i < INSERT_TABLE_COUNT; i++)
+        say("bof3_localize:   %s: %u insert names\n", g_inserts[i].code, (unsigned)*g_inserts[i].count);
 }
