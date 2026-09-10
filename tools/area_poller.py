@@ -232,6 +232,7 @@ def hp_observed():
 def cmd_watch(a):
     by_size = script_sections()
     crcs = crc_index()
+    import resident as rs
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     import name_map as nm
     names = nm.load_area_names()
@@ -247,6 +248,7 @@ def cmd_watch(a):
                                    if harvest_s else "off (--harvest-every 0)"))
     last_area, seen_seq, n_rows = None, 0, 0
     area_crcs, area_file, pending_shot, pending_prompt = {}, None, None, None
+    last_resident, resident_ids_now = None, []
     next_harvest = time.time() + harvest_s if harvest_s else None
 
     def do_harvest(fr, why):
@@ -263,27 +265,45 @@ def cmd_watch(a):
         this run's id for the TIMELINE rows, where per-watch-run really is the
         right grain.
 
-        The area resident right now is stamped on PCs newly seen by this pass,
-        which is how the observed set earns `--by area` stratification.
+        The area resident right now is stamped on PCs newly seen by this pass
+        AND on any PC whose entry count grew since the previous pass -- those
+        were necessarily entered in the interval just polled, so this area is
+        the honest owner (harvest_interp_pcs.py, the merge loop). That is how
+        the observed set earns `--by area` stratification, and it is what makes
+        `tools/area_pcs.py --coverage` able to tell a clean area from an
+        unvisited one.
         Coverage is only computed on the final pass -- it re-reads the 5 MB
         capture file, too expensive to do every 15 minutes for a line nobody
         reads mid-session."""
         try:
             r = hp.harvest(port=a.port, save_json=hp_observed(), quiet=True,
                            session=None, area=area_file,
-                           coverage=(why == "stop"))
+                           coverage=(why == "stop"),
+                           resident=resident_ids_now or None)
         except Exception as e:
             print(f"[f{fr}]   harvest ({why}) failed: {e}", file=sys.stderr)
             return None
         print(f"[f{fr}]   harvest ({why}): {r['new']} new PCs, observed set {r['after']} "
               f"({r['entered']} entered)")
+        if r.get("area"):
+            # "0 new PCs, N stamped" is the healthy shape once an area has been
+            # walked before: nothing undiscovered left, but the attribution for
+            # what did run is still being recorded.
+            print(f"[f{fr}]   attributed {r.get('stamped', 0)} PC(s) to "
+                  f"{r['area'].split('/')[-1]}")
         occ = r.get("occ")
         if occ:
             # Enriched build: say what kind of gaps this session is hitting.
-            # Seedable gaps shrink with the next loop; attribution gaps do not
-            # (compile-side fix); "outside" is BIOS/kernel/boot-EXE residue.
-            print(f"[f{fr}]   gaps: {occ['seed']} seedable, {occ['attrib']} attribution "
-                  f"(resident section has no piece), {occ['none']} outside compiled code")
+            # Seedable and undemanded-attribution gaps both shrink with the
+            # next loop; only RESIDUAL attribution gaps (already demanded,
+            # resident still has no piece) need a compile-side answer.
+            # Kernel / boot-EXE rows are owned images, not overlay gaps.
+            print(f"[f{fr}]   gaps: {occ['seed']} seedable, "
+                  f"{occ['interior_new']} new interior (no piece yet, self-heal), "
+                  f"{occ['attrib_new']} attribution (undemanded, self-heal), "
+                  f"{occ['attrib_residual']} RESIDUAL attribution; "
+                  f"owned: {occ['kernel']} kernel, {occ['bootexe']} boot-EXE; "
+                  f"{occ['none']} outside compiled code")
         g = (r.get("coverage") or {}).get("global") or {}
         if g.get("coverage") is not None:
             print(f"[f{fr}]   estimated coverage {100.0 * g['coverage']:.1f}% "
@@ -292,10 +312,16 @@ def cmd_watch(a):
         row = {"session": session, "event": "harvest", "frame": fr, "why": why,
                "t": dt.datetime.now().isoformat(timespec="seconds"),
                "new": r["new"], "total": r["after"], "entered": r["entered"],
+               "stamped": r.get("stamped", 0), "area_file": r.get("area"),
                "interp": r["interp"], "native": r["native"],
                "coverage": g.get("coverage"), "est_total": g.get("estimate")}
         if occ:
-            row.update({"occ_seed": occ["seed"], "occ_attrib": occ["attrib"],
+            row.update({"occ_seed": occ["seed"],
+                        "occ_interior_new": occ["interior_new"],
+                        "occ_attrib_new": occ["attrib_new"],
+                        "occ_attrib_residual": occ["attrib_residual"],
+                        "occ_residual_pcs": occ["residual_pcs"],
+                        "occ_kernel": occ["kernel"], "occ_bootexe": occ["bootexe"],
                         "occ_none": occ["none"]})
         return row
 
@@ -306,12 +332,31 @@ def cmd_watch(a):
                 fr = frame(a.port)
                 area = resident_area(a.port, by_size)
                 ring = native_ring(a.port)
+                res = rs.resident_ids(a.port)
             except Exception as e:
                 print(f"  server unreachable ({e}); retrying", file=sys.stderr)
                 time.sleep(2.0)
                 continue
             key = area["md5"] if area else None
             rows = []
+            # One u32 per band (the header registry id) names every occupant --
+            # PLCHAR, game-mode, BMAGIC, WORLD, SCENARIO, BOSS -- where the
+            # script-block md5 above names only the AREA. Validated against the
+            # known ids (tools/resident.py), so a save's staging buffer at
+            # 0x800C1800 or an unused band never reads as an overlay.
+            rkey = rs.resident_key(res)
+            if rkey != last_resident:
+                resident_ids_now = ["0x%03X" % e["id"] for e in res["bands"].values()
+                                    if e.get("id") is not None and not e.get("wrong_band")]
+                rows.append({"session": session, "event": "resident", "frame": fr,
+                             "t": dt.datetime.now().isoformat(timespec="seconds"),
+                             "ids": resident_ids_now,
+                             "bands": {"0x%08X" % b: (e.get("name") if e.get("id") is not None else None)
+                                       for b, e in res["bands"].items()},
+                             "file_id": "0x%03X" % res["file_id"], "file": res["file"],
+                             "ready": res["ready"], "area_number": res["area"]})
+                print(f"[f{fr}] {rs.format_resident(res)}")
+                last_resident = rkey
             if key != last_area:
                 area_crcs, area_file = {}, (area["file"] if area else None)
                 row = {"session": session, "event": "area", "frame": fr,

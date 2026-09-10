@@ -53,6 +53,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import struct
 import sys
 
@@ -64,6 +65,76 @@ CAPTURES = os.path.join(AN, "overlay_captures_all.json")
 
 JR_RA = 0x03E00008
 LEGACY = "legacy"          # session id stamped on rows predating incidence
+
+# ------------------------------------------------------------ owner buckets
+#
+# Not every interpreted PC is an overlay gap. Two classes are owned by images
+# that ship as-is and can never be harvested into a band:
+#   kernel   -- the BIOS copies its kernel into RAM [0, 0x10000) at boot; that
+#               copy is install-at-runtime code, so the exception handler
+#               (0x27AC), the 0xA0/0xB0 call gates and the IntRP walk run
+#               interpreted by rule. Owner: the BIOS image. Framework-level.
+#   boot-exe -- a page of SLPS_009.90's text that was written at run time and
+#               so lost its static translation (0x80164E84.., 0x8017EAA0..).
+#               Owner: the boot EXE. Not an overlay.
+# Measured 2026-09-07 these were 57% and 2.5% of ALL interpreted instructions
+# in the observed set, filed under "(outside every band)" where they inflated
+# the "outside compiled code" count and diluted the Axis B numbers. They get
+# their own strata, are excluded from the overlay estimate, and are never
+# recommended as something to go play.
+KERNEL_END = 0x10000
+OWNER_KERNEL = "(kernel RAM -- owner: BIOS)"
+OWNER_BOOT_EXE = "(boot EXE dirty text -- owner: SLPS_009.90)"
+OWNER_LABELS = (OWNER_KERNEL, OWNER_BOOT_EXE)
+
+
+def exe_text_range(game_toml=os.path.join(ROOT, "game.toml")):
+    """(lo, hi) physical extent of the boot EXE text from game.toml.
+
+    Read from the config rather than hard-coded so a re-staged EXE cannot
+    silently move the boot-exe bucket. Missing config -> (0, 0): nothing is
+    ever classified boot-exe on a guess."""
+    try:
+        txt = open(game_toml, encoding="utf-8").read()
+    except OSError:
+        return (0, 0)
+    la = re.search(r'^\s*load_address\s*=\s*"(0x[0-9A-Fa-f]+)"', txt, re.M)
+    ts = re.search(r'^\s*text_size\s*=\s*"(0x[0-9A-Fa-f]+)"', txt, re.M)
+    if not la or not ts:
+        return (0, 0)
+    lo = int(la.group(1), 16) & 0x1FFFFFFF
+    return (lo, lo + int(ts.group(1), 16))
+
+
+def owner_of(pc, spans, exe_range=None):
+    """Owner label for a PC no band claims, or None if it is overlay-shaped.
+
+    Bands overlap the EXE image (overlays load INTO its text), so the band
+    match runs first and the EXE bucket only catches what no band spans."""
+    pc &= 0x1FFFFFFF
+    if pc < KERNEL_END:
+        return OWNER_KERNEL
+    if any(lo <= pc < hi for lo, hi in spans.values()):
+        return None
+    lo, hi = exe_range if exe_range is not None else exe_text_range()
+    if lo <= pc < hi:
+        return OWNER_BOOT_EXE
+    return None
+
+
+def demanded_pcs(captures):
+    """Physical PCs some capture already lists as a dispatch entry.
+
+    extract_overlays.py expands every observed PC to EVERY occupant of its band,
+    so a PC listed for one occupant was demanded for all of them: if the
+    resident occupant still has no piece there after a compile, the demand was
+    rejected (memo / data-as-code), not missed. That is the line between an
+    attribution gap that self-heals on the next loop and a real residual."""
+    out = set()
+    for c in captures:
+        for p in c.get("dispatch_entry_pcs") or []:
+            out.add(int(p, 16) & 0x1FFFFFFF)
+    return out
 
 
 # ------------------------------------------------------------------ chao2
@@ -143,7 +214,10 @@ def static_per_band(captures):
     entries = collections.defaultdict(set)
     for c in captures:
         base = int(c["load_addr"], 16) & 0x1FFFFFFF
-        entries[base].update(c.get("dispatch_entry_pcs") or [])
+        # dispatch_entry_pcs also carries the header entry table since
+        # 2026-09-08 (static_dispatch_entry_pcs); only harvested PCs count here.
+        hdr = set(c.get("static_dispatch_entry_pcs") or [])
+        entries[base].update(p for p in (c.get("dispatch_entry_pcs") or []) if p not in hdr)
         b = base64.b64decode(c["bytes_b64"])
         n = len(b) // 4
         w = struct.unpack("<%dI" % n, b[:n * 4])
@@ -283,13 +357,18 @@ def stratify(rows, by, spans):
     # address is the least wrong one available from the address alone. True
     # attribution needs residency (the occ_crc enrichment), not arithmetic.
     by_width = sorted(spans.items(), key=lambda kv: (kv[1][1] - kv[1][0], kv[0]))
+    exe_range = exe_text_range()
     for r in rows:
         pc = int(r["pc"], 16) & 0x1FFFFFFF
-        label = "(outside every band)"
+        label = None
         for base, (lo, hi) in by_width:
             if lo <= pc < hi:
                 label = band_label(base)
                 break
+        if label is None:
+            # Kernel / boot-EXE PCs are owned, not unexplained: they go to
+            # their owner's stratum, never to the overlay pool.
+            label = owner_of(pc, spans, exe_range) or "(outside every band)"
         out[label].append(r)
     return out
 
@@ -361,12 +440,23 @@ def build(rows, by="band", captures=None):
         e["name"] = names.get(e["label"], "")
         e["display"] = label_for(e["label"], names)
 
-    glob = chao2([len(row_sessions(r)) for r in ent if row_sessions(r)],
+    # The global estimate is the OVERLAY estimate: kernel and boot-EXE rows are
+    # owned by images that ship as-is, so they are listed in their own strata
+    # above but never pooled into the number Axis B is trying to saturate.
+    owned = set()
+    for lbl in OWNER_LABELS:
+        owned.update(id(r) for r in strata.get(lbl, []))
+    pool = [r for r in ent if id(r) not in owned]
+    glob = chao2([len(row_sessions(r)) for r in pool if row_sessions(r)],
                  len(all_sessions))
     glob["label"] = "(global)"
-    glob["rows"] = len(ent)
-    glob["legacy_only"] = legacy_only
+    glob["rows"] = len(pool)
+    glob["legacy_only"] = sum(1 for r in pool if not row_sessions(r))
+    owner_summary = {lbl: {"rows": len(strata.get(lbl, [])),
+                           "insns": sum(int(r.get("insns", 0)) for r in strata.get(lbl, []))}
+                     for lbl in OWNER_LABELS}
     return {"by": by, "sessions": sorted(all_sessions), "global": glob, "duplicate_sessions": duplicate_sessions(ent),
+            "owned": owner_summary,
             "strata": table,
             "static_fn_starts_total": sum(fn_counts.values()),
             "distinct_pcs": len(rows), "entered_pcs": len(ent)}
@@ -550,7 +640,9 @@ def print_report(rep):
             line += " %10s %11s" % (
                 e["fn_starts"] if e.get("fn_starts") is not None else "-",
                 e["registered"] if e.get("registered") is not None else "-")
-        if e["s_obs"] == 0:
+        if e["label"] in OWNER_LABELS:
+            line += "   OWNED -- ships as-is, not harvestable, outside the estimate"
+        elif e["s_obs"] == 0:
             ex = e.get("exclusive")
             if e["legacy_only"]:
                 line += "   (%d legacy-only)" % e["legacy_only"]
@@ -573,9 +665,10 @@ def print_report(rep):
     # empty ones have no coverage number to sort by would be exactly backwards.
     # A shadowed band is excluded from the recommendations: replaying it cannot
     # move its number, because no address in its span is exclusively its own.
-    unsampled = [e for e in rep["strata"] if e["s_obs"] == 0
+    playable = [e for e in rep["strata"] if e["label"] not in OWNER_LABELS]
+    unsampled = [e for e in playable if e["s_obs"] == 0
                  and not (e.get("exclusive") is not None and e["exclusive"] < 0.05)]
-    partial = sorted((e for e in rep["strata"] if e["coverage"] is not None),
+    partial = sorted((e for e in playable if e["coverage"] is not None),
                      key=lambda e: e["coverage"])
     if rep["by"] != "none" and (unsampled or len(partial) > 1):
         picks = ["%s (%s)" % (e.get("display", e["label"]),

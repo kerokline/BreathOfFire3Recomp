@@ -82,3 +82,30 @@ in-game slot 8, the world-map anchor — see [`SAVESTATES.md`](SAVESTATES.md)).
 | Date | Slot | resume pc | addr | ra | a0 | Reproduced same slot? |
 |---|---|---|---|---|---|---|
 | 2026-09-01 | 7 | 0x80175234 | 0x00002934 | 0x801A36BC | 0x80146990 | No |
+| 2026-09-08 | ? | ? | 0x00002934 | 0x801B1638 | 0x00000000 | Yes -- twice, 46 s apart |
+
+**2026-09-08 recurrence.** Two `fatal` terminations at 13:45:41 (frame 265) and
+13:46:27 (frame 195), both during boot/restore, both with `current_func =
+0x000029CC` (the immediate neighbour of the faulting address). `psx_crash.txt`
+survives from the later one:
+
+```
+FAIL-FAST unknown dispatch: addr=0x00002934 phys=0x00002934
+       ra=0x801B1638 a0=0x00000000 a1=0x00009088
+```
+
+**Different call site and different arguments from 2026-09-01** (`ra` was
+`0x801A36BC`, `a0` `0x80146990`, `a1` `0`), so this is an independent
+occurrence, not a replay of the same one -- and it fired **twice in the same
+session**, which retires the "single observation, not reproducible" framing in
+the status header. `a1 = 0x00009088` is a **TCB pointer**: the same value the
+companion freeze dump's `thread_trace` reports as `current_tcb` at a
+`syscall3_enter`. That strengthens the IRQ/thread-boundary reading -- the
+callback is being reached through the kernel's thread-switch path -- and gives
+the next investigation a concrete handle: trace `0x801B1638` and see which
+kernel callback slot it loads.
+
+Not to be confused with the four `slow_frames`/`hard_freeze` dump pairs from the
+same afternoon: those are the wedge detector false-tripping while the guest is
+deliberately paused in `savestate_menu_host_pause_loop`, and are not faults at
+all. See [`STATUS.md`](STATUS.md).
