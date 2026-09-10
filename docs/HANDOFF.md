@@ -829,50 +829,62 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`2fa3472a`** = upstream `17f49ad3` + our two commits
-  (`6e760748` enrichment, `2fa3472a` per-variant static fragments), i.e. the tip
-  of the fork branch `fix/static-fragments-per-variant`, which is a
-  **fast-forward** of the old pin — no merge commit exists or is needed. Also
-  pushed as `pin/bof3-fragments-17f49ad3` on `kerokline/psxrecomp` so the SHA
-  survives deletion of the PR branch. Chosen 2026-09-06 because it is the only
-  reproducible pin that carries our work: **upstream master still does not build
-  against any published `recomp-ui`.** psxrecomp master reads 20 fields off
-  `RecompLauncherCNetplayLaunch`, and six — `guest_memcard`, `is_spectator`,
-  `spectator_wire_slot`, `host_spectates`, `slot_port`, `slot_port_valid` —
-  exist in **no** recomp-ui ref except mstan's unmerged WIP branch
-  `origin/merge/frameblend-localization` (`bba6266`, still committing
-  2026-09-06). That branch is 37 commits ahead of master and 5 behind it, with
-  the header changes spread across ~13 commits interleaved with lobby chat,
-  seat swaps and frame blending — so there is no clean cherry-pick, and
-  bumping our own #48 onto master does **not** help (the fields are not ours
-  and not master's). `8f266efe` is an ancestor of all three of our merge
-  commits, so no upstream commit carries #321/#324/#325 *and* builds.
-  **Verified:** `build-relprof` compiles `runtime/src/main.cpp` — the exact
-  file that failed the `155e269b` attempt — and links in 17 s on this pin.
-  Re-pin to plain upstream master once the recomp-ui netplay half merges.
-- All three of our PRs **are merged upstream** ([#321](https://github.com/mstan/psxrecomp/pull/321),
-  [#324](https://github.com/mstan/psxrecomp/pull/324),
-  [#325](https://github.com/mstan/psxrecomp/pull/325)) and the old pin leaves
-  nothing behind (`git log upstream/master..17f49ad3` is empty). The fork
-  branches `feat/dirty-pc-enrichment` / `fix/static-fragments-per-variant` are
-  kept until the pin can move, because `generated/` was compiled with #325 and
-  a checkout of the gitlink alone cannot reproduce it.
-- `recomp-ui` **`db12620`** = a commit on fork branch
+- `psxrecomp` **`ed55299b`** = plain upstream `master` on
+  `RetroPortingToolKit/psxrecomp` (the org the project moved to on 2026-09-09;
+  `mstan/*` URLs still redirect). Bumped 2026-09-10 from `2fa3472a`, 68 commits.
+  The old pin's reason for existing is gone: it was held on the fork branch
+  because upstream master read six netplay fields
+  (`guest_memcard`, `is_spectator`, `spectator_wire_slot`, `host_spectates`,
+  `slot_port`, `slot_port_valid`) that lived only in mstan's unmerged WIP branch
+  `merge/frameblend-localization`. **That branch is now merged into recomp-ui
+  master** (`13d7d69`), so upstream psxrecomp builds against a published
+  recomp-ui for the first time. Our `fix/gpu-polyline-terminator` also merged
+  ([#313](https://github.com/RetroPortingToolKit/psxrecomp/pull/313)), so no
+  fork branch carries anything the pin lacks.
+  **A regenerate is mandatory across this bump** — do not skip it. The new
+  `dirty_ram_interp.c` calls `psx_overlay_static_can_dispatch`, which
+  `compile_overlays.py` only started emitting after the old pin, so a stale
+  `generated/` fails at link with an undefined reference. Base-EXE codegen came
+  out byte-identical (35 shards, 0 updated, dispatch unchanged) — only the
+  overlay layer actually changes, but `axis_b_loop.sh --skip-harvest` is the
+  supported way to redo it. **Verified 2026-09-10:** regenerate + Axis B +
+  `build-relprof` links a 1.11 GB exe that boots to an OpenGL 3.3 context at
+  60 Hz with all three localization tables registered.
+- **What the bump changes for us, beyond the link fix:** the freeze detector no
+  longer fires during host pause loops
+  ([#339](https://github.com/RetroPortingToolKit/psxrecomp/pull/339)), which
+  retires the `slow_frames`/`hard_freeze` false pairs (they were the
+  savestate/rewind menu pausing the guest on purpose); PR #327's interlaced row submission was
+  reverted to restore retail BIOS boot; `ExitCriticalSection` now preserves
+  registers; and optional native-wide HUD / tiled-background support arrived
+  (enhancement-phase only — leave it off during faithful-core work). The
+  framework license is unchanged (PolyForm Noncommercial 1.0.0).
+- `recomp-ui` **`26756c2`** = a commit on fork branch
   `feat/additional-ui-functionality` (`kerokline/recomp-ui`) = upstream `master`
-  + the launcher UI work ([mstan/recomp-ui#48](https://github.com/mstan/recomp-ui/pull/48),
-  still **open**). The pin sits 3 commits behind that branch's tip. The branch
-  was refreshed 2026-09-06 (`4071e37` → `69eecdc`) by **merging** upstream
-  master in — not rebasing, so the open PR's review history survives; it had
-  fallen 5 commits behind (the SBI picker series, #50). Auto-merge was clean,
-  and `ctest` gives an identical 9/11 on the merged branch and on plain master
-  (`recomp-ui-psx-asset-staging` needs staged fonts this out-of-tree config
-  never produces; `recomp-ui-launcher-setup-bios` fails upstream too) — the
-  merge introduces no regression. #42 (the standalone Scanlines toggle) was **closed unmerged on
-  purpose** — its card was folded into #48, so #48 is the only launcher PR to
-  track. Pin back to upstream `master` when it merges. #42 conflicted once
-  against upstream #46 in `recomp_launcher.h` (both appended to `Settings` /
-  `GameInfo`); resolved upstream-first (`virtual_stylus` before the scanline
-  fields) — rebase the same way if it conflicts again. #47 was redundant with #46.
+  `8bf4738` + the launcher UI work
+  ([recomp-ui#48](https://github.com/RetroPortingToolKit/recomp-ui/pull/48),
+  still **open**), and it is that branch's tip. Refreshed 2026-09-10
+  (`69eecdc` → `26756c2`) by **merging** upstream master in — not rebasing, so
+  the open PR's review history survives; it had fallen 53 commits behind (the
+  netplay lobby/chat series, frame blending, per-GUID pad binds, the display
+  aspect row, HiDPI fixes). Three conflicts, all resolved upstream-first:
+  `recomp_launcher.h` keeps both capability defines (`HAS_FRAME_BLEND` from
+  master, `HAS_SCANLINES` from us); the bind grid takes master's restructure,
+  which splits the pad-source and keyboard-source chips into separate branches
+  and supersedes our KEY+GAMEPAD pairing, with `db12620`'s `!capture_assist`
+  guard re-applied to both capture predicates so capturing a host shortcut does
+  not light up the matching pad slot; the capture handlers keep our
+  Backspace-clears path. `ctest` gives an identical 12/14 on the merged branch
+  and on pristine master `8bf4738` (`recomp-ui-psx-binds` and
+  `recomp-ui-launcher-setup-bios` both fail upstream too) — the merge introduces
+  no regression. #42 (the standalone Scanlines toggle) stays **closed unmerged
+  on purpose**: its card was folded into #48, so #48 is the only launcher PR to
+  track. Pin back to upstream `master` when it merges.
+- `.gitmodules` now points at `RetroPortingToolKit/*`. Note that
+  `git submodule sync` rewrites each submodule's `origin` URL from that file, so
+  it will overwrite a fork `origin`; both submodules keep the fork reachable
+  under a second remote (`psxrecomp` → `origin` fork + `upstream` org;
+  `recomp-ui` → `origin` org + `fork` fork).
 - **Open fork branches: none.** The walk-HLE prototype `d725af45` (the refuted
   `fix/vblank-cadence-pacing`) was retired 2026-09-05; its two reusable mechanics
   live in [`vblank-pacing-bug.md`](vblank-pacing-bug.md) → *Reusable mechanics*
