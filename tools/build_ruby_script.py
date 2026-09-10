@@ -48,7 +48,8 @@ sys.path.insert(0, HERE)
 from text_tables import Disc, default_cue                                  # noqa: E402
 import page_rows                                                            # noqa: E402
 from build_script_xlate import (message_extent, fnv1a64, emit_c, load_jp_tables,  # noqa: E402
-                                decode_jp, ARG1, LEAD, CHOICE, NEWLINE, PAGE, TIMED, SPACE)
+                                decode_jp, ARG1, LEAD, CHOICE, NEWLINE, PAGE, TIMED, SPACE,
+                                INSERT_WIDTH)
 import ruby_fit                                                             # noqa: E402
 
 KANJI_RE = re.compile(r"[\u4e00-\u9fff\u3005]")
@@ -326,8 +327,20 @@ class Annotator:
         return merged
 
     @staticmethod
-    def cells(unit):
-        return sum(1 for it in unit if it[0] == "g")
+    def item_cells(it):
+        """Width of one item: a glyph is one cell; a runtime insert (0x03 /
+        0x04 / 0x07 / 0x08: character, item, skill, message) is budgeted at
+        the widest name it can print, as the English encoder does -- a zero
+        here laid <0701> を教（おし）えてもらった！ out 19 cells wide."""
+        if it[0] == "g":
+            return 1
+        if it[0] == "c":
+            return INSERT_WIDTH.get(it[1][0], 0)
+        return 0
+
+    @classmethod
+    def cells(cls, unit):
+        return sum(cls.item_cells(it) for it in unit)
 
     def rows_for(self, units):
         rows, row, used = [], [], 0
@@ -347,7 +360,7 @@ class Annotator:
                         continue
             if w > self.width:                          # wider than the box: split by glyph
                 for it in u:
-                    c = 1 if it[0] == "g" else 0
+                    c = self.item_cells(it)
                     if used + c > self.width:
                         rows.append(row); row, used = [], 0
                     row.append([it]); used += c
@@ -370,8 +383,8 @@ class Annotator:
         for it in items:
             if it[0] == "nl":
                 rows += 1; cur = 0
-            elif it[0] == "g":
-                cur += 1
+            elif it[0] in ("g", "c"):
+                cur += self.item_cells(it)
                 if cur > self.width:
                     return False
         return rows <= self.rows
@@ -434,6 +447,32 @@ def write_ambiguous(path, ann, overrides):
     print("ambiguity list: %d surfaces -> %s" % (len(rows), path))
 
 
+# The system message block: BIN/ETC/AFLDKWA.EMI's one section (also carried
+# inside FIRST.EMI), dest 0x80014000, an 8-byte header and then the same u16
+# offset table as an area script, 309 slots.  Most of it is menu, shop and
+# memory-card text, but the whole block goes in: the box has one door for
+# system text (Msg_OpenSystem -> MsgBox_Reset, 64 call sites, where the
+# plugin hooks), while menus / shops / battle read the block through
+# Msg_SystemPtr (1,879 sites) and never pass the hook.  So a slot the box
+# draws always matches and a slot a menu draws never does, whichever overlay
+# asked -- including the ids the area scripts pass through Script_ShowMessage
+# with bit 0x2000, which no static scan can enumerate.
+SYSTEM_BLOCK = ("BIN/ETC/AFLDKWA.EMI", 0x80014000, 8, None)   # None = every slot
+
+
+def message_blocks(disc):
+    """(path, section bytes, table base, slot indices) for every message
+    block the tables cover: the 200 area scripts, then the field slots of
+    the system block."""
+    for path in page_rows.area_paths(disc):
+        data = disc.section(path, 0x80010000).data
+        yield path, data, 0, range(struct.unpack_from("<H", data, 0)[0] // 2)
+    path, dest, base, slots = SYSTEM_BLOCK
+    data = disc.section(path, dest).data
+    n = struct.unpack_from("<H", data, base)[0] // 2
+    yield path, data, base, range(n) if slots is None else [m for m in slots if m < n]
+
+
 class _NeverSeen(set):
     """A `seen` set that forgets: every occurrence gets its reading."""
     def add(self, item):
@@ -477,12 +516,10 @@ def main(argv=None):
     stats = collections.Counter()
     longest = (0, None)
 
-    for path in page_rows.area_paths(disc):
-        data = disc.section(path, 0x80010000).data
-        n = struct.unpack_from("<H", data, 0)[0] // 2
+    for path, data, base, slots in message_blocks(disc):
         seen_words = set()                       # first occurrence per area
-        for m in range(n):
-            off = struct.unpack_from("<H", data, 2 * m)[0]
+        for m in slots:
+            off = base + struct.unpack_from("<H", data, base + 2 * m)[0]
             ln = message_extent(data, off)
             stats["slots"] += 1
             if not ln:
