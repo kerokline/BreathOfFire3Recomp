@@ -23,10 +23,18 @@ with certainty, plus screenshots), and the browsable
 `docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
 coverage inside the bands as new content is played, naming areas off their
 screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
-**2026-09-11:** the largest remaining interpreted sink is not an overlay band
+**2026-09-11:** the largest remaining interpreted sink was not an overlay band
 at all but the BIOS exception handler (44.6 % of interpreted work, both
-BIOSes) — an upstream psxrecomp job, planned in
-[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md) (section 4).
+BIOSes). **Fixed the same day** upstream in `psxrecomp` branch
+`feat/kernel-install-slot-ranges` (`c12f0371`): kernel interpreted work is down
+87.7 % on OpenBIOS and 97.8 % on retail, `kernel_bless.mismatch` is 0 on both,
+and the card read trace is byte-identical across the A/B. Evidence and the two
+traps in [`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what
+it bought*; the plan it came from is
+[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). **Open: push
+the branch, open the PR, re-measure on a second title, bump the pin.** The
+A0/B0/C0 vector trampolines are untouched by design and are now 87 % of what
+OpenBIOS kernel RAM still interprets — the next lever if one is needed.
 **2026-09-09:** the text encoding is fully readable *and writable* — the
 single-byte half was read off the font sheet (`tools/font_sheet.py` →
 [`names/font.toml`](../names/font.toml)) and 100% of the area scripts' glyph

@@ -1,6 +1,17 @@
 # Upstream plan — make the patched BIOS exception handler run native
 
-**Status:** PLAN (written 2026-09-11, after [`kernel-patch-sites.md`](kernel-patch-sites.md)).
+**Status:** DONE 2026-09-11 (same day) — implemented as ONE change, not three
+PRs, on `psxrecomp` branch `feat/kernel-install-slot-ranges` (`c12f0371`, off
+upstream master `6f77dcc3`). Steps 1-3 do not pay off separately, and the plan
+was missing a fourth part (the interpreter hand-back at the range end) plus a
+trap that wedged the boot (a dispatch key inside a declared range). Results and
+both corrections are in
+[`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what it bought*.
+Step 4 (measure) is done; the pin bump and the PR are the open items, along
+with re-measuring on a second title before merge. Step 5 (vector trampolines)
+is untouched and is now 87% of what OpenBIOS kernel RAM still interprets.
+
+**Was:** PLAN (written 2026-09-11, after [`kernel-patch-sites.md`](kernel-patch-sites.md)).
 Target repo: `RetroPortingToolKit/psxrecomp` (we can push there). Work in a
 fork branch off the current pin (`ed55299b`, see HANDOFF → *Pins and
 branches*), open one PR per step below, bump the gitlink here when merged.

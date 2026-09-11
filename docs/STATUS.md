@@ -2,6 +2,23 @@
 
 **Status:** IN PROGRESS (last verified 2026-09-05)
 
+> **2026-09-11 — the BIOS exception handler runs native; kernel interpreted
+> work is down 87.7% (OpenBIOS) / 97.8% (retail).** The 44.6% kernel sink from
+> [`kernel-patch-sites.md`](kernel-patch-sites.md) is fixed in `psxrecomp`
+> branch `feat/kernel-install-slot-ranges` (`c12f0371`, off upstream master
+> `6f77dcc3`): install slots became RANGES with an explicit resume shape, the
+> bless verifier skips them, and the dirty-RAM interpreter hands back at a
+> range end. `kernel_bless.mismatch` 21 → 0 on OpenBIOS and 74 → 0 on retail;
+> total interpreted instructions per frame -42.6% / -94.2%. Residual kernel
+> work is exactly declared-words x entries, so only the guest's own patched
+> instructions interpret (Rule 18). Card read traces are byte-identical across
+> the A/B on both images, all 32 entries. Measure it yourself with
+> `python tools/kernel_patch_ab.py [--bios psxrecomp/bios/SCPH1001.BIN]`, which
+> A/Bs one binary via `PSX_KERNEL_PATCH_RANGES=0`. **Open:** push the branch,
+> open the PR, re-measure on a second title, then bump the pin. The A0/B0/C0
+> vector trampolines are untouched by design and are now 87% of what OpenBIOS
+> kernel RAM still interprets.
+
 > **2026-09-05 evening — "compiled band, still interpreted" root-caused and
 > fixed on the compile side.** The enrichment's first lead (title screen:
 > resident SCENA16, every spanning piece from SCENA19/04/06) was not an

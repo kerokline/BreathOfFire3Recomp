@@ -1,6 +1,10 @@
 # Kernel patch sites — why the BIOS exception handler runs interpreted
 
-**Status:** MEASURED 2026-09-11 on both images, clean: OpenBIOS and retail
+**Status:** FIXED UPSTREAM 2026-09-11 — see *The fix and what it bought* at the
+bottom of this file. The finding below stands as the measurement that motivated
+it; the numbers describe the state BEFORE the fix.
+
+**Was:** MEASURED 2026-09-11 on both images, clean: OpenBIOS and retail
 SCPH-1001 **v2.2** (CRC32 `37157331`, the image the framework profile, seeds
 and `docs/psx_bios_disasm.txt` describe). An earlier retail pass on a v2.0
 dump (CRC32 `55847D8C`) is retracted below. Upstream action needed; nothing
@@ -149,3 +153,84 @@ redundant.
 - The retail backend is gitignored generated output; a fresh
   `cmake -S . -B build-relprof` is needed once so `PSXRECOMP_BIOS_STEMS`
   actually links it (the exe then contains `SCPH1001_psx_bios`).
+
+## The fix and what it bought (2026-09-11, same day)
+
+Fixed in `psxrecomp` branch `feat/kernel-install-slot-ranges` (`c12f0371`, off
+upstream master `6f77dcc3`), as one change rather than the three PRs
+[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md) proposed —
+the steps do not pay off separately. What the plan got right, and the one thing
+it missed:
+
+1. **Publish the ranges to the runtime** and skip them in the bless memcmp.
+   As planned.
+2. **A slot is a range** with a length and an explicit `resume` shape
+   (`jalr` / `fallthrough` / `none`), compared against the ROM-baked word
+   instead of against zero. As planned.
+3. **Hand back from the interpreter at the range end.** *Not in the plan.*
+   Kernel page 0 is permanently dirty — the handler saves registers there on
+   every exception — so straight-line interpretation never leaves it, and
+   without a hand-back the interpreter ran the whole function after the patch.
+   The emitter registers the resume PC as a continuation key and
+   `dirty_ram_interp.c` surfaces there.
+
+**The trap, paid for in a wedged boot:** a PC inside a declared range must
+never be a native dispatch key. Seven pre-existing jal-return continuations
+sat inside the declared ranges (OpenBIOS `0x357C`; retail `0x4974`, `0x4980`,
+`0x4984`, `0x4988`, `0x6444`). Dispatching one re-enters the compiled body,
+whose patch-range hook sets `cpu->pc` back to that same PC and returns, so the
+dispatch loop spins forever — the boot wedged at frame 0 and three gdb samples
+showed the identical stack. The emitter now drops continuation keys inside a
+range (dispatch misses through to the interpreter, the intended path) and
+refuses to emit if a range covers a *function entry*.
+
+### Result, headless, matched frames
+
+`PSX_KERNEL_PATCH_RANGES=0` drops the declared ranges at runtime and restores
+the whole-body memcmp, so one binary measures both sides
+(`tools/kernel_patch_ab.py`; artefacts `analysis/kernel_patch_ab_openbios.json`,
+`analysis/kernel_patch_ab_scph1001.json`).
+
+| Per frame | OpenBIOS OFF | OpenBIOS ON | retail OFF | retail ON |
+|---|---|---|---|---|
+| kernel-bless mismatch | 21 | **0** | 74 | **0** |
+| interp insns, kernel bodies | 555.6 | **68.5** (-87.7%) | 3656.5 | **79.4** (-97.8%) |
+| interp insns, A0/B0/C0 vectors | 467.4 | 468.3 | 0 | 0 |
+| interp insns, all | 1500.1 | **860.8** (-42.6%) | 4695.0 | **274.4** (-94.2%) |
+
+The exception handler body no longer appears in the interpreted list at all.
+The residual kernel-body work is exactly *declared words x entries* on every
+range — `0x27B4` 620,916 / 51,743 = 12.0, `0x357C` 56,400 / 18,800 = 3.0,
+retail `0x0C88` 618,264 / 51,522 = 12.0, `0x4964` 118,107 / 10,737 = 11.0 —
+so nothing leaks past the hook and only the guest's own patched instructions
+interpret (Rule 18).
+
+Retail gains more than the plan predicted, because the declared `0x4964` range
+sits inside the pad-driver body `0x4498..0x49BC`, and blessing that one body
+retired ~24 M interpreted instructions per run that were never attributed to
+the exception handler at all (`0x45C4`, `0x45FC`, `0x48FC`, `0x4614`, `0x4728`,
+`0x4664`).
+
+The A0/B0/C0 vector trampolines are unchanged, as intended: the profile
+excludes them by design and they remain the separate job (plan step 5). On
+OpenBIOS they are now **87% of what kernel RAM still interprets**, so they are
+the next lever if this ever needs one.
+
+### Correctness
+
+Two of the declared ranges replace the kernel's card handler with a `jr` into
+the boot EXE, so the card path carries the most risk. Card read traces are
+**byte-identical across the A/B on both images** — all 32 entries, every field
+(command, sector, checksum, data index, resident function, store PC, data
+peek), with cycle counts within 0.0001%. Both images boot healthy to 11 k
+frames on both sides.
+
+### Not declared
+
+- Retail RAM `0x0500`, one word of `kernel_trampoline_0` cleared to zero. What
+  writes it is still unidentified, and a range declared on a guess tells the
+  verifier to stop checking a word it should check. Undeclared costs
+  performance in one body; declared wrongly costs correctness everywhere
+  (Rule 14).
+- The three OpenBIOS pad-table words after `readPadHighLevel` — data, not
+  instructions, so they unbless nothing.

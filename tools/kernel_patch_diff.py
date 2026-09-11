@@ -57,6 +57,28 @@ def parse_bodies(dispatch_c):
     return [(int(a, 16), int(b, 16), int(c, 16)) for a, b, c in
             re.findall(r'\{\s*0x([0-9A-Fa-f]+)u,\s*0x([0-9A-Fa-f]+)u,\s*0x([0-9A-Fa-f]+)u\s*\}', m.group(1))]
 
+def parse_patch_ranges(dispatch_c):
+    """[(lo, hi)] from the PsxKernelPatchRange table.
+
+    The profile's [[recompiler.install_slots]], couriered into the generated C.
+    A differing word INSIDE one of these is a declared patch: the runtime's
+    bless verifier skips it and the body still runs native. A differing word
+    outside every range is what actually unblesses a body.
+    """
+    txt = open(dispatch_c, encoding="utf-8", errors="replace").read()
+    m = re.search(r'psx_bios_kernel_patch_ranges\[(\d+)\]\s*=\s*\{(.*?)\};', txt, re.S)
+    if not m:
+        return []          # a backend from before the ranges existed
+    n = int(m.group(1))
+    pairs = [(int(a, 16), int(b, 16)) for a, b in
+             re.findall(r'\{\s*0x([0-9A-Fa-f]+)u,\s*0x([0-9A-Fa-f]+)u\s*\}', m.group(2))]
+    # An image with no slots emits one inert { 0, 0 } entry and a count of 0.
+    cnt = re.search(r'psx_bios_kernel_patch_range_count\s*=\s*(\d+)u', txt)
+    if cnt:
+        n = int(cnt.group(1))
+    return pairs[:n]
+
+
 def parse_seeds(path):
     """{ram_addr: label} for seeds that land in kernel RAM (ROM-LMA form too)."""
     d = json.load(open(path, encoding="utf-8"))
@@ -81,6 +103,15 @@ def main():
     rom_rel, copies = parse_profile(os.path.join(ROOT, a.profile))
     rom = open(os.path.join(ROOT, "psxrecomp", rom_rel), "rb").read()
     bodies = parse_bodies(os.path.join(ROOT, a.dispatch))
+    pranges = parse_patch_ranges(os.path.join(ROOT, a.dispatch))
+    declared = lambda ram: any(lo <= ram < hi for lo, hi in pranges)
+    if pranges:
+        print("declared install-slot ranges (%s): %s" % (
+            os.path.basename(a.dispatch),
+            ", ".join("0x%04X..0x%04X" % r for r in pranges)), flush=True)
+    else:
+        print("no install-slot ranges declared in %s — every patched word "
+              "unblesses its body" % os.path.basename(a.dispatch), flush=True)
     seeds = parse_seeds(os.path.join(ROOT, a.seeds))
     # map ROM-LMA seeds into RAM for each copy
     ram_names = {}
@@ -131,7 +162,8 @@ def main():
                         inb = [b for b in bodies if b[1] <= ram < b[2]]
                         words.append({"ram": "0x%04X" % ram, "rom": struct.unpack("<I", src[off:off+4])[0],
                                       "live": struct.unpack("<I", live[off:off+4])[0],
-                                      "in_code_body": bool(inb), "fn": fn_of(ram)})
+                                      "in_code_body": bool(inb),
+                                      "declared": declared(ram), "fn": fn_of(ram)})
                 # collapse runs
                 runs = []
                 for w in words:
@@ -141,30 +173,47 @@ def main():
                     else:
                         runs.append({"start": r, "end": r + 4, "n": 1, "in_code_body": w["in_code_body"], "fn": w["fn"]})
                 code_words = sum(1 for w in words if w["in_code_body"])
-                print("copy %-16s RAM 0x%04X..0x%04X: %d differing words, %d inside compiled code bodies, %d runs"
-                      % (name, ram_lo, ram_lo + ln, len(words), code_words, len(runs)), flush=True)
+                undecl = sum(1 for w in words if w["in_code_body"] and not w["declared"])
+                print("copy %-16s RAM 0x%04X..0x%04X: %d differing words, %d inside compiled code bodies "
+                      "(%d declared, %d NOT declared), %d runs"
+                      % (name, ram_lo, ram_lo + ln, len(words), code_words,
+                         code_words - undecl, undecl, len(runs)), flush=True)
                 for r in runs:
                     tag = "CODE" if r["in_code_body"] else "data"
                     print("   %s 0x%04X..0x%04X (%d words)  %s" % (tag, r["start"], r["end"], r["n"], r["fn"]), flush=True)
                     if r["in_code_body"]:
                         for w in words:
                             if r["start"] <= int(w["ram"], 16) < r["end"]:
-                                print("        %s rom %08X -> live %08X" % (w["ram"], w["rom"], w["live"]), flush=True)
+                                print("        %s rom %08X -> live %08X  %s"
+                                      % (w["ram"], w["rom"], w["live"],
+                                         "declared" if w["declared"] else "NOT DECLARED"), flush=True)
                 snap["diffs"].append({"copy": name, "words": words, "runs": runs})
             report["snapshots"].append(snap)
             # which compiled bodies are now un-runnable?
-            dirty = set()
-            for s in snap["diffs"]:
-                for w in s["words"]:
+            dirty, saved = set(), set()
+            for sd in snap["diffs"]:
+                for w in sd["words"]:
                     r = int(w["ram"], 16)
                     for key, lo, hi in bodies:
                         if lo <= r < hi:
-                            dirty.add((lo, hi))
+                            (saved if w["declared"] else dirty).add((lo, hi))
+            saved -= dirty      # one undeclared word is enough to unbless
+            if saved:
+                print("compiled kernel bodies patched INSIDE a declared range "
+                      "(these still run native):", flush=True)
+                for lo, hi in sorted(saved):
+                    print("   0x%04X..0x%04X  %s" % (lo, hi, fn_of(lo)), flush=True)
             if dirty:
-                print("compiled kernel bodies containing a patched word (these interpret):", flush=True)
+                print("compiled kernel bodies containing an UNDECLARED patched word "
+                      "(these interpret):", flush=True)
                 for lo, hi in sorted(dirty):
                     print("   0x%04X..0x%04X  %s" % (lo, hi, fn_of(lo)), flush=True)
+            else:
+                print("no compiled kernel body carries an undeclared patched word", flush=True)
             snap["dirty_bodies"] = ["0x%04X..0x%04X %s" % (lo, hi, fn_of(lo)) for lo, hi in sorted(dirty)]
+            snap["blessed_patched_bodies"] = ["0x%04X..0x%04X %s" % (lo, hi, fn_of(lo))
+                                              for lo, hi in sorted(saved)]
+            snap["declared_ranges"] = ["0x%04X..0x%04X" % r for r in pranges]
     finally:
         if proc:
             proc.kill()
