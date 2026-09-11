@@ -136,7 +136,7 @@ the in-game kanji strings live in each area's own script block (the
 
 - **`caption`** — the banner the game draws on entry: a message of the form
   `<0c> <param> (<ff>|<01>)* TEXT [<11>] <16> <frames>`. グラウス山 (user-confirmed
-  on screen), モーランジ山, ウインディア城, 泉の牧場, シーダの森、泉, 漢羅狂烈大武会.
+  on screen), モーランジ山, ウインディア城, 春の牧場, シーダの森、春, 漢羅狂烈大武会.
   Only **11** areas have one; this is *the* in-game place name where it exists
   (status evidence).
 - **`dev_label`** — message 0 when it is a bare short string with no dialogue

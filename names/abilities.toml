@@ -2421,7 +2421,9 @@ raw = "ea330100000b6241"
 [[ability]]
 id = 158
 ram = 0x801CBC10
-jp = "凶気"
+jp = "邪気"
+en = "Gloom"
+gloss_section = "Skills"
 type = 3
 b0 = 110
 b1 = 51

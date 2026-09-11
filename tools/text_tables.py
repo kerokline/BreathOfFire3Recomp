@@ -81,11 +81,18 @@ KANJI = {}
 
 
 def load_kanji(path):
-    if not path or not os.path.exists(path):
-        return False
-    with open(path, encoding="utf-8") as f:
-        t = json.load(f)
-    KANJI.update({k: v for k, v in t.items() if isinstance(v, str)})
+    """The kanji table: names/kanji.toml through jptext (the version-controlled
+    one, with the corrections), unless an explicit JSON is given. Until
+    2026-09-10 this read the prior work's D:\\BoFIII JSON by default, so the
+    sidecars kept every slip the TOML had already fixed (泉 for 春 in the
+    place captions, which then broke the season fold)."""
+    if path and path != DEFAULT_KANJI and os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            t = json.load(f)
+        KANJI.update({k: v for k, v in t.items() if isinstance(v, str)})
+        return True
+    import jptext
+    KANJI.update(jptext.KANJI)
     return True
 
 
@@ -436,7 +443,7 @@ def read_abilities(disc, gloss):
 #   dev_label message 0 when it is a bare short string (鉱山の外, 港町,
 #             オウガー街道, まくにーるむら): the developers' label for the map.
 SCRIPT_DEST = 0x80010000
-SEASON_WORDS = [("、泉", ""), ("泉の", ""), ("、秋", ""), ("秋の", "")]
+SEASON_WORDS = [("、春", ""), ("春の", ""), ("、秋", ""), ("秋の", "")]   # 春 was 泉 until the 0x12F9 fix (2026-09-10)
 
 
 def decode_script(d):
