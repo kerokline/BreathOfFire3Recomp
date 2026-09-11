@@ -7,8 +7,9 @@ was missing a fourth part (the interpreter hand-back at the range end) plus a
 trap that wedged the boot (a dispatch key inside a declared range). Results and
 both corrections are in
 [`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what it bought*.
-Step 4 (measure) is done; the pin bump and the PR are the open items, along
-with re-measuring on a second title before merge. Step 5 (vector trampolines)
+Steps 1-4 are done and the second-title re-measure is in hand (Mega Man X6).
+Open as [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346);
+the pin bump to the merged commit is all that is left. Step 5 (vector trampolines)
 is untouched and is now 87% of what OpenBIOS kernel RAM still interprets.
 
 **Was:** PLAN (written 2026-09-11, after [`kernel-patch-sites.md`](kernel-patch-sites.md)).

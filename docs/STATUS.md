@@ -21,7 +21,10 @@
 > A/Bs one binary via `PSX_KERNEL_PATCH_RANGES=0`. **Open:** push the branch,
 > open the PR, re-measure on a second title, then bump the pin. The A0/B0/C0
 > vector trampolines are untouched by design and are now 87% of what OpenBIOS
-> kernel RAM still interprets.
+> kernel RAM still interprets. **Open as
+> [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)**
+> (branch `feat/kernel-install-slot-ranges`, `baca0a8a`); the pin here already
+> points at it. Both tools now live in `psxrecomp/tools/`.
 
 > **2026-09-05 evening — "compiled band, still interpreted" root-caused and
 > fixed on the compile side.** The enrichment's first lead (title screen:

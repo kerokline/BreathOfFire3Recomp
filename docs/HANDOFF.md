@@ -31,8 +31,9 @@ BIOSes). **Fixed the same day** upstream in `psxrecomp` branch
 and the card read trace is byte-identical across the A/B. Evidence and the two
 traps in [`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what
 it bought*; the plan it came from is
-[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). **Open: push
-the branch, open the PR, re-measure on a second title, bump the pin.** The
+[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). **Open as [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)**;
+the second title (Mega Man X6) is measured and in the PR body. Remaining: land
+it, then bump the pin to the merged commit.** The
 A0/B0/C0 vector trampolines are untouched by design and are now 87 % of what
 OpenBIOS kernel RAM still interprets — the next lever if one is needed.
 **2026-09-09:** the text encoding is fully readable *and writable* — the
