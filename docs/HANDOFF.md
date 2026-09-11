@@ -1,8 +1,10 @@
 # Handoff — next session
 
 **Status:** IN PROGRESS (rewritten 2026-09-01 night after the framework pin
-returned to upstream master; section 0 added 2026-09-05 after the data-anchor weekend; the dated banner history this file used to carry
-is in the [`STATUS.md`](STATUS.md) Log)
+returned to upstream master; section 0 added 2026-09-05 after the data-anchor
+weekend; refreshed 2026-09-11 after the kernel fix — **the next target is a
+play session, see the paragraph below**; the dated banner history this file
+used to carry is in the [`STATUS.md`](STATUS.md) Log)
 
 Read [`STATUS.md`](STATUS.md) for where the project stands. This file is what
 to pick up, how to build against the current pin, and the traps already paid
@@ -15,25 +17,46 @@ memory-card screens all user-verified 2026-09-01 with clean audio). All ten
 overlay bands plus `LOGO/LOGO.EXE` are compiled from the disc and dispatch
 ~99% native. The Axis B loop now takes **90 s** instead of ~16 min (parallel
 static compile + split translation units, merged upstream as
-mstan/psxrecomp#296; `psxrecomp` is pinned to plain `mstan/master` `17f49ad3`
-since 2026-09-05); `recomp-ui` waits on two launcher PRs. The text engine is identified and
+mstan/psxrecomp#296; `psxrecomp` is pinned to `ed55299b` plus our open
+[#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346));
+`recomp-ui` waits on one launcher PR (#48). The text engine is identified and
 confirmed live. A **readability track** is open: `names/` sidecars
 (overlays, functions, areas), `tools/area_poller.py` (which area is resident,
 with certainty, plus screenshots), and the browsable
-`docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
-coverage inside the bands as new content is played, naming areas off their
-screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
+`docs/subsystem_map.html` — 15 areas sighted, 5 aliased.
+
+**The single most valuable thing anyone can do next is play new content on
+`build-relprof` and run the Axis B loop.** With the kernel retired (below), the
+game-text + overlay region is the whole remaining interpreted cost — 1.54 G
+instructions across 2 911 PCs — and the harvest behind it turns out to be far
+thinner than its session count suggested: `pc_coverage.py --merge-duplicates`
+puts every band between **3.3 % and 18.8 %**, with `0x80117000` (Research
+Plant) never sampled at all. 11 of the 14 recorded session ids are provable
+subsets of `20260904T093558`, i.e. re-harvests of one running process rather
+than new coverage, so Axis B has had no genuinely new content since
+2026-09-04. Worst-covered first: Research Plant, BOSS (3.3 %), the field/map
+core (4.7 %), PLCHAR (9.0 %), BATTLE+ETC+SCENARIO (11.4 %). Everything after
+the harvest is mechanical — §1 below. Also left: naming areas off their
+screenshots, the tier-1/2 runtime enrichment, per-occupant fragment demands
+(would cut `generated/` 1.6 GB → ~400 MB), and the translation reading review.
+
 **2026-09-11:** the largest remaining interpreted sink was not an overlay band
 at all but the BIOS exception handler (44.6 % of interpreted work, both
-BIOSes). **Fixed the same day** upstream in `psxrecomp` branch
-`feat/kernel-install-slot-ranges` (`c12f0371`): kernel interpreted work is down
-87.7 % on OpenBIOS and 97.8 % on retail, `kernel_bless.mismatch` is 0 on both,
+BIOSes). **Fixed the same day** and open upstream as
+[psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)
+(branch `feat/kernel-install-slot-ranges`, `baca0a8a`): kernel interpreted work
+is down 87.6 % on OpenBIOS and 97.8 % on retail, `kernel_bless.mismatch` is 0
+on both images and on both titles measured (Mega Man X6 too),
 and the card read trace is byte-identical across the A/B. Evidence and the two
 traps in [`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what
 it bought*; the plan it came from is
-[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). **Open as [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)**;
-the second title (Mega Man X6) is measured and in the PR body. Remaining: land
-it, then bump the pin to the merged commit.** The
+[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). Remaining on
+that track: land the PR, then bump the pin to the merged commit. What is left
+interpreting in kernel RAM afterwards is the A0/B0/C0 vector trampolines —
+180 M instructions over **90 M entries**, so ~2 each: per-call dispatch
+overhead, not instruction count. That is plan step 5, it is excluded by the
+profile on purpose (rule 18), and it is a smaller and riskier prize than the
+overlay region. Discuss before touching, and not before the Axis B round. The
 A0/B0/C0 vector trampolines are untouched by design and are now 87 % of what
 OpenBIOS kernel RAM still interprets — the next lever if one is needed.
 **2026-09-09:** the text encoding is fully readable *and writable* — the
@@ -528,6 +551,22 @@ Three things to hold onto when reading the output:
   with zero observations, and unsampled bands lead the "go play these next"
   line, because a stratum with no draws is a bigger hole than one at 40 % — and
   a table that quietly omitted them would read as far better news than it is.
+- **Always pass `--merge-duplicates`, and read the DUPLICATE SESSIONS warning
+  when it fires** (paid for 2026-09-11). The tool detects session ids whose PC
+  sets are provable subsets of another id, which only happens when both sample
+  the *same process* — a re-harvest, not a new sample. 11 of the 14 ids
+  recorded here are subsets of `20260904T093558`, because `area_poller.py
+  watch` re-harvests a running session every 15 minutes and each pass was
+  banked under its own id. Counted separately they inflate the sampling unit
+  count, which inflates coverage: the same data reads 3.8–31.5 % unmerged and
+  **3.3–18.8 % merged**, and four bands stop being estimable at all. The
+  merged figures are the real ones. The harvest is early, not nearly done.
+
+**Current state, 2026-09-11 (merged):** `0x80117000` Research Plant never
+sampled; `0x800C1800` BOSS 3.3 %; `0x80196800` field/map core 4.7 %;
+`0x801CE400` PLCHAR 9.0 %; `0x801D0C00` BATTLE+ETC+SCENARIO 11.4 %;
+`0x801F2C00` WORLD 15.6 %; `0x801EEC00` BATTLE+BMAGIC+ETC 18.8 %. Play in that
+order. One long session through unseen areas beats ten polls of a running one.
 
 The estimate needs **session incidence**, added to `observed_interp_pcs.json`
 on 2026-09-04 as a per-row `sessions` list (plus `areas`, stamped on PCs newly
@@ -883,7 +922,16 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- `psxrecomp` **`ed55299b`** = plain upstream `master` on
+- **`psxrecomp` is pinned to `baca0a8a` = `ed55299b` + our two commits on
+  `feat/kernel-install-slot-ranges`, open as
+  [#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)**
+  (2026-09-11). The branch was cut from upstream `master` `6f77dcc3`, six
+  commits past the pin, and **rebased back onto `ed55299b`** so the PR carries
+  only this change; the change is byte-identical across that rebase and all
+  four generated BIOS files regenerate byte-identical at the older base. When
+  #346 merges, bump straight to the merged commit — nothing else in the title
+  moves. The description of the `ed55299b` base follows.
+- `psxrecomp` base **`ed55299b`** = plain upstream `master` on
   `RetroPortingToolKit/psxrecomp` (the org the project moved to on 2026-09-09;
   `mstan/*` URLs still redirect). Bumped 2026-09-10 from `2fa3472a`, 68 commits.
   The old pin's reason for existing is gone: it was held on the fork branch

@@ -1,6 +1,7 @@
 # Current state
 
-**Status:** IN PROGRESS (last verified 2026-09-05)
+**Status:** IN PROGRESS (last verified 2026-09-11 — kernel fix measured on both
+BIOS images and both titles; Axis B coverage re-read honestly)
 
 > **2026-09-11 — the BIOS exception handler runs native; kernel interpreted
 > work is down 87.7% (OpenBIOS) / 97.8% (retail).** The 44.6% kernel sink from
@@ -270,16 +271,23 @@ pin on 2026-09-01 (see Log).
 
 ## In flight
 
-- **Axis B per-PC re-measure.** The 239 PCs banked from the world-map / shop /
-  save-screen session are compiled in but not yet re-measured against a play
-  session that re-exercises that content. That session is the one manual input.
+- **[psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)
+  — kernel install-slot ranges**, awaiting review. Branch
+  `feat/kernel-install-slot-ranges` (`baca0a8a`, two commits off `ed55299b`);
+  the pin here already points at its tip, so landing it means bumping to the
+  merged commit and nothing else. Evidence:
+  [`kernel-patch-sites.md`](kernel-patch-sites.md).
 - **recomp-ui #48** (launcher UI work; #42 was folded into it) awaiting upstream
-  merge. Refreshed against master 2026-09-06 (`4071e37` → `69eecdc`, merge not
+  merge. Refreshed against master 2026-09-10 (`69eecdc` → `26756c2`, merge not
   rebase). The `recomp-ui` pin moves back to upstream master when it lands.
-- **The `psxrecomp` pin cannot return to upstream master** until mstan's
-  recomp-ui netplay half (`merge/frameblend-localization`) merges — six
-  launcher-ABI fields exist on that WIP branch alone. Pinned to `2fa3472a`
-  meanwhile. HANDOFF → *Pins and branches*.
+  This is the only other open PR.
+- **The Axis B harvest is much thinner than its session count suggests**
+  (found 2026-09-11 while picking the next target). `pc_coverage.py` reports 11
+  of the 14 recorded session ids as provable subsets of `20260904T093558` —
+  they sample the *same process*, so they are re-harvests of one session, not
+  new coverage. Counted honestly (`--merge-duplicates`) every band sits between
+  **3.3 % and 18.8 %** harvested and four are not even estimable. Axis B has
+  effectively had no new content since 2026-09-04. See *Next up 1*.
 - **Savestate compatibility across the framework bump** is unchecked; the
   `savestate.c` rework (`47bda817`) made pre-merge `.pst` files load with
   `last_ok: 0` once already. In-game memory-card saves are the reliable path.
@@ -290,30 +298,51 @@ pin on 2026-09-01 (see Log).
    2026-09-11 (user, real play):** a real item pickup and a master's skill
    line (record 1) both draw with readings under *Japanese (Ruby)*.
    [`INSERT_RUBY.md`](INSERT_RUBY.md) is the build record.
-0b. **BIOS exception handler: take [`kernel-patch-sites.md`](kernel-patch-sites.md)
-   upstream — step list in [`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md).**
-   Largest single interpreted sink (44.6 % of all interpreted
-   instructions, every scene). Four asks, one PR each off the current pin:
-   OpenBIOS install slots, a generalised slot model (ROM-word compare, ranges,
-   continuation key), and slot words excluded from the bless memcmp — the
-   last one is proven on retail v2.2, where the stub sits in the declared
-   0xCF0 slot and the handler still interprets. Fourth ask: pin the retail
-   image's sha256 in the profile.
-1. **Play new content on `build-relprof` and run the Axis B loop** — the
-   remaining interpreted sinks are SCENARIO band `0x801F6C00` and the mixed
-   BATTLE band `0x801D0C00`, plus two residual battle interior points
-   (`0x801D1014` / `0x801E739C`). Repetition of seen content adds ~0.
-2. **Ship the two psxrecomp fork branches** — `feat/dirty-pc-enrichment`
-   `6e760748` and `fix/static-fragments-per-variant` `2fa3472a` (both pushed
-   to `kerokline/psxrecomp`, no upstream PR yet): open the PRs, then bump the
-   pin. Rebuild `build-relprof` (stale since 08:17, has neither) before the
-   next play/measure session; the first `psx-runtime` build after the fix is
-   long (1.6 GB of generated C). Then play one session on the enriched build
-   and read the harvest's new `enrichment :` line — the `attribution` count
-   should now be ~0 and any residue `seedable`. Follow-up worth doing: demand
-   fragments only for the occupant that actually ran a PC (observed rows
-   carry `areas` and, after that session, `occ_crc`), which would cut the
-   1.6 GB back toward 400 MB. [`HANDOFF.md`](HANDOFF.md) → Enrichment.
+0b. ~~**BIOS exception handler: take it upstream.**~~ **DONE 2026-09-11 —
+   open as [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346).**
+   Was the largest single interpreted sink (44.6 % of all interpreted
+   instructions, every scene). Shipped as one change rather than four PRs
+   because the parts do not pay off separately, plus a fifth part the plan
+   missed (the interpreter hand-back at a range end). Every kernel-bless
+   mismatch is now zero on both BIOS images and on both titles measured.
+   [`kernel-patch-sites.md`](kernel-patch-sites.md) →
+   *The fix and what it bought*.
+1. **Play new content on `build-relprof` and run the Axis B loop. This is the
+   top target and it is the one thing only the user can do.** With the kernel
+   retired, the game-text + overlay region is what is left: 1.54 G interpreted
+   instructions across 2 911 PCs, and the harvest behind it is 3.3–18.8 %
+   complete per band (see *In flight*). `pc_coverage.py` names the content to
+   play, worst-covered first:
+
+   | Band | Coverage | What to play |
+   |---|---|---|
+   | `0x80117000` Research Plant | **never sampled** | the Research Plant / Plant areas |
+   | `0x800C1800` BOSS ×35 | 3.3 % | boss fights — any, all of them |
+   | `0x80196800` field/map core | 4.7 % | ordinary field walking and map transitions |
+   | `0x801CE400` PLCHAR ×19 | 9.0 % | party members on screen, form changes |
+   | `0x801D0C00` BATTLE+ETC+SCENARIO | 11.4 % | regular battles, scenario cutscenes |
+
+   Repetition of *seen* content adds ~0, and re-harvesting one running process
+   adds nothing at all — that is what produced the 11 duplicate ids. One long
+   session through new areas is worth more than ten polls of a running one.
+   Everything after the harvest is mechanical (`axis_b_loop.sh`).
+1b. **The A0/B0/C0 vector trampolines are now the whole kernel residual**
+   (87 % of what OpenBIOS kernel RAM still interprets after #346): 180 M
+   instructions over **90 M entries** at `0xB0`, i.e. ~2 instructions each, so
+   the cost is a dispatch round-trip per kernel call rather than instruction
+   count. The profile excludes them by design (runtime-written trampolines,
+   rule 18). Plan step 5 — **discuss before touching**, and only after the
+   Axis B round, since it is a smaller prize than the overlay region and a
+   riskier one.
+2. ~~**Ship the two psxrecomp fork branches**~~ **DONE** — `feat/dirty-pc-enrichment`
+   and `fix/static-fragments-per-variant` both reached upstream master, which
+   is why the pin sits on plain `ed55299b` and no fork branch carries anything
+   the pin lacks (HANDOFF → *Pins and branches*). The follow-up that is still
+   open and still worth doing: **demand fragments only for the occupant that
+   actually ran a PC** (observed rows carry `areas` and `occ_crc`), which would
+   cut `generated/` from 1.6 GB back toward 400 MB and buy back the ~9-10 %
+   headless throughput the big binary costs in i-cache. Do it after the next
+   Axis B round, since that round is what supplies the per-occupant evidence.
 3. **Translation: first light is on screen (2026-09-09).** The delivery
    path is built and verified: a framework function-entry plugin at
    `MsgBox_Reset` repoints the box at English bytes in enhancement memory,
@@ -424,6 +453,8 @@ Ghidra GUI running. Prior text-decode work at `D:\BoFIII`.
 
 | Date | Entry |
 |---|---|
+| 2026-09-11 | **Kernel patch sites FIXED and open upstream as [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346).** Install slots became RANGES with a `len` and an explicit `resume` (`jalr` / `fallthrough` / `none`) compared against the ROM-baked word rather than against zero; the bless verifier compares a body in segments that skip them; and `dirty_ram_interp` hands back at a range end, which the plan did not have and without which nothing works (kernel page 0 is permanently dirty, so straight-line interpretation never leaves it). Both profiles declare their measured ranges and `SCPH1001.toml` pins `[program.image] sha256` to v2.2. **Per frame, `PSX_BIOS_HLE=0`, matched frames, one binary A/B'd via `PSX_KERNEL_PATCH_RANGES=0`:** mismatch 21 → 0 (OpenBIOS) and 74 → 0 (retail); kernel interp −47.6 % / −97.8 %; all interp −42.7 % / −93.9 %. The residual is exactly declared-words × entries on every range, so only the guest's own patched instructions interpret (rule 18). Card read traces byte-identical across the A/B on both images, all 32 entries. **Trap that cost a wedged boot:** a PC inside a declared range must never be a native dispatch key — six pre-existing jal-return continuations were (OpenBIOS `0x357C`, retail `0x4974`/`0x4980`/`0x4984`/`0x4988`/`0x6444`), and dispatching one re-enters the body whose hook sets `pc` back to itself, spinning the dispatch loop at frame 0; the emitter now drops them and refuses to emit if a range covers a function *entry*. **Second title:** Mega Man X6 gets −84.2 % kernel / −84.4 % total on OpenBIOS from a true baseline, mismatch 20 → 0 (and 35 → 0 on retail), which also falsified a harness assumption — its B0 vector goes to zero once the bless verdict is clean, so the A0/B0/C0 vectors are no longer discounted from the headline. Both measurement tools moved into `psxrecomp/tools/` and generalised off `--project-root`. [`kernel-patch-sites.md`](kernel-patch-sites.md) → *The fix and what it bought*. |
+| 2026-09-11 | **The Axis B harvest is 3.3–18.8 % complete, not 3.8–31.5 %.** Picking the next target after the kernel fix turned up 11 of the 14 recorded session ids as provable *subsets* of `20260904T093558` — `area_poller.py watch` re-harvests a running session every 15 minutes and each pass was banked under its own id, so they sample one process rather than adding coverage. `pc_coverage.py --merge-duplicates` is the honest read: BOSS 3.3 %, field/map core 4.7 %, PLCHAR 9.0 %, BATTLE+ETC+SCENARIO 11.4 %, WORLD 15.6 %, BATTLE+BMAGIC+ETC 18.8 %, and `0x80117000` Research Plant never sampled; four bands stop being estimable entirely. Axis B has had no genuinely new content since 2026-09-04, which makes one long play session through unseen areas the highest-value action available. Always pass `--merge-duplicates`. |
 | 2026-09-11 | **relprof exe refused by Windows; DWARF split into a sidecar.** After the 13:57 regenerate (`generated/` 2.1 GB) the RelWithDebInfo link produced a valid 1.146 GB PE that Windows would not load ("this app can't run on your PC" / WinError 193): mingw ld maps the ~860 MB of `.debug_*` sections into the image, SizeOfImage reached 1.93 GiB. `.bss` (935 MB) is the framework's debug rings and was already there. Proof: `objcopy --strip-debug` on a copy gives a 284 MB exe that boots headless. Fix: `CMakeLists.txt` gained `PSX_SPLIT_DEBUG` (default ON for Debug/RelWithDebInfo), a POST_BUILD `objcopy --only-keep-debug` + `--strip-debug --add-gnu-debuglink` that leaves `<exe>.debug` beside the exe; gdb and `addr2line -e <exe>` follow the debuglink (verified: an RVA resolves to `memory.c:212`). Cost ~8 s per link. The step runs after the framework's staging and before its mod-catalog check. **Also today:** the SCPH1001 dump staged for the BIOS A/B is **v2.0 (05/07/95 A, CRC 55847D8C)**; the framework's profile, seeds and runtime identity check (`main.cpp` `kScph1001Crc`) target **v2.2 (12/04/95 A, CRC 37157331)**, so the retail boot fail-fasts at `0xBFC0192C` (seeds land on the wrong code). Needs a v2.2 dump. Kernel-patch capture on OpenBIOS: [`tools/kernel_patch_diff.py`](../tools/kernel_patch_diff.py), results in `analysis/kernel_patch_diff.json` (three Psy-Q patch sites unbless the exception handler; 44.6 % of all interpreted instructions). |
 | 2026-09-11 | **Kernel share of interpreted work root-caused: the BIOS exception handler, unblessed by the Psy-Q kernel patches on both BIOSes.** 44.6 % of all interpreted instructions across every session are kernel RAM, 1.22 of 1.48 billion in OpenBIOS's `exceptionHandler`; it is compiled but the kernel-bless byte check fails because `_patch_gte`/`_patch_card`/`_patch_pad` rewrite it at boot. New `tools/kernel_patch_diff.py` boots headless and diffs kernel RAM against the ROM copy: OpenBIOS has 3 patch sites (handler prologue shift + `mfc0 Cause`; a `jalr` stub into the card fast-track installed on first card access; the card handler replaced by a `jr` to boot-EXE 0x8017EAA0), retail SCPH-1001 has 4 — and its stub lands at **0xCC0**, not the profile's 0xCF0 slot, and the bless memcmp covers slot words anyway, so retail interprets the handler too. Retail needed its backend generated from the user's dump (`regen_bios.sh`, then a reconfigure) and three discovery-gap rounds of seeding to reach frame 341 — **which turned out to be a revision mismatch, not a seed gap** (other session, same day): the staged dump is SCPH-1001 v2.0 (CRC `55847D8C`) and the framework profile/seeds/disasm are v2.2 (CRC `37157331`); the empty `[program.image] sha256` let it generate silently. **Rerun on the v2.2 image the same afternoon (user staged it): clean boot, frame 9534 at t+30 s, 6 patch sites in 5 bodies, 75 mismatched bodies — and the card stub lands exactly in the profile's 0xCF0 slot yet the exception handler body still fails the bless memcmp, which is the proof that the install-slot hook and the bless verifier do not compose.** The other session's `PSX_SPLIT_DEBUG` post-link split landed in `CMakeLists.txt` in the same window (exe 289 MB + 945 MB `.debug`); the hand-stripped copy is redundant. **Side finding:** the 14:06 relprof link stopped loading ("this app can't run on your PC"): DWARF sections pushed SizeOfImage to 1.93 GiB; `objcopy --strip-debug` copy boots; a post-link debug split is the fix. Write-up and the five upstream asks: [`kernel-patch-sites.md`](kernel-patch-sites.md). |
 | 2026-09-11 | **Inserted-name readings verified in play (user).** A real item pickup and a master's skill line both drew with readings under *Japanese (Ruby)* on `build-relprof` — record 1 (skill name, filled by the area script through a pointer the static scan could not see) is rewritten in time as well, so the record-1 fallback in [`INSERT_RUBY.md`](INSERT_RUBY.md) (moving the write-back to the stepper's first step) is not needed. Closes the last open item of the insert work; the Ruby track's remaining work is the reading review pass. |
