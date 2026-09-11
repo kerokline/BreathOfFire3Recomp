@@ -218,10 +218,19 @@ retired ~24 M interpreted instructions per run that were never attributed to
 the exception handler at all (`0x45C4`, `0x45FC`, `0x48FC`, `0x4614`, `0x4728`,
 `0x4664`).
 
-The A0/B0/C0 vector trampolines are unchanged, as intended: the profile
-excludes them by design and they remain the separate job (plan step 5). On
-OpenBIOS they are now **87% of what kernel RAM still interprets**, so they are
-the next lever if this ever needs one.
+**The A0/B0/C0 vector trampolines are not a constant, and must not be
+discounted.** On this title they barely move (466.1 -> 462.8 per frame on
+OpenBIOS, 0 on retail), which is why an earlier version of the harness
+subtracted them from the headline "so they would not mask the result". Mega
+Man X6 falsified that: there the OpenBIOS B0 vector burns 2,361,470
+instructions over 1,180,735 entries with the ranges off and **vanishes
+entirely** with them on, because once the bless verdict is clean the vector
+body dispatches native. Subtracting them hid a 130 insn/frame win. The tool
+now reports kernel and all-interp as the headline and shows the split as
+diagnosis only. On *this* title they stay interpreted and are now 87% of what
+OpenBIOS kernel RAM still interprets, so they remain the next lever here
+(plan step 5) — but that is a fact about Breath of Fire III, not about the
+mechanism.
 
 ### Correctness
 
@@ -232,13 +241,36 @@ the boot EXE, so the card path carries the most risk. Card read traces are
 peek), with cycle counts within 0.0001%. Both images boot healthy to 11 k
 frames on both sides.
 
-### Second title (Mega Man X6)
+### Second title (Mega Man X6) — a real before/after
 
 The fix boots MMX6 clean to gameplay on the same framework tree, with the same
 key-drop behaviour: OpenBIOS 1 key dropped (3992 -> 3990 dispatch entries),
 retail 5 dropped (13018 -> 13012). The **after** totals match this repo's
 exactly (3990 / 13012) and so do the drop counts, which is the meaningful
 agreement: same emitter, same profiles, same output on two unrelated titles.
+
+OpenBIOS, the structurally pure comparison (no DeliverEvent anchor, so kernel
+calls are LLE either way):
+
+| Per frame | ranges OFF | ranges ON | change |
+|---|---|---|---|
+| kernel-bless mismatch | 20 | **0** | -100% |
+| interp insns, kernel | 210.9 | **33.4** | **-84.2%** |
+| interp insns, all | 311.0 | **48.7** | **-84.4%** |
+| ... kernel bodies | 80.8 | 33.4 | -58.6% |
+| ... A0/B0/C0 vectors | 130.1 | **0.0** | **-100%** |
+
+Every bless mismatch is eliminated on both titles and both images: 74 -> 0 and
+21 -> 0 here, 35 -> 0 and 20 -> 0 on MMX6. What remains afterwards scales with
+how hard a game hits the patched stubs — MMX6's kernel-bodies figure is lower
+than this title's because MMX6 polls the pad relentlessly, not because
+coverage is worse.
+
+The residual has the same shape on both titles, which is the sign the
+mechanism is uniform: a declared slot running its guest-written stub at
+exactly 3 instructions per entry (retail `0x0CF0`, the SIO data-byte handler;
+OpenBIOS `0x281C`, the card fast-track stub). That is the floor, not a gap —
+those words can never be native.
 
 The **before** totals differ by exactly one entry per image (MMX6 3992/13018
 vs 3991/13017 here), so MMX6's retail run reports "5 dropped, 6 entries lost".
@@ -250,10 +282,6 @@ carried these install-slot TOMLs while its emitter was not yet range-aware, so
 the old code read `ram_addr` alone and registered a legacy `+0x10`
 continuation per declared slot (note retail `0x4964 + 0x10 = 0x4974`, one of
 the five). Regenerating both trees on the rebased base settles it.
-
-**A true MMX6 before/after is still outstanding** — its first build was
-alpha-261 plus part of this change, so it has no clean baseline yet. "It works
-elsewhere" is established; "it buys the same elsewhere" is not.
 
 ### Not declared
 

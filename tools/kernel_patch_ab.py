@@ -21,9 +21,16 @@ import playsession as ps
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KERNEL_WINDOW_END = 0x10000
-# The four 16-byte kernel call vectors. The BIOS profile excludes them on
-# purpose (runtime-written trampolines -> dirty-RAM interp, rule 18), so
-# they interpret on both sides of this A/B and are reported separately.
+# The four 16-byte kernel call vectors, reported on their own line.
+#
+# They are NOT excluded from the headline. An earlier version of this tool
+# subtracted them on the grounds that they interpret on both sides and would
+# mask the result. That is true of Breath of Fire III and false in general:
+# on Mega Man X6 with OpenBIOS the B0 vector burns 2,361,470 instructions
+# over 1,180,735 entries with the ranges off and vanishes entirely with them
+# on, because once the bless verdict is clean the vector body dispatches
+# native. Subtracting them there hid a 130 insn/frame win. Read
+# "kernel" and "all" as the result; the split is diagnostic only.
 VECTOR_STUBS = (0x80, 0xA0, 0xB0, 0xC0)
 
 
@@ -87,10 +94,9 @@ def run_side(exe, port, frames, bios, ranges_on, timeout, stall):
         rows = [r for r in st.get("per_pc", [])
                 if int(r["pc"], 16) < KERNEL_WINDOW_END]
         kernel = sum(r["insns"] for r in rows)
-        # The A0/B0/C0 call vectors are runtime-written trampolines the BIOS
-        # profile excludes on purpose (rule 18), so they interpret on both
-        # sides and would mask the change if left in the headline. Split them
-        # out: "bodies" is the kernel work the install-slot ranges can move.
+        # Split the call vectors out for diagnosis, NOT to discount them:
+        # whether they interpret on both sides is title-dependent (see
+        # VECTOR_STUBS). "kernel" is the headline.
         tramp = sum(r["insns"] for r in rows
                     if int(r["pc"], 16) in VECTOR_STUBS)
         top = sorted(rows, key=lambda r: -r["insns"])[:12]
@@ -170,10 +176,11 @@ def main():
 
     line("kernel-bless mismatch", "bless_mismatch", False)
     line("kernel-bless clean", "bless_clean", False)
-    line("interp insns / frame, bodies", "interp_insns_kernel_bodies")
-    line("interp insns / frame, vectors", "interp_insns_vectors")
     line("interp insns / frame, kernel", "interp_insns_kernel")
     line("interp insns / frame, all", "interp_insns_total")
+    print("  of which (diagnostic, not discounted):")
+    line("  kernel bodies", "interp_insns_kernel_bodies")
+    line("  A0/B0/C0 vectors", "interp_insns_vectors")
 
     os.makedirs(os.path.dirname(os.path.join(ROOT, a.out)), exist_ok=True)
     json.dump({"frames": a.frames, "bios": a.bios, "sides": rows},

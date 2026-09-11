@@ -14,9 +14,9 @@
 > `PSX_BIOS_HLE=0` so the kernel-call HLE tier cannot move the retail figure. Residual kernel
 > work is exactly declared-words x entries, so only the guest's own patched
 > instructions interpret (Rule 18). Card read traces are byte-identical across
-> the A/B on both images, all 32 entries. It also boots Mega Man X6 clean to
-> gameplay with identical key-drop counts and dispatch totals; a true
-> before/after on that title is still outstanding. Measure it yourself with
+> the A/B on both images, all 32 entries. MMX6 also caught a harness flaw: the
+> A0/B0/C0 vectors are not constant across the A/B on every title (its B0
+> vector goes to zero), so they are no longer discounted from the headline. Measure it yourself with
 > `python tools/kernel_patch_ab.py [--bios psxrecomp/bios/SCPH1001.BIN]`, which
 > A/Bs one binary via `PSX_KERNEL_PATCH_RANGES=0`. **Open:** push the branch,
 > open the PR, re-measure on a second title, then bump the pin. The A0/B0/C0
