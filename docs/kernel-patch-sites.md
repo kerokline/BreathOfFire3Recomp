@@ -191,19 +191,26 @@ the whole-body memcmp, so one binary measures both sides
 (`tools/kernel_patch_ab.py`; artefacts `analysis/kernel_patch_ab_openbios.json`,
 `analysis/kernel_patch_ab_scph1001.json`).
 
+Both sides run with `PSX_BIOS_HLE=0`, so the kernel-call HLE tier cannot move
+the number. That matters only for retail — OpenBIOS exports no DeliverEvent
+anchor, so its kernel calls are structurally LLE either way — and on retail the
+tier turned out not to mask anything (`-94.2%` with it on, `-93.9%` off).
+Numbers below are the rebased base (`ed55299b` + `3cbe6c1c`).
+
 | Per frame | OpenBIOS OFF | OpenBIOS ON | retail OFF | retail ON |
 |---|---|---|---|---|
 | kernel-bless mismatch | 21 | **0** | 74 | **0** |
-| interp insns, kernel bodies | 555.6 | **68.5** (-87.7%) | 3656.5 | **79.4** (-97.8%) |
-| interp insns, A0/B0/C0 vectors | 467.4 | 468.3 | 0 | 0 |
-| interp insns, all | 1500.1 | **860.8** (-42.6%) | 4695.0 | **274.4** (-94.2%) |
+| kernel-bless clean | 264 | 273 | 254 | 278 |
+| interp insns, kernel bodies | 546.1 | **67.5** (-87.6%) | 3456.2 | **76.9** (-97.8%) |
+| interp insns, A0/B0/C0 vectors | 466.1 | 462.8 | 0 | 0 |
+| interp insns, all | 1486.1 | **851.1** (-42.7%) | 4446.4 | **271.1** (-93.9%) |
 
 The exception handler body no longer appears in the interpreted list at all.
 The residual kernel-body work is exactly *declared words x entries* on every
 range — `0x27B4` 620,916 / 51,743 = 12.0, `0x357C` 56,400 / 18,800 = 3.0,
-retail `0x0C88` 618,264 / 51,522 = 12.0, `0x4964` 118,107 / 10,737 = 11.0 —
-so nothing leaks past the hook and only the guest's own patched instructions
-interpret (Rule 18).
+retail `0x0C88` 604,020 / 50,335 = 12.0, `0x4964` 112,145 / 10,195 = 11.0,
+`0x4D98` 7,648 / 1,912 = 4.0 — so nothing leaks past the hook and only the
+guest's own patched instructions interpret (Rule 18).
 
 Retail gains more than the plan predicted, because the declared `0x4964` range
 sits inside the pad-driver body `0x4498..0x49BC`, and blessing that one body
@@ -224,6 +231,29 @@ the boot EXE, so the card path carries the most risk. Card read traces are
 (command, sector, checksum, data index, resident function, store PC, data
 peek), with cycle counts within 0.0001%. Both images boot healthy to 11 k
 frames on both sides.
+
+### Second title (Mega Man X6)
+
+The fix boots MMX6 clean to gameplay on the same framework tree, with the same
+key-drop behaviour: OpenBIOS 1 key dropped (3992 -> 3990 dispatch entries),
+retail 5 dropped (13018 -> 13012). The **after** totals match this repo's
+exactly (3990 / 13012) and so do the drop counts, which is the meaningful
+agreement: same emitter, same profiles, same output on two unrelated titles.
+
+The **before** totals differ by exactly one entry per image (MMX6 3992/13018
+vs 3991/13017 here), so MMX6's retail run reports "5 dropped, 6 entries lost".
+That is a baseline difference, not a missed key: retail has exactly five keys
+inside declared ranges, verified by scanning the emitted dispatch table, and
+the only emitter change in the six upstream commits between the two bases is a
+one-word comment edit. The likely cause is that MMX6's before-build already
+carried these install-slot TOMLs while its emitter was not yet range-aware, so
+the old code read `ram_addr` alone and registered a legacy `+0x10`
+continuation per declared slot (note retail `0x4964 + 0x10 = 0x4974`, one of
+the five). Regenerating both trees on the rebased base settles it.
+
+**A true MMX6 before/after is still outstanding** — its first build was
+alpha-261 plus part of this change, so it has no clean baseline yet. "It works
+elsewhere" is established; "it buys the same elsewhere" is not.
 
 ### Not declared
 
