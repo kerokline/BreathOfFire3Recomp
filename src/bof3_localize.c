@@ -43,6 +43,19 @@
 #include <string.h>
 
 #define MSGBOX_RESET_PC 0x8015042Cu
+/* The second door. MsgBox_Replay 0x801515F8 (boot EXE, callers 0x801511B4 in
+ * the page-break state and 0x80151554 when the window is re-shown -- the
+ * master apprenticeship talk is the first sighting, 2026-09-11) re-derives
+ * ptr = 0x80010000 + u16[0x80010000 + 2 * 0x801490A4], stores it into BOTH
+ * globals and sets state 1 with an 8- or 16-frame delay, never calling
+ * MsgBox_Reset -- so a message this hook already redirected snaps back to the
+ * JP block. The replay cannot be intercepted at its own entry (the stores
+ * come after), but every replay lands in state 1, whose handler
+ * MsgBox_DelayState 0x80150F3C runs each frame of the delay before the
+ * stepper touches the pointer again. Hooking that entry and redirecting when
+ * the base still points at the JP block catches every such path, whoever
+ * the caller was. */
+#define MSGBOX_DELAY_PC 0x80150F3Cu
 #define MSG_STR_BASE    0x801490A8u    /* renderer's string base */
 #define MSG_STR_CUR     0x801490ACu    /* stepper's current pointer */
 /* The two message pools the box reads: the area script at 0x80010000 (16 KiB
@@ -279,18 +292,19 @@ static void apply_inserts(const uint8_t *ins, uint32_t nins) {
 }
 
 /* --- the hook ------------------------------------------------------------ */
-static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
+/* Redirect the message the box is about to read, if the active table has
+ * it. `ptr` is the JP pointer both globals hold; `via` names the door;
+ * `log_every` logs every hit rather than the first five. */
+static void redirect_message(uint32_t ptr, const char *via, int log_every) {
     uint8_t jp[JP_MAX];
     uint8_t ins[INSERT_MAX];
-    uint32_t ptr, n, off, len, dst, i, nins = 0;
+    uint32_t n, off, len, dst, i, nins = 0;
     uint64_t h;
     const Bof3XlateTable *t;
-    (void)cpu; (void)address;
 
-    ptr = psx_mod_read_word(MSG_STR_CUR);
     t = active_table();
     if (g_hits + g_misses + g_skipped == 0)
-        say("bof3_localize: first MsgBox_Reset, ptr=%08X, language \"%s\" -> %s%s\n", ptr,
+        say("bof3_localize: first %s, ptr=%08X, language \"%s\" -> %s%s\n", via, ptr,
             g_lang, t ? t->code : "no table, leaving JP",
             g_insert ? " (+ insert table)" : "");
     if (!t) { g_skipped++; return; }
@@ -304,8 +318,8 @@ static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
     if (!lookup(t, h, &off, &len)) {
         g_misses++;
         if (g_misses <= 20)
-            say("bof3_localize: miss #%u ptr=%08X len=%u hash=%016llx head=%02x %02x %02x %02x\n",
-                g_misses, ptr, n, (unsigned long long)h, jp[0], jp[1], jp[2], jp[3]);
+            say("bof3_localize: miss #%u (%s) ptr=%08X len=%u hash=%016llx head=%02x %02x %02x %02x\n",
+                g_misses, via, ptr, n, (unsigned long long)h, jp[0], jp[1], jp[2], jp[3]);
         return;
     }
     if (len > SLOT_SIZE) { g_skipped++; return; }
@@ -325,17 +339,42 @@ static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
     psx_mod_write_word(MSG_STR_BASE, dst);
     psx_mod_write_word(MSG_STR_CUR, dst);
     g_hits++;
-    if (g_hits <= 5)
-        say("bof3_localize: hit #%u ptr=%08X -> %08X (%u -> %u bytes)\n",
-            g_hits, ptr, dst, n, len);
+    if (g_hits <= 5 || log_every)
+        say("bof3_localize: hit #%u (%s) ptr=%08X -> %08X (%u -> %u bytes)\n",
+            g_hits, via, ptr, dst, n, len);
+}
+
+static void on_msgbox_reset(struct CPUState *cpu, uint32_t address) {
+    (void)cpu; (void)address;
+    redirect_message(psx_mod_read_word(MSG_STR_CUR), "MsgBox_Reset", 0);
+}
+
+/* State 1 runs for every frame of a delay: after a replay (base == cur ==
+ * the message start, both in the JP block) and after a 0x0B prompt mid-
+ * message (cur past base -- not ours). One attempt per distinct base, so a
+ * message the table lacks is hashed once, not once per frame. */
+static uint32_t g_delay_last_base;
+static void on_msgbox_delay(struct CPUState *cpu, uint32_t address) {
+    uint32_t base, cur;
+    (void)cpu; (void)address;
+    base = psx_mod_read_word(MSG_STR_BASE);
+    cur = psx_mod_read_word(MSG_STR_CUR);
+    if (base != cur || base < AREA_BLOCK_LO || base >= AREA_BLOCK_HI) return;
+    if (base == g_delay_last_base) return;
+    g_delay_last_base = base;
+    redirect_message(base, "MsgBox_Replay", 1);   /* rare: log each */
 }
 
 PSX_MOD_CONSTRUCTOR(bof3_register_localize_plugin) {
     size_t i;
     int ok = psx_mod_register_function_entry_plugin("bof3.script", MSGBOX_RESET_PC,
                                                     on_msgbox_reset);
+    int ok2 = psx_mod_register_function_entry_plugin("bof3.script.replay", MSGBOX_DELAY_PC,
+                                                     on_msgbox_delay);
     say("bof3_localize: plugin %s, %u table(s)\n",
-        ok ? "registered at MsgBox_Reset" : "REGISTRATION FAILED", (unsigned)TABLE_COUNT);
+        ok && ok2 ? "registered at MsgBox_Reset + MsgBox_DelayState"
+                  : ok ? "registered at MsgBox_Reset only (replay hook FAILED)"
+                       : "REGISTRATION FAILED", (unsigned)TABLE_COUNT);
     for (i = 0; i < TABLE_COUNT; i++)
         say("bof3_localize:   %s: %u messages\n", g_tables[i].code, (unsigned)*g_tables[i].count);
     for (i = 0; i < INSERT_TABLE_COUNT; i++)

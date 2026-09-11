@@ -389,13 +389,29 @@ GAME.EMI  Script_ShowMessage(obj)  0x801A27A8        u16 id = obj+8
    then 0x80143BB0 = 2
 per frame: Window_Task 0x80159F00 → Window_DrawFrame 0x8015A58C (the box) → MsgBox_FrameTask 0x80150508
            → MsgBox_StateDispatch 0x801508EC (state table 0x80149A5C) → MsgBox_Step 0x8015096C / MsgBox_Render 0x80150598
+replay:   MsgBox_Replay 0x801515F8  (callers: the page-break state handler at 0x801511B4, and
+                                     MsgBox_ReplayIfShown 0x80151554 when window state 0x8014832F == 2)
+                       ptr = 0x80010000 + u16[0x80010000 + 2*u16 0x801490A4]   ← the THIRD writer (2026-09-11)
+                       0x801490A8 = 0x801490AC = ptr, state = 1, delay 0x801490A2 = 8 (16 from ReplayIfShown)
+                       NO MsgBox_Reset — the 0x0C speaker byte is not eaten, the state block is not cleared
 ```
 
 Facts that matter for the translation hook:
 
-- **One writer, two pools.** Both resolvers are boot-EXE functions with **zero
-  boot-EXE callers**; every message open comes from an overlay through one of
-  them. `Msg_OpenScript` uses the area block with the table at `+0`;
+- **One writer, two pools — plus a replay (corrected 2026-09-11).** Both
+  resolvers are boot-EXE functions with **zero boot-EXE callers**; every
+  message *open* comes from an overlay through one of them. But the box can
+  also **re-point itself** without a reset: `MsgBox_Replay` `0x801515F8`
+  re-derives the pointer of the *current* index `0x801490A4` from the area
+  table and stores it into both globals (found live on the AREA061 master
+  talk: base `0x80010371` in the JP block while the Ruby table held the
+  message's hash — the replay had undone the plugin's redirect). It runs from
+  the page-break state handler (`0x801511B4`, when byte `-6` of its record is
+  4 or 5) and from `MsgBox_ReplayIfShown` `0x80151554` (window state 2, delay
+  16). A pointer hook must therefore cover state 1 (`MsgBox_DelayState`
+  `0x80150F3C`), which every replay lands in, not only `MsgBox_Reset`.
+  Scanned for by the immediate form `sw rt, 0x90A8(rs)` over the boot EXE —
+  a register-relative store could still hide; none has shown. `Msg_OpenScript` uses the area block with the table at `+0`;
   `Msg_SystemPtr` (`0x801503F8`) uses `0x80014000 + u32[0x80014000 + ((id >> 12) & 0xC)]`
   as the table base — the `W` header, with the header *word* chosen by id bits
   14–15 — then `+ u16[base + 2*(id & 0x3FFF)]`. That is the two-block-shape

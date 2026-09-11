@@ -35,6 +35,25 @@ with no idea anything happened. A miss (no table entry, a system-pool
 pointer, another language) leaves everything alone, so the failure mode is
 "that line is Japanese", never a broken box.
 
+**The second door (2026-09-11).** `MsgBox_Reset` is not the only place the
+pointer is set. `MsgBox_Replay` (`0x801515F8`) re-derives
+`0x80010000 + u16[0x80010000 + 2*idx]` from the *current* index `0x801490A4`
+and stores it into both globals with no reset, then parks the stepper in
+state 1 for 8 or 16 frames. It runs when the box is re-shown
+(`MsgBox_ReplayIfShown` `0x80151554`, window state 2) and from one branch of
+the page-break state; the master apprenticeship talk (AREA061 slot 2,
+Mygas's 攻撃力 / 防御力 line with its colour spans) is the first sighting:
+the box base read `0x80010371`, in the JP block, while the Ruby table held
+the message's hash — the replay had thrown the redirect away. The plugin now
+also hooks `MsgBox_DelayState` (`0x80150F3C`, the state-1 handler, second
+entry in `mod_function_entry_funcs`): on entry, if base == cursor and both
+point into the JP block, it is a fresh replay and the same lookup-and-copy
+runs (`redirect_message`, shared with the reset hook); a `0x0B` prompt also
+lands in state 1 but with the cursor past the base, so it is ignored; one
+attempt per distinct base so a miss is hashed once, not per frame. The
+replay does not eat a leading `0x0C` speaker byte either, so the copy is
+taken from the message start exactly as the game would read it.
+
 Why this and not the framework's own text layer: `text_xlate`'s apply hook
 scans `a0..a3` at dispatch for string pointers, and BoF3 never passes one
 (the resolver stores into globals, 2026-09-05 trace). Its in-place message
@@ -136,7 +155,7 @@ python tools/build_script_xlate.py --bin-root D:\BoFIII\BIN \
 cmake --build build-relprof --target psx-runtime
 ```
 
-Adding the hook changes the **overlay config hash** (`mod_function_entry_funcs`
+Adding a hook address (either one) changes the **overlay config hash** (`mod_function_entry_funcs`
 is an input to `overlay_codegen_config_hash`). That hash names the runtime's
 *dynamic* shard cache directory; the static overlays compiled into the exe do
 not carry it, and `compile_overlays.py --static --force` rewrote nothing
