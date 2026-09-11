@@ -23,6 +23,10 @@ with certainty, plus screenshots), and the browsable
 `docs/subsystem_map.html` — 15 areas sighted, 5 aliased. What is left: Axis B
 coverage inside the bands as new content is played, naming areas off their
 screenshots, the tier-1/2 runtime enrichment, and the translation apply path.
+**2026-09-11:** the largest remaining interpreted sink is not an overlay band
+at all but the BIOS exception handler (44.6 % of interpreted work, both
+BIOSes) — an upstream psxrecomp job, planned in
+[`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md) (section 4).
 **2026-09-09:** the text encoding is fully readable *and writable* — the
 single-byte half was read off the font sheet (`tools/font_sheet.py` →
 [`names/font.toml`](../names/font.toml)) and 100% of the area scripts' glyph
@@ -72,7 +76,7 @@ headless driver. The loop:
 | 4 | ~~Item drop + EXP yield~~ **DONE 2026-09-05** — `Battle_EnemyDefeated` → `Battle_RollDrops` → BATL_END `BattleResult_Setup` / `_ExpTick` / `_ZennyTick` / `_AwardDrops` | left: a battle where a drop actually lands (`AwardDrops` is body-only) | `--watch 0x80146320-0x80146360` on a kill |
 | 5 | ~~Magic / Item / Run command paths~~ **DONE 2026-09-05** — command byte `C+0x119` (+target `+0x118`, parameter `+0x11A`), engine-band menus, `Escape_Roll`/`Escape_Chance`, `Effect_ApplyResult` and its handler table `0x800B165C` | left: per-skill/item handler indices (user: read directly later), Defend confirm body (Ghidra gap `0x801D2520`) | engine band needs `--lo 0x80093800 --hi 0x801D0C00` and ≤ ~130-frame windows |
 | 6 | ~~Roster order~~ **DONE 2026-09-05** — read off the record name bytes in the card saves (`save_tool.py dump`): 0 リュウ, 1 ニーナ, 2 ガーランド, 3 ティーポ, 4 レイ, 5 モモ, 6 ペコロス, 7 パピー = the intro's baby dragon (char id 10; proven live on `slot01`: roster byte 7, write-back into record 7); char id = roster for 0..6, ids 7/8/9/14 are alternate forms via table `0x80182488` (9 = the lone boy Ryu of save 1) | left: which forms 7, 8, 14 are | — |
-| 7 | ~~Dialogue engine anchors~~ **DONE 2026-09-05** — `capture --watch 0x801490A4-0x801490B0` on an NPC talk (`slot04`, `npc_talk.json`): GAME.EMI `Script_ShowMessage` → boot `Msg_OpenScript(idx)` / `Msg_OpenSystem(id)` are the only box-string writers; 13 text-engine functions named `confirmed` in `symbols.toml`, control codes `0x02/0x0A/0x0C/0x0F/0x10/0x14` read, box frame drawer found. TEXT_ENGINE.md "The resolver" | left: the hook *shape* — the pointer is never a dispatch arg, so the framework's a0..a3 hook can't see it (in-place patch needs a BoF3 encoding profile upstream, or repoint at `MsgBox_Reset`) | — |
+| 7 | ~~Dialogue engine anchors~~ **DONE 2026-09-05** — `capture --watch 0x801490A4-0x801490B0` on an NPC talk (`slot04`, `npc_talk.json`): GAME.EMI `Script_ShowMessage` → boot `Msg_OpenScript(idx)` / `Msg_OpenSystem(id)` are the only box-string *openers* (**corrected 2026-09-11:** `MsgBox_Replay` `0x801515F8` re-points the box without a reset — see TEXT_ENGINE.md); 13 text-engine functions named `confirmed` in `symbols.toml`, control codes `0x02/0x0A/0x0C/0x0F/0x10/0x14` read, box frame drawer found. TEXT_ENGINE.md "The resolver" | left: the hook *shape* — the pointer is never a dispatch arg, so the framework's a0..a3 hook can't see it (in-place patch needs a BoF3 encoding profile upstream, or repoint at `MsgBox_Reset`) | — |
 | 8 | ~~Psy-Q signatures on the boot EXE~~ **DONE 2026-09-05** — `tools/psyq_sigs.py` against lab313ru/psx_psyq_signatures (sibling checkout): SDK 3.70, 246 objects, **500 names** appended to `symbols.toml` (libgpu 101, libsnd 121, libgte 63, libcd 53, libspu 45, libetc 29, libapi thunks incl. `open`/`read`/`write`/`firstfile`). No Ghidra needed | left: `0x8014E494`, `0x8015E908` are game code, not library (the `0x8017F7B0` file-API range is the `open`/`lseek`/`read`/`write`/`close`/`firstfile`/`nextfile` thunk block, now named); re-seed the Ghidra boot program to see the names in decompiles | — |
 | 10 | ~~Name tables from the `.EMI`~~ **DONE 2026-09-05** — `tools/text_tables.py extract` → `names/items.toml` (consumables 92 / key 16 / weapons 83 / armour 68 / accessories 52, five tables with five strides), `abilities.toml` (227, `type = b1 & 3`), `places.toml` (200 MTEST entries = AREA000..199, joined to each area's kanji entry banner and dev label, 45 with English), `characters.toml`; `save_tool.py` prints names and `verify` proves ability types and weapon ATK / armour DEF against the saves | left: the `ref` index, accessory effect codes, the ability param bytes, masters (a message block, not a table), promoting places into `areas.toml` | [`TEXT_TABLES.md`](TEXT_TABLES.md) |
 | 9 | ~~Save verifier script~~ **DONE 2026-09-05** — `tools/save_tool.py`; card1's three saves verify and match the Mednafen load screen; three RAM-map corrections (`Flag_Test`, play time `0x80144FBC`, four ability lists); names since row 10 | left: the `0x8014686C..` words at the block head, record `+0x84` | `python tools/save_tool.py verify saves/card1.mcd` |
@@ -723,6 +727,18 @@ demands on (image, PC) instead of expanding every PC to every occupant. Endgame 
 shared caller/callee, the `.EMI`-shaped subsystems fall out — the unit for
 modding, performance and extensibility.
 
+### 4. Upstream: the patched BIOS exception handler — **the next big compile target** (2026-09-11)
+
+44.6 % of every interpreted instruction is kernel RAM, almost all of it the
+BIOS exception handler, unblessed on both BIOSes by the Psy-Q kernel patches
+([`kernel-patch-sites.md`](kernel-patch-sites.md)). The fix is in psxrecomp,
+not here, and we can push there: [`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md)
+is the step list — publish install slots to the runtime and verify around
+them (Step 1), generalise slots to ranges with a ROM-word compare (Step 2),
+declare the observed slots in both profiles and pin the retail sha256
+(Step 3), bump the pin and re-measure with `tools/kernel_patch_diff.py`
+(Step 4). One PR per step, off the current pin.
+
 ### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)
 
 **2026-09-10 — inserted names read too; see [`INSERT_RUBY.md`](INSERT_RUBY.md).**
@@ -740,10 +756,11 @@ rewrites the record at `MsgBox_Reset` before the message opens. The two
 design checks were answered from the GAME.EMI disassembly (record filled
 before the open; no leading byte) and the whole path ran on a live guest:
 a synthetic pickup line drew 薬草（やくそう） を手に入れた (screenshot in
-`INSERT_RUBY.md`). **Left:** see one real pickup and one master's skill line
-on screen with *Japanese (Ruby)* selected — the skill line exercises record 1,
-which the area script fills through a pointer the immediate scan could not
-see. `build-relprof` is linked with all five tables.
+`INSERT_RUBY.md`). ~~**Left:** see one real pickup and one master's skill line
+on screen~~ — **DONE 2026-09-11, user-verified in play**: both draw with
+readings, so record 1 (filled by the area script through a pointer the
+immediate scan could not see) is rewritten in time too. `build-relprof` is
+linked with all five tables.
 
 **Traps from 2026-09-10** (details in FURIGANA.md): the plugin's pointer
 gate must cover the system block (`0x80010000`–`0x80017628`); a regenerated
@@ -796,6 +813,8 @@ The prior decode work at `D:\BoFIII` supplies the kanji table and 11,491
 aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
 
 ## Building against the pin
+
+**Trap (paid for 2026-09-11): a RelWithDebInfo exe over ~1.9 GiB of image will not load.** Windows says "this app can't run on your PC" for a perfectly valid PE once the DWARF sections push SizeOfImage past that; `.bss` is not the problem, `.debug_*` is. `CMakeLists.txt` now splits the DWARF into `<exe>.debug` after every link (`PSX_SPLIT_DEBUG`, default ON outside Release). Keep the sidecar next to the exe: gdb and `addr2line` find it through `.gnu_debuglink`. If an old tree still fails to launch, `objcopy --strip-debug` the exe by hand.
 
 **Trap (paid for 2026-09-06): stale overlay objects survive a regeneration.**
 `build-relprof` failed to link with `multiple definition of
@@ -1105,6 +1124,7 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 ## Open questions
 
 - The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.
+- **The BIOS exception handler interprets on both BIOSes** (Psy-Q kernel patches unbless it; 44.6 % of all interpreted work) — [`kernel-patch-sites.md`](kernel-patch-sites.md), upstream asks listed there.
 - Why `DEMO.EMI` §5 ships the JP image on the PAL English disc.
 - Whether the Western builds use proportional glyph advance.
 - ~~**211 of 8,694 dispatch addresses are zero-fill**~~ — **RESOLVED 2026-09-06**,
