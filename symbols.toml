@@ -195,6 +195,27 @@ status = "confirmed"
 note = "TEXT_ENGINE.md renderer (lead 0x80150770); npc_talk.json 2026-09-05: entered every frame from MsgBox_FrameTask 0x80150578 while the box is open (6 per 6-frame group), interior 0x80150870 calls 0x80150664/0x80150688/0x801507A4 per glyph"
 
 [[func]]
+pc = 0x80150F3C
+name = "MsgBox_DelayState"
+emit = false
+status = "evidence"
+note = "disasm 2026-09-11: state-1 entry of the MsgBox_StateDispatch table 0x80149A5C — decrements the frame counter 0x801490A2 and returns the stepper to state 0 at zero. Entered every frame of a delay: after MsgBox_Replay (base == cur == message start) and after a 0x0B prompt. Hooked by src/bof3_localize.c (game.toml mod_function_entry_funcs) because a replay bypasses MsgBox_Reset"
+
+[[func]]
+pc = 0x801515F8
+name = "MsgBox_Replay"
+emit = false
+status = "evidence"
+note = "disasm 2026-09-11 + live RAM (AREA061 master talk, base 0x80010371 in the JP block with the hash in the Ruby table): the third writer of 0x801490A8/AC — ptr = 0x80010000 + u16[0x80010000 + 2 * u16 0x801490A4], 0x801490A2 = 8, state 0x8014909C = 1, 0x8014909D = 0, 0x801490B5 = 0; no MsgBox_Reset, so a redirected message snaps back to JP. Callers: 0x801511B4 (page-break state handler, when byte -6 of its record is 4 or 5) and MsgBox_ReplayIfShown 0x80151554"
+
+[[func]]
+pc = 0x80151554
+name = "MsgBox_ReplayIfShown"
+emit = false
+status = "evidence"
+note = "disasm 2026-09-11: if window state byte 0x8014832F == 2, sets the delay 0x801490A2 = 16, calls MsgBox_Replay 0x801515F8 and toggles flag 4 of 0x801490A0 — the re-show of the current message after the box was hidden (the master apprenticeship talk after its choice is the sighting)"
+
+[[func]]
 pc = 0x80150508
 name = "MsgBox_FrameTask"
 emit = false

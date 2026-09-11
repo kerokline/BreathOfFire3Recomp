@@ -38,8 +38,12 @@ strict = true
 # psx_mod_function_entry() at the entry of MsgBox_Reset 0x8015042C, where the
 # resolver has just stored the message pointer into 0x801490A8/AC. The
 # title plugin src/bof3_localize.c repoints both at a translated copy.
-# Changing this list changes the overlay config hash -- recompile overlays.
-mod_function_entry_funcs = ["0x8015042C"]
+# 0x80150F3C is MsgBox_DelayState, the state-1 handler every MsgBox_Replay
+# 0x801515F8 lands in: the replay re-derives the JP pointer from the message
+# index without a reset (master talk, 2026-09-11), so the plugin redirects
+# again there. Changing this list changes the overlay config hash (the
+# dynamic shard cache name); the static overlays came out content-identical.
+mod_function_entry_funcs = ["0x8015042C", "0x80150F3C"]
 
 [runtime]
 window_title = "BreathOfFire3 Recompiled"

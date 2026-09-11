@@ -64,6 +64,18 @@
 #define PSX_FN_MsgBox_Step 0x8015096Cu
 #define func_8015096C MsgBox_Step  /* alias */
 
+/* evidence: disasm 2026-09-11: state-1 entry of the MsgBox_StateDispatch table 0x80149A5C — decrements the frame counter 0x801490A2 and returns the stepper to state 0 at zero. Entered every frame of a delay: after MsgBox_Replay (base == cur == message start) and after a 0x0B prompt. Hooked by src/bof3_localize.c (game.toml mod_function_entry_funcs) because a replay bypasses MsgBox_Reset */
+#define PSX_FN_MsgBox_DelayState 0x80150F3Cu
+#define func_80150F3C MsgBox_DelayState  /* alias */
+
+/* evidence: disasm 2026-09-11: if window state byte 0x8014832F == 2, sets the delay 0x801490A2 = 16, calls MsgBox_Replay 0x801515F8 and toggles flag 4 of 0x801490A0 — the re-show of the current message after the box was hidden (the master apprenticeship talk after its choice is the sighting) */
+#define PSX_FN_MsgBox_ReplayIfShown 0x80151554u
+#define func_80151554 MsgBox_ReplayIfShown  /* alias */
+
+/* evidence: disasm 2026-09-11 + live RAM (AREA061 master talk, base 0x80010371 in the JP block with the hash in the Ruby table): the third writer of 0x801490A8/AC — ptr = 0x80010000 + u16[0x80010000 + 2 * u16 0x801490A4], 0x801490A2 = 8, state 0x8014909C = 1, 0x8014909D = 0, 0x801490B5 = 0; no MsgBox_Reset, so a redirected message snaps back to JP. Callers: 0x801511B4 (page-break state handler, when byte -6 of its record is 4 or 5) and MsgBox_ReplayIfShown 0x80151554 */
+#define PSX_FN_MsgBox_Replay 0x801515F8u
+#define func_801515F8 MsgBox_Replay  /* alias */
+
 /* confirmed: TEXT_ENGINE.md font-atlas mapper: (palette, charptr) -> sprite UVs on the 21-glyph-wide 12 px atlas; lead 0x13 = +0x100, 0x15 = +0x5B */
 #define PSX_FN_Font_MapGlyph 0x80151F4Cu
 #define func_80151F4C Font_MapGlyph  /* alias */

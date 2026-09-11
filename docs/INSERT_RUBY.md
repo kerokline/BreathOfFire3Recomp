@@ -1,7 +1,9 @@
 # Readings on inserted names — built (2026-09-10)
 
-**Status:** BUILT, verified on a live guest (synthetic pickup, screenshot
-below), **awaiting a real pickup and a skill line in play**. Designed in the
+**Status:** DONE — **user-verified in play 2026-09-11**: a real item pickup
+and a master's skill line both draw with readings under *Japanese (Ruby)*,
+so record 0 *and* record 1 are rewritten before the box reads them (the
+record-1 fallback below was not needed). Designed in the
 morning, the two open checks answered from the disassembly instead of a live
 print, implemented, linked into `build-relprof` and exercised over the debug
 port the same day.
@@ -147,7 +149,10 @@ name gives the tokenizer no context): 光合成 (光 + 合成, `next` rule 光 =
 them, for the proofreading pass: 知力の研 / 木の研 (研 = けん), 土器
 (かわらけ), 夢氷撃 (ゆめ・こおり・げき), 神風だま (かみ・かぜ).
 
-## Verify in play (next)
+## Verify in play — done 2026-09-11 (user, real play)
+
+Both cases below were confirmed on `build-relprof`; the text that follows is
+the original check, kept for the fallback it describes.
 
 With *Japanese (Ruby)* selected in the launcher, search a chest or shelf
 that gives a kanji item — 薬草 is the commonest — and expect the synthetic
