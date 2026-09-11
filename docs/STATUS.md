@@ -17,7 +17,7 @@
 > the A/B on both images, all 32 entries. MMX6 also caught a harness flaw: the
 > A0/B0/C0 vectors are not constant across the A/B on every title (its B0
 > vector goes to zero), so they are no longer discounted from the headline. Measure it yourself with
-> `python tools/kernel_patch_ab.py [--bios psxrecomp/bios/SCPH1001.BIN]`, which
+> `python psxrecomp/tools/kernel_patch_ab.py [--bios psxrecomp/bios/SCPH1001.BIN]`, which
 > A/Bs one binary via `PSX_KERNEL_PATCH_RANGES=0`. **Open:** push the branch,
 > open the PR, re-measure on a second title, then bump the pin. The A0/B0/C0
 > vector trampolines are untouched by design and are now 87% of what OpenBIOS

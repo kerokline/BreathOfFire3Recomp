@@ -10,7 +10,7 @@ and `docs/psx_bios_disasm.txt` describe). An earlier retail pass on a v2.0
 dump (CRC32 `55847D8C`) is retracted below. Upstream action needed; nothing
 in this repo fixes it. Evidence: `analysis/kernel_patch_diff.json`
 (OpenBIOS), `analysis/kernel_patch_diff_scph1001.json` (retail),
-`analysis/scph1001_table_gaps.json`, tool `tools/kernel_patch_diff.py`.
+`analysis/scph1001_table_gaps.json`, tool `psxrecomp/tools/kernel_patch_diff.py`.
 
 ## The finding in one paragraph
 
@@ -123,18 +123,26 @@ running; they change only where they execute.
 
 ## Reproduce
 
+Both tools live in the framework now (`psxrecomp/tools/`), so any title runs
+them: every path defaults off `--project-root` (cwd) and the BIOS profile, and
+the exe is found by globbing the build tree. Run from this repo root.
+`PSX_BIOS_HLE=0` keeps the kernel-call HLE tier out of the comparison, which
+matters on retail and is a no-op on OpenBIOS.
+
 ```bash
-# OpenBIOS (default image)
-python tools/kernel_patch_diff.py --exe build-relprof/BreathOfFire3_Recompiled.stripped.exe --at 8 --at 30
-# retail (needs psxrecomp/bios/SCPH1001.BIN + the reseeded backend, see item 4)
-python tools/kernel_patch_diff.py --exe build-relprof/BreathOfFire3_Recompiled.stripped.exe \
+# which words does the game patch, and which bodies does that unbless?
+python psxrecomp/tools/kernel_patch_diff.py --at 8 --at 30
+python psxrecomp/tools/kernel_patch_diff.py --at 30 \
     --bios psxrecomp/bios/SCPH1001.BIN --profile psxrecomp/bios/SCPH1001.toml \
-    --dispatch psxrecomp/generated/SCPH1001_dispatch.c \
-    --seeds psxrecomp/recompiler/seeds/phase2_ghidra_seeds.json \
     --out analysis/kernel_patch_diff_scph1001.json
+
+# what do the declared ranges buy? one binary, both sides
+PSX_BIOS_HLE=0 python psxrecomp/tools/kernel_patch_ab.py
+PSX_BIOS_HLE=0 python psxrecomp/tools/kernel_patch_ab.py \
+    --bios psxrecomp/bios/SCPH1001.BIN --profile psxrecomp/bios/SCPH1001.toml
 ```
 
-`.stripped.exe` was a hand `objcopy --strip-debug` of the relprof link,
+An earlier `.stripped.exe` was a hand `objcopy --strip-debug` of the relprof link,
 needed for a few hours on 2026-09-11: with the DWARF sections mapped in, the
 1.15 GB RelWithDebInfo image was 1.93 GiB virtual and Windows refused to
 load it ("this app can't run on your PC"). `CMakeLists.txt` now splits the
@@ -188,7 +196,7 @@ refuses to emit if a range covers a *function entry*.
 
 `PSX_KERNEL_PATCH_RANGES=0` drops the declared ranges at runtime and restores
 the whole-body memcmp, so one binary measures both sides
-(`tools/kernel_patch_ab.py`; artefacts `analysis/kernel_patch_ab_openbios.json`,
+(`psxrecomp/tools/kernel_patch_ab.py`; artefacts `analysis/kernel_patch_ab_openbios.json`,
 `analysis/kernel_patch_ab_scph1001.json`).
 
 Both sides run with `PSX_BIOS_HLE=0`, so the kernel-call HLE tier cannot move

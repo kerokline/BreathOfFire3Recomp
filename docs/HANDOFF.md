@@ -744,7 +744,7 @@ not here, and we can push there: [`upstream-kernel-bless-plan.md`](upstream-kern
 is the step list — publish install slots to the runtime and verify around
 them (Step 1), generalise slots to ranges with a ROM-word compare (Step 2),
 declare the observed slots in both profiles and pin the retail sha256
-(Step 3), bump the pin and re-measure with `tools/kernel_patch_diff.py`
+(Step 3), bump the pin and re-measure with `psxrecomp/tools/kernel_patch_diff.py`
 (Step 4). One PR per step, off the current pin.
 
 ### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)

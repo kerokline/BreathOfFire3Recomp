@@ -62,7 +62,7 @@ PR title: *kernel-bless: exclude declared install slots from body verification*
    `psx_kernel_bless_dispatchable` returns 1; patch a word *outside* the
    range and assert 0. The runtime tests live in `runtime/tests/` (see
    `test_bios_hle_plan.c` for the harness shape).
-5. Acceptance on retail v2.2 (`tools/kernel_patch_diff.py --bios …` here):
+5. Acceptance on retail v2.2 (`psxrecomp/tools/kernel_patch_diff.py --bios …` here):
    `kernel_bless.mismatch` drops from 75 and the exception handler body
    `0x0C80..0x0EA0` is no longer listed under "bodies containing a patched
    word (these interpret)" — *once Step 2 also covers the Cause patch*.
@@ -146,7 +146,7 @@ the union), the numbers must not be assumed.
 1. Bump `psxrecomp` gitlink to the merged commit, `axis_b_loop.sh
    --skip-harvest` if the overlay layer moved (HANDOFF → *Building against
    the pin*), rebuild `build-relprof`.
-2. `python tools/kernel_patch_diff.py` on both images: the "bodies
+2. `python psxrecomp/tools/kernel_patch_diff.py` on both images: the "bodies
    containing a patched word" list should be empty for the exception
    handler; `kernel_bless.mismatch` ≈ 0.
 3. One play session, then `tools/harvest_interp_pcs.py`: the `kernel`
