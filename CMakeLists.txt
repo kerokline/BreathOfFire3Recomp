@@ -57,6 +57,37 @@ foreach(_PSX_RUNTIME_CONFIG game.toml game_options.toml)
     endif()
 endforeach()
 
+# Split the DWARF out of the exe into a sidecar (docs/STATUS.md 2026-09-11).
+# With generated/ past 2 GB the RelWithDebInfo link carries ~860 MB of
+# .debug_* sections; mingw ld maps them into the image, SizeOfImage passes
+# 1.9 GiB and Windows refuses to load the exe ("not a valid Win32
+# application"). The code is unchanged -- only the debug sections move to
+# <exe>.debug next to it, linked back with .gnu_debuglink so gdb (the FMV
+# bench sampler) and addr2line (freeze_heartbeat RVAs) still find symbols.
+# Release / MinSizeRel carry no DWARF and skip this; set
+# -DPSX_SPLIT_DEBUG=OFF to keep a single file.
+if(CMAKE_BUILD_TYPE MATCHES "Debug|RelWithDebInfo")
+    set(_PSX_SPLIT_DEBUG_DEFAULT ON)
+else()
+    set(_PSX_SPLIT_DEBUG_DEFAULT OFF)
+endif()
+option(PSX_SPLIT_DEBUG
+    "Move the runtime exe's DWARF into <exe>.debug after linking (keeps the image loadable)"
+    ${_PSX_SPLIT_DEBUG_DEFAULT})
+if(PSX_SPLIT_DEBUG)
+    if(NOT CMAKE_OBJCOPY)
+        message(FATAL_ERROR "PSX_SPLIT_DEBUG needs objcopy (CMAKE_OBJCOPY is unset)")
+    endif()
+    add_custom_command(TARGET psx-runtime POST_BUILD
+        COMMAND "${CMAKE_OBJCOPY}" --only-keep-debug
+            "$<TARGET_FILE:psx-runtime>" "$<TARGET_FILE:psx-runtime>.debug"
+        COMMAND "${CMAKE_OBJCOPY}" --strip-debug
+            "--add-gnu-debuglink=$<TARGET_FILE:psx-runtime>.debug"
+            "$<TARGET_FILE:psx-runtime>"
+        COMMENT "Splitting DWARF into $<TARGET_FILE_NAME:psx-runtime>.debug (PSX_SPLIT_DEBUG)"
+        VERBATIM)
+endif()
+
 # Script localization plugin (docs/LOCALIZATION_APPLY.md). The tables are
 # generated locally into generated/bof3_xlate_<code>.c -- English by
 # tools/build_script_xlate.py from the player's US disc, Japanese (Ruby) by
