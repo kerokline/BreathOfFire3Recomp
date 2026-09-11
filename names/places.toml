@@ -26,7 +26,7 @@ ram = 0x801D0D94
 jp = "マクニールむら S"
 area_file = "BIN/WORLD00/AREA000.EMI"
 season = "S"
-caption = "泉のマクニール"
+caption = "春のマクニール"
 en = "McNeil Village"
 en_source = "romaji jp"
 sel = [4, 20]
@@ -54,7 +54,7 @@ ram = 0x801D0DB2
 jp = "シーダのもり S"
 area_file = "BIN/WORLD00/AREA003.EMI"
 season = "S"
-caption = "シーダの森、泉"
+caption = "シーダの森、春"
 en = "Cedar Woods"
 en_source = "caption"
 sel = [55, 37]
@@ -146,7 +146,7 @@ ram = 0x801D0E16
 jp = "ぼくそうち S"
 area_file = "BIN/WORLD00/AREA013.EMI"
 season = "S"
-caption = "泉の牧場"
+caption = "春の牧場"
 en = "Farm"
 en_source = "caption"
 sel = [3, 31]
@@ -167,7 +167,7 @@ ram = 0x801D0E2A
 jp = "マクニルていまえ S"
 area_file = "BIN/WORLD00/AREA015.EMI"
 season = "S"
-caption = "おやしき前、泉"
+caption = "おやしき前、春"
 sel = [54, 81]
 
 [[place]]
@@ -496,7 +496,7 @@ id = 56
 ram = 0x801D0FC4
 jp = "ウィンディアちかぼち"
 area_file = "BIN/WORLD01/AREA056.EMI"
-dev_label = "地奥墓地"
+dev_label = "地下墓地"
 sel = [16, 6]
 
 [[place]]
