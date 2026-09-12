@@ -55,38 +55,16 @@ Serve it locally with `.claude/launch.json` → `docs-static`
 
 `symbols.toml` holds `[[func]]` entries and the other sidecars key single PCs or
 whole sections, so until 2026-09-12 a *span* had no home — and the addresses this
-repo cites most were spans. `tools/xref.py queue` made that visible: the top of
-the unnamed list was the overlay band bases (`0x801D0C00` in 14 documents,
-`0x801EEC00` in 13, `0x801F2C00` in 12) and the two `.EMI` block dests.
+repo cites most were spans. `names/regions.toml` closes that: 16 regions (the
+eleven overlay bands, the two message pools, the insert scratch array, the EXE
+image, the kernel area), every row derived from a committed source by
+`tools/regions.py` and re-checkable with `check`.
 
-`names/regions.toml` closes it. Every row is **derived** by `tools/regions.py`
-from a committed source and carries the citation: the ten-band map in
-[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md), the zero-run scan in
-[`OVERLAYS.md`](OVERLAYS.md) §1, the measured spans in
-[`band-overlap-attribution.md`](band-overlap-attribution.md), the shipping
-plugin's own `AREA_BLOCK_LO` / `AREA_BLOCK_HI` and insert geometry in
-`src/bof3_localize.c`, the live text block's end in
-[`TEXT_ENGINE.md`](TEXT_ENGINE.md), and `disc_probe.json`. `check` re-derives and
-fails on drift, so the file cannot rot away from its sources; `seed` keeps
-`alias` and `note`.
-
-Two rules for reading a row:
-
-- **`end` is exclusive, and `bound` says what it *is*.** A `measured occupant
-  span` came from the capture data. A `zero-fill window` is the image's zero run:
-  it bounds where occupants may land and is **not** proof one reaches it. Band
-  `0x801F6C00` has no `end` at all, because no committed source gives one. Never
-  quote an end without its bound.
-- **Regions overlap, and every match must be reported.** LOGO.EXE covers the
-  PLCHAR band entirely and straddles 109,568 bytes of the swap slot — which is
-  the 107 KB that `band-overlap-attribution.md` states in prose, re-derived
-  independently by `regions.py list`. First-match-wins is the bug that document
-  was written about, so `xref.py` lists every containing region, narrowest first.
-
-Falling inside a region is **context, not a name**: an address in the swap slot
-is still unnamed, and only an exact base counts as resolved. What has no home
-yet is the single RAM *variable* — `0x801490AC` is `MSG_STR_CUR` in
-`src/bof3_localize.c` and the naming layer cannot say so.
+Read [`ADDRESS_MAPS.md`](ADDRESS_MAPS.md) before using it or `XREF.md`. It is the
+reference for both maps: the region table, where each field comes from, the three
+rules (`end` is exclusive and `bound` says what it is; regions overlap so every
+match must be reported; containment is context, not a name), and the traps a
+misread range bound already cost.
 
 ## Status vocabulary
 
