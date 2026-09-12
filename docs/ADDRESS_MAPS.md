@@ -1,6 +1,9 @@
 # Address maps — resolving a raw address to what the repo knows about it
 
-**Status:** STABLE (built and verified 2026-09-12). The region table below is a
+**Status:** STABLE (built 2026-09-12; **re-verified the same day after the
+loader-records work landed** — `regions.py check` passed unchanged, and `xref.py`
+gained the two things that work exposed: see *What the loader records changed*).
+The region table below is a
 **snapshot**; `python tools/regions.py list` is authoritative and
 `python tools/regions.py check` proves the sidecar still agrees with its sources.
 
@@ -27,7 +30,8 @@ re-extraction:
 | `names/functions.toml` | (`overlay` md5, `pc`) | overlay-resident functions |
 | `names/data.toml` | (`overlay` md5, `pc`) | data islands inside overlay images |
 | `names/overlays.toml` | section md5 | overlays, with the game's own registry id |
-| `names/regions.toml` | `base` | **spans** — new |
+| `names/*_records.toml` | (`section` md5, `entry` pc) | **engine loader entries**: the pcs the engine itself `jalr`s into — 1,319 rows over 989 distinct pcs ([`LOADER_RECORDS.md`](LOADER_RECORDS.md)) |
+| `names/regions.toml` | `base` | **spans** |
 | `seeds/ghidra_funcs.txt` | address | JAL targets: known function roots, named or not |
 
 Two gaps followed from that shape. First, **the prose was joined to none of it**:
@@ -115,8 +119,8 @@ python tools/xref.py index --out docs/XREF.md    # regenerate the cross-referenc
 
 What `lookup` resolves, in order: an exact boot symbol, exact overlay
 function(s), an exact data island, an exact region base, a layout landmark from
-the probe, membership in `seeds/ghidra_funcs.txt`, then the nearest named entry
-at or below within `0x1000` — across both boot symbols and overlay functions,
+the probe, an **engine loader entry**, membership in `seeds/ghidra_funcs.txt`,
+then the nearest named entry at or below within `0x1000` — across both boot symbols and overlay functions,
 labelled as a *neighbourhood*, because neither side records a span. Three worked
 answers from the current tree:
 
@@ -125,10 +129,41 @@ answers from the current tree:
 | `0x801EF400` | `≤ BattleResult_Setup +0x70` in `BATL_END.EMI#0` — which is what the hand-written evidence note in `names/functions.toml` says in prose |
 | `0x801D0C04` | inside both `band_801D0C00` (+0x4, measured span) and `band_801CE000` (+0x2C04) — the overlap, surfaced without being asked |
 | `0x80093800` | the boot EXE load address, *and* a band base: both are true |
+| `0x801F2C8C` | `area 0 handler[0]` in `AREA000.EMI#13` — an engine loader entry, plus the two bands containing it |
 
 Regenerate [`XREF.md`](XREF.md) when `docs/`, `symbols.toml` or `names/` change.
 Run `regions.py check` after editing any source doc it parses; it exits nonzero
 and names the field that drifted.
+
+## What the loader records changed
+
+[`LOADER_RECORDS.md`](LOADER_RECORDS.md) landed after these maps and exposed two
+gaps in them, both now closed:
+
+- **`docs/` has subdirectories.** The scan globbed `docs/*.md` and so never read
+  the 1,515 lines in `loader_records/`, which cite 327 distinct addresses. It is
+  recursive now: addresses cited in `docs/*.md` went 671 → 969.
+- **989 pcs had an identity the maps could not see.** A row in
+  `names/*_records.toml` says the engine `jalr`s into that pc once the section is
+  resident — proven statically against the disc, with 0 counter-examples. `lookup`
+  reports it, `queue` no longer offers those pcs as unnamed, and `stats` counts
+  them in their own tier. The file list is imported from
+  `extract_overlays.py ENGINE_RECORD_FILES`, so a sixth sidecar added there is
+  picked up without touching `xref.py`.
+
+An engine loader entry is **an identity, not a name** — the same tier as a seed
+list root. It says *the engine enters here for area 12*; it does not say what the
+function does.
+
+Two scan exclusions follow from this, both deliberate. The record sidecars are
+read as an identity source but **not** as prose: a generated row is not a
+document citing an address, and 1,319 of them would swamp the census. And the
+generated [`XREF.md`](XREF.md) is never scanned, since tabulating every address
+is its whole job.
+
+`regions.py check` passed unchanged across the merge: the ten-band map, the
+zero-run scan, the measured spans and the plugin constants it derives from were
+all untouched by that work, which is what the check exists to prove.
 
 ## Limits
 
@@ -139,10 +174,10 @@ and names the field that drifted.
   and named data shares addresses with sibling code
   ([`DATA_ISLANDS.md`](DATA_ISLANDS.md)). These maps report the span and what the
   layer claims; they never guess which.
-- **Unnamed is not a defect.** Of 2,162 addresses cited across `docs/`,
-  `symbols.toml` notes and `names/` evidence, 676 resolve to a name and 28 more
-  are unnamed JAL roots. Most of the rest are RAM variables, which have no home
-  at all — see below.
+- **Unnamed is not a defect.** Of 2,440 addresses cited across `docs/`,
+  `symbols.toml` notes and `names/` evidence, 676 resolve to a name; 15 more are
+  engine loader entries and 37 more are unnamed JAL roots. Most of the rest are
+  RAM variables, which have no home at all — see below.
 - **The region snapshot in this document can go stale.** The sidecar cannot:
   `check` re-derives it from the sources.
 
@@ -165,12 +200,22 @@ never matched). `base` and `end` now emit as `0x%08X` like `pc`.
 
 ## Open
 
-- **The single RAM variable has no home.** `symbols.toml` holds `[[func]]`
-  entries only. `0x801490AC` is `MSG_STR_CUR` and `0x801490A8` is
-  `MSG_STR_BASE` in `src/bof3_localize.c`, each cited in six or seven documents,
-  and the naming layer cannot say so. A `names/variables.toml` seeded from the
-  plugin's own defines and the confirmed RAM map in
-  [`BATTLE_RAM.md`](BATTLE_RAM.md) would close it.
+- **The single RAM variable has no home, and the loader records made that the
+  top of the queue.** `symbols.toml` holds `[[func]]` entries only, so the
+  selectors the engine reads have nowhere to be named: `0x80143F00` (the area
+  number, 11 documents), `0x8014686C` (the chapter byte, 8), `0x80145020` (the
+  party combo, 7), `0x801490AC` = `MSG_STR_CUR` and `0x801490A8` =
+  `MSG_STR_BASE` (7 and 6). A `names/variables.toml` seeded from the plugin's
+  own defines, [`LOADER_RECORDS.md`](LOADER_RECORDS.md) and the confirmed RAM map
+  in [`BATTLE_RAM.md`](BATTLE_RAM.md) would close it.
+- **The loader tables are the obvious next regions.** Each has a documented base,
+  stride and verified count — the AREA boot table `0x801802EC` (200 entries, 9
+  documents), `Area_HookTable 0x801C8F54` (11 × 0x1C), the SCENARIO vtable table
+  `0x801C944C` (20), `Boss_EntryTable 0x800B2048` (55), the boss row and file
+  tables `0x801CDF18` / `0x801CDFF8`, the PLCHAR combo table `0x801824AC` (19).
+  They are the same shape as the insert scratch row already derived here. They
+  are **not** seeded yet: those geometries live in dense prose cells rather than a
+  parseable table, and guessing a stride would assert what the source states.
 - **Band extents could be exact.** On a machine with `analysis/` populated,
   `regions.py` could take every band's real max occupant extent from
   `overlay_captures_all.json` instead of the zero-fill window, and give
