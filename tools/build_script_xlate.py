@@ -340,10 +340,18 @@ def decode_jp(raw, single, page15):
             out.append("<%02x%02x>" % (b, raw[i + 1] if i + 1 < len(raw) else 0)); i += 2
         elif b < 0x12 or b == CHOICE:
             out.append("<%02x>" % b); i += 1
-        elif dec and b >= 0x5B and b != SPACE:
+        elif b in single:
+            # names/font.toml wins over the kanji sheet.  The sheet covers the
+            # whole 0x5B..0xFF band by index, so routing a byte there first
+            # swallowed the four punctuation glyphs the table names explicitly:
+            # 0xFB VU, 0xFD full stop, 0xFE comma, 0xFF space.  Only space was
+            # special-cased out, which left the comma -- 12475 of them in the JP
+            # area script -- decoding as <fe> and looking like a missing glyph.
+            out.append(single[b]); i += 1
+        elif dec and b >= 0x5B:
             out.append(dec(bytes([b]))); i += 1
         else:
-            out.append(single.get(b, "<%02x>" % b)); i += 1
+            out.append("<%02x>" % b); i += 1
     return "".join(out)
 
 
