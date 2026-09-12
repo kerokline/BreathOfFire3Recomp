@@ -30,8 +30,12 @@ Scope and honesty limits, so nobody reads more into the output than is there:
     reports the region an address falls in and what the naming layer claims
     about it. It never guesses which.
   * Eleven bands share load addresses, so one address can resolve to several
-    overlay functions (docs/AREA_PCS.md). Every match is printed; picking the
-    right one needs residency, not arithmetic.
+    overlay functions (docs/AREA_PCS.md), and the named regions it falls inside
+    can likewise overlap (docs/band-overlap-attribution.md). EVERY match is
+    printed, never the first: first-match-wins is the bug that document records.
+    Picking the right one needs residency, not arithmetic.
+  * Falling inside a named region is context, not a name. An address in the swap
+    slot is still unnamed; only an exact region base counts as resolved.
   * A boot symbol has no recorded span, so a non-exact hit is reported as the
     nearest symbol at or below the address with its delta, labelled as such.
     It is a reading aid, not a claim of containment.
@@ -47,9 +51,11 @@ Sources scanned (all committed; analysis/ is NOT required):
     tools/*.py         kind `tool`    -- with --tools
 
 Naming layer read: symbols.toml, names/functions.toml, names/data.toml,
-names/overlays.toml (for overlay aliases), seeds/ghidra_funcs.txt (a JAL
-target is a known function root even when it has no name), disc_probe.json
-(the authoritative memory layout -- never hardcode it here).
+names/overlays.toml (for overlay aliases), names/regions.toml (spans: the
+overlay bands, the two message pools, the EXE image -- tools/regions.py),
+seeds/ghidra_funcs.txt (a JAL target is a known function root even when it has
+no name), disc_probe.json (the authoritative memory layout -- never hardcode it
+here).
 """
 import argparse
 import bisect
@@ -67,6 +73,7 @@ except ImportError:  # pragma: no cover
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from name_map import (load_data_names, load_function_names,  # noqa: E402
                       load_overlay_names)
+from regions import containing, load_regions  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
@@ -179,6 +186,7 @@ def build_naming_layer(L=None):
         "data": data,
         "seeds": load_seeds(),
         "landmarks": landmarks(L),
+        "regions": load_regions(),
     }
 
 
@@ -221,13 +229,19 @@ def resolve(addr, layer):
         "ov_funcs": layer["ov_funcs"].get(addr, []),
         "data": layer["data"].get(addr, []),
         "seed": addr in layer["seeds"],
+        "region_base": [r for b, e, r in layer["regions"] if b == addr],
+        "in_regions": containing(addr, layer["regions"]),
         "near": nearest_below(addr, layer),
     }
 
 
 def is_named(res):
-    """Resolved by the naming layer or by the probe's own layout facts."""
-    return bool(res["boot"] or res["ov_funcs"] or res["data"] or res["landmark"])
+    """Resolved by the naming layer, a region base, or the probe's layout facts.
+
+    Falling INSIDE a region is not a name — an address in the swap slot is still
+    unnamed — so res["in_regions"] deliberately does not count here."""
+    return bool(res["boot"] or res["ov_funcs"] or res["data"] or res["landmark"]
+                or res["region_base"])
 
 
 def identity_line(res, layer):
@@ -249,12 +263,23 @@ def identity_line(res, layer):
         return " · ".join(parts)
     if res["landmark"]:
         return res["landmark"]
+    if res["region_base"]:
+        return " · ".join(region_label(r) + " (base)" for r in res["region_base"])
     if res["seed"]:
         return "unnamed function root (seeds/ghidra_funcs.txt)"
     if res["near"]:
         pc, delta, label = res["near"]
         return f"≤ {label} +0x{delta:X} (nearest below, span unknown)"
+    if res["in_regions"]:
+        b, e, r = res["in_regions"][0]
+        return f"in {region_label(r)} +0x{res['addr'] - b:X}"
     return "unknown"
+
+
+def region_label(row):
+    name = row.get("alias") or row.get("name")
+    kind = row.get("kind")
+    return f"{name} [{kind}]" if kind and kind not in str(name) else str(name)
 
 
 # --------------------------------------------------------------- citations
@@ -330,6 +355,17 @@ def cmd_lookup(args):
                   f"  in {overlay_label(md5, layer)}  (names/data.toml)")
             if row.get("evidence"):
                 print(f"    evidence: {row['evidence']}")
+        for r in res["region_base"]:
+            print(f"  region base: {region_label(r)}"
+                  f"  bound={r.get('bound')}  (names/regions.toml)")
+            if r.get("evidence"):
+                print(f"    evidence: {r['evidence']}")
+        if res["in_regions"]:
+            print("  inside, narrowest first (regions overlap legitimately —"
+                  " every match is listed):")
+            for b, e, r in res["in_regions"]:
+                print(f"    {region_label(r)}  0x{b:08X}..0x{e:08X}"
+                      f"  +0x{addr - b:X}  bound={r.get('bound')}")
         if res["landmark"]:
             print(f"  layout landmark: {res['landmark']}")
         if res["seed"] and not res["boot"]:

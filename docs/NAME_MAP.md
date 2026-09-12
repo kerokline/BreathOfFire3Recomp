@@ -17,6 +17,7 @@ input it will consume. Nothing here touches the submodules.
 | `names/overlays.toml` | alias / role / status / evidence per overlay | `md5` of the section bytes |
 | `names/functions.toml` | name / args / ret / status / evidence per overlay function | (`overlay` md5, `pc`) |
 | `names/areas.toml` | alias / status / evidence / sightings / shots per **area (place)** | area file + script-block md5 |
+| `names/regions.toml` | alias / kind / bound / status / evidence per **RAM region**: the eleven overlay bands, the two message pools, the insert scratch array, the EXE image, the kernel area. Seeded and checked by `tools/regions.py` from committed sources only — never hand-edit the derived fields | `base` (span is `[base, end)`) |
 | `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` | **id → name data tables** generated from the disc by `tools/text_tables.py` (never hand-edited; re-run `extract`) — see [`TEXT_TABLES.md`](TEXT_TABLES.md) | (category, id) / id; `[meta]` carries the section md5 |
 | `names/plates.toml` | the **painted world-map name plates**: rectangle on the map's texture page + by-eye transcription + wiki English (`tools/plates.py` for the rectangles; the `jp` column is hand-read) | (world-map area, plate index) |
 | `symbols.toml` | boot-EXE function names (framework `PSX_FN_*` path) | `pc` |
@@ -33,7 +34,12 @@ re-extraction.
 python tools/name_map.py init      # merge new catalog overlays into names/overlays.toml (never overwrites hand edits)
 python tools/name_map.py check     # md5s exist, statuses valid, alias implies status != unnamed
 python tools/name_map.py stats     # coverage
+python tools/regions.py seed       # merge derived RAM regions into names/regions.toml
+python tools/regions.py check      # re-derive from the sources; nonzero on drift
+python tools/regions.py list       # the region map, widths, and the two real overlaps
+python tools/xref.py lookup 0x…    # what the layer says about an address + who cites it
 python tools/subsystem_map.py      # regenerate docs/subsystem_map.html
+python tools/xref.py index --out docs/XREF.md   # regenerate the address cross-reference
 ```
 
 The map is a pure offline join (catalog + captures + observed PCs +
@@ -44,6 +50,43 @@ committable although `analysis/` is not. Regenerate it after `axis_b_loop.sh`
 
 Serve it locally with `.claude/launch.json` → `docs-static`
 (`python -m http.server 8765 -d docs`) or open the file directly.
+
+## Regions: naming a span, not a point
+
+`symbols.toml` holds `[[func]]` entries and the other sidecars key single PCs or
+whole sections, so until 2026-09-12 a *span* had no home — and the addresses this
+repo cites most were spans. `tools/xref.py queue` made that visible: the top of
+the unnamed list was the overlay band bases (`0x801D0C00` in 14 documents,
+`0x801EEC00` in 13, `0x801F2C00` in 12) and the two `.EMI` block dests.
+
+`names/regions.toml` closes it. Every row is **derived** by `tools/regions.py`
+from a committed source and carries the citation: the ten-band map in
+[`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md), the zero-run scan in
+[`OVERLAYS.md`](OVERLAYS.md) §1, the measured spans in
+[`band-overlap-attribution.md`](band-overlap-attribution.md), the shipping
+plugin's own `AREA_BLOCK_LO` / `AREA_BLOCK_HI` and insert geometry in
+`src/bof3_localize.c`, the live text block's end in
+[`TEXT_ENGINE.md`](TEXT_ENGINE.md), and `disc_probe.json`. `check` re-derives and
+fails on drift, so the file cannot rot away from its sources; `seed` keeps
+`alias` and `note`.
+
+Two rules for reading a row:
+
+- **`end` is exclusive, and `bound` says what it *is*.** A `measured occupant
+  span` came from the capture data. A `zero-fill window` is the image's zero run:
+  it bounds where occupants may land and is **not** proof one reaches it. Band
+  `0x801F6C00` has no `end` at all, because no committed source gives one. Never
+  quote an end without its bound.
+- **Regions overlap, and every match must be reported.** LOGO.EXE covers the
+  PLCHAR band entirely and straddles 109,568 bytes of the swap slot — which is
+  the 107 KB that `band-overlap-attribution.md` states in prose, re-derived
+  independently by `regions.py list`. First-match-wins is the bug that document
+  was written about, so `xref.py` lists every containing region, narrowest first.
+
+Falling inside a region is **context, not a name**: an address in the swap slot
+is still unnamed, and only an exact base counts as resolved. What has no home
+yet is the single RAM *variable* — `0x801490AC` is `MSG_STR_CUR` in
+`src/bof3_localize.c` and the naming layer cannot say so.
 
 ## Status vocabulary
 
