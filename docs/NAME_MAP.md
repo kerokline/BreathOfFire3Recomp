@@ -17,6 +17,7 @@ input it will consume. Nothing here touches the submodules.
 | `names/overlays.toml` | alias / role / status / evidence per overlay | `md5` of the section bytes |
 | `names/functions.toml` | name / args / ret / status / evidence per overlay function | (`overlay` md5, `pc`) |
 | `names/areas.toml` | alias / status / evidence / sightings / shots per **area (place)** | area file + script-block md5 |
+| `names/regions.toml` | alias / kind / bound / status / evidence per **RAM region**: the eleven overlay bands, the two message pools, the insert scratch array, the EXE image, the kernel area. Seeded and checked by `tools/regions.py` from committed sources only — never hand-edit the derived fields | `base` (span is `[base, end)`) |
 | `names/items.toml`, `abilities.toml`, `places.toml`, `characters.toml` | **id → name data tables** generated from the disc by `tools/text_tables.py` (never hand-edited; re-run `extract`) — see [`TEXT_TABLES.md`](TEXT_TABLES.md) | (category, id) / id; `[meta]` carries the section md5 |
 | `names/plates.toml` | the **painted world-map name plates**: rectangle on the map's texture page + by-eye transcription + wiki English (`tools/plates.py` for the rectangles; the `jp` column is hand-read) | (world-map area, plate index) |
 | `symbols.toml` | boot-EXE function names (framework `PSX_FN_*` path) | `pc` |
@@ -33,7 +34,12 @@ re-extraction.
 python tools/name_map.py init      # merge new catalog overlays into names/overlays.toml (never overwrites hand edits)
 python tools/name_map.py check     # md5s exist, statuses valid, alias implies status != unnamed
 python tools/name_map.py stats     # coverage
+python tools/regions.py seed       # merge derived RAM regions into names/regions.toml
+python tools/regions.py check      # re-derive from the sources; nonzero on drift
+python tools/regions.py list       # the region map, widths, and the two real overlaps
+python tools/xref.py lookup 0x…    # what the layer says about an address + who cites it
 python tools/subsystem_map.py      # regenerate docs/subsystem_map.html
+python tools/xref.py index --out docs/XREF.md   # regenerate the address cross-reference
 ```
 
 The map is a pure offline join (catalog + captures + observed PCs +
@@ -44,6 +50,21 @@ committable although `analysis/` is not. Regenerate it after `axis_b_loop.sh`
 
 Serve it locally with `.claude/launch.json` → `docs-static`
 (`python -m http.server 8765 -d docs`) or open the file directly.
+
+## Regions: naming a span, not a point
+
+`symbols.toml` holds `[[func]]` entries and the other sidecars key single PCs or
+whole sections, so until 2026-09-12 a *span* had no home — and the addresses this
+repo cites most were spans. `names/regions.toml` closes that: 16 regions (the
+eleven overlay bands, the two message pools, the insert scratch array, the EXE
+image, the kernel area), every row derived from a committed source by
+`tools/regions.py` and re-checkable with `check`.
+
+Read [`ADDRESS_MAPS.md`](ADDRESS_MAPS.md) before using it or `XREF.md`. It is the
+reference for both maps: the region table, where each field comes from, the three
+rules (`end` is exclusive and `bound` says what it is; regions overlap so every
+match must be reported; containment is context, not a name), and the traps a
+misread range bound already cost.
 
 ## Status vocabulary
 

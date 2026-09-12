@@ -56,6 +56,10 @@ CATALOG = os.path.join(ROOT, "analysis", "overlay_catalog.json")
 
 STATUSES = ("unnamed", "hypothesis", "evidence", "verified")
 
+# Integer fields that are addresses, and so are written as 0x%08X rather than
+# decimal. `base` / `end` are names/regions.toml's span (tools/regions.py).
+HEX_KEYS = ("pc", "base", "end")
+
 
 # ---------------------------------------------------------------- TOML I/O
 
@@ -73,7 +77,8 @@ def _emit_table(kind, rows, header):
             if isinstance(v, bool):
                 out.append(f"{k} = {'true' if v else 'false'}\n")
             elif isinstance(v, int):
-                out.append(f"{k} = 0x{v:08X}\n" if k == "pc" else f"{k} = {v}\n")
+                out.append(f"{k} = 0x{v:08X}\n" if k in HEX_KEYS
+                           else f"{k} = {v}\n")
             elif isinstance(v, list):
                 out.append(f"{k} = [{', '.join(_q(x) for x in v)}]\n")
             else:
