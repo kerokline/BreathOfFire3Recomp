@@ -61,6 +61,16 @@ patch would fit but transcodes to Shift-JIS with another title's framing.
 The function-entry plugin is the framework's sanctioned title-side hook for
 exactly this — no generated-code edit, no submodule change.
 
+## Furigana (2026-09-12)
+
+`tools/build_ruby_script.py --furigana` (and `--scope every`) builds
+`generated/bof3_xlate_jp_furigana.c` / `_jp_furigana_all.c`: readings in a
+half-height row above each text row instead of brackets, authored breaks
+kept, two text rows per page. Same plugin, same `MsgBox_Reset` repoint; the
+plugin's row rule places the rows of a page that starts with `<0f><13>`
+([`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened"). No insert
+table for these codes: inserted names draw inline, unread.
+
 ## One plugin, one table per language code
 
 The plugin does not know what a table means. CMake globs

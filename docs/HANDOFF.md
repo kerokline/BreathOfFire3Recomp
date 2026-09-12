@@ -819,8 +819,12 @@ third `mod_function_entry_funcs` entry). **Step 3 collapsed to a row rule
 and is demonstrated on screen** (`analysis/xlate_shots/ruby_rows_demo.png`):
 ruby rows are ordinary rows in the string, x aligns by glyph count with
 `0x09` half-cell gaps, and the plugin only sets y per row
-(`BOF3_RUBY_ROWY=8,1,29,22 BOF3_RUBY_GAP=9`, five hook entries now). Next
-is the builder variant, `jp_furigana`. Original pointer:
+(five hook entries now). **The builder variant is built and verified in
+play-shaped conditions** (`--furigana`, codes `jp_furigana` /
+`jp_furigana_all`, `analysis/xlate_shots/furigana_area014_pages.png`);
+the plugin applies the row rule only to pages that start with `<0f><13>`.
+Left: the reading review pass, and a look at the 112 readings dropped
+after runtime inserts. Original pointer:
 [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". Two doc errors were
 corrected on the way (advance vs size; `0x0B` never moved y).
 The Ruby tables are in play (user-verified in real play, both scopes, system

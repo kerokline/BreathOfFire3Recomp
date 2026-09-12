@@ -90,6 +90,12 @@ BOF3_XLATE_DECLARE(jp_ruby)
 #ifdef BOF3_XLATE_HAVE_JP_RUBY_ALL
 BOF3_XLATE_DECLARE(jp_ruby_all)
 #endif
+#ifdef BOF3_XLATE_HAVE_JP_FURIGANA
+BOF3_XLATE_DECLARE(jp_furigana)
+#endif
+#ifdef BOF3_XLATE_HAVE_JP_FURIGANA_ALL
+BOF3_XLATE_DECLARE(jp_furigana_all)
+#endif
 static const Bof3XlateTable g_tables[] = {
 #ifdef BOF3_XLATE_HAVE_EN
     BOF3_XLATE_TABLE("en", en),
@@ -99,6 +105,12 @@ static const Bof3XlateTable g_tables[] = {
 #endif
 #ifdef BOF3_XLATE_HAVE_JP_RUBY_ALL
     BOF3_XLATE_TABLE("jp_ruby_all", jp_ruby_all),
+#endif
+#ifdef BOF3_XLATE_HAVE_JP_FURIGANA
+    BOF3_XLATE_TABLE("jp_furigana", jp_furigana),
+#endif
+#ifdef BOF3_XLATE_HAVE_JP_FURIGANA_ALL
+    BOF3_XLATE_TABLE("jp_furigana_all", jp_furigana_all),
 #endif
 };
 #define TABLE_COUNT (sizeof g_tables / sizeof g_tables[0])
@@ -375,32 +387,62 @@ static void on_msgbox_delay(struct CPUState *cpu, uint32_t address) {
 }
 
 /* Row rule for true ruby (docs/FURIGANA.md "The rendering route, reopened",
- * step 3 demo, 2026-09-12). BOF3_RUBY_ROWY="8,1,29,22" gives each row of the
- * message its y offset from the origin 0x801490BE, in string order (rows past
- * the list continue at 14 px pitch); unset, none of these hooks register.
- * BOF3_RUBY_YBUMP=n is the older probe: a flat +n on the sprite path.
+ * step 3, 2026-09-12). A furigana page -- built by
+ * tools/build_ruby_script.py --furigana -- starts with the shrink preset
+ * <0f><13> and then alternates text row, ruby row: `text <01> <0d>ruby<0e>`.
+ * No shipped page starts with a preset (every 0x0F in the disc follows a
+ * closed span), so that byte pair is the signature: once per page the
+ * renderer-entry hook reads the page base 0x801490A8 and looks for it past
+ * the optional <0c>xx head, and only a page that carries it gets its rows
+ * placed. Every other page (a plain JP message, a verbatim collision page,
+ * another language) is never touched.
  *
- * The renderer 0x80150598 re-walks the string every frame from the origin,
- * so its entry resets the row counter. Each blitter entry then reads the
- * cursor y 0x801490BA: the value this hook last wrote, or the value the game
- * itself holds for the row, means the same row; anything else means the
- * newline stepped it (+14) and the row advances. Offsets are chosen so a
- * written y is never a multiple of 14 from the origin, which keeps the two
- * sets apart. Both blitters read the cursor from RAM after entry (the quad
- * path 0x80151F4C reads it directly), so the RAM write is what places the
- * glyph; the sprite path 0x8014F6BC already carries y in a1, so it gets the
- * same delta in the register. */
+ * Placement: the renderer 0x80150598 re-walks the string every frame from
+ * the origin, so its entry resets the row counter. Each blitter entry then
+ * reads the cursor y 0x801490BA: the value this hook last wrote means the
+ * same row; a value 14k past it means k newlines fired (an empty ruby row
+ * draws no glyph, so k can be 2) and the row advances by k. The RAM write
+ * is what places the glyph (the quad path 0x80151F4C reads the cursor
+ * after entry); the sprite path 0x8014F6BC already carries y in a1, so it
+ * gets the same delta in the register. Rows alternate text / ruby with the
+ * y offsets ROWY_TEXT / ROWY_RUBY from the origin per pair, PAIR_PITCH
+ * apart: 8, 1, 29, 22 -- two pairs in the 42 px interior. Offsets are never
+ * a multiple of 14, which keeps a written y apart from a stepped one.
+ * BOF3_RUBY_ROWY="a,b,c,d" overrides the offsets and BOF3_RUBY_FORCE=1
+ * applies the rule to every page (the probe tool's demo mode);
+ * BOF3_RUBY_YBUMP=n is the older probe, a flat +n on the sprite path. */
 #define MSGBOX_RENDER_PC 0x80150598u
 #define MSGBOX_QUAD_PC   0x80151F4Cu
 #define MSG_CUR_Y        0x801490BAu
 #define MSG_ORIGIN_Y     0x801490BEu
+#define FURIGANA_PRESET  0x13u         /* type 3 shrink, P = -6, forever */
 #define ROWY_MAX 8
-static int g_ybump;
-static int g_rowy[ROWY_MAX], g_rowy_n;
-static int g_row, g_row_valid, g_row_written_y, g_row_game_y;
+static int g_ybump, g_rowy_force;
+static int g_rowy[ROWY_MAX] = { 8, 1, 29, 22 }, g_rowy_n = 4;
+static int g_row, g_row_valid, g_row_written_y;
+static uint32_t g_page_base;           /* page whose signature was last checked */
+static int g_page_furigana;
+
+/* A message the box can be reading: the JP pools, or this plugin's ring in
+ * enhancement memory (a redirected message lives there, 2026-09-12). */
+static int readable_text(uint32_t p) {
+    if (p >= AREA_BLOCK_LO && p < AREA_BLOCK_HI) return 1;
+    return g_ring && p >= g_ring && p < g_ring + SLOT_SIZE * SLOT_COUNT;
+}
+
+static int page_is_furigana(uint32_t base) {
+    if (!readable_text(base)) return 0;
+    if (psx_mod_read_byte(base) == 0x0Cu) base += 2;
+    return psx_mod_read_byte(base) == 0x0Fu && psx_mod_read_byte(base + 1) == (uint8_t)FURIGANA_PRESET;
+}
 
 static void on_msgbox_render(struct CPUState *cpu, uint32_t address) {
+    uint32_t base = psx_mod_read_word(MSG_STR_BASE);
     (void)cpu; (void)address;
+    if (base != g_page_base) {
+        g_page_base = base;
+        g_page_furigana = g_rowy_force || page_is_furigana(base);
+    }
     g_row = 0;
     g_row_valid = 0;
 }
@@ -410,48 +452,46 @@ static int row_offset(int row) {
     return g_rowy[g_rowy_n - 1] + 14 * (row - g_rowy_n + 1);
 }
 
-static void place_row(struct CPUState *cpu, int sprite_path) {
-    int y = (int16_t)psx_mod_read_half(MSG_CUR_Y);
-    int origin = (int16_t)psx_mod_read_half(MSG_ORIGIN_Y);
-    int want, delta;
-    if (g_row_valid && y != g_row_written_y && y != g_row_game_y) {
-        g_row++;
-        g_row_valid = 0;
+/* Returns 1 when the glyph was placed (a furigana page), 0 otherwise. */
+static int place_row(struct CPUState *cpu, int sprite_path) {
+    int y, origin, want, delta;
+    if (!g_page_furigana) return 0;
+    y = (int16_t)psx_mod_read_half(MSG_CUR_Y);
+    origin = (int16_t)psx_mod_read_half(MSG_ORIGIN_Y);
+    if (g_row_valid && y != g_row_written_y) {
+        int d = y - g_row_written_y;
+        if (d > 0 && d % 14 == 0) g_row += d / 14;
     }
-    if (!g_row_valid) {
-        g_row_game_y = y;
-        g_row_valid = 1;
-    }
+    g_row_valid = 1;
     want = origin + row_offset(g_row);
     delta = want - y;
     psx_mod_write_half(MSG_CUR_Y, (uint16_t)want);
     g_row_written_y = want;
     if (sprite_path)
         cpu->gpr[5] = (uint32_t)((int32_t)cpu->gpr[5] + delta);
+    return 1;
 }
 
 /* Half-cell gaps in a ruby row. The font has no empty cell and 0xFF is a
  * separator only for full-size glyphs (drawn shrunk it is a junk cell,
  * 2026-09-12 demo), so a gap is a control byte the renderer ignores and the
- * stepper does not count: BOF3_RUBY_GAP=hex names it. The sprite blitter's
- * fifth argument (sp+0x10, `sw s0` at 0x80150854) is the string walk
- * pointer at the glyph; on a ruby row (odd rows under the row rule) each gap
- * byte right before the glyph moves the cursor x by one shrunk cell (12 + P)
- * before the glyph is drawn -- in the x argument and in the RAM cursor, so
- * the renderer's own advance continues from there. Text rows are never
- * scanned, so a kanji whose low byte equals the gap code cannot be misread.
- * The shrunk readings turned out to go through this blitter as well: the
- * quad entry 0x80151F4C never fired on the demo page. */
+ * stepper does not count: 0x09 (BOF3_RUBY_GAP=hex overrides). The shrunk
+ * glyphs go through the quad blitter, whose a1 is the string walk pointer
+ * at the glyph (the same s0 the sprite call stores at sp+0x10); on a ruby
+ * row (odd rows) each gap byte right before the glyph moves the cursor x by
+ * one shrunk cell (12 + P) before the glyph is drawn, and the renderer's own
+ * advance continues from there. Text rows are never scanned, so a kanji
+ * whose low byte equals the gap code cannot be misread. */
 #define MSG_CUR_X   0x801490B8u
 #define MSG_SIZE_P  0x801490C4u
-static int g_gap_code, g_gap_hits;
+static int g_gap_code = 0x09, g_gap_hits;
 
 /* p = the string walk pointer at the glyph (a1 on the quad path, sp+0x10 on
  * the sprite path); x_reg = the register carrying x, or 0 when the blitter
  * reads x from RAM only. */
 static void ruby_gap(struct CPUState *cpu, uint32_t p, int x_reg) {
     int n = 0, step, x;
-    if (p < AREA_BLOCK_LO || p >= 0x80800000u) return;
+    if (!readable_text(p)) return;
     while (n < 64 && psx_mod_read_byte(p - 1u - (uint32_t)n) == (uint8_t)g_gap_code)
         n++;
     if (!n) return;
@@ -467,8 +507,7 @@ static void ruby_gap(struct CPUState *cpu, uint32_t p, int x_reg) {
 
 static void on_sprite_glyph(struct CPUState *cpu, uint32_t address) {
     (void)address;
-    if (g_rowy_n) {
-        place_row(cpu, 1);
+    if (place_row(cpu, 1)) {
         if (g_gap_code && (g_row & 1))
             ruby_gap(cpu, psx_mod_read_word(cpu->gpr[29] + 0x10u), 4);
     } else if (g_ybump)
@@ -477,8 +516,7 @@ static void on_sprite_glyph(struct CPUState *cpu, uint32_t address) {
 
 static void on_quad_glyph(struct CPUState *cpu, uint32_t address) {
     (void)address;
-    place_row(cpu, 0);
-    if (g_gap_code && (g_row & 1))
+    if (place_row(cpu, 0) && g_gap_code && (g_row & 1))
         ruby_gap(cpu, cpu->gpr[5], 0);
 }
 
@@ -496,24 +534,22 @@ static void parse_rowy(const char *spec) {
 PSX_MOD_CONSTRUCTOR(bof3_register_localize_plugin) {
     size_t i;
     const char *ybump = getenv("BOF3_RUBY_YBUMP");
+    int okr, oks, okq;
     g_ybump = ybump ? atoi(ybump) : 0;
-    parse_rowy(getenv("BOF3_RUBY_ROWY"));
-    g_gap_code = getenv("BOF3_RUBY_GAP") ? (int)strtol(getenv("BOF3_RUBY_GAP"), NULL, 16) : 0;
-    if (g_rowy_n) {
-        int okr = psx_mod_register_function_entry_plugin("bof3.script.rowy.render", MSGBOX_RENDER_PC,
-                                                         on_msgbox_render);
-        int oks = psx_mod_register_function_entry_plugin("bof3.script.rowy.sprite", MSGBOX_SPRITE_PC,
-                                                         on_sprite_glyph);
-        int okq = psx_mod_register_function_entry_plugin("bof3.script.rowy.quad", MSGBOX_QUAD_PC,
-                                                         on_quad_glyph);
-        say("bof3_localize: row-y rule %s, %d row offset(s)\n",
-            okr && oks && okq ? "registered" : "FAILED", g_rowy_n);
-    } else if (g_ybump) {
-        int ok3 = psx_mod_register_function_entry_plugin("bof3.script.ybump", MSGBOX_SPRITE_PC,
-                                                         on_sprite_glyph);
-        say("bof3_localize: y-bump probe %s, +%d px at MsgBox_DrawSprite\n",
-            ok3 ? "registered" : "FAILED", g_ybump);
-    }
+    if (getenv("BOF3_RUBY_ROWY"))
+        parse_rowy(getenv("BOF3_RUBY_ROWY"));
+    if (getenv("BOF3_RUBY_GAP"))
+        g_gap_code = (int)strtol(getenv("BOF3_RUBY_GAP"), NULL, 16);
+    g_rowy_force = getenv("BOF3_RUBY_FORCE") ? atoi(getenv("BOF3_RUBY_FORCE")) : 0;
+    okr = psx_mod_register_function_entry_plugin("bof3.script.rowy.render", MSGBOX_RENDER_PC,
+                                                 on_msgbox_render);
+    oks = psx_mod_register_function_entry_plugin("bof3.script.rowy.sprite", MSGBOX_SPRITE_PC,
+                                                 on_sprite_glyph);
+    okq = psx_mod_register_function_entry_plugin("bof3.script.rowy.quad", MSGBOX_QUAD_PC,
+                                                 on_quad_glyph);
+    say("bof3_localize: furigana row rule %s (offsets %d,%d,%d,%d gap %02X%s)\n",
+        okr && oks && okq ? "registered" : "FAILED", g_rowy[0], g_rowy[1], g_rowy[2], g_rowy[3],
+        g_gap_code, g_rowy_force ? ", forced on every page" : "");
     int ok = psx_mod_register_function_entry_plugin("bof3.script", MSGBOX_RESET_PC,
                                                     on_msgbox_reset);
     int ok2 = psx_mod_register_function_entry_plugin("bof3.script.replay", MSGBOX_DELAY_PC,

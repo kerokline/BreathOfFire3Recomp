@@ -496,12 +496,45 @@ trade than the inline variant's re-flow of nearly every page.
    `<01>` rows without complaint, so a four-row string is fine when the
    plugin keeps them inside the frame.
 
-   **What the builder now owes** (`build_ruby_script.py`, a `jp_furigana`
-   variant): per authored row, the ruby row with readings at half-cell
-   2 × stem cell (a reading longer than its stem takes a free half-cell on
-   the left first); a `0x02` before any third row; the head preset; and the
-   width check that every ruby row stays within 32 half-cells. Open before
-   shipping: ~~messages that carry their own `<0d>…<0e>` (a shout span would
+   ~~**What the builder now owes**~~ **BUILT 2026-09-12 (late evening) and
+   verified on a real conversation:** `tools/build_ruby_script.py --furigana`
+   (`--scope every` for `jp_furigana_all`) emits `generated/bof3_xlate_jp_furigana.c`;
+   both codes are in `game.toml`'s language list as *Japanese (Furigana)* and
+   *(Furigana, every word)*; `analysis/xlate_shots/furigana_area014_pages.png`
+   is the AREA014 scarecrow talk, four pages, from the table with no probe
+   bytes. Numbers (first-per-area): 4,542 entries, 358 KB, 6,212 furigana
+   pages, 11,091 readings placed, 112 dropped after a runtime insert (the
+   insert's width is only known at draw time, so nothing to its right can be
+   aligned), 0 with no room, 2,301 pages split at two text rows, 106 pages
+   kept verbatim behind a reset preset for their own span or preset, longest
+   message 837 bytes. No insert table: an inserted item or skill name draws
+   inline in the text row and goes unread. `--selftest --furigana` round-trips
+   all 7,014 messages byte for byte — and fixing that exposed a regression in
+   the inline variant's own selftest (87 mismatches since the 16-cell insert
+   budget, 2026-09-11: with re-flow off the layout still wrapped rows at the
+   budget), now 0 on both.
+
+   **How the plugin knows a page** (`src/bof3_localize.c`): hooks on the
+   renderer and both blitters are always registered; once per page the
+   renderer-entry hook reads the page base `0x801490A8` and applies the row
+   rule only to a page whose bytes start with `<0f><13>` (past an optional
+   `<0c>xx` head) — the builder writes that preset at the head of every
+   annotated page and no shipped page starts with a preset. Every other
+   page, in any language, is untouched (checked: `jp_ruby` still draws three
+   rows at the 14 px pitch). Row offsets 8, 1, 29, 22 and the gap code 0x09
+   are compiled in; `BOF3_RUBY_ROWY`, `BOF3_RUBY_GAP` and `BOF3_RUBY_FORCE=1`
+   (rule on every page, for the probe tool's demo) override them. **Trap
+   paid for:** the hooks gated the base and glyph pointers to guest RAM and
+   a redirected message lives in the plugin's ring at `0x9F000000`, so the
+   first run drew every page at the plain pitch with the readings bunched at
+   the row start — `readable_text()` now accepts the ring. Also settled on
+   the way: `0x801490A8` really is the *page* base (it walked `+0x00`,
+   `+0x43`, `+0x81`, `+0x94` through the four pages), and a text row with no
+   reading still gets its empty `<0d><0e>` ruby row so the alternation
+   holds — an empty row draws no glyph, so the plugin advances the row
+   counter by however many 14 px steps the newline fired.
+
+   Open before shipping: ~~messages that carry their own `<0d>…<0e>` (a shout span would
    shrink under the message-wide preset — count them)~~ **counted,
    `tools/emphasis_census.py` (2026-09-12 evening)**: over 6,924 distinct
    messages (200 areas + system block), 96 carry a span or preset, 29 of
@@ -524,7 +557,8 @@ trade than the inline variant's re-flow of nearly every page.
    `grow`) changes P for the rest of *its page*, so the builder re-emits the
    head preset after any foreign `<0f>` on a page that still has ruby rows
    to come — or, simpler, treats any page with a preset as verbatim.
-   Remaining open items: the typewriter
+   Remaining open items: readings are still SudachiPy's, unproofread (the
+   same `names/readings.toml` sidecar and `--ambiguous` audit apply); the typewriter
    (readings reveal after their row's text, which the demo showed is fine),
    and whether the gap code should be `0x09` or `0x11` (both unused; `0x10`
    toggles a flag). The row offsets belong in `game.toml` or the table

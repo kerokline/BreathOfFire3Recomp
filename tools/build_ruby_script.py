@@ -157,9 +157,15 @@ def parse(raw, single, page15, kanji_dec):
 
 class Annotator:
     def __init__(self, width, rows, annotate=True, reflow=True, dict_name="core",
-                 overrides=None, ambiguous=None, insert_width=None):
+                 overrides=None, ambiguous=None, insert_width=None, furigana=False,
+                 rows_out=2):
         self.kana_enc, self.single, self.page15, self.kanji_dec = load_maps()
         self.width, self.rows = width, rows
+        # Furigana layout (docs/FURIGANA.md "The rendering route, reopened"):
+        # readings go into a half-height ruby row above each text row instead
+        # of brackets inline, authored breaks are kept, and a page with
+        # readings holds `rows_out` text rows (two pairs fit the 42 px box).
+        self.furigana, self.rows_out = furigana, rows_out
         # Cells budgeted for each runtime insert when a row is laid out.  The
         # English encoder's numbers, with the Ruby scopes raising 0x07 to a
         # whole row: an annotated item / skill name reaches 16 cells
@@ -286,9 +292,17 @@ class Annotator:
             last_kanji = len(surface) - 1 if whole else \
                 max(k for k, c in enumerate(surface) if KANJI_RE.match(c))
             unit = list(word[:last_kanji + 1])
-            unit.append(("g", bytes([OPEN_BRACKET]), "\uff08"))
-            unit.extend(("g", e, c) for e, c in zip(enc, ruby))
-            unit.append(("g", bytes([CLOSE_BRACKET]), "\uff09"))
+            if self.furigana:
+                # A zero-width marker after the stem: the reading bytes and
+                # the stem's width in cells (the whole token when kana sit
+                # between its kanji), for the ruby row above this text row.
+                first_kanji = 0 if whole else \
+                    min(k for k, c in enumerate(surface) if KANJI_RE.match(c))
+                unit.append(("ruby", b"".join(enc), last_kanji + 1 - first_kanji))
+            else:
+                unit.append(("g", bytes([OPEN_BRACKET]), "\uff08"))
+                unit.extend(("g", e, c) for e, c in zip(enc, ruby))
+                unit.append(("g", bytes([CLOSE_BRACKET]), "\uff09"))
             unit.extend(word[last_kanji + 1:])
             units.append(unit)
         merged = []
@@ -372,6 +386,17 @@ class Annotator:
 
     def rows_for(self, units):
         rows, row, used = [], [], 0
+        if not self.do_reflow:
+            # Authored rows only: never wrap, whatever an insert is budgeted at
+            # (the budget wrapped 87 shipped rows in --selftest, and would
+            # break authored rows in the furigana layout, 2026-09-12).
+            for u in units:
+                if u[0][0] == "nl":
+                    rows.append(row); row = []
+                else:
+                    row.append(u)
+            rows.append(row)
+            return rows
         for u in units:
             if u[0][0] == "nl":                         # authored break kept (no reflow)
                 rows.append(row); row, used = [], 0
@@ -425,6 +450,88 @@ class Annotator:
     def verbatim(items):
         return b"".join(it[1] if it[0] in ("g", "c") else bytes([NEWLINE]) for it in items)
 
+    # -- furigana rows (docs/FURIGANA.md step 3) ------------------------------
+    FURIGANA_HEAD = b"\x0f\x13"        # shrink -6 forever: the page signature the plugin keys on
+    RESET_HEAD = b"\x0f\x02"           # reset to 12 px forever, ahead of a page with its own effect
+    GAP = 0x09                         # renderer no-op, stepper does not count it: a half-cell gap
+    SPAN_OPEN, SPAN_CLOSE, PRESET = 0x0D, 0x0E, 0x0F
+    INSERTS = (0x03, 0x04, 0x07, 0x08)
+    HANGING = (0x2A, 0x3B)             # drawn one cell left of the origin at a row start
+
+    @staticmethod
+    def has_effect(items):
+        return any(it[0] == "c" and it[1][0] in (Annotator.SPAN_OPEN, Annotator.SPAN_CLOSE,
+                                                 Annotator.PRESET) for it in items)
+
+    def ruby_row_for(self, row):
+        """The half-cell ruby row above one text row, as bytes (b'' when the
+        row has no reading). A reading starts at 2 x its stem's first cell;
+        one longer than its stem takes a free half-cell on the left first,
+        and one that would overlap an earlier reading moves right. A reading
+        past a runtime insert is dropped: the insert's width is only known
+        at draw time."""
+        half = [None] * (2 * self.width)
+        x, insert_seen, first = 0, False, True
+        for u in row:
+            for it in u:
+                if it[0] == "g":
+                    if first and it[1][0] in self.HANGING:
+                        x -= 1
+                    first = False
+                    x += 1
+                elif it[0] == "c":
+                    if it[1][0] in self.INSERTS:
+                        insert_seen = True
+                    x += self.item_cells(it)
+                elif it[0] == "ruby":
+                    kana, stem = it[1], it[2]
+                    if insert_seen:
+                        self.stats["ruby_after_insert"] += 1
+                        continue
+                    s = 2 * (x - stem)
+                    if len(kana) > 2 * stem and s > 0 and half[s - 1] is None:
+                        s -= 1
+                    s = max(s, 0)
+                    while s + len(kana) <= len(half) and any(h is not None for h in half[s:s + len(kana)]):
+                        s += 1
+                    if s + len(kana) > len(half):
+                        s = len(half) - len(kana)
+                        if s < 0 or any(h is not None for h in half[s:]):
+                            self.stats["ruby_no_room"] += 1
+                            continue
+                    for k, b in enumerate(kana):
+                        half[s + k] = b
+                    self.stats["ruby_placed"] += 1
+        while half and half[-1] is None:
+            half.pop()
+        return bytes(h if h is not None else self.GAP for h in half)
+
+    def encode_furigana_page(self, items, term, seen, out):
+        """One box page in the furigana layout, appended to `out`."""
+        if self.do_annotate and self.has_effect(items):
+            # Keep the shout, drop this page's readings (decision 2026-09-12):
+            # verbatim, behind a reset so a shrink left over from an earlier
+            # page does not draw the shout small.
+            self.stats["effect_pages"] += 1
+            out += self.RESET_HEAD + self.verbatim(items) + term
+            return
+        rows = self.rows_for(self.units_for_page(items, seen))
+        text = [self.row_bytes(r) for r in rows]
+        ruby = [self.ruby_row_for(r) for r in rows]
+        if not any(ruby):
+            out += bytes([NEWLINE]).join(text) + term
+            return
+        self.stats["furigana_pages"] += 1
+        if len(rows) > self.rows_out:
+            self.stats["split_pages"] += 1
+        for r0 in range(0, len(rows), self.rows_out):
+            out += self.FURIGANA_HEAD
+            for ri in range(r0, min(r0 + self.rows_out, len(rows))):
+                if ri > r0:
+                    out.append(NEWLINE)
+                out += text[ri] + bytes([NEWLINE, self.SPAN_OPEN]) + ruby[ri] + bytes([self.SPAN_CLOSE])
+            out += bytes([PAGE]) if r0 + self.rows_out < len(rows) else term
+
     def encode(self, parsed, seen):
         head, pages, tail = parsed
         out = bytearray(head)
@@ -432,6 +539,9 @@ class Annotator:
             if not self.is_box_page(items):
                 self.stats["narration_pages"] += 1
                 out += self.verbatim(items) + term
+                continue
+            if self.furigana:
+                self.encode_furigana_page(items, term, seen, out)
                 continue
             rows = self.rows_for(self.units_for_page(items, seen))
             if len(rows) > self.rows:
@@ -575,21 +685,32 @@ def main(argv=None):
     ap.add_argument("--insert-out", help="default generated/bof3_insert_<code>.c: the runtime-"
                          "insert table (annotated item / ability names), built alongside")
     ap.add_argument("--insert-review", help="write the name -> annotated name list here")
+    ap.add_argument("--furigana", action="store_true",
+                    help="true ruby: readings in a half-height row above each text row "
+                         "(jp_furigana / jp_furigana_all), authored breaks kept, two text "
+                         "rows per page; pages with their own span or preset stay verbatim "
+                         "(docs/FURIGANA.md 'The rendering route, reopened')")
+    ap.add_argument("--rows-out", type=int, default=2,
+                    help="furigana: text rows per page (two pairs fit the 42 px box)")
     args = ap.parse_args(argv)
     if not args.dict:
         args.dict = DICT_FOR_SCOPE[args.scope]
 
     code = {"area": "jp_ruby", "every": "jp_ruby_all"}[args.scope]
+    if args.furigana:
+        code = {"area": "jp_furigana", "every": "jp_furigana_all"}[args.scope]
     if not args.out:
         args.out = os.path.join(ROOT, "generated", "bof3_xlate_%s.c" % code)
     if not args.insert_out:
         args.insert_out = os.path.join(ROOT, "generated", "bof3_insert_%s.c" % code)
     disc = Disc(cue=args.cue, bin_root=args.bin_root)
     overrides = load_overrides()
-    ann = Annotator(args.width, args.rows, annotate=not args.selftest, reflow=not args.selftest,
+    ann = Annotator(args.width, args.rows, annotate=not args.selftest,
+                    reflow=not args.selftest and not args.furigana,
                     dict_name=args.dict, overrides=overrides,
                     ambiguous={} if args.ambiguous else None,
-                    insert_width={0x07: args.insert_width})
+                    insert_width={0x07: args.insert_width},
+                    furigana=args.furigana, rows_out=args.rows_out)
     review = open(args.review, "w", encoding="utf-8") if args.review else None
     entries, seen_hash = [], set()
     stats = collections.Counter()
@@ -656,10 +777,21 @@ def main(argv=None):
              ann.stats["repeat"], ann.stats["unread"], ann.stats["unencodable"],
              args.dict, sum(ann.override_hits.values()), len(ann.override_hits), len(overrides)))
     print("pages split for exceeding %d rows at width %d: %d; narration pages left verbatim: %d"
-          % (args.rows, args.width, ann.stats["split_pages"], ann.stats["narration_pages"]))
+          % (args.rows_out if args.furigana else args.rows, args.width,
+             ann.stats["split_pages"], ann.stats["narration_pages"]))
+    if args.furigana:
+        print("furigana pages %d (readings placed %d, dropped after an insert %d, no room %d); "
+              "pages with their own span / preset kept verbatim behind a reset: %d"
+              % (ann.stats["furigana_pages"], ann.stats["ruby_placed"], ann.stats["ruby_after_insert"],
+                 ann.stats["ruby_no_room"], ann.stats["effect_pages"]))
     print("longest encoded message: %d bytes (%s); slot cap %d" % (longest + (args.max_len,)))
     top = sorted(((len(e), h) for h, e in entries), reverse=True)[:5]
     print("five longest: %s" % ", ".join("%d" % n for n, _ in top))
+    if args.furigana:
+        # No runtime-insert table: an inserted name is drawn inline in the
+        # text row, where a reading has nowhere to go (docs/FURIGANA.md).
+        print("no insert table for the furigana layout (inserted names draw inline, unread)")
+        return 0
 
     # The runtime-insert table: the same annotator over the item / ability
     # names the game copies into the 0x07 records (docs/INSERT_RUBY.md).

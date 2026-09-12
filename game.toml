@@ -66,6 +66,8 @@ languages = [
     { code = "jp", label = "Japanese" },
     { code = "jp_ruby", label = "Japanese (Ruby)" },
     { code = "jp_ruby_all", label = "Japanese (Ruby, every word)" },
+    { code = "jp_furigana", label = "Japanese (Furigana)" },
+    { code = "jp_furigana_all", label = "Japanese (Furigana, every word)" },
 ]
 
 [video]
