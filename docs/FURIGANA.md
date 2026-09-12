@@ -405,6 +405,27 @@ Verified on the AREA014 scarecrow talk, four pages
 all at 1:1 from the 8 px design. Tables regenerated: 4,542 / 5,699 entries,
 11,091 / 21,258 readings placed.
 
+**Three corrections from the user's first play frame (same night):**
+
+- **The glyph rows start at page y 169, not 168** (the 168 grid line is
+  empty), and the **UV extent must be the size, not size − 1**: u is
+  interpolated from the vertex, so an extent of 7 over 8 px never reaches
+  the eighth texel row (the game's own 11-for-12 drops its cells' last
+  row, which is empty). Together those cut 2 px off every reading's foot
+  (こころ lost its bottom stroke). `names/font_small.toml` `page_y = 169`,
+  extent `RUBY_PX`.
+- **The next-page arrow goes through the same sprite blitter** from a
+  caller outside the renderer, and the row rule re-placed it onto the
+  current row at whatever x the game gave it — the "stray glyph" over け in
+  the user's frames. Both blitter hooks now act only on the renderer's own
+  calls (return addresses `0x80150870` sprite, `0x80150800` quad).
+- **The arrow's y is cursor y + 14 + P** (measured on plain 1-, 2- and
+  3-row probe pages: +14 with P = 0), and a furigana page keeps P = −6, so
+  it landed 6 px inside the last text row. On the page's last glyph — a
+  text glyph, since ruby rows come first — the sprite hook leaves the RAM
+  cursor y at row y − P while the glyph itself takes y from a1; the arrow
+  then lands one row under the text (`analysis/xlate_shots/furigana_area014_arrow.png`).
+
 Left: the reading review pass; the 112 / 297 readings dropped after a
 runtime insert; a look at pages whose readings collide sideways (the
 builder pushes a later reading right, and an 8 px reading over a 12 px

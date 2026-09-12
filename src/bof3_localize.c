@@ -572,10 +572,13 @@ static void on_prim_commit(struct CPUState *cpu, uint32_t address) {
     v = g_pend_uv >> 8;
     x0 = (int16_t)psx_mod_read_half(pk + 0x08u);
     y0 = (int16_t)psx_mod_read_half(pk + 0x0Au);
-    psx_mod_write_byte(pk + 0x0Cu, (uint8_t)u);       psx_mod_write_byte(pk + 0x0Du, (uint8_t)v);
-    psx_mod_write_byte(pk + 0x14u, (uint8_t)(u + 7)); psx_mod_write_byte(pk + 0x15u, (uint8_t)v);
-    psx_mod_write_byte(pk + 0x1Cu, (uint8_t)u);       psx_mod_write_byte(pk + 0x1Du, (uint8_t)(v + 7));
-    psx_mod_write_byte(pk + 0x24u, (uint8_t)(u + 7)); psx_mod_write_byte(pk + 0x25u, (uint8_t)(v + 7));
+    /* UV extent = the size, not size - 1: u is interpolated from the vertex,
+     * so an extent of 7 over 8 px never reaches the eighth texel row (the
+     * game's own 11-for-12 drops its cells' last row, which is empty). */
+    psx_mod_write_byte(pk + 0x0Cu, (uint8_t)u);              psx_mod_write_byte(pk + 0x0Du, (uint8_t)v);
+    psx_mod_write_byte(pk + 0x14u, (uint8_t)(u + RUBY_PX));  psx_mod_write_byte(pk + 0x15u, (uint8_t)v);
+    psx_mod_write_byte(pk + 0x1Cu, (uint8_t)u);              psx_mod_write_byte(pk + 0x1Du, (uint8_t)(v + RUBY_PX));
+    psx_mod_write_byte(pk + 0x24u, (uint8_t)(u + RUBY_PX));  psx_mod_write_byte(pk + 0x25u, (uint8_t)(v + RUBY_PX));
     psx_mod_write_half(pk + 0x10u, (uint16_t)(x0 + RUBY_PX)); psx_mod_write_half(pk + 0x12u, (uint16_t)y0);
     psx_mod_write_half(pk + 0x18u, (uint16_t)x0);             psx_mod_write_half(pk + 0x1Au, (uint16_t)(y0 + RUBY_PX));
     psx_mod_write_half(pk + 0x20u, (uint16_t)(x0 + RUBY_PX)); psx_mod_write_half(pk + 0x22u, (uint16_t)(y0 + RUBY_PX));
@@ -586,11 +589,37 @@ static void on_prim_commit(struct CPUState *cpu, uint32_t address) {
             u, v, x0, y0, pk, cmd);
 }
 
+/* Only the renderer's own calls are glyphs: the next-page arrow goes
+ * through the same sprite blitter from another caller, and the row rule
+ * re-placed it onto the current row (user's screenshot, 2026-09-12). */
+#define RENDER_SPRITE_RA 0x80150870u
+#define RENDER_QUAD_RA   0x80150800u
+
+/* The next-page arrow is drawn at cursor y + 14 + P (measured on plain 1-,
+ * 2- and 3-row pages: +14 with P = 0; +8 on a furigana page with its
+ * shrink preset live, which put it inside the last text row). A furigana
+ * page ends on a text glyph, so when the glyph being drawn is the page's
+ * last one the RAM cursor y is left at (row y - P): the glyph itself takes
+ * y from a1, and the arrow then lands one row under the text. */
+static int last_glyph_of_page(uint32_t p) {
+    unsigned c, n;
+    if (!readable_text(p)) return 0;
+    c = psx_mod_read_byte(p);
+    n = psx_mod_read_byte(p + ((c == 0x12u || c == 0x13u || c == 0x15u) ? 2u : 1u));
+    return n == 0x00u || n == 0x02u || n == 0x16u;
+}
+
 static void on_sprite_glyph(struct CPUState *cpu, uint32_t address) {
     (void)address;
+    if (cpu->gpr[31] != RENDER_SPRITE_RA) return;
     if (place_row(cpu, 1)) {
+        uint32_t p = psx_mod_read_word(cpu->gpr[29] + 0x10u);
         if (g_gap_code && RUBY_ROW(g_row))
-            ruby_gap(cpu, psx_mod_read_word(cpu->gpr[29] + 0x10u), 4);
+            ruby_gap(cpu, p, 4);
+        else if (!RUBY_ROW(g_row) && last_glyph_of_page(p)) {
+            int P = (int16_t)psx_mod_read_half(MSG_SIZE_P);
+            psx_mod_write_half(MSG_CUR_Y, (uint16_t)(g_row_written_y - P));
+        }
     } else if (g_ybump)
         cpu->gpr[5] = (uint32_t)((int32_t)cpu->gpr[5] + g_ybump);
 }
@@ -598,6 +627,7 @@ static void on_sprite_glyph(struct CPUState *cpu, uint32_t address) {
 static void on_quad_glyph(struct CPUState *cpu, uint32_t address) {
     (void)address;
     g_pend = 0;
+    if (cpu->gpr[31] != RENDER_QUAD_RA) return;
     if (place_row(cpu, 0) && RUBY_ROW(g_row)) {
         int gaps = g_gap_code ? ruby_gap(cpu, cpu->gpr[5], 0) : 0;
         ruby_small_glyph(cpu->gpr[5], gaps);
