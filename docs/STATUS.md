@@ -3,6 +3,22 @@
 **Status:** IN PROGRESS (last verified 2026-09-11 — kernel fix measured on both
 BIOS images and both titles; Axis B coverage re-read honestly)
 
+> **2026-09-11 — script translation work moved to its own repo.** Content and
+> content tooling now live in the sibling checkout
+> `BreathOfFire3Translations` (private; `docs/DECISIONS.md` there records why).
+> The interface back here is unchanged and one-directional: it writes
+> `generated/bof3_xlate_<code>.c`, which `CMakeLists.txt` already globs, so a
+> language is a file drop and nothing in this repo changed. What stays here is
+> the apply path — `src/bof3_localize.c`, `src/bof3_xlate_table.h`, the CMake
+> glob, and `[localization].languages` in `game.toml`. That repo extracts and
+> aligns all four official scripts (Japan, USA, France, Germany) off the discs
+> in `isos/`; alignment is 14075 of 14076 Japanese messages for the US and
+> German, 14067 for the French. **The glossary moved with it**: point
+> `BOF3_GLOSSARY` at `termbase/wiki_terms.tsv` there, or keep using the copy on
+> the D drive. `tools/wiki_terms.py` here regenerates it from the wiki and
+> fixes 41 rows whose columns were shifted by `colspan` cells in the source
+> page (see `docs/TEXT_TABLES.md`).
+
 > **2026-09-11 — the BIOS exception handler runs native; kernel interpreted
 > work is down 87.7% (OpenBIOS) / 97.8% (retail).** The 44.6% kernel sink from
 > [`kernel-patch-sites.md`](kernel-patch-sites.md) is fixed in `psxrecomp`

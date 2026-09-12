@@ -25,7 +25,7 @@ optional — without them kanji print as `[13b3]` and the `en` column is empty):
 | Input | Default | Used for |
 |---|---|---|
 | kanji table | `D:\BoFIII\bof3_character_table.json` (`BOF3_KANJI_TABLE`) | the two-byte `0x12xx`/`0x13xx` glyphs; 435 of them known |
-| glossary | `D:\BoFIII\wiki_terms.tsv` (`BOF3_GLOSSARY`) | JP→official EN, 883 rows by wiki section |
+| glossary | `D:\BoFIII\wiki_terms.tsv` (`BOF3_GLOSSARY`) | JP→official EN, 882 rows by wiki section; regenerate with `tools/wiki_terms.py` |
 | disc | `game.toml` `[game].disc`, or `--bin-root <BIN dir>` | the bytes |
 
 ## The tables
