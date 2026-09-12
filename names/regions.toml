@@ -1,0 +1,210 @@
+# names/regions.toml — human names for RAM REGIONS, seeded by tools/regions.py.
+# Do not hand-edit the derived fields (base, end, bound, kind, evidence): they
+# are re-derived from committed sources by `python tools/regions.py seed`, and
+# `check` fails if a row drifts from them. Edit `alias` and `note` freely; those
+# survive a re-seed.
+#
+#   base / end  the span, end EXCLUSIVE
+#   bound       what `end` IS — a measured occupant span, the image's zero-fill
+#               window, a documented block end, or the EXE layout. The sources
+#               are not equally strong; never quote an end without its bound.
+#   kind        overlay band | message pool | exe image | kernel | scratch array
+#   nature      what the source says the region holds, verbatim (may be empty)
+#   status      unnamed | hypothesis | evidence | verified
+#   evidence    which committed source the row was derived from
+#
+# Regions OVERLAP legitimately (LOGO.EXE covers the PLCHAR band entirely and
+# 107 KB of the swap slot; they are resident at different times —
+# docs/band-overlap-attribution.md). A consumer must report EVERY containing
+# region, never the first match.
+
+[[region]]
+base = 0x80000000
+end = 0x80010000
+name = "kernel_area"
+kind = "kernel"
+bound = "architecture"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "psx-spx: the first 64 KiB of main RAM is the BIOS kernel area. docs/kernel-patch-sites.md measures 44.6% of interpreted work here"
+note = ""
+
+[[region]]
+base = 0x80010000
+end = 0x80014000
+name = "area_script_block"
+kind = "message pool"
+bound = "documented block end"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "src/bof3_localize.c AREA_BLOCK_LO = 0x80010000, the per-area script block the box reads (ptr = base + u16[base + 2*idx]); ends where the system pool begins at 0x80014000 — the 16 KiB window of docs/FURIGANA.md. docs/TEXT_ENGINE.md, names/areas.toml keys areas by this section's md5"
+note = ""
+
+[[region]]
+base = 0x80014000
+end = 0x80017628
+name = "system_message_block"
+kind = "message pool"
+bound = "documented block end"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "BIN/ETC/AFLDKWA.EMI dest 0x80014000, the 'Live text block' row of docs/TEXT_ENGINE.md: 0x80014000 to 0x80017628 exclusive, 13,864 bytes as that row states, 309 slots of menu / shop / memcard text. src/bof3_localize.c gates on AREA_BLOCK_HI = 0x80017628, the same one-past-the-end address"
+note = ""
+
+[[region]]
+base = 0x80093800
+end = 0x800C1800
+name = "band_80093800"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = "battle engine — 42 copies of one identical blob"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 42 occupants, 1 unique, 133,124 unique bytes — battle engine — 42 copies of one identical blob. End is the image's zero run 0x80093801–0x800C1800 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x80093800
+end = 0x801F7000
+name = "boot_exe_image"
+kind = "exe image"
+bound = "exe layout"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "disc_probe.json load_address + text_size. 81.6% of it is zero fill that overlays load into (docs/OVERLAYS.md §1), so an address here says nothing about code vs data"
+note = ""
+
+[[region]]
+base = 0x800C1800
+end = 0x800F5000
+name = "band_800C1800"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = "BOSS/BOSSnnn.EMI"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 40 occupants, 35 unique, 74,504 unique bytes — BOSS/BOSSnnn.EMI. End is the image's zero run 0x800C1801–0x800F5000 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x800F5000
+end = 0x80117000
+name = "band_800F5000"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 3 occupants, 1 unique, 8,808 unique bytes. End is the image's zero run 0x800F5001–0x80117000 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x80117000
+end = 0x80149800
+name = "band_80117000"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 1 occupants, 1 unique, 4,576 unique bytes. End is the image's zero run 0x80117001–0x80149800 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x801490D4
+end = 0x801492D4
+name = "insert_scratch_records"
+kind = "scratch array"
+bound = "documented geometry"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "src/bof3_localize.c INSERT_RECORD_BASE = 0x801490D4, INSERT_RECORD_SIZE = 0x20, INSERT_MAX = 16: the 32-byte records MsgBox_Step draws for <07><nn> item / skill inserts (docs/INSERT_RUBY.md)"
+note = ""
+
+[[region]]
+base = 0x80196800
+end = 0x801CE400
+name = "band_80196800"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = "field engine — GAME.EMI §0. Compiled."
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 1 occupants, 1 unique, 227,556 unique bytes — field engine — GAME.EMI §0. Compiled.. End is the image's zero run 0x80196801–0x801CE400 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x801CE000
+end = 0x801EB800
+name = "band_801CE000"
+kind = "overlay band"
+bound = "measured occupant span"
+nature = "Capcom logo"
+alias = ""
+status = "evidence"
+evidence = "docs/band-overlap-attribution.md, measured over analysis/overlay_captures_all.json: 0x801CE000 Capcom logo span 0x801CE000..0x801EB800. LOGO/LOGO.EXE is a standalone PS-EXE, not an .EMI section, so it is absent from the ten-band map (tools/extract_logo_overlay.py)"
+note = ""
+
+[[region]]
+base = 0x801CE400
+end = 0x801D0ACC
+name = "band_801CE400"
+kind = "overlay band"
+bound = "measured occupant span"
+nature = "PLCHAR/PLPnnn.EMI §0"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 19 occupants, 19 unique, 137,744 unique bytes — PLCHAR/PLPnnn.EMI §0. End from docs/band-overlap-attribution.md, measured over analysis/overlay_captures_all.json: 0x801CE400 PLCHAR span ends 0x801D0ACC"
+note = ""
+
+[[region]]
+base = 0x801D0C00
+end = 0x801ED940
+name = "band_801D0C00"
+kind = "overlay band"
+bound = "measured occupant span"
+nature = "swap slot — SHOP/STATUS/BATTLE/START"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 63 occupants, 18 unique, 594,824 unique bytes — swap slot — SHOP/STATUS/BATTLE/START. End from docs/band-overlap-attribution.md, measured over analysis/overlay_captures_all.json: 0x801D0C00 BATTLE/SHOP/… span ends 0x801ED940"
+note = ""
+
+[[region]]
+base = 0x801EEC00
+end = 0x801F2C00
+name = "band_801EEC00"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = ""
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 157 occupants, 128 unique, 988,043 unique bytes. End is the image's zero run 0x801EEC01–0x801F2C00 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x801F2C00
+end = 0x801F6C00
+name = "band_801F2C00"
+kind = "overlay band"
+bound = "zero-fill window"
+nature = "67 of these classify mixed"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 181 occupants, 181 unique, 1,078,019 unique bytes — 67 of these classify mixed. End is the image's zero run 0x801F2C01–0x801F6C00 (docs/OVERLAYS.md §1): where occupants may land, NOT proof one reaches it"
+note = ""
+
+[[region]]
+base = 0x801F6C00
+name = "band_801F6C00"
+kind = "overlay band"
+bound = "base only — no committed end"
+nature = "SCENARIO"
+alias = ""
+status = "evidence"
+evidence = "docs/OVERLAY_EXTRACTION.md ten-band map (tools/emi_survey.py over the disc, every section's TOC preview checksum verified): 20 occupants, 20 unique, 452,782 unique bytes — SCENARIO. No zero run starts at base+1 and no measured span exists, so the extent is unknown from committed sources"
+note = ""
