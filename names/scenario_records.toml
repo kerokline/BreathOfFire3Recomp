@@ -1,0 +1,2408 @@
+# names/scenario_records.toml -- GAME.EMI's chapter table 0x801C944C for SCENARIO overlays,
+# read off the disc by tools/loader_records.py (docs/OVERLAY_HEADERS.md "Loader records").
+#   chapter  s8[0x8014686C]; file id = 0x295 + chapter
+#   table    vtable[k]: u32[0x801C944C + chapter*4], a 5-slot vtable inside SCENA<cc>.EMI
+#            (GAME.EMI thunks 0x801A8834 / 8880 / 891C / 89AC / 8A3C, slot 4 optional);
+#            subA[k] / subB[k]: u32[0x801CDC4C|0x801CDC9C + chapter*4] -> u32[] the
+#            scenario's own code calls through Scenario_CallA/B (0x801C2DE8 / 0x801C2E34)
+#   entry    the pc
+
+[[record]]
+chapter = 0
+file = "BIN/SCENARIO/SCENA00.EMI"
+section = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+table = "0x801FC9FC"
+kind = "vtable[0]"
+entry = "0x801F913C"
+
+[[record]]
+chapter = 0
+file = "BIN/SCENARIO/SCENA00.EMI"
+section = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+table = "0x801FC9FC"
+kind = "vtable[1]"
+entry = "0x801FC7D0"
+
+[[record]]
+chapter = 0
+file = "BIN/SCENARIO/SCENA00.EMI"
+section = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+table = "0x801FC9FC"
+kind = "vtable[2]"
+entry = "0x801FC818"
+
+[[record]]
+chapter = 0
+file = "BIN/SCENARIO/SCENA00.EMI"
+section = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+table = "0x801FC9FC"
+kind = "vtable[3]"
+entry = "0x801FC8F4"
+
+[[record]]
+chapter = 0
+file = "BIN/SCENARIO/SCENA00.EMI"
+section = "091ad7ac5c0e9f8046e02d525a9b5ef5"
+table = "0x801FCA88"
+kind = "subA[0]"
+entry = "0x801FC8FC"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE288"
+kind = "vtable[0]"
+entry = "0x801F7FC4"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE288"
+kind = "vtable[1]"
+entry = "0x801FD444"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE288"
+kind = "vtable[2]"
+entry = "0x801FDA6C"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE288"
+kind = "vtable[3]"
+entry = "0x801FDA64"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE288"
+kind = "vtable[4]"
+entry = "0x801FE03C"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE364"
+kind = "subA[0]"
+entry = "0x801FE10C"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE364"
+kind = "subA[1]"
+entry = "0x801FE1B0"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE364"
+kind = "subA[2]"
+entry = "0x801FE224"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE364"
+kind = "subA[3]"
+entry = "0x801FE244"
+
+[[record]]
+chapter = 1
+file = "BIN/SCENARIO/SCENA01.EMI"
+section = "d7e923b666efaece317d5fc94e33ebfc"
+table = "0x801FE370"
+kind = "subB[0]"
+entry = "0x801FE244"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE274"
+kind = "vtable[0]"
+entry = "0x801F719C"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE274"
+kind = "vtable[1]"
+entry = "0x801FD084"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE274"
+kind = "vtable[2]"
+entry = "0x801FD780"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE274"
+kind = "vtable[3]"
+entry = "0x801FD6F4"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE370"
+kind = "subA[0]"
+entry = "0x801FE178"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE370"
+kind = "subA[1]"
+entry = "0x801FE198"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE370"
+kind = "subA[2]"
+entry = "0x801FE1C0"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE374"
+kind = "subB[0]"
+entry = "0x801FE198"
+
+[[record]]
+chapter = 2
+file = "BIN/SCENARIO/SCENA02.EMI"
+section = "cd7e05d1bf4141dafda08d2fb1090120"
+table = "0x801FE374"
+kind = "subB[1]"
+entry = "0x801FE1C0"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FCFC0"
+kind = "vtable[0]"
+entry = "0x801F8DA8"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FCFC0"
+kind = "vtable[1]"
+entry = "0x801FC46C"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FCFC0"
+kind = "vtable[2]"
+entry = "0x801FC704"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FCFC0"
+kind = "vtable[3]"
+entry = "0x801FCCDC"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FCFC0"
+kind = "vtable[4]"
+entry = "0x801FCDB4"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FD03C"
+kind = "subA[0]"
+entry = "0x801FCE6C"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FD03C"
+kind = "subA[1]"
+entry = "0x801FCEDC"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FD03C"
+kind = "subA[2]"
+entry = "0x801FCEFC"
+
+[[record]]
+chapter = 3
+file = "BIN/SCENARIO/SCENA03.EMI"
+section = "dcddb013d0d9246c4b8ba9f51ced0f10"
+table = "0x801FD044"
+kind = "subB[0]"
+entry = "0x801FCEFC"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA1F0"
+kind = "vtable[0]"
+entry = "0x801F8124"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA1F0"
+kind = "vtable[1]"
+entry = "0x801F9D48"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA1F0"
+kind = "vtable[2]"
+entry = "0x801F9DB4"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA1F0"
+kind = "vtable[3]"
+entry = "0x801F9DAC"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA1F0"
+kind = "vtable[4]"
+entry = "0x801FA010"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA234"
+kind = "subA[0]"
+entry = "0x801FA0B4"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA234"
+kind = "subA[1]"
+entry = "0x801FA12C"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA234"
+kind = "subA[2]"
+entry = "0x801FA178"
+
+[[record]]
+chapter = 4
+file = "BIN/SCENARIO/SCENA04.EMI"
+section = "ac8acba8076b0780a5df001905df0d02"
+table = "0x801FA23C"
+kind = "subB[0]"
+entry = "0x801FA178"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD5C8"
+kind = "vtable[0]"
+entry = "0x801F7A78"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD5C8"
+kind = "vtable[1]"
+entry = "0x801FCA58"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD5C8"
+kind = "vtable[2]"
+entry = "0x801FCD68"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD5C8"
+kind = "vtable[3]"
+entry = "0x801FCD60"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD5C8"
+kind = "vtable[4]"
+entry = "0x801FD110"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[0]"
+entry = "0x801FD298"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[1]"
+entry = "0x801FD30C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[2]"
+entry = "0x801FD32C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[3]"
+entry = "0x801FD34C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[4]"
+entry = "0x801FD36C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[5]"
+entry = "0x801FD38C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[6]"
+entry = "0x801FD3C8"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[7]"
+entry = "0x801FD404"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[8]"
+entry = "0x801FD440"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[9]"
+entry = "0x801FD460"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[10]"
+entry = "0x801FD49C"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[11]"
+entry = "0x801FD4D8"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[12]"
+entry = "0x801FD508"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[13]"
+entry = "0x801FD530"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[14]"
+entry = "0x801FD558"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD67C"
+kind = "subA[15]"
+entry = "0x801FD580"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD6A8"
+kind = "subB[0]"
+entry = "0x801FD4D8"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD6A8"
+kind = "subB[1]"
+entry = "0x801FD508"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD6A8"
+kind = "subB[2]"
+entry = "0x801FD530"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD6A8"
+kind = "subB[3]"
+entry = "0x801FD558"
+
+[[record]]
+chapter = 5
+file = "BIN/SCENARIO/SCENA05.EMI"
+section = "e6e359fa28a36e8a0c399ac39a65dba4"
+table = "0x801FD6A8"
+kind = "subB[4]"
+entry = "0x801FD580"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE3C4"
+kind = "vtable[0]"
+entry = "0x801F7298"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE3C4"
+kind = "vtable[1]"
+entry = "0x801FCDD0"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE3C4"
+kind = "vtable[2]"
+entry = "0x801FD800"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE3C4"
+kind = "vtable[3]"
+entry = "0x801FD294"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE3C4"
+kind = "vtable[4]"
+entry = "0x801FDD14"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[0]"
+entry = "0x801FDFFC"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[1]"
+entry = "0x801FE048"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[2]"
+entry = "0x801FE08C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[3]"
+entry = "0x801FE0D0"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[4]"
+entry = "0x801FE11C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[5]"
+entry = "0x801FE13C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[6]"
+entry = "0x801FE15C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[7]"
+entry = "0x801FE198"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[8]"
+entry = "0x801FE1D4"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[9]"
+entry = "0x801FE210"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[10]"
+entry = "0x801FE254"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[11]"
+entry = "0x801FE284"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[12]"
+entry = "0x801FE2B4"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[13]"
+entry = "0x801FE2E4"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[14]"
+entry = "0x801FE30C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[15]"
+entry = "0x801FE334"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[16]"
+entry = "0x801FE364"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE49C"
+kind = "subA[17]"
+entry = "0x801FE38C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[0]"
+entry = "0x801FE254"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[1]"
+entry = "0x801FE284"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[2]"
+entry = "0x801FE2B4"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[3]"
+entry = "0x801FE2E4"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[4]"
+entry = "0x801FE30C"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[5]"
+entry = "0x801FE334"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[6]"
+entry = "0x801FE364"
+
+[[record]]
+chapter = 6
+file = "BIN/SCENARIO/SCENA06.EMI"
+section = "664ae1eb073ca402804fb014c3c899b4"
+table = "0x801FE4C4"
+kind = "subB[7]"
+entry = "0x801FE38C"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDDE0"
+kind = "vtable[0]"
+entry = "0x801FA65C"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDDE0"
+kind = "vtable[1]"
+entry = "0x801FD3BC"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDDE0"
+kind = "vtable[2]"
+entry = "0x801FD67C"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDDE0"
+kind = "vtable[3]"
+entry = "0x801FD944"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDDE0"
+kind = "vtable[4]"
+entry = "0x801FDA7C"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF90"
+kind = "subA[0]"
+entry = "0x801FDB18"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF90"
+kind = "subA[1]"
+entry = "0x801FDB64"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF90"
+kind = "subA[2]"
+entry = "0x801FDBB0"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF90"
+kind = "subA[3]"
+entry = "0x801FDBD8"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF98"
+kind = "subB[0]"
+entry = "0x801FDBB0"
+
+[[record]]
+chapter = 7
+file = "BIN/SCENARIO/SCENA07.EMI"
+section = "689a99bc8f508b8c0fe70affad6b5d46"
+table = "0x801FDF98"
+kind = "subB[1]"
+entry = "0x801FDBD8"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE950"
+kind = "vtable[0]"
+entry = "0x801FA294"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE950"
+kind = "vtable[1]"
+entry = "0x801FE018"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE950"
+kind = "vtable[2]"
+entry = "0x801FE170"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE950"
+kind = "vtable[3]"
+entry = "0x801FE2A0"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[0]"
+entry = "0x801FE698"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[1]"
+entry = "0x801FE6DC"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[2]"
+entry = "0x801FE740"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[3]"
+entry = "0x801FE760"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[4]"
+entry = "0x801FE7AC"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[5]"
+entry = "0x801FE800"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[6]"
+entry = "0x801FE840"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9CC"
+kind = "subA[7]"
+entry = "0x801FE874"
+
+[[record]]
+chapter = 8
+file = "BIN/SCENARIO/SCENA08.EMI"
+section = "613d940f615be93f7ce69dad10e6b481"
+table = "0x801FE9E8"
+kind = "subB[0]"
+entry = "0x801FE874"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE3CC"
+kind = "vtable[0]"
+entry = "0x801F78D0"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE3CC"
+kind = "vtable[1]"
+entry = "0x801FC5E4"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE3CC"
+kind = "vtable[2]"
+entry = "0x801FC91C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE3CC"
+kind = "vtable[3]"
+entry = "0x801FD278"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE3CC"
+kind = "vtable[4]"
+entry = "0x801FD280"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[0]"
+entry = "0x801FDCF4"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[1]"
+entry = "0x801FDD38"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[2]"
+entry = "0x801FDD7C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[3]"
+entry = "0x801FDDC8"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[4]"
+entry = "0x801FDE0C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[5]"
+entry = "0x801FDE50"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[6]"
+entry = "0x801FDE80"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[7]"
+entry = "0x801FDECC"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[8]"
+entry = "0x801FDF10"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[9]"
+entry = "0x801FDF54"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[10]"
+entry = "0x801FE014"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[11]"
+entry = "0x801FE058"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[12]"
+entry = "0x801FE0A4"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[13]"
+entry = "0x801FE0E8"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[14]"
+entry = "0x801FE12C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[15]"
+entry = "0x801FE154"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[16]"
+entry = "0x801FE184"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[17]"
+entry = "0x801FE1AC"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[18]"
+entry = "0x801FE1DC"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[19]"
+entry = "0x801FE20C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[20]"
+entry = "0x801FE234"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[21]"
+entry = "0x801FE30C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[22]"
+entry = "0x801FE334"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE4F4"
+kind = "subA[23]"
+entry = "0x801FE35C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[0]"
+entry = "0x801FE12C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[1]"
+entry = "0x801FE154"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[2]"
+entry = "0x801FE184"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[3]"
+entry = "0x801FE1AC"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[4]"
+entry = "0x801FE1DC"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[5]"
+entry = "0x801FE20C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[6]"
+entry = "0x801FE234"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[7]"
+entry = "0x801FE30C"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[8]"
+entry = "0x801FE334"
+
+[[record]]
+chapter = 9
+file = "BIN/SCENARIO/SCENA09.EMI"
+section = "468ed8c8f9338e7f4fa9d2253c261b71"
+table = "0x801FE52C"
+kind = "subB[9]"
+entry = "0x801FE35C"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE884"
+kind = "vtable[0]"
+entry = "0x801F7F50"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE884"
+kind = "vtable[1]"
+entry = "0x801FD464"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE884"
+kind = "vtable[2]"
+entry = "0x801FDB14"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE884"
+kind = "vtable[3]"
+entry = "0x801FE00C"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[0]"
+entry = "0x801FE314"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[1]"
+entry = "0x801FE360"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[2]"
+entry = "0x801FE3F8"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[3]"
+entry = "0x801FE418"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[4]"
+entry = "0x801FE438"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[5]"
+entry = "0x801FE4F0"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[6]"
+entry = "0x801FE5B0"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[7]"
+entry = "0x801FE614"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[8]"
+entry = "0x801FE63C"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9B4"
+kind = "subA[9]"
+entry = "0x801FE6F4"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9CC"
+kind = "subB[0]"
+entry = "0x801FE5B0"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9CC"
+kind = "subB[1]"
+entry = "0x801FE614"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9CC"
+kind = "subB[2]"
+entry = "0x801FE63C"
+
+[[record]]
+chapter = 10
+file = "BIN/SCENARIO/SCENA10.EMI"
+section = "5154bf3736ee9dc4025a2294791340e6"
+table = "0x801FE9CC"
+kind = "subB[3]"
+entry = "0x801FE6F4"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAEDC"
+kind = "vtable[0]"
+entry = "0x801F7288"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAEDC"
+kind = "vtable[1]"
+entry = "0x801FA5B8"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAEDC"
+kind = "vtable[2]"
+entry = "0x801FAB64"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAEDC"
+kind = "vtable[3]"
+entry = "0x801FAA74"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAEDC"
+kind = "vtable[4]"
+entry = "0x801FAB6C"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[0]"
+entry = "0x801FAB74"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[1]"
+entry = "0x801FABC0"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[2]"
+entry = "0x801FAC04"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[3]"
+entry = "0x801FAC48"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[4]"
+entry = "0x801FAC94"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[5]"
+entry = "0x801FACD8"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[6]"
+entry = "0x801FAD1C"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[7]"
+entry = "0x801FAD68"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[8]"
+entry = "0x801FADAC"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[9]"
+entry = "0x801FADF8"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[10]"
+entry = "0x801FAE20"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[11]"
+entry = "0x801FAE48"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[12]"
+entry = "0x801FAE70"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF60"
+kind = "subA[13]"
+entry = "0x801FAE98"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF84"
+kind = "subB[0]"
+entry = "0x801FADF8"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF84"
+kind = "subB[1]"
+entry = "0x801FAE20"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF84"
+kind = "subB[2]"
+entry = "0x801FAE48"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF84"
+kind = "subB[3]"
+entry = "0x801FAE70"
+
+[[record]]
+chapter = 11
+file = "BIN/SCENARIO/SCENA11.EMI"
+section = "f914e1fa6e98bb04797ae2d2756b83b8"
+table = "0x801FAF84"
+kind = "subB[4]"
+entry = "0x801FAE98"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD1A4"
+kind = "vtable[0]"
+entry = "0x801F7F28"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD1A4"
+kind = "vtable[1]"
+entry = "0x801FC574"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD1A4"
+kind = "vtable[2]"
+entry = "0x801FC890"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD1A4"
+kind = "vtable[3]"
+entry = "0x801FC80C"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD1A4"
+kind = "vtable[4]"
+entry = "0x801FCC54"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[0]"
+entry = "0x801FCDE0"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[1]"
+entry = "0x801FCE2C"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[2]"
+entry = "0x801FCE70"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[3]"
+entry = "0x801FCEB4"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[4]"
+entry = "0x801FCF00"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[5]"
+entry = "0x801FCF44"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[6]"
+entry = "0x801FCF88"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[7]"
+entry = "0x801FCFD4"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[8]"
+entry = "0x801FD018"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[9]"
+entry = "0x801FD064"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[10]"
+entry = "0x801FD0B0"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[11]"
+entry = "0x801FD0D8"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[12]"
+entry = "0x801FD100"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[13]"
+entry = "0x801FD128"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD24C"
+kind = "subA[14]"
+entry = "0x801FD150"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD274"
+kind = "subB[0]"
+entry = "0x801FD0B0"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD274"
+kind = "subB[1]"
+entry = "0x801FD0D8"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD274"
+kind = "subB[2]"
+entry = "0x801FD100"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD274"
+kind = "subB[3]"
+entry = "0x801FD128"
+
+[[record]]
+chapter = 12
+file = "BIN/SCENARIO/SCENA12.EMI"
+section = "b78b99356bc3493402e6cded780be507"
+table = "0x801FD274"
+kind = "subB[4]"
+entry = "0x801FD150"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBF34"
+kind = "vtable[0]"
+entry = "0x801F7D14"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBF34"
+kind = "vtable[1]"
+entry = "0x801FB350"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBF34"
+kind = "vtable[2]"
+entry = "0x801FB464"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBF34"
+kind = "vtable[3]"
+entry = "0x801FBA34"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[0]"
+entry = "0x801FBB78"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[1]"
+entry = "0x801FBBC4"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[2]"
+entry = "0x801FBC88"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[3]"
+entry = "0x801FBCC4"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[4]"
+entry = "0x801FBD84"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[5]"
+entry = "0x801FBDD8"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[6]"
+entry = "0x801FBE98"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[7]"
+entry = "0x801FBEC0"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFC8"
+kind = "subA[8]"
+entry = "0x801FBEE8"
+
+[[record]]
+chapter = 13
+file = "BIN/SCENARIO/SCENA13.EMI"
+section = "8be14198d4c2bb71d423562549eb58ac"
+table = "0x801FBFE8"
+kind = "subB[0]"
+entry = "0x801FBEE8"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC404"
+kind = "vtable[0]"
+entry = "0x801F6FD8"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC404"
+kind = "vtable[1]"
+entry = "0x801FB37C"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC404"
+kind = "vtable[2]"
+entry = "0x801FB648"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC404"
+kind = "vtable[3]"
+entry = "0x801FB84C"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[0]"
+entry = "0x801FBD2C"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[1]"
+entry = "0x801FBD78"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[2]"
+entry = "0x801FBDC4"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[3]"
+entry = "0x801FBE10"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[4]"
+entry = "0x801FBF18"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[5]"
+entry = "0x801FBFA8"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[6]"
+entry = "0x801FC020"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[7]"
+entry = "0x801FC074"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[8]"
+entry = "0x801FC0C8"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[9]"
+entry = "0x801FC130"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[10]"
+entry = "0x801FC1E8"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[11]"
+entry = "0x801FC22C"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[12]"
+entry = "0x801FC280"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC488"
+kind = "subA[13]"
+entry = "0x801FC328"
+
+[[record]]
+chapter = 14
+file = "BIN/SCENARIO/SCENA14.EMI"
+section = "040d2fe72c14f568c75e144085cf04de"
+table = "0x801FC4BC"
+kind = "subB[0]"
+entry = "0x801FC328"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE5F4"
+kind = "vtable[0]"
+entry = "0x801F9CAC"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE5F4"
+kind = "vtable[1]"
+entry = "0x801FDD80"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE5F4"
+kind = "vtable[2]"
+entry = "0x801FE024"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE5F4"
+kind = "vtable[3]"
+entry = "0x801FE18C"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE724"
+kind = "subA[0]"
+entry = "0x801FE3C8"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE724"
+kind = "subA[1]"
+entry = "0x801FE49C"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE724"
+kind = "subA[2]"
+entry = "0x801FE4CC"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE724"
+kind = "subA[3]"
+entry = "0x801FE520"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE724"
+kind = "subA[4]"
+entry = "0x801FE574"
+
+[[record]]
+chapter = 15
+file = "BIN/SCENARIO/SCENA15.EMI"
+section = "194920760ffb770e2249a1cc08b638ae"
+table = "0x801FE734"
+kind = "subB[0]"
+entry = "0x801FE574"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F8524"
+kind = "vtable[0]"
+entry = "0x801F6C90"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F8524"
+kind = "vtable[1]"
+entry = "0x801F8344"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F8524"
+kind = "vtable[2]"
+entry = "0x801F838C"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F8524"
+kind = "vtable[3]"
+entry = "0x801F8394"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F855C"
+kind = "subA[0]"
+entry = "0x801F8498"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F855C"
+kind = "subA[1]"
+entry = "0x801F851C"
+
+[[record]]
+chapter = 16
+file = "BIN/SCENARIO/SCENA16.EMI"
+section = "d9e4564d18798a552777d29c2cb3cb71"
+table = "0x801F8560"
+kind = "subB[0]"
+entry = "0x801F851C"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9770"
+kind = "vtable[0]"
+entry = "0x801F775C"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9770"
+kind = "vtable[1]"
+entry = "0x801F88C4"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9770"
+kind = "vtable[2]"
+entry = "0x801F9714"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9770"
+kind = "vtable[3]"
+entry = "0x801F890C"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9E28"
+kind = "subA[0]"
+entry = "0x801F971C"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9E28"
+kind = "subA[1]"
+entry = "0x801F9768"
+
+[[record]]
+chapter = 17
+file = "BIN/SCENARIO/SCENA17.EMI"
+section = "8a1ff74a3ada097cb9346004f3b02795"
+table = "0x801F9E2C"
+kind = "subB[0]"
+entry = "0x801F9768"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D58"
+kind = "vtable[0]"
+entry = "0x801F6C04"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D58"
+kind = "vtable[1]"
+entry = "0x801F6CAC"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D58"
+kind = "vtable[2]"
+entry = "0x801F6CFC"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D58"
+kind = "vtable[3]"
+entry = "0x801F6CF4"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D80"
+kind = "subA[0]"
+entry = "0x801F6D04"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D80"
+kind = "subA[1]"
+entry = "0x801F6D50"
+
+[[record]]
+chapter = 18
+file = "BIN/SCENARIO/SCENA18.EMI"
+section = "319f5b33d9ea6f479a73e1d31c930dfe"
+table = "0x801F6D84"
+kind = "subB[0]"
+entry = "0x801F6D50"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DBC"
+kind = "vtable[0]"
+entry = "0x801F6C04"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DBC"
+kind = "vtable[1]"
+entry = "0x801F6D10"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DBC"
+kind = "vtable[2]"
+entry = "0x801F6D60"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DBC"
+kind = "vtable[3]"
+entry = "0x801F6D58"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DE4"
+kind = "subA[0]"
+entry = "0x801F6D68"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DE4"
+kind = "subA[1]"
+entry = "0x801F6DB4"
+
+[[record]]
+chapter = 19
+file = "BIN/SCENARIO/SCENA19.EMI"
+section = "f1891520079774f0ebf167615ff3a18e"
+table = "0x801F6DE8"
+kind = "subB[0]"
+entry = "0x801F6DB4"

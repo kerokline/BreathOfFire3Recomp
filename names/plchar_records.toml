@@ -1,0 +1,1223 @@
+# names/plchar_records.toml -- GAME.EMI's entry tables for the PLCHAR (PLP) overlays,
+# read off the disc by tools/loader_records.py (docs/OVERLAY_HEADERS.md "Loader records").
+#   combo    party combination index 0..18 (u8[0x80145020] & 0x7F, rows of 0x801824AC)
+#   file_id  0x27D + combo -> BIN/PLCHAR/PLP<combo>.EMI
+#   entry    kind tableA = u32[0x801CD8F0 + combo*4] (jalr 0x801B46B0),
+#            tableB = u32[0x801CD964 + combo*4] (jalr 0x801B3C78 / 0x801BE508),
+#            slot[g][s] = the image's last six words, u32[2][3] indexed by u16[ctx+0x2C]
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "tableA"
+entry = "0x801CFD3C"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "tableB"
+entry = "0x801CFCF8"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[0][2]"
+entry = "0x801CF500"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 0
+file = "BIN/PLCHAR/PLP012.EMI"
+file_id = "0x27D"
+section = "321aa9282fa723b23cb60b4ebc8f521a"
+kind = "slot[1][2]"
+entry = "0x801CF70C"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "tableA"
+entry = "0x801CFB40"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "tableB"
+entry = "0x801CFAFC"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[0][2]"
+entry = "0x801CF500"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 1
+file = "BIN/PLCHAR/PLP015.EMI"
+file_id = "0x27E"
+section = "e80b51c1b2cf5e1fbbe6fe7cb8eb773c"
+kind = "slot[1][2]"
+entry = "0x801CF70C"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "tableA"
+entry = "0x801D05EC"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "tableB"
+entry = "0x801D05A8"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[0][2]"
+entry = "0x801CF500"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 2
+file = "BIN/PLCHAR/PLP016.EMI"
+file_id = "0x27F"
+section = "16f3eeb0c1f42cc2b814273370b44808"
+kind = "slot[1][2]"
+entry = "0x801CF72C"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "tableA"
+entry = "0x801CFF64"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "tableB"
+entry = "0x801CFF20"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[0][2]"
+entry = "0x801CF924"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 3
+file = "BIN/PLCHAR/PLP025.EMI"
+file_id = "0x280"
+section = "efcff88fae3c88f97e72eb2e00bb693c"
+kind = "slot[1][2]"
+entry = "0x801CFB30"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "tableA"
+entry = "0x801D0A10"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "tableB"
+entry = "0x801D09CC"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[0][2]"
+entry = "0x801CF924"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 4
+file = "BIN/PLCHAR/PLP026.EMI"
+file_id = "0x281"
+section = "56e3a59e9592a594ea992ab9f856d05e"
+kind = "slot[1][2]"
+entry = "0x801CFB50"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "tableA"
+entry = "0x801D02B0"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "tableB"
+entry = "0x801D026C"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[0][2]"
+entry = "0x801D0050"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 5
+file = "BIN/PLCHAR/PLP034.EMI"
+file_id = "0x282"
+section = "33b6ed74993e71f5f3a11f40f843225e"
+kind = "slot[1][2]"
+entry = "0x801D025C"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "tableA"
+entry = "0x801D0814"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "tableB"
+entry = "0x801D07D0"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[0][1]"
+entry = "0x801CF12C"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[0][2]"
+entry = "0x801CF728"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[1][0]"
+entry = "0x801CE72C"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[1][1]"
+entry = "0x801CF338"
+
+[[record]]
+combo = 6
+file = "BIN/PLCHAR/PLP056.EMI"
+file_id = "0x283"
+section = "85919909d6a752d16d2eb0c9d7889aa5"
+kind = "slot[1][2]"
+entry = "0x801CF954"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "tableA"
+entry = "0x801CFAB8"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "tableB"
+entry = "0x801CFA74"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[0][1]"
+entry = "0x801CEBFC"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[0][2]"
+entry = "0x801CEE18"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[1][1]"
+entry = "0x801CEE08"
+
+[[record]]
+combo = 7
+file = "BIN/PLCHAR/PLP247.EMI"
+file_id = "0x284"
+section = "bd5ef483761a7b81df3308d584c34f27"
+kind = "slot[1][2]"
+entry = "0x801CF04C"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "tableA"
+entry = "0x801CFE98"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "tableB"
+entry = "0x801CFE54"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[0][1]"
+entry = "0x801CEBFC"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[0][2]"
+entry = "0x801CF1F8"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[1][1]"
+entry = "0x801CEE08"
+
+[[record]]
+combo = 8
+file = "BIN/PLCHAR/PLP257.EMI"
+file_id = "0x285"
+section = "2111ad9a20d950100562b3a17b746f85"
+kind = "slot[1][2]"
+entry = "0x801CF42C"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "tableA"
+entry = "0x801D0944"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "tableB"
+entry = "0x801D0900"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[0][1]"
+entry = "0x801CEBFC"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[0][2]"
+entry = "0x801CFCA4"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[1][1]"
+entry = "0x801CEE28"
+
+[[record]]
+combo = 9
+file = "BIN/PLCHAR/PLP267.EMI"
+file_id = "0x286"
+section = "5432c32c9d84b621596cccf067878ad1"
+kind = "slot[1][2]"
+entry = "0x801CFED8"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "tableA"
+entry = "0x801CFC70"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "tableB"
+entry = "0x801CFC2C"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[0][1]"
+entry = "0x801CEBFC"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[0][2]"
+entry = "0x801CF858"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[1][1]"
+entry = "0x801CEE30"
+
+[[record]]
+combo = 10
+file = "BIN/PLCHAR/PLP278.EMI"
+file_id = "0x287"
+section = "06a0c510d5236f9c69ac7d8de408a88e"
+kind = "slot[1][2]"
+entry = "0x801CFA64"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "tableA"
+entry = "0x801CF8BC"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "tableB"
+entry = "0x801CF878"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[0][1]"
+entry = "0x801CEBFC"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[0][2]"
+entry = "0x801CF858"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[1][1]"
+entry = "0x801CEE30"
+
+[[record]]
+combo = 11
+file = "BIN/PLCHAR/PLP27A.EMI"
+file_id = "0x288"
+section = "f43849f8afde26e95dc5e7ea997efc6b"
+kind = "slot[1][2]"
+entry = "0x801CF868"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "tableA"
+entry = "0x801CF5A8"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "tableB"
+entry = "0x801CF564"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[0][1]"
+entry = "0x801CF328"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[0][2]"
+entry = "0x801CF544"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[1][1]"
+entry = "0x801CF534"
+
+[[record]]
+combo = 12
+file = "BIN/PLCHAR/PLP349.EMI"
+file_id = "0x289"
+section = "64e806173b36aef3271c08391fa66c77"
+kind = "slot[1][2]"
+entry = "0x801CF554"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "tableA"
+entry = "0x801CF8BC"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "tableB"
+entry = "0x801CF878"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[0][1]"
+entry = "0x801CE620"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[0][2]"
+entry = "0x801CEC1C"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[1][1]"
+entry = "0x801CE82C"
+
+[[record]]
+combo = 13
+file = "BIN/PLCHAR/PLP457.EMI"
+file_id = "0x28A"
+section = "b0028e26b252d55bb3dda758a3771d30"
+kind = "slot[1][2]"
+entry = "0x801CEE50"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "tableA"
+entry = "0x801D0368"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "tableB"
+entry = "0x801D0324"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[0][1]"
+entry = "0x801CE620"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[0][2]"
+entry = "0x801CF6C8"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[1][1]"
+entry = "0x801CE84C"
+
+[[record]]
+combo = 14
+file = "BIN/PLCHAR/PLP467.EMI"
+file_id = "0x28B"
+section = "65fd224bce57c8919ebd8033bf8a2df7"
+kind = "slot[1][2]"
+entry = "0x801CF8FC"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "tableA"
+entry = "0x801CF694"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "tableB"
+entry = "0x801CF650"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[0][1]"
+entry = "0x801CE620"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[0][2]"
+entry = "0x801CF27C"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[1][1]"
+entry = "0x801CE854"
+
+[[record]]
+combo = 15
+file = "BIN/PLCHAR/PLP478.EMI"
+file_id = "0x28C"
+section = "fa09d2b7614daeb7597cca9e01e777bd"
+kind = "slot[1][2]"
+entry = "0x801CF488"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "tableA"
+entry = "0x801D0748"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "tableB"
+entry = "0x801D0704"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[0][1]"
+entry = "0x801CEA00"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[0][2]"
+entry = "0x801CFAA8"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[1][1]"
+entry = "0x801CEC2C"
+
+[[record]]
+combo = 16
+file = "BIN/PLCHAR/PLP567.EMI"
+file_id = "0x28D"
+section = "fcac575ac75b255d6525bacc20e9adcd"
+kind = "slot[1][2]"
+entry = "0x801CFCDC"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "tableA"
+entry = "0x801CFA74"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "tableB"
+entry = "0x801CFA30"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[0][1]"
+entry = "0x801CEA00"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[0][2]"
+entry = "0x801CF65C"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[1][0]"
+entry = "0x801CE610"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[1][1]"
+entry = "0x801CEC34"
+
+[[record]]
+combo = 17
+file = "BIN/PLCHAR/PLP578.EMI"
+file_id = "0x28E"
+section = "4ae07a74677a1267a2fe4931aebebb18"
+kind = "slot[1][2]"
+entry = "0x801CF868"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "tableA"
+entry = "0x801D0520"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "tableB"
+entry = "0x801D04DC"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[0][0]"
+entry = "0x801CE404"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[0][1]"
+entry = "0x801CF4AC"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[0][2]"
+entry = "0x801D0108"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[1][0]"
+entry = "0x801CE630"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[1][1]"
+entry = "0x801CF6E0"
+
+[[record]]
+combo = 18
+file = "BIN/PLCHAR/PLP678.EMI"
+file_id = "0x28F"
+section = "147814366a039d7bbdde7cc664829b2a"
+kind = "slot[1][2]"
+entry = "0x801D0314"

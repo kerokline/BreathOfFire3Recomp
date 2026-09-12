@@ -82,7 +82,7 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 | `0x08` | **insert message by index** — see the table formula above |
 | `0x0A` | play sound — `0x8015E908(next_byte \| 0x200)` |
 | `0x0C` | (string head only) speaker/portrait id in the next byte → `0x801490CA`; consumed by `MsgBox_Reset`, never seen by the stepper |
-| `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1, `y += 8`) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
+| `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1 with an 8-frame delay; the renderer's handler for it is a no-op, so nothing moves — the `y += 8` this row used to claim was that delay count misread, corrected 2026-09-12) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
 | `0x0D` / `0x0E` | **open / close an emphasis span** (flag `0x8014909D` / `0x801490A0`). Read statically as enable/disable drawing; the script says otherwise — 105 opens, 105 closes, 106 `0x0F` uses, and every `0x0F` in the disc follows a closed span (`<0d>えらいっ<40><0e><0f><0a>`). The span is what the effect is applied to |
 | `0x0F` | **text effect preset** from the 4-byte table `0x8017FF30[next_byte]` = `{type, param, u16 duration}`, unpacked at `0x80150D34` into type `0x8014909E`, duration `0x801490A6`, param `0x801490C4`. Types 2 and 3 are **grow and shrink** — see *Two blitters, and the only font sizing there is* |
 | `0x16` | **timed page break** — `0x16 <frames>`; the narration/cutscene form of `0x02`, ends the page and advances itself. 670 uses, most often 0x20 or 0x30 frames. `TEXT_TABLES.md` already used this shape for the area caption banner |
@@ -99,8 +99,11 @@ walks the inserted record for a fixed count (6 for names, 0x11 for messages,
 Layout constants: **12 px** per glyph advance (`addiu 0xC` at `0x801508A0`),
 **14 px** line height in the box (`addiu 0xE` at `0x80150690`), 13 px in the
 immediate path. Both are single immediates, so both are in reach of
-`[[recompiler.patch]]`. The advance does **not** track the glyph's drawn size:
-a scaled glyph still moves the cursor 12 px.
+`[[recompiler.patch]]`. On the sprite path the advance is that flat 12 px whatever
+is drawn. On the quad path it is **not**: `0x80151F4C` adds `P` to the cursor x
+before returning (`0x80152D98`) and the renderer then adds its 12, so a scaled
+glyph advances by its drawn width, **12 + P** (corrected 2026-09-12; this
+paragraph used to say the advance never tracked size).
 
 ## Glyph path
 
@@ -168,9 +171,68 @@ used twice, both in AREA008 (−3 px, forever).
 **Why this matters for furigana** ([`IDEAS.md`](IDEAS.md) Part 2/3): the
 primitive is not the blocker. A smaller glyph is already a shipped code path —
 no new primitive, no second font in VRAM, no engine surgery to get a 6 px quad.
-What is still missing is a 6 px **advance** (the 12 px add at `0x801508A0` is
-shared by both paths), per-row metrics rather than one global `P`, and a source
-better than point-sampling a 12 px cell down to half height.
+The 6 px **advance** is not missing either: the quad path adds `P` to the
+cursor itself (2026-09-12, see *Layout constants* above), so a span drawn at
+P = −6 is half-size kana at half pitch. What is missing is vertical placement —
+see *Per-glyph placement* below — and a source better than point-sampling a
+12 px cell down to half height.
+
+## Per-glyph placement, and what a hook can override
+
+**Status:** read off `MsgBox_Render` `0x80150598` and the two blitters,
+2026-09-12, for the true-ruby question in [`FURIGANA.md`](FURIGANA.md).
+
+The string has **no per-line start control**. What the renderer does:
+
+- It re-walks the revealed string from the beginning **every frame**. At entry
+  it copies the origin `0x801490BC/BE` into the cursor `0x801490B8/BA`, then
+  draws the first N glyphs, N = the typewriter count `0x801490B5`. Control
+  codes do not count toward N and do not advance the cursor.
+- The origin is not authored anywhere. `MsgBox_FrameTask` `0x80150508`
+  recomputes it every frame from the window rect at `0x80148330/32`
+  (12.4 fixed point): **window x + 10, window y + 6**. The 10 is the left
+  padding.
+- Newline `0x01` (`0x80150688`): x = origin x, y += 14. Nothing else in the
+  jump table at `0x80149A00` touches x or y; `0x09`, `0x10` and `0x11` are
+  no-ops in the renderer (free slots, but filling one needs guest code).
+- The cursor is **re-read from RAM before every glyph** and written back
+  after (`0x80150850`, `0x80150898`). Nothing caches it across glyphs.
+- Sprite path (`0x8014F6BC` → `0x8014F708`): draws at the cursor. Inside a
+  `0x0D`…`0x0E` span it adds the signed byte pair `0x801490B6/B7` to x/y
+  (`0x80150808`); those bytes are zeroed by `MsgBox_Reset` and animated only
+  by effect types 4 (shake, ±2 in x) and 5 (drop: B6 walks ±3, B7 accumulates
+  `P` per frame). That is the one per-span displacement the engine has, and it
+  is one global pair, not per line.
+- Quad path (`0x80151F4C`, taken inside a span when bit 3 of `0x801490A0` is
+  set): quad at (cursor x, cursor y) top-left, width and height 12 + P, then
+  cursor x += P. Top-aligned, so a shrunk glyph sits in the upper part of its
+  14 px row.
+
+**Box width, settled on screen (user, 2026-09-12):** 15 cells fit with the
+right padding mirroring the left; a 16th touches the right wall; anything past
+that overruns the frame. The 15 the census found was the authored maximum
+for that reason.
+
+**What a plugin can override, with no guest code.** The framework's
+function-entry hook hands the callback the full `CPUState` (`gpr[32]`), and
+both blitters are real function entries called once per glyph. So a hook on
+the renderer entry can reset a per-frame glyph counter, and hooks on
+`0x8014F6BC` / `0x80151F4C` can place glyph n wherever a build-time layout
+table says — writing the cursor globals (both paths read them from RAM), and
+on the sprite path also the x/y arguments in `gpr[4]`/`gpr[5]`, or the
+wrapper's own `0x80145AC6/8` from a hook on `0x8014F708`. With every glyph
+placed by table, the engine's own advance and newline no longer matter. Open
+check before building it: that `gpr` writes from a callback are honoured by
+the generated code rather than a cached local.
+
+**The data-only stepping stone, runnable today:** `<0f><13>` (shrink −6,
+forever) at the head of a message and each reading in `<0d>…<0e>` gives
+6 px kana at 6 px pitch right after the kanji, through shipped code paths.
+`tools/ruby_shrink_probe.py --slot N --variant span --shot x.png` puts it on
+screen headless from a field savestate. Constraints that carry: ruby glyphs
+must be in a span (the span flag lives in a register, not RAM, so only the
+string can set it); `P` is one global, so a message with a genuine shout span
+cannot also carry ruby at a different size.
 
 ## Rows per page — what the script actually asks the box for
 

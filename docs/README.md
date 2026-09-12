@@ -25,6 +25,7 @@ the task touches.
 | [`INVENTORY.md`](INVENTORY.md) | snapshot | What is in the repo and on this machine |
 | [`OVERLAYS.md`](OVERLAYS.md) | evidence | *Why* most of the game is overlays, why seeding cannot substitute, and the `.EMI` TOC finding that made disc extraction possible |
 | [`OVERLAY_EXTRACTION.md`](OVERLAY_EXTRACTION.md) | evidence | *How*: the ten-band map, extraction, compilation, build wiring, and the numbered measurement sections (§5–§12) other docs cite — including the three upstream dispatch fixes and the all-bands result |
+| [`LOADER_RECORDS.md`](LOADER_RECORDS.md) | evidence + built | **The engine's own entry records for every overlay family** (2026-09-12): AREA descriptors off the boot table `0x801802EC`, SCENARIO vtables off `0x801C944C`, `Boss_EntryTable 0x800B2048`, the PLCHAR combo tables — all read off the disc, all disjoint from the header entry runs, seeded by `tools/loader_records.py` → `names/*_records.toml` → `extract_overlays.py`. Raw reports per family in [`loader_records/`](loader_records/) |
 | [`OVERLAY_SIZE.md`](OVERLAY_SIZE.md) | evidence | *Why `generated/` is 1.6 GB*: per-band expansion measurements; falsifies occupants-per-band as the cause, identifies interior-entry fragmentation, and gives the dedup estimate |
 | [`BRINGUP.md`](BRINGUP.md) | log | Boot 001/002 (first boot, the retracted "wait loop"), and framework observations F-1 / F-2 |
 | [`TEXT_ENGINE.md`](TEXT_ENGINE.md) | evidence | The message interpreter, renderer, glyph path, control codes, and the per-block message-table formula confirmed live |

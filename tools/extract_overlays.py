@@ -36,6 +36,20 @@ Seeds are call-edge evidence read out of the bytes themselves:
     `static_dispatch_entry_pcs` (compile_overlays classifies them
     STATIC_DISPATCH_ENTRY). `--no-header-seeds` drops them for A/B work.
     The registry id itself is emitted as `registry_id`.
+  * `engine_entry_pcs` -- entry pcs the ENGINE holds for an overlay, read off
+    the disc into names/ sidecars (docs/LOADER_RECORDS.md). The engine never
+    enters an overlay through its header: the battle engine keeps a handler pc
+    per ability (names/magic.toml) and per boss (boss_records.toml), the boot
+    EXE a descriptor per area with an init pc and a handler array
+    (area_records.toml), GAME.EMI a 5-slot vtable plus two sub-tables per
+    scenario chapter (scenario_records.toml) and two u32[19] tables per party
+    combo (plchar_records.toml). Each row names its section by md5 and this
+    joins it back to the capture. They are interior entries reached by `jalr`,
+    i.e. exactly what a play session would otherwise have to harvest, and
+    they are disjoint from the header run (2026-09-12: 1398 pcs, 914 of them
+    in no other seed set). Unioned into `dispatch_entry_pcs` /
+    `static_dispatch_entry_pcs` like the header run; `--no-engine-seeds`
+    drops them for A/B work.
 
 Nothing here invents bytes: every capture is a verbatim disc section whose
 TOC preview checksum matched (tools/emi_survey.py records `preview_ok`).
@@ -107,6 +121,42 @@ def header_entries(data, load_addr):
     return reg_id, out
 
 
+ENGINE_RECORD_FILES = (
+    "names/magic.toml",             # tools/magic_map.py:   ability -> BMAGIC handler pc
+    "names/area_records.toml",      # tools/loader_records.py: area descriptor init/handlers + GAME.EMI hook rows
+    "names/scenario_records.toml",  # tools/loader_records.py: chapter vtable + sub-tables
+    "names/boss_records.toml",      # tools/loader_records.py: Boss_EntryTable
+    "names/plchar_records.toml",    # tools/loader_records.py: PLCHAR entry tables + per-slot tail
+)
+
+
+def load_engine_entries(paths=ENGINE_RECORD_FILES):
+    """{section md5: set(entry pc)} from the engine's loader records.
+
+    Each sidecar holds rows with `section` (md5 of the code section the record
+    loads) and `entry` (the handler pc the engine jumps to once it is
+    resident). Rows with no section (engine-side handlers) carry no overlay
+    entry and are skipped. Any future record table (area, boss, scenario,
+    character) joins the same way: add its sidecar to ENGINE_RECORD_FILES.
+    """
+    import tomllib
+    out = {}
+    for p in paths:
+        if not os.path.exists(p):
+            continue
+        with open(p, "rb") as fh:
+            doc = tomllib.load(fh)
+        for rows in doc.values():
+            if not isinstance(rows, list):
+                continue
+            for r in rows:
+                sec = r.get("section") or ""
+                if not sec or not r.get("entry"):
+                    continue
+                out.setdefault(sec, set()).add(int(r["entry"], 16))
+    return out
+
+
 def load_observed(path):
     """Physical PCs a live session actually *entered* (entries > 0).
 
@@ -152,6 +202,9 @@ def main():
     ap.add_argument("--no-header-seeds", action="store_true",
                     help="do not seed the header entry table (A/B experiments "
                          "only; header seeds are included by default)")
+    ap.add_argument("--no-engine-seeds", action="store_true",
+                    help="do not seed the engine's loader-record entry pcs "
+                         "(names/magic.toml; A/B experiments only)")
     args = ap.parse_args()
 
     with open(args.survey) as fh:
@@ -195,8 +248,13 @@ def main():
     observed = load_observed(args.observed)
     if observed:
         print("# %d observed interpreted PCs available" % len(observed))
+    engine = {} if args.no_engine_seeds else load_engine_entries()
+    if engine:
+        print("# %d engine loader-record entry PCs across %d sections"
+              % (sum(len(v) for v in engine.values()), len(engine)))
 
     captures = []
+    engine_joined = engine_dropped = 0
     for s in picked:
         extent, fsize = locate[s["file"].upper()]
         blob = DiscFile(read, extent, fsize)[s["offset"]:s["offset"] + s["size"]]
@@ -212,7 +270,15 @@ def main():
                    if phys <= p < phys + s["size"])
         reg_id, hdr = header_entries(blob, load)
         hdr_set = set() if args.no_header_seeds else set(hdr)
-        dispatch = sorted(hits | hdr_set)
+        # Engine records name a section by md5; keep only pcs that are
+        # 4-aligned and inside this image (a record whose pc is outside its
+        # own file would be a decode error, not a seed).
+        eng_all = engine.get(s["md5"], set())
+        eng = {a for a in eng_all if load <= a < load + s["size"] and not a & 3}
+        engine_joined += len(eng)
+        engine_dropped += len(eng_all) - len(eng)
+        static_set = hdr_set | eng
+        dispatch = sorted(hits | static_set)
         captures.append({
             "schema": "static-emi-v1",
             "load_addr": "0x%08X" % load,
@@ -221,22 +287,26 @@ def main():
             "registry_id": "0x%03X" % reg_id,
             "header_entry_pcs": ["0x%08X" % a for a in hdr],
             "static_discovery_entry_pcs": ["0x%08X" % a for a in sorted(roots)],
+            "engine_entry_pcs": ["0x%08X" % a for a in sorted(eng)],
             "dispatch_entry_pcs": ["0x%08X" % a for a in dispatch],
-            "static_dispatch_entry_pcs": ["0x%08X" % a for a in sorted(hdr_set)],
+            "static_dispatch_entry_pcs": ["0x%08X" % a for a in sorted(static_set)],
             "source_file": s["file"],
             "source_index": s["index"],
             "source_md5": s["md5"],
             "crc32": "0x%08X" % (binascii.crc32(blob) & 0xFFFFFFFF),
         })
-        print("0x%08X  %8d bytes  id 0x%03X  %5d static roots  %4d observed  %3d header  %s#%d"
+        print("0x%08X  %8d bytes  id 0x%03X  %5d static roots  %4d observed  %3d header  %3d engine  %s#%d"
               % (load, s["size"], reg_id, len(roots), len(hits), len(hdr),
-                 s["file"], s["index"]))
+                 len(eng), s["file"], s["index"]))
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w") as out:
         json.dump(captures, out, indent=1)
     print("\n# %d capture(s), %d bytes of overlay code -> %s"
           % (len(captures), sum(c["size"] for c in captures), args.out))
+    if engine:
+        print("# engine records: %d entry pcs joined, %d outside their image (dropped)"
+              % (engine_joined, engine_dropped))
     return 0
 
 
