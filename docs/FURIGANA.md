@@ -15,6 +15,11 @@ the line.
 
 ## Why inline, and not real ruby
 
+**Superseded in part, 2026-09-12:** the advance *does* track size on the
+quad path, and per-glyph placement is overridable from the plugin. See *The
+rendering route, reopened* at the foot of this file. The paragraph below is
+kept as the reasoning of 2026-09-09.
+
 Real ruby is closer than it looks and still not close. The box already draws
 scaled glyphs: a `0x0F` size preset switches it from an unscalable `SPRT` to a
 `POLY_FT4` quad whose size is `12 + P` px, so half-height kana need no new
@@ -353,3 +358,52 @@ second.
   (`src/bof3_localize.c`). Also checked on the way: a headless boot with only
   `settings.toml` resolves `lang=jp_ruby_all` immediately (debug port
   `{"cmd":"xlate"}`), and the plugin registers all three tables.
+
+## The rendering route, reopened (2026-09-12)
+
+The user's framing: if the y spacing is controllable, the existing script
+re-flows to a **two-row box with a reading band above each row** instead of
+the three-row inline layout, and nothing has to be spelled out in brackets.
+Taking stock against the disassembly changed two of the 2026-09-09 blockers
+([`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement"):
+
+- **The advance tracks size on the quad path.** `0x80151F4C` adds `P` to the
+  cursor before the renderer's 12, so a span drawn at P = −6 is 6 px kana at
+  6 px pitch. The doc's "hard 12 px add shared by both blitters" was wrong.
+- **Per-glyph placement is overridable without guest code.** The cursor is
+  re-read from RAM before every glyph, both blitters are hookable function
+  entries, and the hook gets `CPUState`. A build-time layout table (glyph
+  index → x, y) driven from a per-frame counter places everything; the
+  engine's newline and advance stop mattering.
+
+What did not change: the typewriter reveals by glyph count (a reading types
+out after its word, which is acceptable); the span flag is a register, so ruby
+runs must be `<0d>…<0e>` in the string; `P` is one global per message; the box
+frame height is still unlocated (set through a struct pointer, not an
+immediate), so a taller box stays uncosted. Width is now settled: 15 cells
+fit, 16 touches the wall.
+
+**Row budget under this layout.** A text row plus its 6 px band needs about
+20 px, so the 42 px interior holds **two** annotated rows. Pages that use a
+third row today (1,215 confirm pages) split; every other page keeps its
+authored rows, because the readings no longer cost width. That is a cleaner
+trade than the inline variant's re-flow of nearly every page.
+
+**Order of work:**
+
+1. **Shrink probe, on screen.** `tools/ruby_shrink_probe.py --slot N
+   --variant span --shot span.png` against a fresh field savestate (every
+   slot went stale when the codegen hash changed 2026-09-11 16:39; re-save
+   one). Compare with `--variant plain` and `--variant bracket`. This settles
+   the 6 px point-sampled quality and confirms 12 + P advance in play.
+2. **Hook feasibility.** One throwaway callback on `0x8014F6BC` that bumps
+   `gpr[5]` (y) by a constant: if the text moves, register writes are
+   honoured; if not, steer the sprite path through `0x80145AC6/8` from
+   `0x8014F708` instead.
+3. **Layout table + builder.** Extend `build_ruby_script.py`: two rows per
+   page, readings emitted as `<0d>…<0e>` runs after each word, and a sidecar
+   table of per-glyph (x, y) keyed by the message hash, emitted next to the
+   message table. Plugin: per-frame counter reset at `0x80150598`, placement
+   at the two blitters, `P` and bit 3 forced each frame rather than trusting
+   an in-string preset.
+

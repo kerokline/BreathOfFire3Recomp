@@ -40,6 +40,17 @@ the harvest is mechanical — §1 below. Also left: naming areas off their
 screenshots, the tier-1/2 runtime enrichment, per-occupant fragment demands
 (would cut `generated/` 1.6 GB → ~400 MB), and the translation reading review.
 
+**2026-09-12:** the premise of the paragraph above changed. Play was never
+finding anything the disc does not hold: every overlay family's entry points
+live in engine records — the AREA descriptor table `0x801802EC`, the SCENARIO
+vtable table `0x801C944C`, `Boss_EntryTable 0x800B2048`, the PLCHAR tables
+`0x801CD8F0`/`0x801CD964` — all proven statically and seeded by default
+(`tools/loader_records.py` → `names/*_records.toml` → `extract_overlays.py`;
+914 entries no session had seen, static-dispatch entries 594 → 1,229, audit
+set unchanged). What play still supplies is **proof and weight**: the next
+session on `build-relprof` should visit an unplayed area, a boss and a party
+change and read what `harvest_interp_pcs.py` still reports.
+[`LOADER_RECORDS.md`](LOADER_RECORDS.md).
 **2026-09-11:** the largest remaining interpreted sink was not an overlay band
 at all but the BIOS exception handler (44.6 % of interpreted work, both
 BIOSes). **Fixed the same day** and open upstream as
@@ -790,6 +801,13 @@ declare the observed slots in both profiles and pin the retail sha256
 ### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)
 
 **2026-09-10 — inserted names read too; see [`INSERT_RUBY.md`](INSERT_RUBY.md).**
+**2026-09-12 — true ruby (readings above the kanji) is back on the table.**
+The quad blitter advances by 12 + P, not a flat 12, and per-glyph placement is
+overridable from the plugin through the blitter entry hooks; the plan and the
+shrink probe (`tools/ruby_shrink_probe.py`, needs a re-saved field state) are
+in [`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened" and
+[`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". Two doc errors were
+corrected on the way (advance vs size; `0x0B` never moved y).
 The Ruby tables are in play (user-verified in real play, both scopes, system
 block included), the readings have an override sidecar (`names/readings.toml`:
 surface / dictionary-form / `next` / `prev` rules) and an audit list

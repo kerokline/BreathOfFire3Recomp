@@ -261,10 +261,12 @@ do not read it as the caster.
   tables serves (sizes 100/92/72/96 match no `items.toml` table exactly).
 - **`Magic_EffectTable` `+0x02`** is 0 in all 151 rows — padding or an
   unused field.
-- **The other loader tables**: `0x800B19A4`/`0x800B19A8` (u16 lists indexed
-  by `0x80145020`, used at `BATTLE.EMI#3` `0x801E7A3C`) and the
-  `BPLCHAR` picks (`0x201/0x205`, `0x23C/0x23D/0x23F` chosen by a form byte
-  `< 2`) — character battle models by form, not read yet.
+- ~~**The other loader tables**~~ **DONE 2026-09-12** — every family's
+  record is in [`LOADER_RECORDS.md`](LOADER_RECORDS.md): AREA, SCENARIO,
+  BOSS and PLCHAR, seeded by default. `0x80145020` is the PLCHAR combo
+  index (`& 0x7F`), and the `BPLD`/`BPLU` battle models are `0x1DB`/`0x1EE`
+  + combo through the same loader `0x80167C04`. Still unread:
+  `0x800B19A4`/`0x800B19A8`.
 
 ## Method note
 

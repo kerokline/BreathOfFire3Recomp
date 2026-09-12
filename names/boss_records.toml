@@ -1,0 +1,446 @@
+# names/boss_records.toml -- the battle engine's entry records for BOSS bundles,
+# read off the disc by tools/loader_records.py (docs/OVERLAY_HEADERS.md "Loader records").
+#   boss     boss id u8[0x801462E6] (1..55); row = u8[0x801CDF18 + id*4 + 3]
+#   file_id  u16[0x801CDFF8 + row*2] -> BIN/BOSS/BOSS<nnn>.EMI (several ids share a file)
+#   entry    u32[0x800B2048 + id*4], the pc Battle_SetupBoss jalr's at 0x800A8B40
+#   section  md5 of the file's 0x800C1800 section (deduped: join by md5, not by name)
+
+[[record]]
+boss = 1
+file = "BIN/BOSS/BOSS001.EMI"
+file_id = "0x1B3"
+section = "fc08d4cc9be536680611df000cbd8b78"
+kind = "boss"
+entry = "0x800C1E50"
+
+[[record]]
+boss = 2
+file = "BIN/BOSS/BOSS002.EMI"
+file_id = "0x1B4"
+section = "865425f06225ee1f2c349c5f9bf94cdc"
+kind = "boss"
+entry = "0x800C1D50"
+
+[[record]]
+boss = 3
+file = "BIN/BOSS/BOSS002.EMI"
+file_id = "0x1B4"
+section = "865425f06225ee1f2c349c5f9bf94cdc"
+kind = "boss"
+entry = "0x800C1E3C"
+
+[[record]]
+boss = 4
+file = "BIN/BOSS/BOSS004.EMI"
+file_id = "0x1B5"
+section = "45323c3f56b78e78ea7c42a0d7ae417d"
+kind = "boss"
+entry = "0x800C1C0C"
+
+[[record]]
+boss = 5
+file = "BIN/BOSS/BOSS004.EMI"
+file_id = "0x1B5"
+section = "45323c3f56b78e78ea7c42a0d7ae417d"
+kind = "boss"
+entry = "0x800C1FB0"
+
+[[record]]
+boss = 6
+file = "BIN/BOSS/BOSS004.EMI"
+file_id = "0x1B5"
+section = "45323c3f56b78e78ea7c42a0d7ae417d"
+kind = "boss"
+entry = "0x800C234C"
+
+[[record]]
+boss = 7
+file = "BIN/BOSS/BOSS007.EMI"
+file_id = "0x1B6"
+section = "21370918d10a1f82f3cd602cc8226426"
+kind = "boss"
+entry = "0x800C1A0C"
+
+[[record]]
+boss = 8
+file = "BIN/BOSS/BOSS008.EMI"
+file_id = "0x1B7"
+section = "ee573e355d0f141fb1a2d9b7661e088e"
+kind = "boss"
+entry = "0x800C1F9C"
+
+[[record]]
+boss = 9
+file = "BIN/BOSS/BOSS008.EMI"
+file_id = "0x1B7"
+section = "ee573e355d0f141fb1a2d9b7661e088e"
+kind = "boss"
+entry = "0x800C2088"
+
+[[record]]
+boss = 10
+file = "BIN/BOSS/BOSS008.EMI"
+file_id = "0x1B7"
+section = "ee573e355d0f141fb1a2d9b7661e088e"
+kind = "boss"
+entry = "0x800C2184"
+
+[[record]]
+boss = 11
+file = "BIN/BOSS/BOSS008.EMI"
+file_id = "0x1B7"
+section = "ee573e355d0f141fb1a2d9b7661e088e"
+kind = "boss"
+entry = "0x800C2280"
+
+[[record]]
+boss = 12
+file = "BIN/BOSS/BOSS012.EMI"
+file_id = "0x1B8"
+section = "b528ab3f4cf2c9223fa0a3e016b3556f"
+kind = "boss"
+entry = "0x800C1B68"
+
+[[record]]
+boss = 13
+file = "BIN/BOSS/BOSS013.EMI"
+file_id = "0x1B9"
+section = "88ae43dc409ef66358c3f8fae9f7192e"
+kind = "boss"
+entry = "0x800C200C"
+
+[[record]]
+boss = 14
+file = "BIN/BOSS/BOSS014.EMI"
+file_id = "0x1BA"
+section = "61fa0e949b0bacb2afc8426f7044d76b"
+kind = "boss"
+entry = "0x800C19E8"
+
+[[record]]
+boss = 15
+file = "BIN/BOSS/BOSS015.EMI"
+file_id = "0x1BB"
+section = "4413d9db2da55e622092b0fe37c75164"
+kind = "boss"
+entry = "0x800C18F0"
+
+[[record]]
+boss = 16
+file = "BIN/BOSS/BOSS013.EMI"
+file_id = "0x1B9"
+section = "88ae43dc409ef66358c3f8fae9f7192e"
+kind = "boss"
+entry = "0x800C20D8"
+
+[[record]]
+boss = 17
+file = "BIN/BOSS/BOSS017.EMI"
+file_id = "0x1BC"
+section = "c2948d4dde040eac8f5a7d1e16f0f8bf"
+kind = "boss"
+entry = "0x800C19C4"
+
+[[record]]
+boss = 18
+file = "BIN/BOSS/BOSS018.EMI"
+file_id = "0x1BD"
+section = "e16536f21e3bf3f35d0280fab4245134"
+kind = "boss"
+entry = "0x800C2114"
+
+[[record]]
+boss = 19
+file = "BIN/BOSS/BOSS019.EMI"
+file_id = "0x1BE"
+section = "e16536f21e3bf3f35d0280fab4245134"
+kind = "boss"
+entry = "0x800C23F8"
+
+[[record]]
+boss = 20
+file = "BIN/BOSS/BOSS020.EMI"
+file_id = "0x1BF"
+section = "e16536f21e3bf3f35d0280fab4245134"
+kind = "boss"
+entry = "0x800C26DC"
+
+[[record]]
+boss = 21
+file = "BIN/BOSS/BOSS021.EMI"
+file_id = "0x1C0"
+section = "4ac89abdc7e506be23f7dc55cb659c78"
+kind = "boss"
+entry = "0x800C1AD0"
+
+[[record]]
+boss = 22
+file = "BIN/BOSS/BOSS022.EMI"
+file_id = "0x1C1"
+section = "fa20948b8a4c226a7cb98dc8f4e3db02"
+kind = "boss"
+entry = "0x800C1A08"
+
+[[record]]
+boss = 23
+file = "BIN/BOSS/BOSS023.EMI"
+file_id = "0x1C2"
+section = "8387a99872b752cd5a377ddf53f289f2"
+kind = "boss"
+entry = "0x800C1984"
+
+[[record]]
+boss = 24
+file = "BIN/BOSS/BOSS024.EMI"
+file_id = "0x1C3"
+section = "2f0c4fc54246becd1f4940eb1f9cac8e"
+kind = "boss"
+entry = "0x800C19E8"
+
+[[record]]
+boss = 25
+file = "BIN/BOSS/BOSS025.EMI"
+file_id = "0x1C4"
+section = "904cf27bb9f7bd988ccfeee4def41fd7"
+kind = "boss"
+entry = "0x800C2184"
+
+[[record]]
+boss = 26
+file = "BIN/BOSS/BOSS025.EMI"
+file_id = "0x1C4"
+section = "904cf27bb9f7bd988ccfeee4def41fd7"
+kind = "boss"
+entry = "0x800C2710"
+
+[[record]]
+boss = 27
+file = "BIN/BOSS/BOSS027.EMI"
+file_id = "0x1C5"
+section = "904cf27bb9f7bd988ccfeee4def41fd7"
+kind = "boss"
+entry = "0x800C2B60"
+
+[[record]]
+boss = 28
+file = "BIN/BOSS/BOSS028.EMI"
+file_id = "0x1C6"
+section = "1e15c6a3f89962ee2c99950f61148760"
+kind = "boss"
+entry = "0x800C1B40"
+
+[[record]]
+boss = 29
+file = "BIN/BOSS/BOSS029.EMI"
+file_id = "0x1C7"
+section = "8f4b7c9bbc6aa95cdc2eafab17a419d3"
+kind = "boss"
+entry = "0x800C18F0"
+
+[[record]]
+boss = 30
+file = "BIN/BOSS/BOSS030.EMI"
+file_id = "0x1C8"
+section = "8cf64875971e1edf68e86050939b56b7"
+kind = "boss"
+entry = "0x800C19DC"
+
+[[record]]
+boss = 31
+file = "BIN/BOSS/BOSS031.EMI"
+file_id = "0x1C9"
+section = "0ec052084eff2f6f884d084f34ed00c3"
+kind = "boss"
+entry = "0x800C19C8"
+
+[[record]]
+boss = 32
+file = "BIN/BOSS/BOSS032.EMI"
+file_id = "0x1CA"
+section = "a41e92000b40f8f486aa146ef3229b0d"
+kind = "boss"
+entry = "0x800C19C8"
+
+[[record]]
+boss = 33
+file = "BIN/BOSS/BOSS033.EMI"
+file_id = "0x1CB"
+section = "a7053573728fda2384a52ae6e5026400"
+kind = "boss"
+entry = "0x800C1D70"
+
+[[record]]
+boss = 34
+file = "BIN/BOSS/BOSS034.EMI"
+file_id = "0x1CC"
+section = "f9a07b7ada9b9cb304844108bb735a63"
+kind = "boss"
+entry = "0x800C1EA8"
+
+[[record]]
+boss = 35
+file = "BIN/BOSS/BOSS035.EMI"
+file_id = "0x1CD"
+section = "c4198cf7908bf7d3ff274ddd1daddb01"
+kind = "boss"
+entry = "0x800C1B4C"
+
+[[record]]
+boss = 36
+file = "BIN/BOSS/BOSS036.EMI"
+file_id = "0x1CE"
+section = "fca2502e4076885fa9a3bdbffb6f8215"
+kind = "boss"
+entry = "0x800C1D78"
+
+[[record]]
+boss = 37
+file = "BIN/BOSS/BOSS037.EMI"
+file_id = "0x1CF"
+section = "efa3e8258ba19105bad836c80fe32cf8"
+kind = "boss"
+entry = "0x800C18FC"
+
+[[record]]
+boss = 38
+file = "BIN/BOSS/BOSS038.EMI"
+file_id = "0x1D0"
+section = "af4faad1814d8ef8e098603b84ed43c5"
+kind = "boss"
+entry = "0x800C1A34"
+
+[[record]]
+boss = 39
+file = "BIN/BOSS/BOSS002.EMI"
+file_id = "0x1B4"
+section = "865425f06225ee1f2c349c5f9bf94cdc"
+kind = "boss"
+entry = "0x800C1F08"
+
+[[record]]
+boss = 40
+file = "BIN/BOSS/BOSS040.EMI"
+file_id = "0x1D1"
+section = "f8ef81120adba6d02e5b3634794b71e4"
+kind = "boss"
+entry = "0x800C19F4"
+
+[[record]]
+boss = 41
+file = "BIN/BOSS/BOSS034.EMI"
+file_id = "0x1CC"
+section = "f9a07b7ada9b9cb304844108bb735a63"
+kind = "boss"
+entry = "0x800C2324"
+
+[[record]]
+boss = 42
+file = "BIN/BOSS/BOSS042.EMI"
+file_id = "0x1D2"
+section = "f4925bf90fa5e39c35ad8dde1b2a4081"
+kind = "boss"
+entry = "0x800C18FC"
+
+[[record]]
+boss = 43
+file = "BIN/BOSS/BOSS036.EMI"
+file_id = "0x1CE"
+section = "fca2502e4076885fa9a3bdbffb6f8215"
+kind = "boss"
+entry = "0x800C1E0C"
+
+[[record]]
+boss = 44
+file = "BIN/BOSS/BOSS038.EMI"
+file_id = "0x1D0"
+section = "af4faad1814d8ef8e098603b84ed43c5"
+kind = "boss"
+entry = "0x800C1B7C"
+
+[[record]]
+boss = 45
+file = "BIN/BOSS/BOSS049.EMI"
+file_id = "0x1D5"
+section = "600351f352bfcdd7646f8d3a8fc15b13"
+kind = "boss"
+entry = "0x800C19F4"
+
+[[record]]
+boss = 46
+file = "BIN/BOSS/BOSS046.EMI"
+file_id = "0x1D3"
+section = "61fa0e949b0bacb2afc8426f7044d76b"
+kind = "boss"
+entry = "0x800C1A94"
+
+[[record]]
+boss = 47
+file = "BIN/BOSS/BOSS047.EMI"
+file_id = "0x1D4"
+section = "c4198cf7908bf7d3ff274ddd1daddb01"
+kind = "boss"
+entry = "0x800C1C70"
+
+[[record]]
+boss = 48
+file = "BIN/BOSS/BOSS024.EMI"
+file_id = "0x1C3"
+section = "2f0c4fc54246becd1f4940eb1f9cac8e"
+kind = "boss"
+entry = "0x800C1AB0"
+
+[[record]]
+boss = 49
+file = "BIN/BOSS/BOSS049.EMI"
+file_id = "0x1D5"
+section = "600351f352bfcdd7646f8d3a8fc15b13"
+kind = "boss"
+entry = "0x800C1A88"
+
+[[record]]
+boss = 50
+file = "BIN/BOSS/BOSS050.EMI"
+file_id = "0x1D6"
+section = "2cf14515dc97165bf78df4adb0c4960b"
+kind = "boss"
+entry = "0x800C1908"
+
+[[record]]
+boss = 51
+file = "BIN/BOSS/BOSS051.EMI"
+file_id = "0x1D7"
+section = "f9ec7fc579e667d0ba042898d2aace6a"
+kind = "boss"
+entry = "0x800C1A14"
+
+[[record]]
+boss = 52
+file = "BIN/BOSS/BOSS052.EMI"
+file_id = "0x1D8"
+section = "77863593506545bc4d47c000ac37ab3e"
+kind = "boss"
+entry = "0x800C1B0C"
+
+[[record]]
+boss = 53
+file = "BIN/BOSS/BOSS040.EMI"
+file_id = "0x1D1"
+section = "f8ef81120adba6d02e5b3634794b71e4"
+kind = "boss"
+entry = "0x800C1A88"
+
+[[record]]
+boss = 54
+file = "BIN/BOSS/BOSS054.EMI"
+file_id = "0x1D9"
+section = "5b362957c95ff002688a35eac083d556"
+kind = "boss"
+entry = "0x800C1930"
+
+[[record]]
+boss = 55
+file = "BIN/BOSS/BOSS055.EMI"
+file_id = "0x1DA"
+section = "afed891c124125641e8119cc9b96d5c2"
+kind = "boss"
+entry = "0x800C2488"

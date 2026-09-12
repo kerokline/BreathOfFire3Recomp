@@ -1,0 +1,6503 @@
+# names/area_records.toml -- the field engine's entry records for AREA overlays,
+# read off the disc by tools/loader_records.py (docs/OVERLAY_HEADERS.md "Loader records").
+#   area        area number = index into the boot table 0x801802EC
+#   descriptor  the 0x44-byte descriptor at the end of the area's 0x801F2C00 section
+#   entry       a pc the engine jalr's into: kind = init (desc+0x40), handler[k] (u32[desc+0x3C][k]),
+#               or hook[k] (GAME.EMI's 11-row Area_HookTable 0x801C8F54 / 0x801C95BC, descriptor = the row)
+#   section     md5 of the code section (joins names/overlays.toml and the capture set)
+
+[[record]]
+area = 0
+file = "BIN/WORLD00/AREA000.EMI"
+section = "73b246491365e5797e45f75e322c5526"
+descriptor = "0x801F3FF8"
+kind = "handler[0]"
+entry = "0x801F2C8C"
+
+[[record]]
+area = 0
+file = "BIN/WORLD00/AREA000.EMI"
+section = "73b246491365e5797e45f75e322c5526"
+descriptor = "0x801F3FF8"
+kind = "handler[1]"
+entry = "0x801F2CD8"
+
+[[record]]
+area = 1
+file = "BIN/WORLD00/AREA001.EMI"
+section = "7f96361265d3ff2592f94050b50cb872"
+descriptor = "0x801F41D0"
+kind = "handler[0]"
+entry = "0x801F2C88"
+
+[[record]]
+area = 1
+file = "BIN/WORLD00/AREA001.EMI"
+section = "7f96361265d3ff2592f94050b50cb872"
+descriptor = "0x801F41D0"
+kind = "handler[1]"
+entry = "0x801F2CD4"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[0]"
+entry = "0x801F2D30"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[1]"
+entry = "0x801F2D88"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[2]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[3]"
+entry = "0x801F2C48"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[4]"
+entry = "0x801F2C78"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[5]"
+entry = "0x801F2CA8"
+
+[[record]]
+area = 3
+file = "BIN/WORLD00/AREA003.EMI"
+section = "bf3bf098fcbb1da6bf943c6f9eca470c"
+descriptor = "0x801F3340"
+kind = "handler[6]"
+entry = "0x801F2CEC"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[1]"
+entry = "0x801F2C24"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[2]"
+entry = "0x801F2C44"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[3]"
+entry = "0x801F2C64"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[4]"
+entry = "0x801F2C84"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[5]"
+entry = "0x801F2EFC"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[6]"
+entry = "0x801F2F20"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[7]"
+entry = "0x801F2F48"
+
+[[record]]
+area = 7
+file = "BIN/WORLD00/AREA007.EMI"
+section = "a401e4cbb492e3b682d8058d4b76925e"
+descriptor = "0x801F35B0"
+kind = "handler[8]"
+entry = "0x801F2F70"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[0]"
+entry = "0x801F434C"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[10]"
+entry = "0x801F45FC"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[11]"
+entry = "0x801F4618"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[12]"
+entry = "0x801F4634"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[1]"
+entry = "0x801F4394"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[2]"
+entry = "0x801F43E0"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[3]"
+entry = "0x801F443C"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[4]"
+entry = "0x801F4524"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[5]"
+entry = "0x801F454C"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[6]"
+entry = "0x801F4574"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[7]"
+entry = "0x801F4590"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[8]"
+entry = "0x801F45B8"
+
+[[record]]
+area = 8
+file = "BIN/WORLD00/AREA008.EMI"
+section = "ac6072f7ec0288b3f34490bdbf17d1f6"
+descriptor = "0x801F53C8"
+kind = "handler[9]"
+entry = "0x801F45E0"
+
+[[record]]
+area = 10
+file = "BIN/WORLD00/AREA010.EMI"
+section = "5b14dd81ba8c6f02389cd7458bf4de6e"
+descriptor = "0x801F35E8"
+kind = "handler[0]"
+entry = "0x801F2CDC"
+
+[[record]]
+area = 11
+file = "BIN/WORLD00/AREA011.EMI"
+section = "41a107e8345f0fb14c951b93a378b085"
+descriptor = "0x801F30B0"
+kind = "init"
+entry = "0x801F2CC4"
+
+[[record]]
+area = 11
+file = "BIN/WORLD00/AREA011.EMI"
+section = "41a107e8345f0fb14c951b93a378b085"
+descriptor = "0x801F30B0"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 11
+file = "BIN/WORLD00/AREA011.EMI"
+section = "41a107e8345f0fb14c951b93a378b085"
+descriptor = "0x801F30B0"
+kind = "handler[1]"
+entry = "0x801F2C44"
+
+[[record]]
+area = 12
+file = "BIN/WORLD00/AREA012.EMI"
+section = "5110df3d4780b517b597daac01d7f0d1"
+descriptor = "0x801F2F78"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 13
+file = "BIN/WORLD00/AREA013.EMI"
+section = "9957c9bc3055f7ec51af3905e4e1d2c9"
+descriptor = "0x801F4300"
+kind = "handler[0]"
+entry = "0x801F2C54"
+
+[[record]]
+area = 13
+file = "BIN/WORLD00/AREA013.EMI"
+section = "9957c9bc3055f7ec51af3905e4e1d2c9"
+descriptor = "0x801F4300"
+kind = "handler[1]"
+entry = "0x801F2CAC"
+
+[[record]]
+area = 13
+file = "BIN/WORLD00/AREA013.EMI"
+section = "9957c9bc3055f7ec51af3905e4e1d2c9"
+descriptor = "0x801F4300"
+kind = "handler[2]"
+entry = "0x801F2CEC"
+
+[[record]]
+area = 13
+file = "BIN/WORLD00/AREA013.EMI"
+section = "9957c9bc3055f7ec51af3905e4e1d2c9"
+descriptor = "0x801F4300"
+kind = "handler[3]"
+entry = "0x801F2D88"
+
+[[record]]
+area = 13
+file = "BIN/WORLD00/AREA013.EMI"
+section = "9957c9bc3055f7ec51af3905e4e1d2c9"
+descriptor = "0x801F4300"
+kind = "handler[4]"
+entry = "0x801F2E18"
+
+[[record]]
+area = 14
+file = "BIN/WORLD00/AREA014.EMI"
+section = "d0b46f77b10ec0af83ab9b197e41200e"
+descriptor = "0x801F367C"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "init"
+entry = "0x801F2C04"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[0]"
+entry = "0x801F2CF8"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[1]"
+entry = "0x801F2D0C"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[2]"
+entry = "0x801F2D34"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[3]"
+entry = "0x801F2D5C"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[4]"
+entry = "0x801F2D78"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[5]"
+entry = "0x801F2EE8"
+
+[[record]]
+area = 15
+file = "BIN/WORLD00/AREA015.EMI"
+section = "23374eb0ecb938aee58755a871570d76"
+descriptor = "0x801F40AC"
+kind = "handler[6]"
+entry = "0x801F2CB8"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[0]"
+entry = "0x801F2EEC"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[1]"
+entry = "0x801F45CC"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[2]"
+entry = "0x801F4178"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[3]"
+entry = "0x801F341C"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[4]"
+entry = "0x801F4768"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[5]"
+entry = "0x801F4DA0"
+
+[[record]]
+area = 16
+file = "BIN/WORLD00/AREA016.EMI"
+section = "b1146950a430dbc021facf3b58b60d77"
+descriptor = "0x801C8F54"
+kind = "hook[6]"
+entry = "0x801F2C38"
+
+[[record]]
+area = 18
+file = "BIN/WORLD00/AREA018.EMI"
+section = "35b84c7617b862d21a736031da272455"
+descriptor = "0x801F30E8"
+kind = "init"
+entry = "0x801F2C04"
+
+[[record]]
+area = 18
+file = "BIN/WORLD00/AREA018.EMI"
+section = "35b84c7617b862d21a736031da272455"
+descriptor = "0x801F30E8"
+kind = "handler[0]"
+entry = "0x801F2C68"
+
+[[record]]
+area = 18
+file = "BIN/WORLD00/AREA018.EMI"
+section = "35b84c7617b862d21a736031da272455"
+descriptor = "0x801F30E8"
+kind = "handler[1]"
+entry = "0x801F2CA8"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[1]"
+entry = "0x801F2C2C"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[2]"
+entry = "0x801F2C54"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[3]"
+entry = "0x801F2C74"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[4]"
+entry = "0x801F2C94"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[5]"
+entry = "0x801F2CB4"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[6]"
+entry = "0x801F2CD4"
+
+[[record]]
+area = 19
+file = "BIN/WORLD00/AREA019.EMI"
+section = "0cfe91c7778e8a34ef3d308f8886295a"
+descriptor = "0x801F323C"
+kind = "handler[7]"
+entry = "0x801F2D6C"
+
+[[record]]
+area = 20
+file = "BIN/WORLD00/AREA020.EMI"
+section = "5ae4bd1528ebed5ed8139519193789c1"
+descriptor = "0x801F2DD8"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 22
+file = "BIN/WORLD00/AREA022.EMI"
+section = "9e4cc9968d7284bc0114fceb213e068f"
+descriptor = "0x801F3830"
+kind = "handler[0]"
+entry = "0x801F2CC4"
+
+[[record]]
+area = 23
+file = "BIN/WORLD00/AREA023.EMI"
+section = "23d9a3b796415ca17b7dd48052f03727"
+descriptor = "0x801F36D4"
+kind = "handler[0]"
+entry = "0x801F2C88"
+
+[[record]]
+area = 23
+file = "BIN/WORLD00/AREA023.EMI"
+section = "23d9a3b796415ca17b7dd48052f03727"
+descriptor = "0x801F36D4"
+kind = "handler[1]"
+entry = "0x801F2CE0"
+
+[[record]]
+area = 23
+file = "BIN/WORLD00/AREA023.EMI"
+section = "23d9a3b796415ca17b7dd48052f03727"
+descriptor = "0x801F36D4"
+kind = "handler[2]"
+entry = "0x801F2D38"
+
+[[record]]
+area = 23
+file = "BIN/WORLD00/AREA023.EMI"
+section = "23d9a3b796415ca17b7dd48052f03727"
+descriptor = "0x801F36D4"
+kind = "handler[3]"
+entry = "0x801F2D60"
+
+[[record]]
+area = 23
+file = "BIN/WORLD00/AREA023.EMI"
+section = "23d9a3b796415ca17b7dd48052f03727"
+descriptor = "0x801F36D4"
+kind = "handler[4]"
+entry = "0x801F2D88"
+
+[[record]]
+area = 25
+file = "BIN/WORLD00/AREA025.EMI"
+section = "1f7dd96a240e42e754f344f3eda6acd0"
+descriptor = "0x801F398C"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[0]"
+entry = "0x801F309C"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[10]"
+entry = "0x801F3268"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[11]"
+entry = "0x801F3290"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[12]"
+entry = "0x801F32C8"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[13]"
+entry = "0x801F3348"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[14]"
+entry = "0x801F3370"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[1]"
+entry = "0x801F30D4"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[2]"
+entry = "0x801F30FC"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[3]"
+entry = "0x801F3124"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[4]"
+entry = "0x801F314C"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[5]"
+entry = "0x801F3184"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[6]"
+entry = "0x801F31AC"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[7]"
+entry = "0x801F31D4"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[8]"
+entry = "0x801F31FC"
+
+[[record]]
+area = 26
+file = "BIN/WORLD00/AREA026.EMI"
+section = "4565833f032909eabaa3198a505f8d3b"
+descriptor = "0x801F4CA8"
+kind = "handler[9]"
+entry = "0x801F3240"
+
+[[record]]
+area = 27
+file = "BIN/WORLD00/AREA027.EMI"
+section = "d6bbcff3dd423a10012d0ce4a4305501"
+descriptor = "0x801F4D20"
+kind = "handler[0]"
+entry = "0x801F3710"
+
+[[record]]
+area = 27
+file = "BIN/WORLD00/AREA027.EMI"
+section = "d6bbcff3dd423a10012d0ce4a4305501"
+descriptor = "0x801F4D20"
+kind = "handler[1]"
+entry = "0x801F376C"
+
+[[record]]
+area = 28
+file = "BIN/WORLD00/AREA028.EMI"
+section = "6acb5d7d9c00a32b8554d99759838ba2"
+descriptor = "0x801F3DBC"
+kind = "handler[0]"
+entry = "0x801F3414"
+
+[[record]]
+area = 28
+file = "BIN/WORLD00/AREA028.EMI"
+section = "6acb5d7d9c00a32b8554d99759838ba2"
+descriptor = "0x801F3DBC"
+kind = "handler[1]"
+entry = "0x801F341C"
+
+[[record]]
+area = 28
+file = "BIN/WORLD00/AREA028.EMI"
+section = "6acb5d7d9c00a32b8554d99759838ba2"
+descriptor = "0x801F3DBC"
+kind = "handler[2]"
+entry = "0x801F3424"
+
+[[record]]
+area = 29
+file = "BIN/WORLD00/AREA029.EMI"
+section = "aa720714a5f64092300a064fbbee65ec"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[0]"
+entry = "0x801F36E4"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[1]"
+entry = "0x801F3800"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[2]"
+entry = "0x801F3A78"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[3]"
+entry = "0x801F3C18"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[4]"
+entry = "0x801F3D28"
+
+[[record]]
+area = 32
+file = "BIN/WORLD00/AREA032.EMI"
+section = "1870dd69ca009c240756d523fa724956"
+descriptor = "0x801F48BC"
+kind = "handler[5]"
+entry = "0x801F3DCC"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801F4E60"
+kind = "handler[0]"
+entry = "0x801F2C38"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801F4E60"
+kind = "handler[1]"
+entry = "0x801F2CD0"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801F4E60"
+kind = "handler[2]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[0]"
+entry = "0x801F2E20"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[1]"
+entry = "0x801F4500"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[2]"
+entry = "0x801F40AC"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[3]"
+entry = "0x801F3350"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[4]"
+entry = "0x801F469C"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[5]"
+entry = "0x801F4CC8"
+
+[[record]]
+area = 33
+file = "BIN/WORLD00/AREA033.EMI"
+section = "b2bb1b052c80c906084fae061aadac32"
+descriptor = "0x801C8F70"
+kind = "hook[6]"
+entry = "0x801F2D18"
+
+[[record]]
+area = 34
+file = "BIN/WORLD00/AREA034.EMI"
+section = "b43e868b42463c9284581cf721b705f4"
+descriptor = "0x801F3910"
+kind = "handler[0]"
+entry = "0x801F2CDC"
+
+[[record]]
+area = 34
+file = "BIN/WORLD00/AREA034.EMI"
+section = "b43e868b42463c9284581cf721b705f4"
+descriptor = "0x801F3910"
+kind = "handler[1]"
+entry = "0x801F2D1C"
+
+[[record]]
+area = 35
+file = "BIN/WORLD00/AREA035.EMI"
+section = "bd41cfe770f36f1e87bf61ed97c886d2"
+descriptor = "0x801F2EC8"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 35
+file = "BIN/WORLD00/AREA035.EMI"
+section = "bd41cfe770f36f1e87bf61ed97c886d2"
+descriptor = "0x801F2EC8"
+kind = "handler[1]"
+entry = "0x801F2C74"
+
+[[record]]
+area = 35
+file = "BIN/WORLD00/AREA035.EMI"
+section = "bd41cfe770f36f1e87bf61ed97c886d2"
+descriptor = "0x801F2EC8"
+kind = "handler[2]"
+entry = "0x801F2CE4"
+
+[[record]]
+area = 35
+file = "BIN/WORLD00/AREA035.EMI"
+section = "bd41cfe770f36f1e87bf61ed97c886d2"
+descriptor = "0x801F2EC8"
+kind = "handler[3]"
+entry = "0x801F2D54"
+
+[[record]]
+area = 36
+file = "BIN/WORLD00/AREA036.EMI"
+section = "c66e6aacb75a949ed45fe40e5af1bc6a"
+descriptor = "0x801F32C0"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 36
+file = "BIN/WORLD00/AREA036.EMI"
+section = "c66e6aacb75a949ed45fe40e5af1bc6a"
+descriptor = "0x801F32C0"
+kind = "handler[1]"
+entry = "0x801F2C30"
+
+[[record]]
+area = 37
+file = "BIN/WORLD00/AREA037.EMI"
+section = "b1de15082380835b01839b97c5599282"
+descriptor = "0x801F4A68"
+kind = "handler[0]"
+entry = "0x801F3B14"
+
+[[record]]
+area = 38
+file = "BIN/WORLD01/AREA038.EMI"
+section = "5ed6a5f0663cb3fddff4309e3f94a2e8"
+descriptor = "0x801F3D48"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 38
+file = "BIN/WORLD01/AREA038.EMI"
+section = "5ed6a5f0663cb3fddff4309e3f94a2e8"
+descriptor = "0x801F3D48"
+kind = "handler[1]"
+entry = "0x801F2C4C"
+
+[[record]]
+area = 38
+file = "BIN/WORLD01/AREA038.EMI"
+section = "5ed6a5f0663cb3fddff4309e3f94a2e8"
+descriptor = "0x801F3D48"
+kind = "handler[2]"
+entry = "0x801F2C94"
+
+[[record]]
+area = 38
+file = "BIN/WORLD01/AREA038.EMI"
+section = "5ed6a5f0663cb3fddff4309e3f94a2e8"
+descriptor = "0x801F3D48"
+kind = "handler[3]"
+entry = "0x801F2E60"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[10]"
+entry = "0x801F2EC4"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[11]"
+entry = "0x801F2EEC"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[12]"
+entry = "0x801F2F0C"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[13]"
+entry = "0x801F2F68"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[14]"
+entry = "0x801F2F94"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[1]"
+entry = "0x801F2D18"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[2]"
+entry = "0x801F2D38"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[3]"
+entry = "0x801F2D54"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[4]"
+entry = "0x801F2DE4"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[5]"
+entry = "0x801F2E1C"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[6]"
+entry = "0x801F2E54"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[7]"
+entry = "0x801F2E8C"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[8]"
+entry = "0x801F2E94"
+
+[[record]]
+area = 39
+file = "BIN/WORLD01/AREA039.EMI"
+section = "4a6d44982d61d7a0c7d2b621171426c3"
+descriptor = "0x801F4BCC"
+kind = "handler[9]"
+entry = "0x801F2E9C"
+
+[[record]]
+area = 40
+file = "BIN/WORLD01/AREA040.EMI"
+section = "a1236eb6e8f3a6d659b5c6addbc3a9d7"
+descriptor = "0x801F491C"
+kind = "init"
+entry = "0x801F3A00"
+
+[[record]]
+area = 40
+file = "BIN/WORLD01/AREA040.EMI"
+section = "a1236eb6e8f3a6d659b5c6addbc3a9d7"
+descriptor = "0x801F491C"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 40
+file = "BIN/WORLD01/AREA040.EMI"
+section = "a1236eb6e8f3a6d659b5c6addbc3a9d7"
+descriptor = "0x801F491C"
+kind = "handler[1]"
+entry = "0x801F2C74"
+
+[[record]]
+area = 41
+file = "BIN/WORLD01/AREA041.EMI"
+section = "a6671addeaf3916c1b2cec859b150b29"
+descriptor = "0x801F5634"
+kind = "handler[0]"
+entry = "0x801F3E00"
+
+[[record]]
+area = 41
+file = "BIN/WORLD01/AREA041.EMI"
+section = "a6671addeaf3916c1b2cec859b150b29"
+descriptor = "0x801F5634"
+kind = "handler[1]"
+entry = "0x801F3E20"
+
+[[record]]
+area = 41
+file = "BIN/WORLD01/AREA041.EMI"
+section = "a6671addeaf3916c1b2cec859b150b29"
+descriptor = "0x801F5634"
+kind = "handler[2]"
+entry = "0x801F3E3C"
+
+[[record]]
+area = 41
+file = "BIN/WORLD01/AREA041.EMI"
+section = "a6671addeaf3916c1b2cec859b150b29"
+descriptor = "0x801F5634"
+kind = "handler[3]"
+entry = "0x801F41F8"
+
+[[record]]
+area = 41
+file = "BIN/WORLD01/AREA041.EMI"
+section = "a6671addeaf3916c1b2cec859b150b29"
+descriptor = "0x801F5634"
+kind = "handler[4]"
+entry = "0x801F4230"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "init"
+entry = "0x801F5070"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[0]"
+entry = "0x801F3DBC"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[1]"
+entry = "0x801F3E80"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[2]"
+entry = "0x801F3EB8"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[3]"
+entry = "0x801F3F6C"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[4]"
+entry = "0x801F4020"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[5]"
+entry = "0x801F40D4"
+
+[[record]]
+area = 42
+file = "BIN/WORLD01/AREA042.EMI"
+section = "d2861023c166f9d581f2d8c682136c1c"
+descriptor = "0x801F5668"
+kind = "handler[6]"
+entry = "0x801F3D90"
+
+[[record]]
+area = 43
+file = "BIN/WORLD01/AREA043.EMI"
+section = "3e7bfbbe54e08510884f83f7e728c4e9"
+descriptor = "0x801F37B4"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 43
+file = "BIN/WORLD01/AREA043.EMI"
+section = "3e7bfbbe54e08510884f83f7e728c4e9"
+descriptor = "0x801F37B4"
+kind = "handler[1]"
+entry = "0x801F2E28"
+
+[[record]]
+area = 43
+file = "BIN/WORLD01/AREA043.EMI"
+section = "3e7bfbbe54e08510884f83f7e728c4e9"
+descriptor = "0x801F37B4"
+kind = "handler[2]"
+entry = "0x801F2FBC"
+
+[[record]]
+area = 44
+file = "BIN/WORLD01/AREA044.EMI"
+section = "d0bc11d867c5f8232f8c62155db0bb16"
+descriptor = "0x801F3F70"
+kind = "init"
+entry = "0x801F2CB0"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[0]"
+entry = "0x801F2EEC"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[1]"
+entry = "0x801F45CC"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[2]"
+entry = "0x801F4178"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[3]"
+entry = "0x801F341C"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[4]"
+entry = "0x801F4768"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[5]"
+entry = "0x801F4DA4"
+
+[[record]]
+area = 45
+file = "BIN/WORLD01/AREA045.EMI"
+section = "a6dd23cc1eb317c3ffa6622b158cf94e"
+descriptor = "0x801C8F8C"
+kind = "hook[6]"
+entry = "0x801F2C38"
+
+[[record]]
+area = 46
+file = "BIN/WORLD01/AREA046.EMI"
+section = "547193030362bd36340f08ec18d13a65"
+descriptor = "0x801F3538"
+kind = "handler[0]"
+entry = "0x801F2D88"
+
+[[record]]
+area = 47
+file = "BIN/WORLD01/AREA047.EMI"
+section = "65f93c199896ee4ac4b104e2412c9544"
+descriptor = "0x801F3E64"
+kind = "handler[0]"
+entry = "0x801F38F4"
+
+[[record]]
+area = 47
+file = "BIN/WORLD01/AREA047.EMI"
+section = "65f93c199896ee4ac4b104e2412c9544"
+descriptor = "0x801F3E64"
+kind = "handler[1]"
+entry = "0x801F396C"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "init"
+entry = "0x801F4D2C"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[0]"
+entry = "0x801F4804"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[1]"
+entry = "0x801F4864"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[2]"
+entry = "0x801F48DC"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[3]"
+entry = "0x801F49C8"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[4]"
+entry = "0x801F4AB4"
+
+[[record]]
+area = 48
+file = "BIN/WORLD01/AREA048.EMI"
+section = "f326326e519d3a403d88292aa6e91825"
+descriptor = "0x801F63B4"
+kind = "handler[5]"
+entry = "0x801F4B40"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[0]"
+entry = "0x801F3288"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[10]"
+entry = "0x801F3554"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[11]"
+entry = "0x801F35D4"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[12]"
+entry = "0x801F360C"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[13]"
+entry = "0x801F36F8"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[14]"
+entry = "0x801F3700"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[15]"
+entry = "0x801F3728"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[16]"
+entry = "0x801F3750"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[17]"
+entry = "0x801F376C"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[18]"
+entry = "0x801F37EC"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[19]"
+entry = "0x801F3884"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[1]"
+entry = "0x801F32B0"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[20]"
+entry = "0x801F3908"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[2]"
+entry = "0x801F3328"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[3]"
+entry = "0x801F33A0"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[4]"
+entry = "0x801F33C4"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[5]"
+entry = "0x801F33E8"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[6]"
+entry = "0x801F3410"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[7]"
+entry = "0x801F3438"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[8]"
+entry = "0x801F3454"
+
+[[record]]
+area = 49
+file = "BIN/WORLD01/AREA049.EMI"
+section = "4d3b4974fafeb6c54007daddd6847d42"
+descriptor = "0x801F5C90"
+kind = "handler[9]"
+entry = "0x801F34D4"
+
+[[record]]
+area = 50
+file = "BIN/WORLD01/AREA050.EMI"
+section = "aa4935daf766187c8d306da14edf6d1f"
+descriptor = "0x801F3EAC"
+kind = "handler[0]"
+entry = "0x801F2D48"
+
+[[record]]
+area = 51
+file = "BIN/WORLD01/AREA051.EMI"
+section = "dc6b1c62114af4c83134ed60af0a0f5a"
+descriptor = "0x801F3474"
+kind = "init"
+entry = "0x801F2D00"
+
+[[record]]
+area = 51
+file = "BIN/WORLD01/AREA051.EMI"
+section = "dc6b1c62114af4c83134ed60af0a0f5a"
+descriptor = "0x801F3474"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 51
+file = "BIN/WORLD01/AREA051.EMI"
+section = "dc6b1c62114af4c83134ed60af0a0f5a"
+descriptor = "0x801F3474"
+kind = "handler[1]"
+entry = "0x801F2C7C"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[0]"
+entry = "0x801F3280"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[1]"
+entry = "0x801F3414"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[2]"
+entry = "0x801F35A0"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[3]"
+entry = "0x801F37A8"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[4]"
+entry = "0x801F3894"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[5]"
+entry = "0x801F4268"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[6]"
+entry = "0x801F4290"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[7]"
+entry = "0x801F431C"
+
+[[record]]
+area = 52
+file = "BIN/WORLD01/AREA052.EMI"
+section = "3ff7fd3ab33b893965b9b453a73fe692"
+descriptor = "0x801F50A4"
+kind = "handler[8]"
+entry = "0x801F43B0"
+
+[[record]]
+area = 53
+file = "BIN/WORLD01/AREA053.EMI"
+section = "b91f28aa98624e90ceb758049ae498f7"
+descriptor = "0x801F35F8"
+kind = "init"
+entry = "0x801F2C5C"
+
+[[record]]
+area = 53
+file = "BIN/WORLD01/AREA053.EMI"
+section = "b91f28aa98624e90ceb758049ae498f7"
+descriptor = "0x801F35F8"
+kind = "handler[0]"
+entry = "0x801F2C64"
+
+[[record]]
+area = 56
+file = "BIN/WORLD01/AREA056.EMI"
+section = "22704ffea9bbde78bcad988e5480a4d0"
+descriptor = "0x801F3854"
+kind = "init"
+entry = "0x801F3464"
+
+[[record]]
+area = 56
+file = "BIN/WORLD01/AREA056.EMI"
+section = "22704ffea9bbde78bcad988e5480a4d0"
+descriptor = "0x801F3854"
+kind = "handler[0]"
+entry = "0x801F3284"
+
+[[record]]
+area = 57
+file = "BIN/WORLD01/AREA057.EMI"
+section = "f98644f3f42fca0caddcb18b1c738af1"
+descriptor = "0x801F4AB8"
+kind = "handler[0]"
+entry = "0x801F2C30"
+
+[[record]]
+area = 57
+file = "BIN/WORLD01/AREA057.EMI"
+section = "f98644f3f42fca0caddcb18b1c738af1"
+descriptor = "0x801F4AB8"
+kind = "handler[1]"
+entry = "0x801F2CB0"
+
+[[record]]
+area = 57
+file = "BIN/WORLD01/AREA057.EMI"
+section = "f98644f3f42fca0caddcb18b1c738af1"
+descriptor = "0x801F4AB8"
+kind = "handler[2]"
+entry = "0x801F2D30"
+
+[[record]]
+area = 57
+file = "BIN/WORLD01/AREA057.EMI"
+section = "f98644f3f42fca0caddcb18b1c738af1"
+descriptor = "0x801F4AB8"
+kind = "handler[3]"
+entry = "0x801F2D58"
+
+[[record]]
+area = 57
+file = "BIN/WORLD01/AREA057.EMI"
+section = "f98644f3f42fca0caddcb18b1c738af1"
+descriptor = "0x801F4AB8"
+kind = "handler[4]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 59
+file = "BIN/WORLD01/AREA059.EMI"
+section = "f3ce91c7857763a91dd0944b0813ba49"
+descriptor = "0x801F37E0"
+kind = "handler[0]"
+entry = "0x801F2D30"
+
+[[record]]
+area = 59
+file = "BIN/WORLD01/AREA059.EMI"
+section = "f3ce91c7857763a91dd0944b0813ba49"
+descriptor = "0x801F37E0"
+kind = "handler[1]"
+entry = "0x801F2D5C"
+
+[[record]]
+area = 59
+file = "BIN/WORLD01/AREA059.EMI"
+section = "f3ce91c7857763a91dd0944b0813ba49"
+descriptor = "0x801F37E0"
+kind = "handler[2]"
+entry = "0x801F2D90"
+
+[[record]]
+area = 59
+file = "BIN/WORLD01/AREA059.EMI"
+section = "f3ce91c7857763a91dd0944b0813ba49"
+descriptor = "0x801F37E0"
+kind = "handler[3]"
+entry = "0x801F2E08"
+
+[[record]]
+area = 60
+file = "BIN/WORLD01/AREA060.EMI"
+section = "3fdd8e166f46508b5b45c7b5ed04ec6b"
+descriptor = "0x801F3444"
+kind = "init"
+entry = "0x801F3310"
+
+[[record]]
+area = 62
+file = "BIN/WORLD01/AREA062.EMI"
+section = "031bffd35a4029368b2ecb30ef73ef7a"
+descriptor = "0x801F2EC8"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 63
+file = "BIN/WORLD01/AREA063.EMI"
+section = "54996f1e70e64f7ed40501c29ee61e69"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 64
+file = "BIN/WORLD01/AREA064.EMI"
+section = "fdcb7056e77802885a0fab7be46eb71e"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801F50B8"
+kind = "init"
+entry = "0x801F2C38"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[0]"
+entry = "0x801F2F24"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[1]"
+entry = "0x801F4604"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[2]"
+entry = "0x801F41B0"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[3]"
+entry = "0x801F3454"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[4]"
+entry = "0x801F47A0"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[5]"
+entry = "0x801F4DE0"
+
+[[record]]
+area = 65
+file = "BIN/WORLD01/AREA065.EMI"
+section = "4413882680c18c7193266eb29ad3477c"
+descriptor = "0x801C8FA8"
+kind = "hook[6]"
+entry = "0x801F2C6C"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[0]"
+entry = "0x801F3EC4"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[10]"
+entry = "0x801F4324"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[11]"
+entry = "0x801F43A4"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[12]"
+entry = "0x801F4424"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[13]"
+entry = "0x801F4440"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[14]"
+entry = "0x801F445C"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[15]"
+entry = "0x801F4478"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[16]"
+entry = "0x801F449C"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[17]"
+entry = "0x801F451C"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[18]"
+entry = "0x801F45BC"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[1]"
+entry = "0x801F3EE4"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[2]"
+entry = "0x801F3F00"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[3]"
+entry = "0x801F3F80"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[4]"
+entry = "0x801F400C"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[5]"
+entry = "0x801F4098"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[6]"
+entry = "0x801F4124"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[7]"
+entry = "0x801F41A4"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[8]"
+entry = "0x801F4224"
+
+[[record]]
+area = 67
+file = "BIN/WORLD01/AREA067.EMI"
+section = "659384883b05a2506d057b415ae18ae7"
+descriptor = "0x801F5340"
+kind = "handler[9]"
+entry = "0x801F42A4"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[0]"
+entry = "0x801F3A18"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[1]"
+entry = "0x801F3A98"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[2]"
+entry = "0x801F3B18"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[3]"
+entry = "0x801F3C2C"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[4]"
+entry = "0x801F3D40"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[5]"
+entry = "0x801F3DC0"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[6]"
+entry = "0x801F3E40"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[7]"
+entry = "0x801F3E48"
+
+[[record]]
+area = 68
+file = "BIN/WORLD01/AREA068.EMI"
+section = "0f97a1b874ff8f4535725a5641f50283"
+descriptor = "0x801F4D88"
+kind = "handler[8]"
+entry = "0x801F3EC8"
+
+[[record]]
+area = 69
+file = "BIN/WORLD01/AREA069.EMI"
+section = "5d4a5d57748e2073677fe54d84076871"
+descriptor = "0x801F3DAC"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 71
+file = "BIN/WORLD01/AREA071.EMI"
+section = "3405ef8b42c2e1fbbae769c2f1527ddf"
+descriptor = "0x801F30FC"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 71
+file = "BIN/WORLD01/AREA071.EMI"
+section = "3405ef8b42c2e1fbbae769c2f1527ddf"
+descriptor = "0x801F30FC"
+kind = "handler[1]"
+entry = "0x801F2CF4"
+
+[[record]]
+area = 72
+file = "BIN/WORLD01/AREA072.EMI"
+section = "43e6077eea1fd2bc3275cd084b7d4a82"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 73
+file = "BIN/WORLD01/AREA073.EMI"
+section = "32f478738843cd8f1c7859752d5f889e"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[0]"
+entry = "0x801F2D48"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[1]"
+entry = "0x801F2E74"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[2]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[3]"
+entry = "0x801F2C60"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[4]"
+entry = "0x801F2C90"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[5]"
+entry = "0x801F2CC0"
+
+[[record]]
+area = 74
+file = "BIN/WORLD01/AREA074.EMI"
+section = "77af193247fe75b82ad944d5727c3c91"
+descriptor = "0x801F3C48"
+kind = "handler[6]"
+entry = "0x801F2D04"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "init"
+entry = "0x801F4FB4"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[0]"
+entry = "0x801F317C"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[1]"
+entry = "0x801F319C"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[2]"
+entry = "0x801F31D0"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[3]"
+entry = "0x801F321C"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[4]"
+entry = "0x801F3268"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[5]"
+entry = "0x801F32C8"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[6]"
+entry = "0x801F32FC"
+
+[[record]]
+area = 75
+file = "BIN/WORLD01/AREA075.EMI"
+section = "4188211aaeb88809550eb07f988f7d80"
+descriptor = "0x801F5754"
+kind = "handler[7]"
+entry = "0x801F33D0"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[0]"
+entry = "0x801F5A58"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[10]"
+entry = "0x801F5DC0"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[11]"
+entry = "0x801F5DE8"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[12]"
+entry = "0x801F5E04"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[13]"
+entry = "0x801F5E84"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[14]"
+entry = "0x801F5F04"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[15]"
+entry = "0x801F5F84"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[16]"
+entry = "0x801F6004"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[17]"
+entry = "0x801F6084"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[18]"
+entry = "0x801F60A4"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[19]"
+entry = "0x801F60C4"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[1]"
+entry = "0x801F5A84"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[20]"
+entry = "0x801F61DC"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[2]"
+entry = "0x801F5AAC"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[3]"
+entry = "0x801F5B2C"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[4]"
+entry = "0x801F5BAC"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[5]"
+entry = "0x801F5BD8"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[6]"
+entry = "0x801F5C00"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[7]"
+entry = "0x801F5C80"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[8]"
+entry = "0x801F5D00"
+
+[[record]]
+area = 77
+file = "BIN/WORLD02/AREA077.EMI"
+section = "0c4fe24f11bc35cef8b48b8e2d727d56"
+descriptor = "0x801F6AD0"
+kind = "handler[9]"
+entry = "0x801F5D80"
+
+[[record]]
+area = 78
+file = "BIN/WORLD02/AREA078.EMI"
+section = "f3062394721a35794b967a928a49c081"
+descriptor = "0x801F4140"
+kind = "handler[0]"
+entry = "0x801F2E1C"
+
+[[record]]
+area = 79
+file = "BIN/WORLD02/AREA079.EMI"
+section = "fa4ab750d321750cf70e87e4c1d49fe2"
+descriptor = "0x801F4C2C"
+kind = "handler[0]"
+entry = "0x801F2E24"
+
+[[record]]
+area = 80
+file = "BIN/WORLD02/AREA080.EMI"
+section = "72576aa10acf23f1f2d30f8d4f9dbd54"
+descriptor = "0x801F4450"
+kind = "handler[0]"
+entry = "0x801F3CE4"
+
+[[record]]
+area = 80
+file = "BIN/WORLD02/AREA080.EMI"
+section = "72576aa10acf23f1f2d30f8d4f9dbd54"
+descriptor = "0x801F4450"
+kind = "handler[1]"
+entry = "0x801F3D0C"
+
+[[record]]
+area = 80
+file = "BIN/WORLD02/AREA080.EMI"
+section = "72576aa10acf23f1f2d30f8d4f9dbd54"
+descriptor = "0x801F4450"
+kind = "handler[2]"
+entry = "0x801F3D34"
+
+[[record]]
+area = 80
+file = "BIN/WORLD02/AREA080.EMI"
+section = "72576aa10acf23f1f2d30f8d4f9dbd54"
+descriptor = "0x801F4450"
+kind = "handler[3]"
+entry = "0x801F3D50"
+
+[[record]]
+area = 81
+file = "BIN/WORLD02/AREA081.EMI"
+section = "4844583fa71c441b5ebbb2baf3dfe4fb"
+descriptor = "0x801F37B8"
+kind = "handler[0]"
+entry = "0x801F2C94"
+
+[[record]]
+area = 81
+file = "BIN/WORLD02/AREA081.EMI"
+section = "4844583fa71c441b5ebbb2baf3dfe4fb"
+descriptor = "0x801F37B8"
+kind = "handler[1]"
+entry = "0x801F2D14"
+
+[[record]]
+area = 81
+file = "BIN/WORLD02/AREA081.EMI"
+section = "4844583fa71c441b5ebbb2baf3dfe4fb"
+descriptor = "0x801F37B8"
+kind = "handler[2]"
+entry = "0x801F2D3C"
+
+[[record]]
+area = 81
+file = "BIN/WORLD02/AREA081.EMI"
+section = "4844583fa71c441b5ebbb2baf3dfe4fb"
+descriptor = "0x801F37B8"
+kind = "handler[3]"
+entry = "0x801F2D64"
+
+[[record]]
+area = 82
+file = "BIN/WORLD02/AREA082.EMI"
+section = "6c4636a83971a7102e21d8a4070b21e7"
+descriptor = "0x801F62A4"
+kind = "handler[0]"
+entry = "0x801F5590"
+
+[[record]]
+area = 82
+file = "BIN/WORLD02/AREA082.EMI"
+section = "6c4636a83971a7102e21d8a4070b21e7"
+descriptor = "0x801F62A4"
+kind = "handler[1]"
+entry = "0x801F55F0"
+
+[[record]]
+area = 82
+file = "BIN/WORLD02/AREA082.EMI"
+section = "6c4636a83971a7102e21d8a4070b21e7"
+descriptor = "0x801F62A4"
+kind = "handler[2]"
+entry = "0x801F5604"
+
+[[record]]
+area = 82
+file = "BIN/WORLD02/AREA082.EMI"
+section = "6c4636a83971a7102e21d8a4070b21e7"
+descriptor = "0x801F62A4"
+kind = "handler[3]"
+entry = "0x801F56E8"
+
+[[record]]
+area = 84
+file = "BIN/WORLD02/AREA084.EMI"
+section = "f0e325ee5bf11cc0399379538b1560dd"
+descriptor = "0x801F3130"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "init"
+entry = "0x801F3C1C"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[0]"
+entry = "0x801F373C"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[1]"
+entry = "0x801F37C0"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[2]"
+entry = "0x801F38D0"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[3]"
+entry = "0x801F38F0"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[4]"
+entry = "0x801F39F4"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[5]"
+entry = "0x801F3AF8"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[6]"
+entry = "0x801F3B5C"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[7]"
+entry = "0x801F3BA4"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[8]"
+entry = "0x801F3BCC"
+
+[[record]]
+area = 85
+file = "BIN/WORLD02/AREA085.EMI"
+section = "11ae030794853af065a76de93c1fc39e"
+descriptor = "0x801F42C4"
+kind = "handler[9]"
+entry = "0x801F3BEC"
+
+[[record]]
+area = 86
+file = "BIN/WORLD02/AREA086.EMI"
+section = "31cc0e988b1c8c310ac9917df36d4700"
+descriptor = "0x801F3CA8"
+kind = "init"
+entry = "0x801F3604"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801F5594"
+kind = "init"
+entry = "0x801F2C38"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[0]"
+entry = "0x801F2F20"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[1]"
+entry = "0x801F45FC"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[2]"
+entry = "0x801F41A8"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[3]"
+entry = "0x801F3450"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[4]"
+entry = "0x801F4798"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[5]"
+entry = "0x801F4DD4"
+
+[[record]]
+area = 87
+file = "BIN/WORLD02/AREA087.EMI"
+section = "739659f2410dfe2e06413de94b83972c"
+descriptor = "0x801C8FC4"
+kind = "hook[6]"
+entry = "0x801F2C6C"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[0]"
+entry = "0x801F3A50"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[1]"
+entry = "0x801F512C"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[2]"
+entry = "0x801F4CD8"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[3]"
+entry = "0x801F3F80"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[4]"
+entry = "0x801F52C8"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[5]"
+entry = "0x801F591C"
+
+[[record]]
+area = 88
+file = "BIN/WORLD02/AREA088.EMI"
+section = "e9da08ed444101dc63938ddd7c19b01f"
+descriptor = "0x801C8FE0"
+kind = "hook[6]"
+entry = "0x801F3798"
+
+[[record]]
+area = 90
+file = "BIN/WORLD02/AREA090.EMI"
+section = "4e09d00fb33db0b1901bde520d89d92f"
+descriptor = "0x801F40EC"
+kind = "init"
+entry = "0x801F2C5C"
+
+[[record]]
+area = 91
+file = "BIN/WORLD02/AREA091.EMI"
+section = "9a7215369685c1518433c70f123ed37a"
+descriptor = "0x801F3B60"
+kind = "handler[0]"
+entry = "0x801F2D6C"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[0]"
+entry = "0x801F2E9C"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[1]"
+entry = "0x801F304C"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[2]"
+entry = "0x801F31FC"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[3]"
+entry = "0x801F33AC"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[4]"
+entry = "0x801F355C"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[5]"
+entry = "0x801F3708"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[6]"
+entry = "0x801F38B4"
+
+[[record]]
+area = 92
+file = "BIN/WORLD02/AREA092.EMI"
+section = "e2722c64fb2fb0fea9225815bb12d08c"
+descriptor = "0x801F416C"
+kind = "handler[7]"
+entry = "0x801F3A60"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "init"
+entry = "0x801F3460"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[0]"
+entry = "0x801F2ED0"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[10]"
+entry = "0x801F3330"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[11]"
+entry = "0x801F33B0"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[12]"
+entry = "0x801F33E0"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[13]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[14]"
+entry = "0x801F2C30"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[15]"
+entry = "0x801F2C5C"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[16]"
+entry = "0x801F2CB4"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[17]"
+entry = "0x801F2DC4"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[1]"
+entry = "0x801F2F50"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[2]"
+entry = "0x801F2FD0"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[3]"
+entry = "0x801F3050"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[4]"
+entry = "0x801F30D0"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[5]"
+entry = "0x801F3118"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[6]"
+entry = "0x801F3198"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[7]"
+entry = "0x801F3218"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[8]"
+entry = "0x801F3230"
+
+[[record]]
+area = 94
+file = "BIN/WORLD02/AREA094.EMI"
+section = "ab9f88a3dba57093e172cd7ca7567614"
+descriptor = "0x801F52F8"
+kind = "handler[9]"
+entry = "0x801F32B0"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[0]"
+entry = "0x801F30E8"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[1]"
+entry = "0x801F31F8"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[2]"
+entry = "0x801F336C"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[3]"
+entry = "0x801F3450"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[4]"
+entry = "0x801F351C"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[5]"
+entry = "0x801F35A4"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[6]"
+entry = "0x801F35F0"
+
+[[record]]
+area = 95
+file = "BIN/WORLD02/AREA095.EMI"
+section = "0084048c22c2965e4288919146da3cb9"
+descriptor = "0x801F3E58"
+kind = "handler[7]"
+entry = "0x801F3618"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[0]"
+entry = "0x801F3078"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[1]"
+entry = "0x801F3188"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[2]"
+entry = "0x801F32FC"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[3]"
+entry = "0x801F33E0"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[4]"
+entry = "0x801F34AC"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[5]"
+entry = "0x801F3534"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[6]"
+entry = "0x801F3580"
+
+[[record]]
+area = 96
+file = "BIN/WORLD02/AREA096.EMI"
+section = "eed051848fd95a76cbdb3ac5cb19b0a6"
+descriptor = "0x801F3DCC"
+kind = "handler[7]"
+entry = "0x801F35A8"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "init"
+entry = "0x801F5DD0"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[0]"
+entry = "0x801F5BA0"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[1]"
+entry = "0x801F59F4"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[2]"
+entry = "0x801F5A68"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[3]"
+entry = "0x801F5A98"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[4]"
+entry = "0x801F5AC8"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[5]"
+entry = "0x801F5B0C"
+
+[[record]]
+area = 98
+file = "BIN/WORLD02/AREA098.EMI"
+section = "5e548f8e0236b3f121005a9a3897cf7b"
+descriptor = "0x801F64CC"
+kind = "handler[6]"
+entry = "0x801F5B50"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "init"
+entry = "0x801F30D0"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[1]"
+entry = "0x801F2C24"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[2]"
+entry = "0x801F2C40"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[3]"
+entry = "0x801F2D68"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[4]"
+entry = "0x801F2E58"
+
+[[record]]
+area = 99
+file = "BIN/WORLD02/AREA099.EMI"
+section = "214a2a31a4d70283c21090c0a744a6b2"
+descriptor = "0x801F4944"
+kind = "handler[5]"
+entry = "0x801F30A8"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "init"
+entry = "0x801F3C2C"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[0]"
+entry = "0x801F34FC"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[1]"
+entry = "0x801F35D4"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[2]"
+entry = "0x801F3608"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[3]"
+entry = "0x801F3630"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[4]"
+entry = "0x801F3658"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[5]"
+entry = "0x801F3680"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[6]"
+entry = "0x801F369C"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[7]"
+entry = "0x801F3724"
+
+[[record]]
+area = 100
+file = "BIN/WORLD02/AREA100.EMI"
+section = "5a8dddab135192608d96eea1e60dc0d7"
+descriptor = "0x801F4F18"
+kind = "handler[8]"
+entry = "0x801F37AC"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[0]"
+entry = "0x801F560C"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[1]"
+entry = "0x801F5738"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[2]"
+entry = "0x801F5778"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[3]"
+entry = "0x801F57B4"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[4]"
+entry = "0x801F57FC"
+
+[[record]]
+area = 103
+file = "BIN/WORLD02/AREA103.EMI"
+section = "868762102bad748034b8cb545381429c"
+descriptor = "0x801F5D20"
+kind = "handler[5]"
+entry = "0x801F5834"
+
+[[record]]
+area = 104
+file = "BIN/WORLD02/AREA104.EMI"
+section = "f1a44745bd3e6b045f39d8489b9d90db"
+descriptor = "0x801F6A18"
+kind = "init"
+entry = "0x801F2E8C"
+
+[[record]]
+area = 104
+file = "BIN/WORLD02/AREA104.EMI"
+section = "f1a44745bd3e6b045f39d8489b9d90db"
+descriptor = "0x801C8FFC"
+kind = "hook[0]"
+entry = "0x801F2FB0"
+
+[[record]]
+area = 104
+file = "BIN/WORLD02/AREA104.EMI"
+section = "f1a44745bd3e6b045f39d8489b9d90db"
+descriptor = "0x801C8FFC"
+kind = "hook[3]"
+entry = "0x801F34E0"
+
+[[record]]
+area = 104
+file = "BIN/WORLD02/AREA104.EMI"
+section = "f1a44745bd3e6b045f39d8489b9d90db"
+descriptor = "0x801C8FFC"
+kind = "hook[4]"
+entry = "0x801F4238"
+
+[[record]]
+area = 104
+file = "BIN/WORLD02/AREA104.EMI"
+section = "f1a44745bd3e6b045f39d8489b9d90db"
+descriptor = "0x801C8FFC"
+kind = "hook[6]"
+entry = "0x801F2F0C"
+
+[[record]]
+area = 105
+file = "BIN/WORLD02/AREA105.EMI"
+section = "6df723c847ef4b5af8359cb26dbd5c24"
+descriptor = "0x801F3434"
+kind = "init"
+entry = "0x801F32B8"
+
+[[record]]
+area = 106
+file = "BIN/WORLD02/AREA106.EMI"
+section = "caf425f126708675c0393621f5bb96e3"
+descriptor = "0x801F480C"
+kind = "handler[0]"
+entry = "0x801F38E8"
+
+[[record]]
+area = 106
+file = "BIN/WORLD02/AREA106.EMI"
+section = "caf425f126708675c0393621f5bb96e3"
+descriptor = "0x801F480C"
+kind = "handler[1]"
+entry = "0x801F3940"
+
+[[record]]
+area = 106
+file = "BIN/WORLD02/AREA106.EMI"
+section = "caf425f126708675c0393621f5bb96e3"
+descriptor = "0x801F480C"
+kind = "handler[2]"
+entry = "0x801F3A60"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "init"
+entry = "0x801F56E0"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[0]"
+entry = "0x801F43A4"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[10]"
+entry = "0x801F4D60"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[11]"
+entry = "0x801F4DC8"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[12]"
+entry = "0x801F4E9C"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[13]"
+entry = "0x801F4EBC"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[14]"
+entry = "0x801F4EE4"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[15]"
+entry = "0x801F4F0C"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[1]"
+entry = "0x801F43C0"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[2]"
+entry = "0x801F43DC"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[3]"
+entry = "0x801F43F8"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[4]"
+entry = "0x801F4414"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[5]"
+entry = "0x801F4918"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[6]"
+entry = "0x801F4998"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[7]"
+entry = "0x801F4A18"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[8]"
+entry = "0x801F4A98"
+
+[[record]]
+area = 108
+file = "BIN/WORLD02/AREA108.EMI"
+section = "5c94f03574e4ce5472b9ff11c7f53565"
+descriptor = "0x801F6328"
+kind = "handler[9]"
+entry = "0x801F4B14"
+
+[[record]]
+area = 110
+file = "BIN/WORLD02/AREA110.EMI"
+section = "09e5b71f41a5935d0b9d7ac581dd220d"
+descriptor = "0x801F2DD4"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "init"
+entry = "0x801F46A8"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[0]"
+entry = "0x801F3448"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[1]"
+entry = "0x801F3460"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[2]"
+entry = "0x801F35F4"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[3]"
+entry = "0x801F3768"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[4]"
+entry = "0x801F3790"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[5]"
+entry = "0x801F3808"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[6]"
+entry = "0x801F39E0"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[7]"
+entry = "0x801F3BC0"
+
+[[record]]
+area = 111
+file = "BIN/WORLD02/AREA111.EMI"
+section = "d00477f7e777d3d5c4f1fd814aa4b5ab"
+descriptor = "0x801F5B84"
+kind = "handler[8]"
+entry = "0x801F3D3C"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[0]"
+entry = "0x801F3558"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[1]"
+entry = "0x801F3638"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[2]"
+entry = "0x801F366C"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[3]"
+entry = "0x801F3730"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[4]"
+entry = "0x801F3870"
+
+[[record]]
+area = 112
+file = "BIN/WORLD02/AREA112.EMI"
+section = "7a39c49e9e3b8744d9b6143d07faa53d"
+descriptor = "0x801F48B8"
+kind = "handler[5]"
+entry = "0x801F3898"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[0]"
+entry = "0x801F2EF0"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[1]"
+entry = "0x801F45CC"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[2]"
+entry = "0x801F4178"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[3]"
+entry = "0x801F3420"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[4]"
+entry = "0x801F4768"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[5]"
+entry = "0x801F4D90"
+
+[[record]]
+area = 115
+file = "BIN/WORLD03/AREA115.EMI"
+section = "97871478a8e71fa7efbc23278f743453"
+descriptor = "0x801C9018"
+kind = "hook[6]"
+entry = "0x801F2C38"
+
+[[record]]
+area = 116
+file = "BIN/WORLD03/AREA116.EMI"
+section = "c599b1ad8ac458eb6d7983dd679eed6b"
+descriptor = "0x801F34A4"
+kind = "handler[0]"
+entry = "0x801F2D54"
+
+[[record]]
+area = 116
+file = "BIN/WORLD03/AREA116.EMI"
+section = "c599b1ad8ac458eb6d7983dd679eed6b"
+descriptor = "0x801F34A4"
+kind = "handler[1]"
+entry = "0x801F2D80"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[0]"
+entry = "0x801F3D70"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[1]"
+entry = "0x801F3DF0"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[2]"
+entry = "0x801F3E70"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[3]"
+entry = "0x801F3EF0"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[4]"
+entry = "0x801F3FB0"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[5]"
+entry = "0x801F3FF0"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[6]"
+entry = "0x801F4048"
+
+[[record]]
+area = 117
+file = "BIN/WORLD03/AREA117.EMI"
+section = "78dd9e1f7e9fb0af9532c8fb8dd2a154"
+descriptor = "0x801F5594"
+kind = "handler[7]"
+entry = "0x801F40CC"
+
+[[record]]
+area = 118
+file = "BIN/WORLD03/AREA118.EMI"
+section = "4718624b8be614844fdd02e0de33912c"
+descriptor = "0x801F599C"
+kind = "handler[0]"
+entry = "0x801F4B88"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[0]"
+entry = "0x801F4138"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[10]"
+entry = "0x801F4524"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[11]"
+entry = "0x801F4554"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[1]"
+entry = "0x801F41B8"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[2]"
+entry = "0x801F41E0"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[3]"
+entry = "0x801F4208"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[4]"
+entry = "0x801F4224"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[5]"
+entry = "0x801F42A4"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[6]"
+entry = "0x801F4324"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[7]"
+entry = "0x801F43A4"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[8]"
+entry = "0x801F4424"
+
+[[record]]
+area = 119
+file = "BIN/WORLD03/AREA119.EMI"
+section = "d037afdc7580e9e1f83189f0b1f569e5"
+descriptor = "0x801F531C"
+kind = "handler[9]"
+entry = "0x801F44A4"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801F6770"
+kind = "handler[0]"
+entry = "0x801F2C3C"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801F6770"
+kind = "handler[1]"
+entry = "0x801F2D30"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801F6770"
+kind = "handler[2]"
+entry = "0x801F2DC0"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801F6770"
+kind = "handler[3]"
+entry = "0x801F2C08"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[0]"
+entry = "0x801F2F04"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[1]"
+entry = "0x801F45E0"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[2]"
+entry = "0x801F418C"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[3]"
+entry = "0x801F3434"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[4]"
+entry = "0x801F477C"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[5]"
+entry = "0x801F64E8"
+
+[[record]]
+area = 121
+file = "BIN/WORLD03/AREA121.EMI"
+section = "716c3bdd5b1ad416bf0fdd7a655a9ee5"
+descriptor = "0x801C9034"
+kind = "hook[6]"
+entry = "0x801F2E1C"
+
+[[record]]
+area = 124
+file = "BIN/WORLD03/AREA124.EMI"
+section = "0aff6009dd38efb0a64cd55982552850"
+descriptor = "0x801F2DE0"
+kind = "init"
+entry = "0x801F2D2C"
+
+[[record]]
+area = 125
+file = "BIN/WORLD03/AREA125.EMI"
+section = "7155a43fc3374d250051415fd0e6f729"
+descriptor = "0x801F37F0"
+kind = "init"
+entry = "0x801F362C"
+
+[[record]]
+area = 127
+file = "BIN/WORLD03/AREA127.EMI"
+section = "9fed3fcd7e23a71858268ef30088aee8"
+descriptor = "0x801F2D10"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 128
+file = "BIN/WORLD03/AREA128.EMI"
+section = "95c18be58ee47ef175e60f3893666ae5"
+descriptor = "0x801F3DA8"
+kind = "init"
+entry = "0x801F31D0"
+
+[[record]]
+area = 128
+file = "BIN/WORLD03/AREA128.EMI"
+section = "95c18be58ee47ef175e60f3893666ae5"
+descriptor = "0x801F3DA8"
+kind = "handler[0]"
+entry = "0x801F3030"
+
+[[record]]
+area = 128
+file = "BIN/WORLD03/AREA128.EMI"
+section = "95c18be58ee47ef175e60f3893666ae5"
+descriptor = "0x801F3DA8"
+kind = "handler[1]"
+entry = "0x801F307C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[0]"
+entry = "0x801F363C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[10]"
+entry = "0x801F39FC"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[11]"
+entry = "0x801F3A7C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[12]"
+entry = "0x801F3AFC"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[13]"
+entry = "0x801F3B7C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[14]"
+entry = "0x801F3BFC"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[15]"
+entry = "0x801F3C7C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[16]"
+entry = "0x801F35B0"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[1]"
+entry = "0x801F36BC"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[2]"
+entry = "0x801F373C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[3]"
+entry = "0x801F3760"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[4]"
+entry = "0x801F378C"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[5]"
+entry = "0x801F37B8"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[6]"
+entry = "0x801F37F0"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[7]"
+entry = "0x801F3870"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[8]"
+entry = "0x801F38F0"
+
+[[record]]
+area = 130
+file = "BIN/WORLD03/AREA130.EMI"
+section = "a8696699e32d42923e0a2ff2413da6d2"
+descriptor = "0x801F500C"
+kind = "handler[9]"
+entry = "0x801F397C"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[0]"
+entry = "0x801F2D78"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[10]"
+entry = "0x801F2EEC"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[1]"
+entry = "0x801F2DA0"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[2]"
+entry = "0x801F2DC8"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[3]"
+entry = "0x801F2DF0"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[4]"
+entry = "0x801F2E18"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[5]"
+entry = "0x801F2E40"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[6]"
+entry = "0x801F2E68"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[7]"
+entry = "0x801F2E90"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[8]"
+entry = "0x801F2EB8"
+
+[[record]]
+area = 131
+file = "BIN/WORLD03/AREA131.EMI"
+section = "2f2b67d24192700b839ca98919cd8e11"
+descriptor = "0x801F3CB8"
+kind = "handler[9]"
+entry = "0x801F2ED0"
+
+[[record]]
+area = 132
+file = "BIN/WORLD03/AREA132.EMI"
+section = "a4ed478c50cb629a31d4a0b2e999ef4f"
+descriptor = "0x801F4A44"
+kind = "handler[0]"
+entry = "0x801F3A24"
+
+[[record]]
+area = 132
+file = "BIN/WORLD03/AREA132.EMI"
+section = "a4ed478c50cb629a31d4a0b2e999ef4f"
+descriptor = "0x801F4A44"
+kind = "handler[1]"
+entry = "0x801F3A64"
+
+[[record]]
+area = 132
+file = "BIN/WORLD03/AREA132.EMI"
+section = "a4ed478c50cb629a31d4a0b2e999ef4f"
+descriptor = "0x801F4A44"
+kind = "handler[2]"
+entry = "0x801F3AEC"
+
+[[record]]
+area = 132
+file = "BIN/WORLD03/AREA132.EMI"
+section = "a4ed478c50cb629a31d4a0b2e999ef4f"
+descriptor = "0x801F4A44"
+kind = "handler[3]"
+entry = "0x801F3C1C"
+
+[[record]]
+area = 132
+file = "BIN/WORLD03/AREA132.EMI"
+section = "a4ed478c50cb629a31d4a0b2e999ef4f"
+descriptor = "0x801F4A44"
+kind = "handler[4]"
+entry = "0x801F3CA0"
+
+[[record]]
+area = 133
+file = "BIN/WORLD03/AREA133.EMI"
+section = "f976e4e0505c8037ec63a196650afa3f"
+descriptor = "0x801F3DAC"
+kind = "handler[0]"
+entry = "0x801F2CEC"
+
+[[record]]
+area = 133
+file = "BIN/WORLD03/AREA133.EMI"
+section = "f976e4e0505c8037ec63a196650afa3f"
+descriptor = "0x801F3DAC"
+kind = "handler[1]"
+entry = "0x801F2D6C"
+
+[[record]]
+area = 133
+file = "BIN/WORLD03/AREA133.EMI"
+section = "f976e4e0505c8037ec63a196650afa3f"
+descriptor = "0x801F3DAC"
+kind = "handler[2]"
+entry = "0x801F2D94"
+
+[[record]]
+area = 133
+file = "BIN/WORLD03/AREA133.EMI"
+section = "f976e4e0505c8037ec63a196650afa3f"
+descriptor = "0x801F3DAC"
+kind = "handler[3]"
+entry = "0x801F2DBC"
+
+[[record]]
+area = 133
+file = "BIN/WORLD03/AREA133.EMI"
+section = "f976e4e0505c8037ec63a196650afa3f"
+descriptor = "0x801F3DAC"
+kind = "handler[4]"
+entry = "0x801F2C1C"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[0]"
+entry = "0x801F5114"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[10]"
+entry = "0x801F53EC"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[11]"
+entry = "0x801F546C"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[12]"
+entry = "0x801F54EC"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[13]"
+entry = "0x801F557C"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[14]"
+entry = "0x801F560C"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[15]"
+entry = "0x801F5698"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[1]"
+entry = "0x801F5194"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[2]"
+entry = "0x801F51BC"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[3]"
+entry = "0x801F51E4"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[4]"
+entry = "0x801F5200"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[5]"
+entry = "0x801F5280"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[6]"
+entry = "0x801F52A8"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[7]"
+entry = "0x801F52D0"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[8]"
+entry = "0x801F5350"
+
+[[record]]
+area = 134
+file = "BIN/WORLD03/AREA134.EMI"
+section = "bfe44d49c5bd765302a7044b0e0b49c9"
+descriptor = "0x801F6374"
+kind = "handler[9]"
+entry = "0x801F53D0"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "init"
+entry = "0x801F5A44"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[0]"
+entry = "0x801F40F8"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[10]"
+entry = "0x801F4828"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[11]"
+entry = "0x801F4848"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[12]"
+entry = "0x801F4868"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[13]"
+entry = "0x801F4888"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[14]"
+entry = "0x801F48DC"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[15]"
+entry = "0x801F49A8"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[16]"
+entry = "0x801F4BD4"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[17]"
+entry = "0x801F4D88"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[18]"
+entry = "0x801F4ED4"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[19]"
+entry = "0x801F50B0"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[1]"
+entry = "0x801F4128"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[2]"
+entry = "0x801F4178"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[3]"
+entry = "0x801F41C8"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[4]"
+entry = "0x801F4270"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[5]"
+entry = "0x801F4464"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[6]"
+entry = "0x801F44E0"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[7]"
+entry = "0x801F456C"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[8]"
+entry = "0x801F460C"
+
+[[record]]
+area = 135
+file = "BIN/WORLD03/AREA135.EMI"
+section = "72b1985ab8b794fa918064dc94be653b"
+descriptor = "0x801F6A68"
+kind = "handler[9]"
+entry = "0x801F46AC"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "init"
+entry = "0x801F33BC"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[0]"
+entry = "0x801F2D68"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[10]"
+entry = "0x801F3170"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[1]"
+entry = "0x801F2E08"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[2]"
+entry = "0x801F2E50"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[3]"
+entry = "0x801F2ED0"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[4]"
+entry = "0x801F2F50"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[5]"
+entry = "0x801F2FD0"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[6]"
+entry = "0x801F3018"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[7]"
+entry = "0x801F3048"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[8]"
+entry = "0x801F30C8"
+
+[[record]]
+area = 136
+file = "BIN/WORLD03/AREA136.EMI"
+section = "f20a6436a5911018a22fda9cd1760395"
+descriptor = "0x801F43B4"
+kind = "handler[9]"
+entry = "0x801F3148"
+
+[[record]]
+area = 139
+file = "BIN/WORLD03/AREA139.EMI"
+section = "fb322fb56f335a8a689427f1b821b4c5"
+descriptor = "0x801F45A0"
+kind = "handler[0]"
+entry = "0x801F42F4"
+
+[[record]]
+area = 140
+file = "BIN/WORLD03/AREA140.EMI"
+section = "e8787d95f92e3231a1b24c126d83df41"
+descriptor = "0x801F4A28"
+kind = "handler[0]"
+entry = "0x801F3DAC"
+
+[[record]]
+area = 140
+file = "BIN/WORLD03/AREA140.EMI"
+section = "e8787d95f92e3231a1b24c126d83df41"
+descriptor = "0x801F4A28"
+kind = "handler[1]"
+entry = "0x801F3E30"
+
+[[record]]
+area = 140
+file = "BIN/WORLD03/AREA140.EMI"
+section = "e8787d95f92e3231a1b24c126d83df41"
+descriptor = "0x801F4A28"
+kind = "handler[2]"
+entry = "0x801F3D4C"
+
+[[record]]
+area = 141
+file = "BIN/WORLD03/AREA141.EMI"
+section = "47a02f7959f6ab5cf25a403e979e98d7"
+descriptor = "0x801F4D50"
+kind = "init"
+entry = "0x801F3B04"
+
+[[record]]
+area = 141
+file = "BIN/WORLD03/AREA141.EMI"
+section = "47a02f7959f6ab5cf25a403e979e98d7"
+descriptor = "0x801F4D50"
+kind = "handler[0]"
+entry = "0x801F3588"
+
+[[record]]
+area = 141
+file = "BIN/WORLD03/AREA141.EMI"
+section = "47a02f7959f6ab5cf25a403e979e98d7"
+descriptor = "0x801F4D50"
+kind = "handler[1]"
+entry = "0x801F35E4"
+
+[[record]]
+area = 141
+file = "BIN/WORLD03/AREA141.EMI"
+section = "47a02f7959f6ab5cf25a403e979e98d7"
+descriptor = "0x801F4D50"
+kind = "handler[2]"
+entry = "0x801F3688"
+
+[[record]]
+area = 141
+file = "BIN/WORLD03/AREA141.EMI"
+section = "47a02f7959f6ab5cf25a403e979e98d7"
+descriptor = "0x801F4D50"
+kind = "handler[3]"
+entry = "0x801F3838"
+
+[[record]]
+area = 142
+file = "BIN/WORLD03/AREA142.EMI"
+section = "0a3273e106a02ba264146bf334a57e38"
+descriptor = "0x801F3B38"
+kind = "handler[0]"
+entry = "0x801F3414"
+
+[[record]]
+area = 143
+file = "BIN/WORLD03/AREA143.EMI"
+section = "90cfe7bfc1bb4ba3eb0e220e245b8466"
+descriptor = "0x801F52B8"
+kind = "handler[0]"
+entry = "0x801F3C10"
+
+[[record]]
+area = 143
+file = "BIN/WORLD03/AREA143.EMI"
+section = "90cfe7bfc1bb4ba3eb0e220e245b8466"
+descriptor = "0x801F52B8"
+kind = "handler[1]"
+entry = "0x801F3C40"
+
+[[record]]
+area = 143
+file = "BIN/WORLD03/AREA143.EMI"
+section = "90cfe7bfc1bb4ba3eb0e220e245b8466"
+descriptor = "0x801F52B8"
+kind = "handler[2]"
+entry = "0x801F3C74"
+
+[[record]]
+area = 143
+file = "BIN/WORLD03/AREA143.EMI"
+section = "90cfe7bfc1bb4ba3eb0e220e245b8466"
+descriptor = "0x801F52B8"
+kind = "handler[3]"
+entry = "0x801F3D38"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[0]"
+entry = "0x801F3818"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[1]"
+entry = "0x801F3A20"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[2]"
+entry = "0x801F3AB4"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[3]"
+entry = "0x801F3AEC"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[4]"
+entry = "0x801F3B24"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[5]"
+entry = "0x801F3BAC"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[6]"
+entry = "0x801F3C78"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[7]"
+entry = "0x801F3CE4"
+
+[[record]]
+area = 144
+file = "BIN/WORLD03/AREA144.EMI"
+section = "fe93cd94cf9312973ac44c090f3855d9"
+descriptor = "0x801F491C"
+kind = "handler[8]"
+entry = "0x801F3D14"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "init"
+entry = "0x801F5324"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[0]"
+entry = "0x801F3CE4"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[10]"
+entry = "0x801F4374"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[1]"
+entry = "0x801F3DCC"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[2]"
+entry = "0x801F3FD8"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[3]"
+entry = "0x801F4008"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[4]"
+entry = "0x801F403C"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[5]"
+entry = "0x801F4100"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[6]"
+entry = "0x801F41C4"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[7]"
+entry = "0x801F4288"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[8]"
+entry = "0x801F4304"
+
+[[record]]
+area = 145
+file = "BIN/WORLD03/AREA145.EMI"
+section = "c91a0720c33c614c2816669952a6e6f9"
+descriptor = "0x801F5C50"
+kind = "handler[9]"
+entry = "0x801F434C"
+
+[[record]]
+area = 146
+file = "BIN/WORLD03/AREA146.EMI"
+section = "62746ab25bdc754b9d7c699f3949d38b"
+descriptor = "0x801F3ABC"
+kind = "handler[0]"
+entry = "0x801F2C04"
+
+[[record]]
+area = 146
+file = "BIN/WORLD03/AREA146.EMI"
+section = "62746ab25bdc754b9d7c699f3949d38b"
+descriptor = "0x801F3ABC"
+kind = "handler[1]"
+entry = "0x801F2C34"
+
+[[record]]
+area = 146
+file = "BIN/WORLD03/AREA146.EMI"
+section = "62746ab25bdc754b9d7c699f3949d38b"
+descriptor = "0x801F3ABC"
+kind = "handler[2]"
+entry = "0x801F2C68"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "init"
+entry = "0x801F4274"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[0]"
+entry = "0x801F3990"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[1]"
+entry = "0x801F39A4"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[2]"
+entry = "0x801F39D4"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[3]"
+entry = "0x801F3A0C"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[4]"
+entry = "0x801F3A20"
+
+[[record]]
+area = 148
+file = "BIN/WORLD03/AREA148.EMI"
+section = "1f7b8ee8c2fef799d7595cb18a21904f"
+descriptor = "0x801F60F4"
+kind = "handler[5]"
+entry = "0x801F3AE4"
+
+[[record]]
+area = 149
+file = "BIN/WORLD03/AREA149.EMI"
+section = "20bcbeece137db9ee9a99ae47fd26fad"
+descriptor = "0x801F453C"
+kind = "init"
+entry = "0x801F36CC"
+
+[[record]]
+area = 149
+file = "BIN/WORLD03/AREA149.EMI"
+section = "20bcbeece137db9ee9a99ae47fd26fad"
+descriptor = "0x801F453C"
+kind = "handler[0]"
+entry = "0x801F2EC4"
+
+[[record]]
+area = 149
+file = "BIN/WORLD03/AREA149.EMI"
+section = "20bcbeece137db9ee9a99ae47fd26fad"
+descriptor = "0x801F453C"
+kind = "handler[1]"
+entry = "0x801F2EFC"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[0]"
+entry = "0x801F2E5C"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[1]"
+entry = "0x801F4538"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[2]"
+entry = "0x801F40E4"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[3]"
+entry = "0x801F338C"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[4]"
+entry = "0x801F46D4"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[5]"
+entry = "0x801F4D04"
+
+[[record]]
+area = 151
+file = "BIN/WORLD03/AREA151.EMI"
+section = "cecb75900acb61eec85d37dee3df0145"
+descriptor = "0x801C9050"
+kind = "hook[6]"
+entry = "0x801F2C38"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801F4CB4"
+kind = "init"
+entry = "0x801F2C38"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[0]"
+entry = "0x801F2DB0"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[1]"
+entry = "0x801F448C"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[2]"
+entry = "0x801F4038"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[3]"
+entry = "0x801F32E0"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[4]"
+entry = "0x801F4628"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[5]"
+entry = "0x801F4C48"
+
+[[record]]
+area = 152
+file = "BIN/WORLD04/AREA152.EMI"
+section = "8f384cab7689c1d190084a57f9cd9cd0"
+descriptor = "0x801C906C"
+kind = "hook[6]"
+entry = "0x801F2CA8"
+
+[[record]]
+area = 153
+file = "BIN/WORLD04/AREA153.EMI"
+section = "cf1aa64cef25d2b3aaf28081d49c5cd6"
+descriptor = "0x801F3BB4"
+kind = "init"
+entry = "0x801F2C5C"
+
+[[record]]
+area = 154
+file = "BIN/WORLD04/AREA154.EMI"
+section = "40241f2f9d21600f65ceabbf3468af07"
+descriptor = "0x801F318C"
+kind = "init"
+entry = "0x801F2C5C"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "init"
+entry = "0x801F49F0"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[0]"
+entry = "0x801F3F14"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[10]"
+entry = "0x801F4480"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[1]"
+entry = "0x801F3F28"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[2]"
+entry = "0x801F3F58"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[3]"
+entry = "0x801F4080"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[4]"
+entry = "0x801F40F4"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[5]"
+entry = "0x801F4140"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[6]"
+entry = "0x801F42C4"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[7]"
+entry = "0x801F43B8"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[8]"
+entry = "0x801F4434"
+
+[[record]]
+area = 167
+file = "BIN/WORLD04/AREA167.EMI"
+section = "7f93c130bef5107da19117c08b7c76fa"
+descriptor = "0x801F6870"
+kind = "handler[9]"
+entry = "0x801F446C"
+
+[[record]]
+area = 169
+file = "BIN/WORLD04/AREA169.EMI"
+section = "c4cc80526826b4ab5e56c5cdc1793021"
+descriptor = "0x801F3B58"
+kind = "init"
+entry = "0x801F3524"
+
+[[record]]
+area = 170
+file = "BIN/WORLD04/AREA170.EMI"
+section = "38486ae1f3849c3b95d9bb3c9cf4fc57"
+descriptor = "0x801F6474"
+kind = "init"
+entry = "0x801F4ABC"
+
+[[record]]
+area = 170
+file = "BIN/WORLD04/AREA170.EMI"
+section = "38486ae1f3849c3b95d9bb3c9cf4fc57"
+descriptor = "0x801F6474"
+kind = "handler[0]"
+entry = "0x801F4A7C"
+
+[[record]]
+area = 170
+file = "BIN/WORLD04/AREA170.EMI"
+section = "38486ae1f3849c3b95d9bb3c9cf4fc57"
+descriptor = "0x801F6474"
+kind = "handler[1]"
+entry = "0x801F4A9C"
+
+[[record]]
+area = 171
+file = "BIN/WORLD04/AREA171.EMI"
+section = "f781951e1547be3aad2475abb78cfa49"
+descriptor = "0x801F4144"
+kind = "init"
+entry = "0x801F3764"
+
+[[record]]
+area = 171
+file = "BIN/WORLD04/AREA171.EMI"
+section = "f781951e1547be3aad2475abb78cfa49"
+descriptor = "0x801F4144"
+kind = "handler[0]"
+entry = "0x801F3558"
+
+[[record]]
+area = 171
+file = "BIN/WORLD04/AREA171.EMI"
+section = "f781951e1547be3aad2475abb78cfa49"
+descriptor = "0x801F4144"
+kind = "handler[1]"
+entry = "0x801F3650"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "init"
+entry = "0x801F4D58"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[0]"
+entry = "0x801F4324"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[1]"
+entry = "0x801F434C"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[2]"
+entry = "0x801F43C8"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[3]"
+entry = "0x801F471C"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[4]"
+entry = "0x801F491C"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[5]"
+entry = "0x801F49DC"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[6]"
+entry = "0x801F4AAC"
+
+[[record]]
+area = 172
+file = "BIN/WORLD04/AREA172.EMI"
+section = "ed114a840729d347c0321c5ddd02315d"
+descriptor = "0x801F672C"
+kind = "handler[7]"
+entry = "0x801F4AF4"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "init"
+entry = "0x801F4E90"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[0]"
+entry = "0x801F48B0"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[1]"
+entry = "0x801F48C4"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[2]"
+entry = "0x801F4988"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[3]"
+entry = "0x801F4A4C"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[4]"
+entry = "0x801F4A9C"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[5]"
+entry = "0x801F4ADC"
+
+[[record]]
+area = 173
+file = "BIN/WORLD04/AREA173.EMI"
+section = "e42dcfe0fda5d15d494769fcf2e00108"
+descriptor = "0x801F58D0"
+kind = "handler[6]"
+entry = "0x801F4BB0"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[0]"
+entry = "0x801F3C8C"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[10]"
+entry = "0x801F43FC"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[11]"
+entry = "0x801F4594"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[12]"
+entry = "0x801F4688"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[13]"
+entry = "0x801F4810"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[14]"
+entry = "0x801F48EC"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[15]"
+entry = "0x801F49C8"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[16]"
+entry = "0x801F4AB4"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[17]"
+entry = "0x801F4D1C"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[18]"
+entry = "0x801F4D54"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[19]"
+entry = "0x801F4D90"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[1]"
+entry = "0x801F3CE4"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[20]"
+entry = "0x801F4F28"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[21]"
+entry = "0x801F4F6C"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[2]"
+entry = "0x801F3D40"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[3]"
+entry = "0x801F3D78"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[4]"
+entry = "0x801F3E68"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[5]"
+entry = "0x801F3F4C"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[6]"
+entry = "0x801F3FFC"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[7]"
+entry = "0x801F4100"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[8]"
+entry = "0x801F41A8"
+
+[[record]]
+area = 174
+file = "BIN/WORLD04/AREA174.EMI"
+section = "efa22d8507628aecdb02340cdc4ee628"
+descriptor = "0x801F6668"
+kind = "handler[9]"
+entry = "0x801F4278"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "init"
+entry = "0x801F44D8"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[0]"
+entry = "0x801F3FBC"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[1]"
+entry = "0x801F3FDC"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[2]"
+entry = "0x801F400C"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[3]"
+entry = "0x801F40AC"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[4]"
+entry = "0x801F4204"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[5]"
+entry = "0x801F431C"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[6]"
+entry = "0x801F439C"
+
+[[record]]
+area = 175
+file = "BIN/WORLD04/AREA175.EMI"
+section = "48227cae36317ec9a2d2977b8bc61637"
+descriptor = "0x801F531C"
+kind = "handler[7]"
+entry = "0x801F446C"
+
+[[record]]
+area = 176
+file = "BIN/WORLD04/AREA176.EMI"
+section = "8ddf384f51849a2d0e57dc59fbe09228"
+descriptor = "0x801F376C"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 176
+file = "BIN/WORLD04/AREA176.EMI"
+section = "8ddf384f51849a2d0e57dc59fbe09228"
+descriptor = "0x801F376C"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 176
+file = "BIN/WORLD04/AREA176.EMI"
+section = "8ddf384f51849a2d0e57dc59fbe09228"
+descriptor = "0x801F376C"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 177
+file = "BIN/WORLD04/AREA177.EMI"
+section = "5cecf1ec373fd83c3ddb75606716d246"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 177
+file = "BIN/WORLD04/AREA177.EMI"
+section = "5cecf1ec373fd83c3ddb75606716d246"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 177
+file = "BIN/WORLD04/AREA177.EMI"
+section = "5cecf1ec373fd83c3ddb75606716d246"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 178
+file = "BIN/WORLD04/AREA178.EMI"
+section = "c305ea438d4cbc26edf3e223f1914239"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 178
+file = "BIN/WORLD04/AREA178.EMI"
+section = "c305ea438d4cbc26edf3e223f1914239"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 178
+file = "BIN/WORLD04/AREA178.EMI"
+section = "c305ea438d4cbc26edf3e223f1914239"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 179
+file = "BIN/WORLD04/AREA179.EMI"
+section = "cdc6b1827d65f16740c9e9ffdc1b380b"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 179
+file = "BIN/WORLD04/AREA179.EMI"
+section = "cdc6b1827d65f16740c9e9ffdc1b380b"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 179
+file = "BIN/WORLD04/AREA179.EMI"
+section = "cdc6b1827d65f16740c9e9ffdc1b380b"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 180
+file = "BIN/WORLD04/AREA180.EMI"
+section = "919b1b51b465938c870e2f831a6e9633"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 180
+file = "BIN/WORLD04/AREA180.EMI"
+section = "919b1b51b465938c870e2f831a6e9633"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 180
+file = "BIN/WORLD04/AREA180.EMI"
+section = "919b1b51b465938c870e2f831a6e9633"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 181
+file = "BIN/WORLD04/AREA181.EMI"
+section = "85f3899aba1679f138530452b3ccf2cb"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 181
+file = "BIN/WORLD04/AREA181.EMI"
+section = "85f3899aba1679f138530452b3ccf2cb"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 181
+file = "BIN/WORLD04/AREA181.EMI"
+section = "85f3899aba1679f138530452b3ccf2cb"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 182
+file = "BIN/WORLD04/AREA182.EMI"
+section = "d1e6c72bb7ab3b4baee04c6d50770b75"
+descriptor = "0x801F3784"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 182
+file = "BIN/WORLD04/AREA182.EMI"
+section = "d1e6c72bb7ab3b4baee04c6d50770b75"
+descriptor = "0x801F3784"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 182
+file = "BIN/WORLD04/AREA182.EMI"
+section = "d1e6c72bb7ab3b4baee04c6d50770b75"
+descriptor = "0x801F3784"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 183
+file = "BIN/WORLD04/AREA183.EMI"
+section = "2495af10c23c9727801d7c2f9cf0c70f"
+descriptor = "0x801F379C"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 183
+file = "BIN/WORLD04/AREA183.EMI"
+section = "2495af10c23c9727801d7c2f9cf0c70f"
+descriptor = "0x801F379C"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 183
+file = "BIN/WORLD04/AREA183.EMI"
+section = "2495af10c23c9727801d7c2f9cf0c70f"
+descriptor = "0x801F379C"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 184
+file = "BIN/WORLD04/AREA184.EMI"
+section = "77de9d43e5bffec61c3736142b0e25f6"
+descriptor = "0x801F379C"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 184
+file = "BIN/WORLD04/AREA184.EMI"
+section = "77de9d43e5bffec61c3736142b0e25f6"
+descriptor = "0x801F379C"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 184
+file = "BIN/WORLD04/AREA184.EMI"
+section = "77de9d43e5bffec61c3736142b0e25f6"
+descriptor = "0x801F379C"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 185
+file = "BIN/WORLD04/AREA185.EMI"
+section = "c750d5ea5fc23dd1cc9ac9d5982fc250"
+descriptor = "0x801F3A44"
+kind = "init"
+entry = "0x801F32D8"
+
+[[record]]
+area = 185
+file = "BIN/WORLD04/AREA185.EMI"
+section = "c750d5ea5fc23dd1cc9ac9d5982fc250"
+descriptor = "0x801F3A44"
+kind = "handler[0]"
+entry = "0x801F3328"
+
+[[record]]
+area = 185
+file = "BIN/WORLD04/AREA185.EMI"
+section = "c750d5ea5fc23dd1cc9ac9d5982fc250"
+descriptor = "0x801F3A44"
+kind = "handler[1]"
+entry = "0x801F3348"
+
+[[record]]
+area = 186
+file = "BIN/WORLD04/AREA186.EMI"
+section = "8004d36e2ed8c9d7d24fab6341290255"
+descriptor = "0x801F3B34"
+kind = "init"
+entry = "0x801F2F24"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "init"
+entry = "0x801F4D88"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[0]"
+entry = "0x801F4840"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[1]"
+entry = "0x801F48E0"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[2]"
+entry = "0x801F4908"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[3]"
+entry = "0x801F4930"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[4]"
+entry = "0x801F494C"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[5]"
+entry = "0x801F49A4"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[6]"
+entry = "0x801F49FC"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[7]"
+entry = "0x801F4A54"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[8]"
+entry = "0x801F4AAC"
+
+[[record]]
+area = 188
+file = "BIN/WORLD04/AREA188.EMI"
+section = "c787edb8467971090693a7656ff25dd5"
+descriptor = "0x801F6848"
+kind = "handler[9]"
+entry = "0x801F4B24"
+
+[[record]]
+area = 189
+file = "BIN/WORLD04/AREA189.EMI"
+section = "b880f46307b087de746ab744f0855e2e"
+descriptor = "0x801F62AC"
+kind = "init"
+entry = "0x801F4C38"
+
+[[record]]
+area = 191
+file = "BIN/WORLD04/AREA191.EMI"
+section = "1091d89f83dee0c857234a7ebc103caa"
+descriptor = "0x801F418C"
+kind = "init"
+entry = "0x801F3964"
+
+[[record]]
+area = 191
+file = "BIN/WORLD04/AREA191.EMI"
+section = "1091d89f83dee0c857234a7ebc103caa"
+descriptor = "0x801F418C"
+kind = "handler[0]"
+entry = "0x801F30DC"
+
+[[record]]
+area = 191
+file = "BIN/WORLD04/AREA191.EMI"
+section = "1091d89f83dee0c857234a7ebc103caa"
+descriptor = "0x801F418C"
+kind = "handler[1]"
+entry = "0x801F3130"
+
+[[record]]
+area = 191
+file = "BIN/WORLD04/AREA191.EMI"
+section = "1091d89f83dee0c857234a7ebc103caa"
+descriptor = "0x801F418C"
+kind = "handler[2]"
+entry = "0x801F31A0"
+
+[[record]]
+area = 192
+file = "BIN/WORLD04/AREA192.EMI"
+section = "f0cc0f32ebbf5e4e8507373d9fab8b27"
+descriptor = "0x801F37C8"
+kind = "init"
+entry = "0x801F3424"
+
+[[record]]
+area = 192
+file = "BIN/WORLD04/AREA192.EMI"
+section = "f0cc0f32ebbf5e4e8507373d9fab8b27"
+descriptor = "0x801F37C8"
+kind = "handler[0]"
+entry = "0x801F2E44"
+
+[[record]]
+area = 193
+file = "BIN/WORLD04/AREA193.EMI"
+section = "99de4571d7d7d81ed95f80bd00c8afca"
+descriptor = "0x801F39B8"
+kind = "init"
+entry = "0x801F31C0"
+
+[[record]]
+area = 193
+file = "BIN/WORLD04/AREA193.EMI"
+section = "99de4571d7d7d81ed95f80bd00c8afca"
+descriptor = "0x801F39B8"
+kind = "handler[0]"
+entry = "0x801F2E38"
+
+[[record]]
+area = 196
+file = "BIN/WORLD04/AREA196.EMI"
+section = "c12e05caf5dc11750a3257c9505e22dc"
+descriptor = "0x801F42B0"
+kind = "handler[0]"
+entry = "0x801F3F90"
+
+[[record]]
+area = 196
+file = "BIN/WORLD04/AREA196.EMI"
+section = "c12e05caf5dc11750a3257c9505e22dc"
+descriptor = "0x801F42B0"
+kind = "handler[1]"
+entry = "0x801F4054"
+
+[[record]]
+area = 196
+file = "BIN/WORLD04/AREA196.EMI"
+section = "c12e05caf5dc11750a3257c9505e22dc"
+descriptor = "0x801F42B0"
+kind = "handler[2]"
+entry = "0x801F4118"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[0]"
+entry = "0x801F39E0"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[1]"
+entry = "0x801F3AA4"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[2]"
+entry = "0x801F3B68"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[3]"
+entry = "0x801F3C2C"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[4]"
+entry = "0x801F3CF0"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[5]"
+entry = "0x801F3DB4"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[6]"
+entry = "0x801F3E78"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[7]"
+entry = "0x801F3F3C"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[8]"
+entry = "0x801F4050"
+
+[[record]]
+area = 197
+file = "BIN/WORLD04/AREA197.EMI"
+section = "c9567658ba06ceab4ed59d6eb35aabde"
+descriptor = "0x801F49E4"
+kind = "handler[9]"
+entry = "0x801F4124"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[0]"
+entry = "0x801F2E00"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[10]"
+entry = "0x801F3850"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[11]"
+entry = "0x801F39B0"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[1]"
+entry = "0x801F2E58"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[2]"
+entry = "0x801F2F00"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[3]"
+entry = "0x801F2FD0"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[4]"
+entry = "0x801F2FF8"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[5]"
+entry = "0x801F3198"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[6]"
+entry = "0x801F3384"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[7]"
+entry = "0x801F3524"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[8]"
+entry = "0x801F35A0"
+
+[[record]]
+area = 198
+file = "BIN/WORLD04/AREA198.EMI"
+section = "6174a167ed48b49d41903900417d72c7"
+descriptor = "0x801F4294"
+kind = "handler[9]"
+entry = "0x801F35FC"
