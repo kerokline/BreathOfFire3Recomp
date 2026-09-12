@@ -22,15 +22,24 @@ Variants:
   span     `<0f><13>` shrink -6 forever at the head; each reading in
            `<0d>...<0e>` -> drawn through the quad path at 6 px, 6 px advance
   span3    same with `<0f><12>` shrink -3 (9 px), for comparison
+  rows     true ruby: per authored row `text <01> <0d>ruby<0e>`, the ruby
+           row laid out in half-cells with `--blank` bytes (09 = the gap
+           code the plugin's BOF3_RUBY_GAP=9 turns into 6 px of advance);
+           run with BOF3_RUBY_ROWY=8,1,29,22 so the plugin places the rows
 
 Markup in --text: `<xx>` hex control bytes; `[reading]` marks a reading run;
 everything else is glyphs encoded through names/font.toml and names/kanji.toml.
 """
 import argparse
+import io
 import os
 import re
 import sys
 import time
+
+# The console here is cp1252; the decoded probe line is Japanese.
+if hasattr(sys.stdout, "buffer") and (sys.stdout.encoding or "").lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jptext
@@ -64,9 +73,68 @@ def enc_glyphs(s, maps):
     return bytes(out)
 
 
-def build(text, variant):
+def parse_row(row, maps):
+    """One authored row -> (text glyph bytes, [(cell, reading glyph bytes)]).
+    Every glyph and <xx> control is one cell wide except <01>/<02>, which
+    are not allowed inside a row. <ff> (the word separator) counts one cell."""
+    kanji = maps[0]
+    text = bytearray(); readings = []
+    cells = 0; pos = 0; word_start = 0; word_width = 0
+    for m in re.finditer(r"<([0-9a-fA-F]{2})>|\[([^\]]+)\]", row):
+        chunk = row[pos:m.start()]
+        if chunk:
+            # A reading annotates the kanji run at the end of the chunk
+            # before it (the stem), as the markup is written.
+            stem = 0
+            while stem < len(chunk) and chunk[-1 - stem] in kanji:
+                stem += 1
+            text += enc_glyphs(chunk, maps); cells += len(chunk)
+            word_start, word_width = cells - stem, stem
+        pos = m.end()
+        if m.group(1):
+            text.append(int(m.group(1), 16)); cells += 1
+            word_start, word_width = cells, 0
+        else:
+            readings.append((word_start, word_width, enc_glyphs(m.group(2), maps)))
+    chunk = row[pos:]; text += enc_glyphs(chunk, maps); cells += len(chunk)
+    return bytes(text), cells, readings
+
+
+def ruby_row(cells, readings, blank):
+    """Half-cell layout: reading for the word at cell c starts at half-cell
+    2c; a reading longer than its word steals a free half-cell on the left
+    first. Blanks pad; the row is trimmed to the last reading."""
+    half = [None] * (2 * cells + 8)
+    for start, width, kana in readings:
+        s = 2 * start
+        if len(kana) > 2 * width and s > 0 and half[s - 1] is None:
+            s -= 1
+        for k, b in enumerate(kana):
+            half[s + k] = bytes([b])
+    while half and half[-1] is None:
+        half.pop()
+    return b"".join(h if h is not None else blank for h in half)
+
+
+def build_rows(text, blank):
+    """variant rows: <0f><13>, then per authored row: text <01> <0d>ruby<0e>."""
+    maps = glyph_maps()
+    out = bytearray(b"\x0f\x13")            # shrink -6 forever; ruby rows are spans
+    rows = text.split("<01>")
+    for i, row in enumerate(rows):
+        tb, cells, readings = parse_row(row, maps)
+        out += tb + b"\x01\x0d" + ruby_row(cells, readings, blank) + b"\x0e"
+        if i + 1 < len(rows):
+            out += b"\x01"
+    out.append(0)
+    return bytes(out)
+
+
+def build(text, variant, blank=b"\xff"):
     maps = glyph_maps()
     out = bytearray()
+    if variant == "rows":
+        return build_rows(text, blank)
     if variant == "span":
         out += b"\x0f\x13"                  # preset 19: type 3 shrink, P = -6, forever
     elif variant == "span3":
@@ -103,9 +171,12 @@ def main():
     ap.add_argument("--tree", default=scene.DEFAULT_TREE)
     ap.add_argument("--port", type=int, default=scene.DEFAULT_PORT)
     ap.add_argument("--dry", action="store_true", help="print the bytes and exit")
+    ap.add_argument("--blank", default="ff",
+                    help="rows: hex code of the half-cell blank in a ruby row")
+    ap.add_argument("--log", default=None, help="write the runtime's console here")
     a = ap.parse_args()
 
-    msg = build(a.text, a.variant)
+    msg = build(a.text, a.variant, bytes.fromhex(a.blank))
     print("probe (%d bytes): %s" % (len(msg), msg.hex()))
     print("decodes as:", jptext.decode(msg))
     if a.dry:
@@ -113,14 +184,21 @@ def main():
     if len(msg) > 0x200:
         raise SystemExit("probe too long for the scratch slot")
 
-    sc = scene.Scene(a.tree, a.port)
+    sc = scene.Scene(a.tree, a.port, log=a.log)
     try:
-        sc.enter(a.slot)
+        # Land on the slot and press Circle at once: scene.enter()'s settle
+        # and verify take seconds of wall time, and the field state's idle
+        # animation can walk the party off the NPC in that window (2026-09-12).
+        sc.launch()
+        st = sc.load(a.slot)
+        if st.get("last_ok") != 1:
+            raise SystemExit("savestate load failed: %r" % st)
         # The block must be an area script: the table entry for slot 0 is
         # non-zero and inside the 16 KiB window.
         r = sc.q("read_ram", addr=hex(AREA_BLOCK), len=4)
         head = bytes.fromhex(r["hex"])
         print("area block head:", head.hex())
+        t0 = time.time()
         for i, b in enumerate(msg):
             sc.q("write_ram", addr="0x%08X" % (PROBE_AT + i), val="0x%02X" % b)
         for i in range(256):
@@ -129,7 +207,16 @@ def main():
         back = bytes.fromhex(sc.q("read_ram", addr=hex(PROBE_AT), len=len(msg))["hex"])
         if back != msg:
             raise SystemExit("write-back mismatch: %s" % back.hex())
-        sc.press(["circle"])
+        print("probe written in %.2fs" % (time.time() - t0))
+        sc.press(["circle"], frames=8)
+        opened = False
+        for _ in range(40):
+            time.sleep(0.1)
+            if int(sc.q("read_ram", addr="0x80143B90", len=1)["hex"], 16) == 4:
+                opened = True
+                break
+        if not opened:
+            raise SystemExit("Circle did not open a message box (mode never became 4)")
         sc.wait_frames(a.reveal_frames)
         if a.shot:
             shot = a.shot if os.path.isabs(a.shot) else os.path.join(os.getcwd(), a.shot)

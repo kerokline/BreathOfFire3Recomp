@@ -809,8 +809,18 @@ declare the observed slots in both profiles and pin the retail sha256
 **2026-09-12 — true ruby (readings above the kanji) is back on the table.**
 The quad blitter advances by 12 + P, not a flat 12, and per-glyph placement is
 overridable from the plugin through the blitter entry hooks; the plan and the
-shrink probe (`tools/ruby_shrink_probe.py`, needs a re-saved field state) are
+shrink probe (`tools/ruby_shrink_probe.py`, stage = `slot02`) are
 in [`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened" and
+[`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". **Steps 1 and 2
+of that plan are done the same evening:** 12 + P advance and the fixed 14 px
+newline are measured on screen, and a `gpr[5]` write from a function-entry
+hook on the sprite blitter moves the text (env-gated `BOF3_RUBY_YBUMP`,
+third `mod_function_entry_funcs` entry). **Step 3 collapsed to a row rule
+and is demonstrated on screen** (`analysis/xlate_shots/ruby_rows_demo.png`):
+ruby rows are ordinary rows in the string, x aligns by glyph count with
+`0x09` half-cell gaps, and the plugin only sets y per row
+(`BOF3_RUBY_ROWY=8,1,29,22 BOF3_RUBY_GAP=9`, five hook entries now). Next
+is the builder variant, `jp_furigana`. Original pointer:
 [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". Two doc errors were
 corrected on the way (advance vs size; `0x0B` never moved y).
 The Ruby tables are in play (user-verified in real play, both scopes, system

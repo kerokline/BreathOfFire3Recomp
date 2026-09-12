@@ -23,7 +23,7 @@ the player to load one.
 |---|---|---|---|---|
 | 1 | `slot00` | 2026-09-05 | **Title / start screen** | Quick restarts |
 | 2 | `slot01` | 2026-09-05 | **Just before the intro-boss battle** | Auto-advances into the battle; after it, any command auto-advances through several scene transitions of auto-playing dialogue and areas — a long scripted stretch from one load |
-| 3 | `slot02` | 2026-09-05 | **Inside the Nu boss fight** | Boss-battle anchor |
+| 3 | `slot02` | 2026-09-12 | **Field, facing a talkable NPC (AREA014), Ryu aligned to the idle-animation direction** | The furigana probe stage (`tools/ruby_shrink_probe.py --slot 2`): Circle opens a ~5-page conversation. Press Circle right after the load — the idle animation walks Ryu off the NPC if the harness settles first. Re-saved by the user 2026-09-12 15:58; supersedes the Nu boss-fight anchor |
 | 4 | `slot03` | 2026-09-05 | **Inside a regular field battle** | `tools/callstack_diff.py` differential anchor (Attack / Defend / Watch / Auto / Run — see the command-menu note below) |
 | 7 | `slot06` | 2026-09-05 | **NEW GAME / LOAD GAME menu** (after the card check, from `slot00` + Start) | Front-end menu. ⚠ Down + Circle from here lands on **name entry**, not the LOAD-GAME card select as this row used to say (observed headless 2026-09-06, `scene.py run --slot 6 --press down --press circle`) — the state has moved, or the row was always wrong |
 | 12 | `slot11` | 2026-09-05 | **LOAD-GAME card-select screen** (「どのカードからロードしますか」) — from `slot06` + Down + Circle | Near-floor-in-dbg screen; in relprof ~418 fps (floor 355), **99% BIOS/boot-EXE, ~0 overlays** |

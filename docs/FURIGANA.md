@@ -391,19 +391,142 @@ trade than the inline variant's re-flow of nearly every page.
 
 **Order of work:**
 
-1. **Shrink probe, on screen.** `tools/ruby_shrink_probe.py --slot N
-   --variant span --shot span.png` against a fresh field savestate (every
-   slot went stale when the codegen hash changed 2026-09-11 16:39; re-save
-   one). Compare with `--variant plain` and `--variant bracket`. This settles
-   the 6 px point-sampled quality and confirms 12 + P advance in play.
-2. **Hook feasibility.** One throwaway callback on `0x8014F6BC` that bumps
-   `gpr[5]` (y) by a constant: if the text moves, register writes are
-   honoured; if not, steer the sprite path through `0x80145AC6/8` from
-   `0x8014F708` instead.
-3. **Layout table + builder.** Extend `build_ruby_script.py`: two rows per
-   page, readings emitted as `<0d>…<0e>` runs after each word, and a sidecar
-   table of per-glyph (x, y) keyed by the message hash, emitted next to the
-   message table. Plugin: per-frame counter reset at `0x80150598`, placement
-   at the two blitters, `P` and bit 3 forced each frame rather than trusting
-   an in-string preset.
+1. ~~**Shrink probe, on screen.**~~ **DONE 2026-09-12 (evening), on
+   `slot02`** — a field state facing a talkable NPC in AREA014, saved by the
+   user. `tools/ruby_shrink_probe.py --slot 2 --variant span|span3|plain|
+   bracket`; crops in `analysis/xlate_shots/ruby_shrink_compare.png`. What
+   it settled:
+   - **12 + P advance holds in play.** `<0f><13>` (P = −6) drew every
+     `<0d>…<0e>` run as 6 px kana at 6 px pitch; `<0f><12>` (P = −3) as 9 px
+     at 9 px. Glyphs outside the span stayed 12 px on the sprite path with
+     P = −6 live, so the span flag really is the only switch between the two
+     blitters, and the preset survives the `<01>` newline (flags `0x0008`,
+     P = −6 read back after the page finished).
+   - **The shrunk glyph sits at the top of its cell.** The quad is anchored
+     at the cursor, so a 6 px reading already occupies the upper half of the
+     12 px row. A ruby band above the row is a y shift of about −6 and an x
+     step back over the word — exactly what step 2's placement hook writes —
+     not a second layout.
+   - **6 px is legible, barely.** むら / ひと / よる / さばく / で all read at
+     native resolution but the point-sampled strokes are thin; 9 px (P = −3)
+     is comfortably readable and would fit a band if the box grew by 3 px
+     per row, which the row budget below does not assume. Compare both crops
+     before choosing.
+   - **The bracket variant overflows the frame** on this sentence (夜（よ cut
+     at the wall), which is the inline cost the row-budget table already
+     priced.
+   - **The newline does not track the row's size** (user's follow-up test,
+     `analysis/xlate_shots/ruby_shrink_newline.png`): a 30-kana row drawn at
+     P = −6, with `<01>` inside or outside the span, put the next 12 px row
+     at screen y 191 either way — the same y the plain text takes. Measured
+     bands: shrunk row 177–181, full row 178–187, second row 191–201 in all
+     three. So the 14 px step at `0x80150690` is a hard immediate as
+     documented, and a reading row costs a full row of height unless the
+     placement hook (step 2) moves y itself. Two annotated rows at 14 + 14
+     per pair would need 56 px of a 42 px interior, which is why the hook
+     is the route and not a `<01>` between band and text. One thing the
+     measurement gives for free: a 6 px reading row sits 14 px above the
+     next text row, which is roughly the band-above look already.
+
+   Two traps paid for: the probe's decoded-text echo is Japanese and the
+   console is cp1252 (the tool now re-wraps stdout as utf-8), and the field
+   idle animation walks the party off the NPC while `scene.enter()` settles,
+   so the tool now loads, writes, and presses Circle in one go (3.6 s of
+   single-byte `write_ram` calls is still inside the window) and waits for
+   game mode 4 before the screenshot. `jptext.decode` does not know `<0f>`
+   takes a parameter byte, so its echo of the span variants misreads the
+   preset byte as a kanji — cosmetic.
+2. ~~**Hook feasibility.**~~ **DONE 2026-09-12 (evening): register writes
+   from a function-entry plugin are honoured.** `0x8014F6BC` (the sprite
+   blitter, x in a0, y in a1) is the third entry in
+   `mod_function_entry_funcs`; `src/bof3_localize.c` registers
+   `on_sprite_glyph` there only when `BOF3_RUBY_YBUMP=n` is set and adds n
+   to `gpr[5]`. With n = 8 on the span probe
+   (`analysis/xlate_shots/ruby_ybump_compare.png`) every full-size glyph
+   moved from y 177 to 185 and the second row from 190 to 199, while the
+   6 px readings, which take the unhooked quad path, stayed at 177–181 and
+   191–195. The generated code reads `cpu->gpr[]` directly at each
+   instruction, so there is no cached local to fight. Adding the hook
+   regenerated one shard in 3 s, needed no overlay recompile, and did not
+   change `PSX_OVERLAY_CODEGEN_HASH` (that is a hash of the emitter sources,
+   not the config), so savestates survive. Two things the frame shows on
+   the way: the readings sit at the cursor x *after* their word, so x has to
+   step back by the word's width for a band; and the second row's readings
+   drew into the bumped first row, because the hook moved the argument and
+   not the RAM cursor — the layout table has to own both x and y for every
+   glyph, both paths, or the two drift apart.
+3. ~~**Layout table + builder.**~~ **Replaced by the row rule, and
+   demonstrated on screen 2026-09-12 (evening)** — the user's cut: a ruby row
+   is its own row in the string, so x aligns by glyph count (a 6 px glyph is
+   half a text cell: ruby half-cell 2c sits over text cell c) and the plugin
+   only owns y, per row. No per-glyph table, no re-flow; authored line
+   breaks stay, and a page's third row moves to a new page.
+   `analysis/xlate_shots/ruby_rows_demo.png`: むら over 村, ひと over 人, よる
+   over 夜, さばく over 砂漠, で over 出, both pairs inside the 42 px box.
+
+   **String shape** (`tools/ruby_shrink_probe.py --variant rows --blank 09`):
+   `<0f><13>` at the head, then per authored row `text <01> <0d> ruby <0e>`,
+   rows joined by `<01>`. The ruby row is half-cells: a reading starts at
+   2 × (its stem's cell), padded with **`0x09` gap bytes** — the renderer
+   ignores `0x09` and the stepper does not count it, so gaps cost no bytes
+   of font, no reveal ticks and no advance of their own. (`0xFF`, the word
+   separator, is a separator only at full size: drawn shrunk it is a junk
+   cell, and the single-byte sheet has no empty cell at all.)
+
+   **Plugin** (`src/bof3_localize.c`, env-gated so the play build is
+   unchanged without the variables; `BOF3_RUBY_ROWY=8,1,29,22
+   BOF3_RUBY_GAP=9` is the demo): three more entries in
+   `mod_function_entry_funcs` — the renderer `0x80150598` resets the row
+   counter each frame; both blitters call `place_row`, which reads the
+   cursor y `0x801490BA`, treats a value it did not write and the game did
+   not hold for this row as the newline having fired (+14 → next row), and
+   writes `origin + offset[row]` back (plus the same delta into a1 on the
+   sprite path, which already carries y). Offsets are chosen so no written
+   y is a multiple of 14 from the origin, which keeps the two sets apart.
+   On odd rows the quad hook reads the string walk pointer from a1, counts
+   the `0x09` bytes before the glyph and adds `n × (12 + P)` to the cursor
+   x `0x801490B8`. Measured bands: ruby 177–182 and 198–203, text 185–195
+   and 206–216 (origin y 176).
+
+   **Corrections to this file's own step-1 and step-2 notes, from the
+   demo:** the shrunk glyphs *do* go through the quad blitter `0x80151F4C`
+   (a1 = the string pointer, same `s0` the sprite call stores at sp+0x10);
+   the step-2 sentence saying they take the sprite path was a debugging
+   misread and is wrong. And on a two-row-plus-ruby page the box drew four
+   `<01>` rows without complaint, so a four-row string is fine when the
+   plugin keeps them inside the frame.
+
+   **What the builder now owes** (`build_ruby_script.py`, a `jp_furigana`
+   variant): per authored row, the ruby row with readings at half-cell
+   2 × stem cell (a reading longer than its stem takes a free half-cell on
+   the left first); a `0x02` before any third row; the head preset; and the
+   width check that every ruby row stays within 32 half-cells. Open before
+   shipping: ~~messages that carry their own `<0d>…<0e>` (a shout span would
+   shrink under the message-wide preset — count them)~~ **counted,
+   `tools/emphasis_census.py` (2026-09-12 evening)**: over 6,924 distinct
+   messages (200 areas + system block), 96 carry a span or preset, 29 of
+   those have no kanji at all and are left verbatim. Per distinct *page*,
+   which is the unit that matters because every page after the first is
+   opened by its own replay and the size parameter only affects what is on
+   screen: **78 pages carry a span or preset, 26 of them also hold kanji,
+   and in 8 the span itself holds kanji** (殺してやるッ, な‥な‥何だ,
+   だだ‥誰だ, お前らが, 爆音で, 道を, 教えて, 動いて). Effects in use: 58
+   resets, 34 grows, 3 shrinks (all −3), 12 shake/drop. So the collision set
+   is 26 pages; the builder's choice per such page is to keep the shout and
+   drop that page's readings (emit it verbatim behind a reset preset, then
+   re-arm the shrink preset on the next page), or to strip the effect and
+   annotate. **Decided 2026-09-12 (user): keep the shout and drop the
+   readings for that page** — a page that carries any `<0d>…<0e>` or `<0f>`
+   is emitted verbatim (no ruby rows, no gaps) behind a reset preset, and
+   the next page with readings re-arms the shrink preset. 26 pages, 8
+   kanji-in-span, go unread.
+   Also from the census: a message's own preset (`<0f>` with a `reset` or
+   `grow`) changes P for the rest of *its page*, so the builder re-emits the
+   head preset after any foreign `<0f>` on a page that still has ruby rows
+   to come — or, simpler, treats any page with a preset as verbatim.
+   Remaining open items: the typewriter
+   (readings reveal after their row's text, which the demo showed is fine),
+   and whether the gap code should be `0x09` or `0x11` (both unused; `0x10`
+   toggles a flag). The row offsets belong in `game.toml` or the table
+   header rather than an env var once the variant exists.
 
