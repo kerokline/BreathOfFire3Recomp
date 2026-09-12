@@ -88,11 +88,52 @@ A boss dialer harness needs only the setter's writes (boss id, `0x80145E8D = 5`,
 the *current area's* formation table at `0x800E4000`, so dial from the area
 that normally triggers the fight.
 
+## Runtime proof: the warp sweep (2026-09-12, same day)
+
+Play turned out not to be needed for the proof either. `tools/warp.py` writes
+the pending-area cells and the mode request byte the way `Field_ChangeArea`
+does and visits every AREA overlay from one field savestate (the user parked
+in a field; anchor in slot 5): **200/200 areas in 508 s**, nine anchor reloads
+for random battles the walk step tripped, zero failures. The mode facts and
+the attract-demo trap are in the tool's docstring.
+
+| sweep | exe | entered interior pcs in overlay bands | unseeded | seeded-but-interpreted |
+|---|---|---:|---:|---:|
+| 3 (first full) | 08:44, records seeded | 92 | 46 | 45 |
+| 4, after the loop compiled sweep 3's harvest | 14:53 | 20 | 14 | 5 |
+| 5, after `pointer_roots` compiled | 15:30 | **1** (observed-only) | **0** | **0** |
+
+None of sweep 3's 91 pcs interprets after the rebuild — the self-heal works.
+Sweep 4 ran with `--attribute` (a dirty-PC snapshot per area) and
+[`tools/warp_gap.py`](../tools/warp_gap.py) classified every residual pair
+against its own room's image: **all 19 are targets of small in-image pointer
+runs** (3–11 code pointers, per-entity handler tables in the middle of the
+image) that no descriptor field reaches. No `jr`-table label, no
+address-taken immediate, no cross-section pointer. A generic rule — every
+aligned in-image word that points at a code-shaped location — covers 19 of 19
+and yields 2,393 candidates game-wide; it is now a default discovery source
+in `extract_overlays.py` (`pointer_roots`, `--no-pointer-seeds` for A/B).
+
+Sweep 5 is that zero: 200/200 areas, `harvest` added nothing to the observed
+set, and every entered interior pc in every overlay band was already a static
+seed. The first attempt at the pointer rule (boundary shape only) doubled the
+audit-failed shards, 26 → 53, by admitting data that happens to decode; gating
+each target on the framework's own CFG proof (`plausible_callable_target`)
+brought it to 27 and the exe *shrank* 288 → 258 MB. What the sweep still
+interprets is outside the overlay region by design: the A0/B0/C0 kernel
+trampolines and a boot-EXE run at `0x80164E48..0x80164E90` that only the
+areas which tripped a random battle entered (dirty boot text during the
+battle transition — the `bootexe` class of `harvest_interp_pcs.py`).
+
+The stop condition for Axis B is therefore no longer a coverage estimate: it
+is the warp sweep's unseeded count on a fresh build, and it reads zero.
+
 ## Open
 
-- Runtime proof that the new entries dispatch natively: a first visit to an
-  unplayed area, a boss, or a party change on the rebuilt exe, then
-  `harvest_interp_pcs.py` should report far fewer interior entries.
+- ~~Runtime proof~~ **DONE for AREA** (the warp sweep above). Still to
+  prove the same way: BOSS (a boss dialer from the right area), PLCHAR (a
+  party change), SCENARIO (a chapter advance). The warp harness gives the
+  field state to do all three from.
 - The 18 areas whose `0x801F2C00` section is classed `data` (6, 9, 17, 31, 66,
   70, 83, 89, 101, 122, 126, 129, 137, 138, 159, 190, 194, 195) and the
   world-map descriptor type (areas 30/89/129).

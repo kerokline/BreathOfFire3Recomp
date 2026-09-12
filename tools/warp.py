@@ -15,11 +15,19 @@ warp:
     u32 0x80143F18   pending y
     u8  0x80143F1C   pending flags (bit 0x80 = special entry; 0 here)
     u8  0x80143F1D   transition kind (1 normal; Field_ChangeArea derives it)
-    u8  0x80143BB0   game mode := 5
+    u8  0x80143BB0   mode REQUEST := 5 (consumed by the advance FUN_80198378)
 
-Proven 2026-09-12 from the attract demo (title + Start with the disc: the demo
-is a real field state with GAME.EMI resident, no memory card needed) -- area 1
-loaded, its registry id landed at 0x801F2C00 and the room rendered with NPCs.
+The active mode lives in u8 0x80143B90 and is what the advance drives; values
+seen 2026-09-12: 2 = field walk (real play and the attract demo alike),
+4 = message box / menu, 5 = battle, 8 = world map. Only warp from a field
+mode, only write the request cell, never the active cell (a raw poke into a
+mid-transition state desyncs the pair and the loader never runs again).
+
+Proven 2026-09-12: a single poke worked from the attract demo, but the demo's
+own scenario script (SCENA16) keeps re-issuing transitions and later warps
+lose the race, so the harness needs a real in-game field state -- anchor one
+with a savestate (`--slot`). From that anchor: 200/200 areas in 512 s, nine
+anchor reloads for random battles the walk step tripped, zero failures.
 
 Why: the Axis B harvest needs the game to *enter* an area's interior entry
 points, and after the loader-record seeding (docs/LOADER_RECORDS.md) the
@@ -60,7 +68,8 @@ PENDING_Y = 0x80143F18
 PENDING_FLAGS = 0x80143F1C
 TRANSITION_KIND = 0x80143F1D
 MODE_REQUEST = 0x80143BB0        # Field_ChangeArea sets this to 5
-ACTIVE_MODE = 0x80143B90         # FUN_80198378 drives this; 1 = field walk
+ACTIVE_MODE = 0x80143B90         # FUN_80198378 drives this; 2 = field walk (real play and the demo alike)
+FIELD_MODES = (1, 2)
 AREA_NUMBER = 0x80143F00
 LOADER_STATE = 0x80146490          # 3 = File_LoadDone
 VSYNC = 0x8018603C
@@ -140,7 +149,17 @@ def ensure_field(g, say, timeout=90.0):
     return False
 
 
-def warp(g, area, say, xz=None, y=None, dwell=240, walk=False, timeout=25.0):
+def pc_snapshot(g):
+    """{phys pc: (entries, insns)} for every interpreted PC with entries > 0."""
+    d = g.q("dirty_ram_stats")
+    out = {}
+    for row in d.get("per_pc") or []:
+        if row.get("entries", 0) > 0:
+            out["0x%08X" % (int(row["pc"], 16) & 0x1FFFFFFF)] = (row["entries"], row.get("insns", 0))
+    return out
+
+
+def warp(g, area, say, xz=None, y=None, dwell=240, walk=False, timeout=25.0, snap=None):
     """One transition. Returns a result dict."""
     res = {"area": area, "ok": False}
     if not ensure_field(g, say):
@@ -150,9 +169,9 @@ def warp(g, area, say, xz=None, y=None, dwell=240, walk=False, timeout=25.0):
     # a mid-transition state desyncs the two-cell handshake (mode request vs
     # active mode) and wedges the loader; wait for the game to be walking first.
     t_settle = time.time() + 8.0
-    while g.u8(ACTIVE_MODE) != 1 and time.time() < t_settle:
+    while g.u8(ACTIVE_MODE) not in FIELD_MODES and time.time() < t_settle:
         time.sleep(0.1)
-    if g.u8(ACTIVE_MODE) != 1:
+    if g.u8(ACTIVE_MODE) not in FIELD_MODES:
         res["why"] = "active mode %d never settled to field-walk" % g.u8(ACTIVE_MODE)
         return res
     v0 = g.vsync()
@@ -187,15 +206,37 @@ def warp(g, area, say, xz=None, y=None, dwell=240, walk=False, timeout=25.0):
         res["why"] = "guest stopped advancing after the load"
         return res
     if walk:
+        # Directions only. A Circle press here opened a message/menu (active
+        # mode 4) on the 2026-09-12 full sweep and every later warp waited on
+        # it; talking is not needed to run the entity handlers.
         for d in ("up", "right", "down", "left"):
             g.press(d, 16)
             g.wait_frames(24)
-        g.press("circle", 4)
-        g.wait_frames(60)
-        g.press("cross", 4)
-        g.wait_frames(30)
+        # If walking tripped a message or menu anyway, back out of it.
+        for _ in range(6):
+            if g.u8(ACTIVE_MODE) in FIELD_MODES:
+                break
+            g.press("cross", 4)
+            g.wait_frames(20)
+            g.press("circle", 4)
+            g.wait_frames(20)
+        res["mode_after_walk"] = g.u8(ACTIVE_MODE)
+        if res["mode_after_walk"] == 5:
+            res["battle_triggered"] = True     # mode 5 = battle (area 10, 2026-09-12)
     r = g.resident()
     res["resident"] = resident.format_resident(r)
+    if snap is not None:
+        # Per-area attribution: the dirty-PC rows whose entry count grew while
+        # this area was resident. dirty_ram_stats is read-only on the runtime.
+        cur = pc_snapshot(g)
+        grew = []
+        for pc, (e, i) in cur.items():
+            e0, i0 = snap.get(pc, (0, 0))
+            if e > e0:
+                grew.append({"pc": pc, "entries": e - e0, "insns": i - i0})
+        grew.sort(key=lambda x: -x["insns"])
+        res["entered_pcs"] = grew
+        snap.clear(); snap.update(cur)
     e = band_entry(r, AREA_BAND)
     res["area_band"] = (e or {}).get("name") or (e or {}).get("id")
     res["ok"] = True
@@ -286,6 +327,9 @@ def main():
     ap.add_argument("--no-save", action="store_true", help="with --harvest: seed gap only, no union")
     ap.add_argument("--out", default=None, help="results JSON (default analysis/warp_<ts>.json)")
     ap.add_argument("--quit", action="store_true", help="quit the runtime at the end (implied by --boot)")
+    ap.add_argument("--attribute", action="store_true",
+                    help="snapshot dirty-PC entries after every area and record which PCs "
+                         "were entered while it was resident (entered_pcs per result)")
     ap.add_argument("--slot", type=int, default=None,
                     help="with --boot: load this savestate FILE number after boot instead of the "
                          "attract demo. Warp needs a real field-walk state (active mode 1); the "
@@ -312,8 +356,8 @@ def main():
     g = Guest(a.port)
     if a.slot is None and not ensure_field(g, say, timeout=120):
         raise SystemExit("could not reach a field state (title + Start should start the attract demo)")
-    if g.u8(ACTIVE_MODE) != 1:
-        say("WARNING: active mode is %d, not 1 (field walk). If this is the attract demo the "
+    if g.u8(ACTIVE_MODE) not in FIELD_MODES:
+        say("WARNING: active mode is %d, not a field mode. If this is the attract demo the "
             "sweep will fail; anchor a real in-game field save and pass --slot." % g.u8(ACTIVE_MODE))
 
     areas = parse_areas(a.areas)
@@ -324,10 +368,36 @@ def main():
     if a.shots:
         os.makedirs(a.shots, exist_ok=True)
 
+    def reload_anchor():
+        """Put the guest back on the anchor savestate. A walk can start a random
+        battle (active mode 5) or a cutscene the harness cannot finish; the
+        anchor is the known-good field state, and a restore is milliseconds."""
+        if a.slot is None:
+            return False
+        g.q("savestate", slot=a.slot, op="load")
+        dl = time.time() + 45
+        while time.time() < dl:
+            st = g.q("savestate_status")
+            if st.get("pending") == 0 and st.get("last_op") == "load":
+                break
+            time.sleep(0.3)
+        v0 = g.vsync(); time.sleep(1.0)
+        ok = g.vsync() > v0 and st.get("last_ok") == 1
+        say("  reloaded anchor slot %d: %s" % (a.slot, "ok" if ok else "FAILED %s" % st))
+        return ok
+
     results = []
     t0 = time.time()
+    reloads = 0
+    snap = pc_snapshot(g) if a.attribute else None
     for n in areas:
-        r = warp(g, n, say, xz=xz, y=y, dwell=a.dwell, walk=a.walk)
+        r = warp(g, n, say, xz=xz, y=y, dwell=a.dwell, walk=a.walk, snap=snap)
+        if not r["ok"] and a.slot is not None and "STUCK" not in r.get("why", ""):
+            say("area %3d  first try: %s" % (n, r.get("why")))
+            if reload_anchor():
+                reloads += 1
+                r = warp(g, n, say, xz=xz, y=y, dwell=a.dwell, walk=a.walk, snap=snap)
+                r["retried_after_reload"] = True
         if r["ok"] and a.shots:
             path = os.path.abspath(os.path.join(a.shots, "area%03d.png" % n))
             g.q("screenshot", path=path)
@@ -338,7 +408,8 @@ def main():
         if not r["ok"] and "STUCK" in r.get("why", ""):
             say("guest wedged; stopping the sweep here")
             break
-    say("%d/%d areas loaded in %.0f s" % (sum(1 for r in results if r["ok"]), len(results), time.time() - t0))
+    say("%d/%d areas loaded in %.0f s (%d anchor reloads)"
+        % (sum(1 for r in results if r["ok"]), len(results), time.time() - t0, reloads))
 
     report = {"schema": "warp-v1", "when": ts, "port": a.port, "dwell": a.dwell,
               "walk": a.walk, "results": results}
