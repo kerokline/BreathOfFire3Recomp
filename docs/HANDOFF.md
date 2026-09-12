@@ -50,7 +50,12 @@ vtable table `0x801C944C`, `Boss_EntryTable 0x800B2048`, the PLCHAR tables
 set unchanged). What play still supplies is **proof and weight**: the next
 session on `build-relprof` should visit an unplayed area, a boss and a party
 change and read what `harvest_interp_pcs.py` still reports.
-[`LOADER_RECORDS.md`](LOADER_RECORDS.md).
+[`LOADER_RECORDS.md`](LOADER_RECORDS.md). **Same evening:** the AREA half of
+that proof is done without play — `tools/warp.py` visits all 200 areas from
+the slot-5 field anchor in ~8 min, `tools/warp_gap.py` explains what is left,
+and the last static gap (in-image code-pointer runs) is now a default seed
+source; on the 15:30 build the sweep reads **0 unseeded** across all 200 areas.
+Re-anchor slot 5 after any regenerate (the hash stales every `.pst`).
 **2026-09-11:** the largest remaining interpreted sink was not an overlay band
 at all but the BIOS exception handler (44.6 % of interpreted work, both
 BIOSes). **Fixed the same day** and open upstream as

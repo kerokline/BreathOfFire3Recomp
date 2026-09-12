@@ -26,6 +26,15 @@ Seeds are call-edge evidence read out of the bytes themselves:
     directly follow a `jr $ra` delay slot. compile_overlays.py re-validates
     each against its own callable test and classifies survivors
     STATIC_DISCOVERY_ROOT, so a bad guess is dropped, not fabricated.
+  * `pointer_roots` (folded into `static_discovery_entry_pcs`) -- every
+    aligned word in the image that points at a code-shaped location inside
+    the same image: the target follows a `jr $ra` delay slot or opens with a
+    prologue. These are the small per-entity handler tables that sit in the
+    middle of an area image and hang off nothing the loader records walk
+    (2026-09-12 warp sweep: all 19 residual (area, pc) pairs were exactly
+    this, 2,393 candidates game-wide). compile_overlays re-validates each
+    with its callable test like any other discovery root. `--no-pointer-seeds`
+    drops them for A/B work.
   * `dispatch_entry_pcs` -- PCs a live session actually interpreted, if
     analysis/observed_interp_pcs.json exists. Optional; purely additive.
   * `header_entry_pcs` -- the overlay's own exported entry table. Every .EMI
@@ -66,6 +75,11 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import disc_ls
 from emi_survey import DiscFile
+# The framework's CFG proof for a call target without a prologue (bounded valid
+# CFG with a reachable return, rejects pointer tables / NOP runways). Read-only
+# use of the submodule's tool, the same one the compile itself runs.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "psxrecomp", "tools"))
+from compile_overlays import plausible_callable_target  # noqa: E402
 
 JR_RA = 0x03E00008
 
@@ -96,6 +110,29 @@ def prologue_roots(data, load_addr):
             continue
         if i == 0 or (i >= 2 and words[i - 2] == JR_RA):
             out.add(load_addr + i * 4)
+    return out
+
+
+def pointer_roots(data, load_addr):
+    """Aligned in-image words whose target is a provable function.
+
+    Boundary shape first (the word before the target's delay slot is `jr $ra`,
+    or the target opens with a prologue), then the framework's CFG proof: a
+    bounded walk from the target in which every word decodes and a return is
+    reachable. The shape alone admitted data that happens to decode -- the
+    2026-09-12 first attempt doubled the audit-failed shards (26 -> 53).
+    """
+    words = [w for w, in struct.iter_unpack("<I", data[:len(data) // 4 * 4])]
+    lo, hi = load_addr, load_addr + len(words) * 4
+    out, seen = set(), set()
+    for w in words:
+        if not (lo <= w < hi) or w & 3 or w in seen:
+            continue
+        seen.add(w)
+        i = (w - lo) // 4
+        if (i >= 2 and words[i - 2] == JR_RA) or (words[i] >> 16) == 0x27BD and (words[i] & 0x8000):
+            if plausible_callable_target(data, lo, len(data), w, hi):
+                out.add(w)
     return out
 
 
@@ -202,6 +239,8 @@ def main():
     ap.add_argument("--no-header-seeds", action="store_true",
                     help="do not seed the header entry table (A/B experiments "
                          "only; header seeds are included by default)")
+    ap.add_argument("--no-pointer-seeds", action="store_true",
+                    help="do not seed in-image code pointers (A/B experiments only)")
     ap.add_argument("--no-engine-seeds", action="store_true",
                     help="do not seed the engine's loader-record entry pcs "
                          "(names/magic.toml; A/B experiments only)")
@@ -265,6 +304,8 @@ def main():
             raise SystemExit("%s#%d: bytes differ from the survey" % (s["file"], s["index"]))
         load = s["dest"]
         roots = jal_targets(blob, load) | prologue_roots(blob, load)
+        ptr_roots = set() if args.no_pointer_seeds else pointer_roots(blob, load) - roots
+        roots |= ptr_roots
         phys = load & 0x1FFFFFFF
         hits = set((load & 0xF0000000) | p for p in observed
                    if phys <= p < phys + s["size"])
@@ -295,8 +336,8 @@ def main():
             "source_md5": s["md5"],
             "crc32": "0x%08X" % (binascii.crc32(blob) & 0xFFFFFFFF),
         })
-        print("0x%08X  %8d bytes  id 0x%03X  %5d static roots  %4d observed  %3d header  %3d engine  %s#%d"
-              % (load, s["size"], reg_id, len(roots), len(hits), len(hdr),
+        print("0x%08X  %8d bytes  id 0x%03X  %5d static roots (%3d ptr)  %4d observed  %3d header  %3d engine  %s#%d"
+              % (load, s["size"], reg_id, len(roots), len(ptr_roots), len(hits), len(hdr),
                  len(eng), s["file"], s["index"]))
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)

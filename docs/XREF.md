@@ -4,7 +4,7 @@
 
 Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer claims about it. An address alone does not say whether it is code or data (81.6% of `.text` is overlay zero fill, and named data shares addresses with sibling code — `DATA_ISLANDS.md`), and one address can resolve to several overlay functions because bands share load addresses (`AREA_PCS.md`). Unnamed is not a defect: most cited addresses are RAM variables, which `symbols.toml` has no table for.
 
-970 distinct addresses · 147 resolve to a name · 823 do not.
+973 distinct addresses · 147 resolve to a name · 826 do not.
 
 | Address | Region | Identity | Cited by |
 |---|---|---|---|
@@ -124,7 +124,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80117001` | text | in band_80117000 [overlay band] +0x1 | `OVERLAYS.md`, `zero-fill-dispatch-audit.md` |
 | `0x8011CD40` | text | unnamed function root (seeds/ghidra_funcs.txt) | `zero-fill-dispatch-audit.md` |
 | `0x80142A2C` | text | unnamed function root (seeds/ghidra_funcs.txt) | `zero-fill-dispatch-audit.md` |
-| `0x80143BB0` | text | in band_80117000 [overlay band] +0x2CBB0 | `TEXT_ENGINE.md`, `WORLD_ITEMS.md` |
+| `0x80143B90` | text | in band_80117000 [overlay band] +0x2CB90 | `STATUS.md` |
+| `0x80143BB0` | text | in band_80117000 [overlay band] +0x2CBB0 | `STATUS.md`, `TEXT_ENGINE.md`, `WORLD_ITEMS.md` |
 | `0x80143F00` | text | in band_80117000 [overlay band] +0x2CF00 | `ADDRESS_MAPS.md`, `BATTLE_RAM.md`, `LOADER_RECORDS.md`, `LOCALIZATION_APPLY.md`, `OVERLAY_HEADERS.md`, `SAVE_IMPORT.md`, `STATUS.md`, `loader_records/AREA.md`, `loader_records/BOSS.md`, `loader_records/SCENARIO.md` |
 | `0x80143F02` | text | in band_80117000 [overlay band] +0x2CF02 | `loader_records/AREA.md` |
 | `0x80143F04` | text | in band_80117000 [overlay band] +0x2CF04 | `loader_records/AREA.md` |
@@ -427,7 +428,9 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801629F0` | text | ≤ File_LoadRequest (boot) +0x24 (nearest below, span unknown) | `OVERLAY_HEADERS.md` |
 | `0x80162B50` | text | File_LBA [confirmed] boot | `OVERLAY_HEADERS.md` |
 | `0x801636F0` | text | File_LoadDone [confirmed] boot | `BATTLE_RAM.md`, `OVERLAY_HEADERS.md`, `STATUS.md`, `loader_records/AREA.md`, `loader_records/PLCHAR.md`, `loader_records/SCENARIO.md` |
+| `0x80164E48` | text | in boot_exe_image [exe image] +0xD1648 | `LOADER_RECORDS.md`, `STATUS.md` |
 | `0x80164E84` | text | in boot_exe_image [exe image] +0xD1684 | `HANDOFF.md`, `STATUS.md` |
+| `0x80164E90` | text | in boot_exe_image [exe image] +0xD1690 | `LOADER_RECORDS.md` |
 | `0x80165434` | text | Char_RecalcStats [confirmed] boot | `STATUS.md` |
 | `0x80165AA4` | text | Inventory_Add [confirmed] boot | `AREA_PCS.md`, `BATTLE_RAM.md`, `STATUS.md` |
 | `0x80165BCC` | text | AbilityList_Add [guessed] boot | `STATUS.md` |
