@@ -71,6 +71,7 @@ except ImportError:  # pragma: no cover
     import tomli as tomllib  # type: ignore
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from extract_overlays import ENGINE_RECORD_FILES  # noqa: E402
 from name_map import (load_data_names, load_function_names,  # noqa: E402
                       load_overlay_names)
 from regions import containing, load_regions  # noqa: E402
@@ -81,6 +82,10 @@ NAMES_DIR = os.path.join(ROOT, "names")
 SYMBOLS_TOML = os.path.join(ROOT, "symbols.toml")
 SEEDS = os.path.join(ROOT, "seeds", "ghidra_funcs.txt")
 PROBE = os.path.join(ROOT, "disc_probe.json")
+
+# Generated prose: listing every address is its whole job, so scanning it would
+# report each address as "cited" by the index that merely tabulates it.
+GENERATED_DOCS = (os.path.join(DOCS, "XREF.md"),)
 
 # Main RAM only. 0x80 covers the whole 2 MiB KSEG0 window (0x80000000..0x801FFFFF);
 # anything wider would start matching instruction words out of disassembly dumps.
@@ -156,6 +161,43 @@ def load_seeds():
     return out
 
 
+def load_engine_records():
+    """pc -> [(section md5, row)] from the engine's loader-record sidecars.
+
+    The file list comes from tools/extract_overlays.py ENGINE_RECORD_FILES, so a
+    sidecar added there is picked up here without a second edit. A row says the
+    engine itself jalrs into that pc once the section is resident
+    (docs/LOADER_RECORDS.md) -- a proven identity, but not a human name, so it is
+    reported in the same tier as a seed list root rather than counted as named."""
+    out = {}
+    for rel in ENGINE_RECORD_FILES:
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as f:
+            rows = tomllib.load(f).get("record", [])
+        for r in rows:
+            entry, md5 = r.get("entry"), r.get("section")
+            if not entry:
+                continue
+            pc = int(str(entry), 16)
+            out.setdefault(pc, []).append((md5, dict(r, _file=rel)))
+    return out
+
+
+def record_label(md5, row, layer):
+    """`AREA 12 handler[3] in <overlay>` — whichever key the family uses."""
+    for key in ("area", "boss", "chapter", "combo", "ability", "id"):
+        if key in row:
+            who = f"{key.upper() if len(key) < 3 else key} {row[key]}"
+            break
+    else:
+        who = os.path.basename(str(row.get("_file", "record")))
+    kind = row.get("kind") or "entry"
+    where = f" in {overlay_label(md5, layer)}" if md5 else ""
+    return f"{who} {kind}{where}"
+
+
 def load_boot_symbols():
     """pc -> symbols.toml row, for the boot EXE (the PSX_FN_* path)."""
     with open(SYMBOLS_TOML, "rb") as f:
@@ -187,6 +229,7 @@ def build_naming_layer(L=None):
         "seeds": load_seeds(),
         "landmarks": landmarks(L),
         "regions": load_regions(),
+        "engine": load_engine_records(),
     }
 
 
@@ -229,6 +272,7 @@ def resolve(addr, layer):
         "ov_funcs": layer["ov_funcs"].get(addr, []),
         "data": layer["data"].get(addr, []),
         "seed": addr in layer["seeds"],
+        "engine": layer["engine"].get(addr, []),
         "region_base": [r for b, e, r in layer["regions"] if b == addr],
         "in_regions": containing(addr, layer["regions"]),
         "near": nearest_below(addr, layer),
@@ -265,6 +309,10 @@ def identity_line(res, layer):
         return res["landmark"]
     if res["region_base"]:
         return " · ".join(region_label(r) + " (base)" for r in res["region_base"])
+    if res["engine"]:
+        md5, row = res["engine"][0]
+        more = f" (+{len(res['engine']) - 1} more)" if len(res["engine"]) > 1 else ""
+        return f"engine loader entry: {record_label(md5, row, layer)}{more}"
     if res["seed"]:
         return "unnamed function root (seeds/ghidra_funcs.txt)"
     if res["near"]:
@@ -286,11 +334,20 @@ def region_label(row):
 
 def source_files(include_tools):
     out = []
-    for p in sorted(glob.glob(os.path.join(DOCS, "*.md"))):
-        out.append((p, "doc"))
+    # recursive: docs/loader_records/*.md and any future subdirectory of notes
+    # count as prose too (they were missed until 2026-09-12)
+    skip = {os.path.abspath(p) for p in GENERATED_DOCS}
+    for p in sorted(glob.glob(os.path.join(DOCS, "**", "*.md"), recursive=True)):
+        if os.path.abspath(p) not in skip:
+            out.append((p, "doc"))
     out.append((SYMBOLS_TOML, "symbol"))
+    # The engine record sidecars are an IDENTITY source, not prose: a row saying
+    # the engine enters 0x801F2C8C is not a document citing that address, and
+    # counting 1,319 generated rows as citations would swamp the census.
+    generated = {os.path.abspath(os.path.join(ROOT, r)) for r in ENGINE_RECORD_FILES}
     for p in sorted(glob.glob(os.path.join(NAMES_DIR, "*.toml"))):
-        out.append((p, "name"))
+        if os.path.abspath(p) not in generated:
+            out.append((p, "name"))
     if include_tools:
         for p in sorted(glob.glob(os.path.join(ROOT, "tools", "*.py"))):
             out.append((p, "tool"))
@@ -316,6 +373,13 @@ def scan_citations(include_tools=False, exclude=()):
 
 def doc_files_citing(cl):
     return sorted({rel for rel, _, kind in cl if kind == "doc"})
+
+
+def doc_label(rel):
+    """`FOO.md` for a top-level doc, `loader_records/AREA.md` for a nested one —
+    a bare basename would make docs/loader_records/AREA.md ambiguous."""
+    inner = rel[len("docs/"):] if rel.startswith("docs/") else rel
+    return inner
 
 
 # ----------------------------------------------------------------- reports
@@ -368,6 +432,14 @@ def cmd_lookup(args):
                       f"  +0x{addr - b:X}  bound={r.get('bound')}")
         if res["landmark"]:
             print(f"  layout landmark: {res['landmark']}")
+        if res["engine"]:
+            print(f"  engine loader entry — the engine jalrs here once the"
+                  f" section is resident ({len(res['engine'])} record(s),"
+                  f" docs/LOADER_RECORDS.md):")
+            for md5, row in res["engine"][:6]:
+                print(f"    {record_label(md5, row, layer)}  [{row['_file']}]")
+            if len(res["engine"]) > 6:
+                print(f"    … {len(res['engine']) - 6} more record(s)")
         if res["seed"] and not res["boot"]:
             print("  known function root: listed in seeds/ghidra_funcs.txt, unnamed")
         if not is_named(res):
@@ -457,7 +529,7 @@ def render_markdown(rows, layer, L, cites):
         "\n| Address | Region | Identity | Cited by |\n|---|---|---|---|\n",
     ]
     for r in rows:
-        docs = ", ".join(f"`{d.split('/')[-1]}`" for d in r["docs"]) or "—"
+        docs = ", ".join(f"`{doc_label(d)}`" for d in r["docs"]) or "—"
         ident = r["identity"].replace("|", "\\|")
         out.append(f"| `0x{r['addr']:08X}` | {r['region']} | {ident} | {docs} |\n")
     return "".join(out)
@@ -470,7 +542,7 @@ def cmd_queue(args):
     cand = []
     for addr, cl in cites.items():
         res = resolve(addr, layer)
-        if is_named(res):
+        if is_named(res) or res["engine"]:
             continue
         docs = doc_files_citing(cl)
         if len(docs) < args.min_docs:
@@ -498,7 +570,7 @@ def cmd_queue(args):
             pc, delta, label = res["near"]
             ctx = f"≤ {label} +0x{delta:X}"
         elif docs:
-            ctx = docs[0].split("/")[-1]
+            ctx = doc_label(docs[0])
         print(f"0x{addr:08X}  {region_of(addr, L):10} {ndocs:<4} {ncites:<5}"
               f" {root:5} {ctx}")
     if len(cand) > args.limit:
@@ -537,6 +609,7 @@ def cmd_stats(args):
     by_region = {}
     named = 0
     seed_only = 0
+    engine_only = 0
     for addr, cl in cites.items():
         res = resolve(addr, layer)
         reg = region_of(addr, L)
@@ -545,6 +618,8 @@ def cmd_stats(args):
         if is_named(res):
             named += 1
             b["named"] += 1
+        elif res["engine"]:
+            engine_only += 1
         elif res["seed"]:
             seed_only += 1
     doc_cited = {a for a, cl in cites.items() if any(k == "doc" for _, _, k in cl)}
@@ -556,13 +631,16 @@ def cmd_stats(args):
     print(f"  names/data.toml         {sum(len(v) for v in layer['data'].values()):5}"
           f" data islands")
     print(f"  names/overlays.toml     {len(layer['overlays']):5} overlays")
+    print(f"  names/*_records.toml    {sum(len(v) for v in layer['engine'].values()):5}"
+          f" engine loader entries over {len(layer['engine'])} distinct PCs")
     print(f"  seeds/ghidra_funcs.txt  {len(layer['seeds']):5} JAL targets")
     print("\nAddresses cited in prose")
     print(f"  {len(cites):5} distinct, of which {len(doc_cited)} appear in docs/*.md")
     print(f"  {named:5} resolve to a name"
           f"  ({100.0 * named / max(1, len(cites)):.1f}%)")
+    print(f"  {engine_only:5} more are engine loader entries with no name")
     print(f"  {seed_only:5} more are known function roots with no name")
-    print(f"  {len(cites) - named - seed_only:5} unresolved")
+    print(f"  {len(cites) - named - engine_only - seed_only:5} unresolved")
     print("\nBy region")
     for reg in ("kernel", "pre-text", "text", "post-text", "above-ram"):
         b = by_region.get(reg)
