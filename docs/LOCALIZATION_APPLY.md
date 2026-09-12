@@ -68,8 +68,12 @@ exactly this — no generated-code edit, no submodule change.
 half-height row above each text row instead of brackets, authored breaks
 kept, two text rows per page. Same plugin, same `MsgBox_Reset` repoint; the
 plugin's row rule places the rows of a page that starts with `<0f><13>`
-([`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened"). No insert
-table for these codes: inserted names draw inline, unread.
+and draws the readings from the game's own 8 x 8 kana font by re-pointing
+each reading quad on the packet-commit hook
+([`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened", "The 8 px
+font"). No insert table for these codes: inserted names draw inline,
+unread. Build order: `python tools/sync_small_font.py` after editing
+`names/font_small.toml`, then the table, then the tree.
 
 ## One plugin, one table per language code
 

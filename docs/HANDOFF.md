@@ -823,8 +823,11 @@ ruby rows are ordinary rows in the string, x aligns by glyph count with
 play-shaped conditions** (`--furigana`, codes `jp_furigana` /
 `jp_furigana_all`, `analysis/xlate_shots/furigana_area014_pages.png`);
 the plugin applies the row rule only to pages that start with `<0f><13>`.
-Left: the reading review pass, and a look at the 112 readings dropped
-after runtime inserts. Original pointer:
+**Readings draw from the game's own 8 x 8 kana font** (FURIGANA.md "The
+8 px font"): the plugin re-points each reading glyph's `POLY_FT4` at the
+small cell on the packet-commit hook `0x8014E494`; ruby row first, text
+row second, offsets -2 / 6 / 19 / 27. Left: the reading review pass, and
+the readings dropped after runtime inserts. Original pointer:
 [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". Two doc errors were
 corrected on the way (advance vs size; `0x0B` never moved y).
 The Ruby tables are in play (user-verified in real play, both scopes, system

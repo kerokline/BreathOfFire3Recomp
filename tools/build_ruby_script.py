@@ -463,13 +463,18 @@ class Annotator:
         return any(it[0] == "c" and it[1][0] in (Annotator.SPAN_OPEN, Annotator.SPAN_CLOSE,
                                                  Annotator.PRESET) for it in items)
 
+    RUBY_PX = 8                        # a reading glyph is drawn 8 px wide (the 8 x 8 font)
+    HALF_PX = 6                        # one gap byte / one half-cell
+
     def ruby_row_for(self, row):
         """The half-cell ruby row above one text row, as bytes (b'' when the
         row has no reading). A reading starts at 2 x its stem's first cell;
-        one longer than its stem takes a free half-cell on the left first,
-        and one that would overlap an earlier reading moves right. A reading
-        past a runtime insert is dropped: the insert's width is only known
-        at draw time."""
+        one wider than its stem takes a free half-cell on the left first,
+        and one that would overlap an earlier reading moves right. Glyphs
+        are 8 px wide on a 6 px half-cell grid, so a reading of n kana
+        occupies ceil(8n / 6) half-cells and its kana are emitted back to
+        back (the plugin advances 8 px per kana). A reading past a runtime
+        insert is dropped: the insert's width is only known at draw time."""
         half = [None] * (2 * self.width)
         x, insert_seen, first = 0, False, True
         for u in row:
@@ -488,23 +493,29 @@ class Annotator:
                     if insert_seen:
                         self.stats["ruby_after_insert"] += 1
                         continue
+                    px = self.RUBY_PX * len(kana)
+                    w = -(-px // self.HALF_PX)                      # half-cells covered
                     s = 2 * (x - stem)
-                    if len(kana) > 2 * stem and s > 0 and half[s - 1] is None:
+                    if px > 12 * stem and s > 0 and half[s - 1] is None:
                         s -= 1
                     s = max(s, 0)
-                    while s + len(kana) <= len(half) and any(h is not None for h in half[s:s + len(kana)]):
+                    while s + w <= len(half) and any(h is not None for h in half[s:s + w]):
                         s += 1
-                    if s + len(kana) > len(half):
-                        s = len(half) - len(kana)
+                    if s + w > len(half):
+                        s = len(half) - w
                         if s < 0 or any(h is not None for h in half[s:]):
                             self.stats["ruby_no_room"] += 1
                             continue
-                    for k, b in enumerate(kana):
-                        half[s + k] = b
+                    # The kana go back to back from half-cell s; the rest of
+                    # the covered span is reserved (True) so no later reading
+                    # lands under this one, and emits as nothing.
+                    for k in range(w):
+                        half[s + k] = kana[k:k + 1] if k < len(kana) else True
                     self.stats["ruby_placed"] += 1
         while half and half[-1] is None:
             half.pop()
-        return bytes(h if h is not None else self.GAP for h in half)
+        return b"".join(h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
+                        for h in half)
 
     def encode_furigana_page(self, items, term, seen, out):
         """One box page in the furigana layout, appended to `out`."""
@@ -524,12 +535,14 @@ class Annotator:
         self.stats["furigana_pages"] += 1
         if len(rows) > self.rows_out:
             self.stats["split_pages"] += 1
+        # Ruby row first, then its text row, so the page ends on a text row:
+        # the next-page arrow places itself off the last row (2026-09-12).
         for r0 in range(0, len(rows), self.rows_out):
             out += self.FURIGANA_HEAD
             for ri in range(r0, min(r0 + self.rows_out, len(rows))):
                 if ri > r0:
                     out.append(NEWLINE)
-                out += text[ri] + bytes([NEWLINE, self.SPAN_OPEN]) + ruby[ri] + bytes([self.SPAN_CLOSE])
+                out += bytes([self.SPAN_OPEN]) + ruby[ri] + bytes([self.SPAN_CLOSE, NEWLINE]) + text[ri]
             out += bytes([PAGE]) if r0 + self.rows_out < len(rows) else term
 
     def encode(self, parsed, seen):

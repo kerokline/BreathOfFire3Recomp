@@ -359,6 +359,57 @@ second.
   `settings.toml` resolves `lang=jp_ruby_all` immediately (debug port
   `{"cmd":"xlate"}`), and the plugin registers all three tables.
 
+## The 8 px font (2026-09-12, late)
+
+The 6 px readings were legible only with effort: a 12 px bitmap point-
+sampled to half height loses every other row, at native resolution and
+at 4x alike (user screenshot). The fix needed no new art and no VRAM: the
+single-byte page of `BIN/ETC/ENDKANJI.EMI` carries **the game's own 8 x 8
+kana font** below the 12 px cells, page rows 168-215, 8 px pitch both
+ways, five rows of 32 -- 46 hiragana, all 25 voiced forms, the 9 small
+kana, the long vowel bar, and the katakana (`analysis/font/small_font_grid.png`,
+transcribed in [`names/font_small.toml`](../names/font_small.toml),
+`tools/sync_small_font.py` -> `src/bof3_small_font.h`). The atlas has no
+spare cells at all (one empty cell of 882; the six kanji no script
+references are battle and item words), so a custom font would have had to
+displace something; this one is already there.
+
+**How a reading glyph reaches it.** The box mapper only knows 12 px cells,
+but the quad blitter builds an ordinary `POLY_FT4` in RAM and commits it
+through `0x8014E494(1, 0x28)` with the packet at `*0x80145988` and every
+field written (`SetDrawTPage`, `GetClut`, u/v/tpage, the four vertices,
+`SetSemiTrans`, then the commit -- Psy-Q PRIM.OBJ calls, `symbols.toml`).
+The plugin hooks that commit (sixth `mod_function_entry_funcs` entry),
+filtered by the blitter's return address `0x80152D84`, and for a reading
+glyph rewrites the packet: UV origin to the small cell of the same kana,
+7-texel extent, an 8 px square from the game's own x0/y0, same texture page
+and CLUT. The dialogue palette draws the small font white (its strokes are
+nibble 2 where the main font uses 7 and 1; `BOF3_RUBY_PAL=n` overrides the
+CLUT to palette n if another box's palette ever differs). The renderer's
+advance is still 12 + P = 6, so kana after the first in a reading get +2
+for an 8 px pitch; the builder sizes a reading as ceil(8n / 6) half-cells.
+
+**Rows.** Ruby row FIRST, then its text row: the next-page arrow places
+itself off the last row (user's screenshot: it sat under the ruby row), so
+a page ends on text. Offsets from the origin: ruby -2 and 19, text 6 and
+27 -- 8 px bands, the block moved up 2 px so the two extra pixels per band
+are shared between the margins (user's call). A ruby row with no reading
+draws nothing, so the first glyph of a frame derives its row from the
+game's own y (origin + 14 x newlines) rather than assuming row 0. One
+consequence: a reading now types in just before its word rather than
+after it, which is how furigana reads.
+
+Verified on the AREA014 scarecrow talk, four pages
+(`analysis/xlate_shots/furigana_area014_8px.png`): はな over 話, みあ over
+見上, こころ over 心, ちょうし over 調子, もの / はな / しら / い / き,
+all at 1:1 from the 8 px design. Tables regenerated: 4,542 / 5,699 entries,
+11,091 / 21,258 readings placed.
+
+Left: the reading review pass; the 112 / 297 readings dropped after a
+runtime insert; a look at pages whose readings collide sideways (the
+builder pushes a later reading right, and an 8 px reading over a 12 px
+stem overhangs by 4 px per extra kana).
+
 ## The rendering route, reopened (2026-09-12)
 
 The user's framing: if the y spacing is controllable, the existing script
