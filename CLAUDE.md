@@ -54,8 +54,7 @@ English script table (local, from the player's US dump; never committed;
 ```bash
 python tools/build_script_xlate.py --bin-root D:\BoFIII\BIN \
     --us-cue "isos/Breath of Fire III (USA).cue"
-python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN                # Japanese (Ruby)
-python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --scope every  # ... every word
+python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN                # Japanese (Furigana)
 ```
 
 Symbols, after editing `symbols.toml`:

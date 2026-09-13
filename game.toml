@@ -43,7 +43,7 @@ strict = true
 # index without a reset (master talk, 2026-09-11), so the plugin redirects
 # again there. Changing this list changes the overlay config hash (the
 # dynamic shard cache name); the static overlays came out content-identical.
-mod_function_entry_funcs = ["0x8015042C", "0x80150F3C"]
+mod_function_entry_funcs = ["0x8015042C", "0x80150F3C", "0x80150598", "0x8014F6BC", "0x80151F4C", "0x8014E494"]
 
 [runtime]
 window_title = "BreathOfFire3 Recompiled"
@@ -64,8 +64,7 @@ language = "en"
 languages = [
     { code = "en", label = "English" },
     { code = "jp", label = "Japanese" },
-    { code = "jp_ruby", label = "Japanese (Ruby)" },
-    { code = "jp_ruby_all", label = "Japanese (Ruby, every word)" },
+    { code = "jp_furigana", label = "Japanese (Furigana)" },
 ]
 
 [video]

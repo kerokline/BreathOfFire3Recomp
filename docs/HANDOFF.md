@@ -809,8 +809,26 @@ declare the observed slots in both profiles and pin the retail sha256
 **2026-09-12 — true ruby (readings above the kanji) is back on the table.**
 The quad blitter advances by 12 + P, not a flat 12, and per-glyph placement is
 overridable from the plugin through the blitter entry hooks; the plan and the
-shrink probe (`tools/ruby_shrink_probe.py`, needs a re-saved field state) are
+shrink probe (`tools/ruby_shrink_probe.py`, stage = `slot02`) are
 in [`FURIGANA.md`](FURIGANA.md) "The rendering route, reopened" and
+[`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". **Steps 1 and 2
+of that plan are done the same evening:** 12 + P advance and the fixed 14 px
+newline are measured on screen, and a `gpr[5]` write from a function-entry
+hook on the sprite blitter moves the text (env-gated `BOF3_RUBY_YBUMP`,
+third `mod_function_entry_funcs` entry). **Step 3 collapsed to a row rule
+and is demonstrated on screen** (`analysis/xlate_shots/ruby_rows_demo.png`):
+ruby rows are ordinary rows in the string, x aligns by glyph count with
+`0x09` half-cell gaps, and the plugin only sets y per row
+(five hook entries now). **The builder variant is built and verified in
+play-shaped conditions** (code `jp_furigana`, every word, the builder's
+default since the inline jp_ruby / jp_ruby_all and the first-occurrence
+scope were retired 2026-09-12; `analysis/xlate_shots/furigana_area014_pages.png`);
+the plugin applies the row rule only to pages that start with `<0f><13>`.
+**Readings draw from the game's own 8 x 8 kana font** (FURIGANA.md "The
+8 px font"): the plugin re-points each reading glyph's `POLY_FT4` at the
+small cell on the packet-commit hook `0x8014E494`; ruby row first, text
+row second, offsets -2 / 6 / 19 / 27. Left: the reading review pass, and
+the readings dropped after runtime inserts. Original pointer:
 [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "Per-glyph placement". Two doc errors were
 corrected on the way (advance vs size; `0x0B` never moved y).
 The Ruby tables are in play (user-verified in real play, both scopes, system

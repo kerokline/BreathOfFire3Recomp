@@ -221,9 +221,12 @@ the renderer entry can reset a per-frame glyph counter, and hooks on
 table says — writing the cursor globals (both paths read them from RAM), and
 on the sprite path also the x/y arguments in `gpr[4]`/`gpr[5]`, or the
 wrapper's own `0x80145AC6/8` from a hook on `0x8014F708`. With every glyph
-placed by table, the engine's own advance and newline no longer matter. Open
+placed by table, the engine's own advance and newline no longer matter. ~~Open
 check before building it: that `gpr` writes from a callback are honoured by
-the generated code rather than a cached local.
+the generated code rather than a cached local.~~ Answered 2026-09-12: they
+are — a plugin adding 8 to `gpr[5]` at `0x8014F6BC` moved every sprite-path
+glyph down 8 px on screen ([`FURIGANA.md`](FURIGANA.md) step 2), and the
+generated C reads `cpu->gpr[]` at each instruction.
 
 **The data-only stepping stone, runnable today:** `<0f><13>` (shrink −6,
 forever) at the head of a message and each reading in `<0d>…<0e>` gives
