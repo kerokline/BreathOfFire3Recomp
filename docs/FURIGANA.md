@@ -504,6 +504,11 @@ bytes after the marker per half-cell of overrun, so the readings to the
 right land where the builder put them. The blank between the name and を
 in those frames is the game's own: the system pickup line is authored
 `<0700>␣を手に入れた`, so it shows for every name length.
+Verified headless the same day on the synthetic 薬草 pickup (savestate
+slot 0, `analysis/xlate_shots/furigana_pickup_overhang.png`): text origin
+x = 114, 手 at 162 and 入 at 186, て drawn at 162 and い at 186 (168 / 192
+before); the boot line reads `insert marker -> insert 07/00, 2 cells
+(fragment), overhang absorbed`.
 
 ## The rendering route, reopened (2026-09-12)
 
