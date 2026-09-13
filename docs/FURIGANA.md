@@ -420,12 +420,15 @@ all at 1:1 from the 8 px design. Tables regenerated: 4,542 / 5,699 entries,
 
 **Three corrections from the user's first play frame (same night):**
 
-- **The glyph rows start at page y 169, not 168** (the 168 grid line is
-  empty), and the **UV extent must be the size, not size − 1**: u is
-  interpolated from the vertex, so an extent of 7 over 8 px never reaches
-  the eighth texel row (the game's own 11-for-12 drops its cells' last
-  row, which is empty). Together those cut 2 px off every reading's foot
-  (こころ lost its bottom stroke). `names/font_small.toml` `page_y = 169`,
+- **The UV extent must be the size, not size − 1**: u is interpolated
+  from the vertex, so an extent of 7 over 8 px never reaches the eighth
+  texel row (the game's own 11-for-12 drops its cells' last row, which is
+  empty). That alone cut the feet off every reading (こころ lost its bottom
+  stroke). ~~The glyph rows start at page y 169, not 168~~ — a misread of
+  the same symptom, corrected on the user's next frame: the grid IS
+  168-based, a voiced kana keeps its **dakuten on the cell's top row**
+  (ど at 184, が at 176) and its body on rows 1–7, so an origin of 169 cut
+  every dakuten (戻 read もと). `names/font_small.toml` `page_y = 168`,
   extent `RUBY_PX`.
 - **The next-page arrow goes through the same sprite blitter** from a
   caller outside the renderer, and the row rule re-placed it onto the

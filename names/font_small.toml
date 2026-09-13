@@ -1,7 +1,9 @@
 # names/font_small.toml -- the game's own 8 x 8 kana font, read off the font sheet
 # (BIN/ETC/ENDKANJI.EMI section 0, the single-byte page) 2026-09-12.
 #
-# It sits below the 12 px cells: page rows 169..216 (the 168 grid line is empty; glyph rows start at 169), 8 px pitch both ways,
+# It sits below the 12 px cells: page rows 168..215, 8 px pitch both ways -- a
+# voiced kana keeps its dakuten on the cell's top row (168 + 8r), the body on
+# rows 1..7 (2026-09-12: an origin of 169 cut every dakuten: もど drew as もと),
 # 32 glyphs per row, transcribed from analysis/font/small_font_grid.png.
 # The box mapper cannot address it (it only knows 12 px cells), so the
 # furigana plugin re-points a reading glyph's quad at the small cell of the
@@ -11,7 +13,7 @@
 # or non-kana cell. tools/sync_small_font.py turns this into
 # src/bof3_small_font.h, keyed by the single-byte kana code in names/font.toml.
 
-page_y = 169
+page_y = 168
 pitch = 8
 
 rows = [
