@@ -342,6 +342,27 @@ static int kth_insert_after(const uint8_t *src, uint32_t len, uint32_t i, uint32
     return 0;
 }
 
+/* Pixels the draw-time cursor consumes over a ruby fragment, by the
+ * plugin's own rules (the builder's lint_row models the same): a gap byte is
+ * 6 px; kana in a run are 8 px apart and the renderer adds 6 after the last,
+ * so a run of n ends 8n - 2 past its start, snapped up to the half-cell
+ * before the next gap counts. */
+#define HALF_PX     6u
+#define RUBY_PX_ADV 8u
+static uint32_t fragment_px(const uint8_t *f, uint32_t n) {
+    uint32_t px = 0, run = 0, i;
+    for (i = 0; i < n; i++) {
+        if (f[i] == GAP_BYTE) {
+            if (run) { px += (RUBY_PX_ADV * run - 2u + HALF_PX - 1u) / HALF_PX * HALF_PX; run = 0; }
+            px += HALF_PX;
+        } else {
+            run++;
+        }
+    }
+    if (run) px += (RUBY_PX_ADV * run - 2u + HALF_PX - 1u) / HALF_PX * HALF_PX;
+    return px;
+}
+
 /* Copy a furigana message, replacing each INSERT_MARK in a ruby row with the
  * inserted name's fragment from the insert table, or with gaps of the
  * name's real width. Everything else is copied byte for byte. */
@@ -358,17 +379,32 @@ static uint32_t expand_markers(const uint8_t *src, uint32_t len, uint8_t *dst, u
             uint32_t n = 0, cells = 0, off = 0, flen = 0, j;
             int have = kth_insert_after(src, len, i, k++, &code, &arg);
             if (have) n = insert_record(code, arg, rec, &cells);
+            uint32_t eaten = 0;
             if (have && n && g_insert && lookup(g_insert, fnv1a64(rec, n), &off, &flen)
                 && o + flen <= cap) {
+                uint32_t px;
                 for (j = 0; j < flen; j++) dst[o++] = g_insert->blob[off + j];
                 g_frag_hits++;
+                /* A reading wider than its name (やくそう over 薬草: 32 px on
+                 * 24) leaves the cursor past the name's width, and every
+                 * reading after the insert started late by the excess
+                 * (user's pickup frame, 2026-09-13). Absorb it: drop one of
+                 * the gap bytes the builder laid after the marker per
+                 * half-cell of overrun. */
+                px = fragment_px(g_insert->blob + off, flen);
+                while (px >= 12u * cells + HALF_PX && i + 1u + eaten < len
+                       && src[i + 1u + eaten] == GAP_BYTE) {
+                    px -= HALF_PX;
+                    eaten++;
+                }
             } else {
                 for (j = 0; j < 2u * cells && o < cap; j++) dst[o++] = GAP_BYTE;
             }
             if (g_marks_expanded++ < 6)
-                say("bof3_localize: insert marker -> %s %02X/%02X, %u cells%s\n",
-                    have ? "insert" : "no insert", code, arg, cells, flen ? " (fragment)" : "");
-            i += 1;
+                say("bof3_localize: insert marker -> %s %02X/%02X, %u cells%s%s\n",
+                    have ? "insert" : "no insert", code, arg, cells, flen ? " (fragment)" : "",
+                    eaten ? ", overhang absorbed" : "");
+            i += 1 + eaten;
             continue;
         }
         switch (b) {

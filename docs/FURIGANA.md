@@ -492,6 +492,19 @@ always expanded before the engine sees the copy. The old record rewrite
 (`apply_inserts`) is gone: the furigana layout never writes a record.
 Table: 6,024 entries, 2,536 markers, 21,555 readings.
 
+**Overhang, from the user's two pickup frames (2026-09-13):** 火薬だま
+(かやく, 24 px on a 48 px name) drew て / い on 手 / 入, but 薬草
+(やくそう, 32 px on a 24 px name) pushed every reading after the insert
+one half-cell right. A fragment is padded *up* to its name's width, but a
+reading wider than the name cannot be padded *down* — the cursor ends
+past the name by the overrun. `expand_markers()` now runs the plugin's own
+cursor model over the spliced fragment (`fragment_px`: gaps 6, a run of n
+kana ceil((8n − 2) / 6) half-cells) and drops one of the builder's gap
+bytes after the marker per half-cell of overrun, so the readings to the
+right land where the builder put them. The blank between the name and を
+in those frames is the game's own: the system pickup line is authored
+`<0700>␣を手に入れた`, so it shows for every name length.
+
 ## The rendering route, reopened (2026-09-12)
 
 The user's framing: if the y spacing is controllable, the existing script

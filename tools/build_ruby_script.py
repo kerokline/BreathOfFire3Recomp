@@ -586,8 +586,11 @@ class Annotator:
         if not any(b != self.GAP for b in frag):
             return None
         # Cursor model: kana consume 8 px each less 2 at the end of a run,
-        # gaps 6; pad to the name's width. (A run overhanging the name is
-        # left as is: the readings after it shift by the excess.)
+        # gaps 6; pad to the name's width. A run overhanging the name (やくそう
+        # over 薬草: 32 px on 24) cannot be padded away here; the plugin
+        # measures the same cursor over the fragment at open time and drops
+        # one gap byte after the marker per half-cell of overrun
+        # (expand_markers, 2026-09-13 -- readings after 薬草 sat 6 px right).
         consumed, run = 0, 0
         for b in frag:
             if b == self.GAP:
