@@ -458,7 +458,19 @@ state: ひと / く / まえ each on their kanji. **And a reading may never
 start directly after another reading's consumed cells** (user's frame
 村の連中に, れんちゅう drawn against むら): the plugin tells readings apart
 only by a gap byte between them, so the left-steal and the placement both
-keep at least one gap byte as the boundary.
+keep at least one gap byte as the boundary. **The check that would have
+caught it now runs at build time:** `--lint FILE` simulates the plugin's
+draw-time cursor (gap = 6 px; a kana after gaps starts at the cursor
+snapped up to the half-cell plus the gaps; a kana after a kana is 8 px
+on; the renderer adds 6 after a run) over every ruby row and writes the
+rows whose readings would not land where the builder put them. First run
+over the corpus: 13,420 rows, one bad — 調整終了, where the right-wall
+clamp put しゅうりょう straight after ちょうせい's consumed cells; that
+clamp now yields "no room" instead, and the lint is clean. Rows with an
+insert marker are skipped (2,523: the insert's width is a draw-time
+value), and 716 readings sit more than a half-cell off their stem because
+an earlier reading pushed them right, which is the intended collision
+rule, not an error.
 
 **Inserts (2026-09-12, night; user's pickup frame まがった剣 を手に入れた
 with no readings):** a row with a runtime insert (`0x07 nn` item / skill /
