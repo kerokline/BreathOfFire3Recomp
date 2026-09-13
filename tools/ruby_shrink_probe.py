@@ -18,7 +18,7 @@ Nothing on disk is touched; the state is not re-saved.
 
 Variants:
   plain    the sentence with no readings (baseline for row height / spacing)
-  bracket  readings inline in brackets, as the shipped jp_ruby tables do
+  bracket  readings inline in brackets, as the retired jp_ruby tables did
   span     `<0f><13>` shrink -6 forever at the head; each reading in
            `<0d>...<0e>` -> drawn through the quad path at 6 px, 6 px advance
   span3    same with `<0f><12>` shrink -3 (9 px), for comparison

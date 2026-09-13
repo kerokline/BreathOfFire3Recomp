@@ -1,17 +1,23 @@
 #!/usr/bin/env python
-r"""build_ruby_script.py -- the Japanese (Ruby) script table, from the JP disc.
+r"""build_ruby_script.py -- the Japanese (Furigana) script table, from the JP disc.
 
 The third selectable script (docs/FURIGANA.md): the JP area dialogue with
-the reading written inline after each kanji word, `漢字（かんじ）`, once per
-word per area, re-flowed to the box.  It is delivered exactly like the
-English table -- one more `generated/bof3_xlate_<code>.c` for the
-`MsgBox_Reset` plugin (docs/LOCALIZATION_APPLY.md), selected by the
-launcher's Localization dropdown as `jp_ruby`.
+every kanji word's reading in an 8 px row above it, authored line breaks
+kept, two text rows per page.  It is delivered exactly like the English
+table -- one more `generated/bof3_xlate_<code>.c` for the `MsgBox_Reset`
+plugin (docs/LOCALIZATION_APPLY.md), selected by the launcher's
+Localization dropdown as `jp_furigana`; the plugin's row rule and 8 px
+font hooks do the drawing.
 
     python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN
-    python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --review analysis/ruby_review.txt
+    python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --review analysis/furigana_review.txt
     python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --selftest
-    python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --scope every   # jp_ruby_all
+    python tools/build_ruby_script.py --bin-root D:\BoFIII\BIN --inline --scope area   # retired jp_ruby
+
+Retired 2026-09-12 (still buildable, not in game.toml's language list): the
+inline-bracket layout `漢字（かんじ）` with re-flowed pages (`--inline`,
+jp_ruby / jp_ruby_all) and the first-occurrence-per-area scope (`--scope
+area`), which only ever saved width the furigana rows do not spend.
 
 ## How a message is rebuilt
 
@@ -679,9 +685,10 @@ def main(argv=None):
     ap.add_argument("--bin-root", help="extracted JP BIN/ tree instead of the .cue")
     ap.add_argument("--width", type=int, default=16, help="box width in cells (16 measured)")
     ap.add_argument("--rows", type=int, default=3, help="rows per page before a split")
-    ap.add_argument("--scope", choices=["area", "every"], default="area",
-                    help="annotate a word on its first occurrence per area (jp_ruby, default) "
-                         "or every occurrence (jp_ruby_all)")
+    ap.add_argument("--scope", choices=["area", "every"], default="every",
+                    help="annotate every occurrence (default, the shipped jp_furigana) or only "
+                         "a word's first occurrence per area (retired: the furigana rows cost "
+                         "no width, so there is nothing to save)")
     ap.add_argument("--out", help="default generated/bof3_xlate_<code>.c for the scope's code")
     ap.add_argument("--review", help="write a shipped / ruby side-by-side text file here")
     ap.add_argument("--selftest", action="store_true",
@@ -698,20 +705,23 @@ def main(argv=None):
     ap.add_argument("--insert-out", help="default generated/bof3_insert_<code>.c: the runtime-"
                          "insert table (annotated item / ability names), built alongside")
     ap.add_argument("--insert-review", help="write the name -> annotated name list here")
-    ap.add_argument("--furigana", action="store_true",
-                    help="true ruby: readings in a half-height row above each text row "
-                         "(jp_furigana / jp_furigana_all), authored breaks kept, two text "
-                         "rows per page; pages with their own span or preset stay verbatim "
-                         "(docs/FURIGANA.md 'The rendering route, reopened')")
+    ap.add_argument("--inline", action="store_true",
+                    help="the retired layout: readings inline in brackets after each word, "
+                         "pages re-flowed (jp_ruby / jp_ruby_all). Default is furigana: "
+                         "readings in an 8 px row above each text row, authored breaks kept, "
+                         "two text rows per page, pages with their own span or preset kept "
+                         "verbatim (docs/FURIGANA.md)")
     ap.add_argument("--rows-out", type=int, default=2,
                     help="furigana: text rows per page (two pairs fit the 42 px box)")
     args = ap.parse_args(argv)
     if not args.dict:
         args.dict = DICT_FOR_SCOPE[args.scope]
 
-    code = {"area": "jp_ruby", "every": "jp_ruby_all"}[args.scope]
+    args.furigana = not args.inline
     if args.furigana:
-        code = {"area": "jp_furigana", "every": "jp_furigana_all"}[args.scope]
+        code = {"every": "jp_furigana", "area": "jp_furigana_area"}[args.scope]
+    else:
+        code = {"every": "jp_ruby_all", "area": "jp_ruby"}[args.scope]
     if not args.out:
         args.out = os.path.join(ROOT, "generated", "bof3_xlate_%s.c" % code)
     if not args.insert_out:

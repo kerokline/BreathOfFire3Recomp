@@ -1,11 +1,24 @@
-# Japanese (Ruby) — a third script variant for learners
+# Japanese (Furigana) — a third script variant for learners
 
-**Status:** BUILT and on screen (2026-09-09 evening). The variant ships as
-`jp_ruby` in `[localization].languages`, built by `tools/build_ruby_script.py`
-into `generated/bof3_xlate_jp_ruby.c` and delivered by the same `MsgBox_Reset`
-plugin as English ([`LOCALIZATION_APPLY.md`](LOCALIZATION_APPLY.md)). Verified
-headless on AREA150 slot 45: 夜を待（ま）って‥砂漠に出ますか？. Readings are
-still SudachiPy's, not proofread — that review pass is what remains.
+**Status:** SHIPPED as `jp_furigana` (2026-09-12): every kanji word's reading
+drawn in an 8 px row above it, from the game's own small kana font, with
+the authored line breaks kept — see *The 8 px font* and *The rendering
+route, reopened* at the foot of this file. Built by
+`tools/build_ruby_script.py` into `generated/bof3_xlate_jp_furigana.c` and
+delivered by the same `MsgBox_Reset` plugin as English
+([`LOCALIZATION_APPLY.md`](LOCALIZATION_APPLY.md)), whose row rule and
+packet hooks do the drawing. Readings are still SudachiPy's, not proofread —
+that review pass is what remains.
+
+**Retired the same day (user's call):** the inline-bracket variants
+`jp_ruby` / `jp_ruby_all` (`漢字（かんじ）`, pages re-flowed) and the
+first-occurrence-per-area scope. Furigana rows cost no width, so the
+first-time-only scope had nothing left to save, and the brackets are
+strictly worse than readings above the line. Both remain buildable
+(`--inline`, `--scope area`) but are out of `game.toml`'s language list and
+the plugin. Everything below the *As built* section is the history of how
+the inline variant was costed and built; it still documents the encoder,
+the byte budget and the reading pipeline the furigana variant inherits.
 
 The goal is a reading aid, not a translation: the Japanese script with the
 readings shown, selectable next to English and Japanese. The decision taken

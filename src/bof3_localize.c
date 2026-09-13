@@ -85,33 +85,19 @@
 #ifdef BOF3_XLATE_HAVE_EN
 BOF3_XLATE_DECLARE(en)
 #endif
-#ifdef BOF3_XLATE_HAVE_JP_RUBY
-BOF3_XLATE_DECLARE(jp_ruby)
-#endif
-#ifdef BOF3_XLATE_HAVE_JP_RUBY_ALL
-BOF3_XLATE_DECLARE(jp_ruby_all)
-#endif
+/* jp_furigana: the JP script with every kanji word read in an 8 px row
+ * above it (docs/FURIGANA.md). The inline-bracket jp_ruby / jp_ruby_all and
+ * the first-occurrence jp_furigana_area were retired 2026-09-12 once the
+ * furigana rows cost no width; the builder still emits them on request. */
 #ifdef BOF3_XLATE_HAVE_JP_FURIGANA
 BOF3_XLATE_DECLARE(jp_furigana)
-#endif
-#ifdef BOF3_XLATE_HAVE_JP_FURIGANA_ALL
-BOF3_XLATE_DECLARE(jp_furigana_all)
 #endif
 static const Bof3XlateTable g_tables[] = {
 #ifdef BOF3_XLATE_HAVE_EN
     BOF3_XLATE_TABLE("en", en),
 #endif
-#ifdef BOF3_XLATE_HAVE_JP_RUBY
-    BOF3_XLATE_TABLE("jp_ruby", jp_ruby),
-#endif
-#ifdef BOF3_XLATE_HAVE_JP_RUBY_ALL
-    BOF3_XLATE_TABLE("jp_ruby_all", jp_ruby_all),
-#endif
 #ifdef BOF3_XLATE_HAVE_JP_FURIGANA
     BOF3_XLATE_TABLE("jp_furigana", jp_furigana),
-#endif
-#ifdef BOF3_XLATE_HAVE_JP_FURIGANA_ALL
-    BOF3_XLATE_TABLE("jp_furigana_all", jp_furigana_all),
 #endif
 };
 #define TABLE_COUNT (sizeof g_tables / sizeof g_tables[0])
@@ -134,19 +120,10 @@ static const Bof3XlateTable g_tables[] = {
 #define INSERT_RECORD_SIZE 0x20u
 #define INSERT_MAX 16u                 /* distinct <07><nn> in one message */
 
-#ifdef BOF3_INSERT_HAVE_JP_RUBY
-BOF3_INSERT_DECLARE(jp_ruby)
-#endif
-#ifdef BOF3_INSERT_HAVE_JP_RUBY_ALL
-BOF3_INSERT_DECLARE(jp_ruby_all)
-#endif
+/* No shipped language has an insert table since the inline Ruby variants
+ * were retired (a furigana reading has nowhere to go inside an inserted
+ * name); the mechanism stays for a table that declares one. */
 static const Bof3XlateTable g_inserts[] = {
-#ifdef BOF3_INSERT_HAVE_JP_RUBY
-    BOF3_INSERT_TABLE("jp_ruby", jp_ruby),
-#endif
-#ifdef BOF3_INSERT_HAVE_JP_RUBY_ALL
-    BOF3_INSERT_TABLE("jp_ruby_all", jp_ruby_all),
-#endif
     { NULL, NULL, NULL, NULL, NULL, NULL }   /* keeps the array non-empty */
 };
 #define INSERT_TABLE_COUNT (sizeof g_inserts / sizeof g_inserts[0] - 1u)

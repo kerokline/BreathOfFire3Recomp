@@ -63,10 +63,12 @@ exactly this — no generated-code edit, no submodule change.
 
 ## Furigana (2026-09-12)
 
-`tools/build_ruby_script.py --furigana` (and `--scope every`) builds
-`generated/bof3_xlate_jp_furigana.c` / `_jp_furigana_all.c`: readings in a
-half-height row above each text row instead of brackets, authored breaks
-kept, two text rows per page. Same plugin, same `MsgBox_Reset` repoint; the
+`tools/build_ruby_script.py` (defaults: furigana layout, every word) builds
+`generated/bof3_xlate_jp_furigana.c`: readings in an 8 px row above each
+text row instead of brackets, authored breaks kept, two text rows per
+page. The only Japanese reading variant shipped since 2026-09-12; `--inline`
+and `--scope area` rebuild the retired jp_ruby / jp_ruby_all / jp_furigana_area
+tables, which are out of the language list and the plugin. Same plugin, same `MsgBox_Reset` repoint; the
 plugin's row rule places the rows of a page that starts with `<0f><13>`
 and draws the readings from the game's own 8 x 8 kana font by re-pointing
 each reading quad on the packet-commit hook
@@ -86,8 +88,8 @@ resolved language string. Two exist today:
 | code | built by | source | what changes |
 |---|---|---|---|
 | `en` | `tools/build_script_xlate.py` | the US disc, slot for slot | every translated slot, capitals, 16 cells |
-| `jp_ruby` | `tools/build_ruby_script.py` | the JP disc itself | kanji words get `（reading）` once per area, box pages re-flowed ([`FURIGANA.md`](FURIGANA.md)) |
-| `jp_ruby_all` | `tools/build_ruby_script.py --scope every` | the JP disc itself | the same, every occurrence read (longest message 702 B of the 2,040 B slot) |
+| `jp_furigana` | `tools/build_ruby_script.py` | the JP disc itself | every kanji word read in an 8 px row above it, authored breaks kept, third rows split to a new page ([`FURIGANA.md`](FURIGANA.md)) |
+| ~~`jp_ruby`~~, ~~`jp_ruby_all`~~ | `--inline` [`--scope area`] | the JP disc itself | retired 2026-09-12: `（reading）` inline, pages re-flowed |
 
 Adding a code is three lines in the plugin (`BOF3_XLATE_DECLARE`, a
 `BOF3_XLATE_TABLE` row) and one in `game.toml`. A code with no table (`jp`,

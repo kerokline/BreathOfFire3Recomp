@@ -820,8 +820,9 @@ and is demonstrated on screen** (`analysis/xlate_shots/ruby_rows_demo.png`):
 ruby rows are ordinary rows in the string, x aligns by glyph count with
 `0x09` half-cell gaps, and the plugin only sets y per row
 (five hook entries now). **The builder variant is built and verified in
-play-shaped conditions** (`--furigana`, codes `jp_furigana` /
-`jp_furigana_all`, `analysis/xlate_shots/furigana_area014_pages.png`);
+play-shaped conditions** (code `jp_furigana`, every word, the builder's
+default since the inline jp_ruby / jp_ruby_all and the first-occurrence
+scope were retired 2026-09-12; `analysis/xlate_shots/furigana_area014_pages.png`);
 the plugin applies the row rule only to pages that start with `<0f><13>`.
 **Readings draw from the game's own 8 x 8 kana font** (FURIGANA.md "The
 8 px font"): the plugin re-points each reading glyph's `POLY_FT4` at the
