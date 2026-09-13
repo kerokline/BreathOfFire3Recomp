@@ -500,9 +500,19 @@ class Annotator:
                         self.stats["ruby_after_insert"] += 1
                         continue
                     px = self.RUBY_PX * len(kana)
-                    w = -(-px // self.HALF_PX)                      # half-cells covered
+                    w = -(-px // self.HALF_PX)                      # half-cells the ink covers
+                    # Half-cells the cursor consumes: the renderer advances 6
+                    # after the last kana, the plugin 8 between kana, so a
+                    # reading ends 8n - 2 past its start; the plugin snaps
+                    # that up to the next half-cell before counting gaps, and
+                    # the builder must count gaps from the same place.
+                    c = -(-(px - (self.RUBY_PX - self.HALF_PX)) // self.HALF_PX)
                     s = 2 * (x - stem)
-                    if px > 12 * stem and s > 0 and half[s - 1] is None:
+                    # A reading wider than its stem hangs right, aligned with
+                    # the stem's left edge; only past half a cell of overhang
+                    # does it take a free half-cell on the left as well (まえ
+                    # over 前 stays on 前; さばく over 砂 straddles it).
+                    if px - 12 * stem > self.HALF_PX and s > 0 and half[s - 1] is None:
                         s -= 1
                     s = max(s, 0)
                     while s + w <= len(half) and any(h is not None for h in half[s:s + w]):
@@ -512,13 +522,15 @@ class Annotator:
                         if s < 0 or any(h is not None for h in half[s:]):
                             self.stats["ruby_no_room"] += 1
                             continue
-                    # The kana go back to back from half-cell s; the rest of
-                    # the covered span is reserved (True) so no later reading
-                    # lands under this one, and emits as nothing.
+                    # The kana go back to back from half-cell s. Cells up to
+                    # c are what the cursor consumes and emit nothing; cells
+                    # from c to w are covered by ink but not by the cursor,
+                    # so they are reserved against a later reading (False)
+                    # yet still emit a gap byte.
                     for k in range(w):
-                        half[s + k] = kana[k:k + 1] if k < len(kana) else True
+                        half[s + k] = kana[k:k + 1] if k < len(kana) else (True if k < c else False)
                     self.stats["ruby_placed"] += 1
-        while half and half[-1] is None:
+        while half and half[-1] in (None, False):
             half.pop()
         return b"".join(h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
                         for h in half)
