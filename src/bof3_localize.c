@@ -120,12 +120,29 @@ static const Bof3XlateTable g_tables[] = {
 #define INSERT_RECORD_SIZE 0x20u
 #define INSERT_MAX 16u                 /* distinct <07><nn> in one message */
 
-/* No shipped language has an insert table since the inline Ruby variants
- * were retired (a furigana reading has nowhere to go inside an inserted
- * name); the mechanism stays for a table that declares one. */
+/* For the furigana layout the insert table holds ruby-row FRAGMENTS, not
+ * annotated names: hash of the inserted name's bytes -> the gaps and kana
+ * that read it, padded to the name's width. The message's ruby row carries
+ * INSERT_MARK where the inserted name begins, and expand_markers() splices
+ * the fragment (or plain gaps of the name's width) in its place when the
+ * message opens -- the records are already filled by then. Names are still
+ * drawn verbatim in the text row. */
+#ifdef BOF3_INSERT_HAVE_JP_FURIGANA
+BOF3_INSERT_DECLARE(jp_furigana)
+#endif
 static const Bof3XlateTable g_inserts[] = {
+#ifdef BOF3_INSERT_HAVE_JP_FURIGANA
+    BOF3_INSERT_TABLE("jp_furigana", jp_furigana),
+#endif
     { NULL, NULL, NULL, NULL, NULL, NULL }   /* keeps the array non-empty */
 };
+#define INSERT_MARK        0x11u
+#define GAP_BYTE           0x09u
+#define NAME_RECORD_BASE   0x80144964u  /* character records, 0xA4 apart; 6-glyph name at +0 */
+#define NAME_RECORD_STRIDE 0xA4u
+#define NAME_MAX           6u
+#define CUR_CHAR_INDEX     0x80145F05u  /* the 0x03 insert's character */
+#define MSG_INSERT_CELLS   11u          /* 0x08: a message by index, width unknown -- the budget */
 #define INSERT_TABLE_COUNT (sizeof g_inserts / sizeof g_inserts[0] - 1u)
 
 static uint32_t g_ring;                /* guest address of the slot ring, 0 until first use */
@@ -258,42 +275,114 @@ static int lookup(const Bof3XlateTable *t, uint64_t h, uint32_t *off, uint32_t *
  * table hit that fits 31 bytes + NUL. Rewriting is idempotent: the annotated
  * bytes hash to nothing, so a message re-opened on the same record is left
  * as it is. */
-static void apply_inserts(const uint8_t *ins, uint32_t nins) {
-    uint8_t rec[INSERT_RECORD_SIZE];
-    uint32_t k, j, n, off, len, base;
-    uint64_t h;
-    const Bof3XlateTable *t = g_insert;
-    if (!t || !nins) return;
-    for (k = 0; k < nins; k++) {
-        for (j = 0; j < k; j++) if (ins[j] == ins[k]) break;
-        if (j < k) continue;                   /* same record twice in one message */
-        base = INSERT_RECORD_BASE + INSERT_RECORD_SIZE * ins[k];
-        for (n = 0; n < INSERT_RECORD_SIZE; n++) {
-            rec[n] = psx_mod_read_byte(base + n);
-            if (rec[n] == 0) break;
-        }
-        if (n == 0 || n == INSERT_RECORD_SIZE) continue;
-        h = fnv1a64(rec, n);
-        if (!lookup(t, h, &off, &len) || len + 1 > INSERT_RECORD_SIZE) {
-            g_ins_misses++;
-            if (g_ins_misses <= 10)
-                say("bof3_localize: insert miss #%u rec=%u len=%u hash=%016llx head=%02x %02x %02x %02x\n",
-                    g_ins_misses, ins[k], n, (unsigned long long)h, rec[0], rec[1], rec[2], rec[3]);
-            continue;
-        }
-        for (j = 0; j < len; j++) psx_mod_write_byte(base + j, t->blob[off + j]);
-        psx_mod_write_byte(base + len, 0);
-        g_ins_hits++;
-        if (g_ins_hits <= 5)
-            say("bof3_localize: insert hit #%u rec=%u at %08X (%u -> %u bytes)\n",
-                g_ins_hits, ins[k], base, n, len);
-    }
-}
+/* apply_inserts() -- rewriting a 0x07 record with an inline-annotated name --
+ * went with the inline Ruby variants (2026-09-12); the furigana layout reads
+ * the records instead (expand_markers below) and never writes them. */
 
 /* --- the hook ------------------------------------------------------------ */
 /* Redirect the message the box is about to read, if the active table has
  * it. `ptr` is the JP pointer both globals hold; `via` names the door;
  * `log_every` logs every hit rather than the first five. */
+/* --- furigana insert markers ---------------------------------------------- */
+static uint32_t g_marks_expanded, g_frag_hits;
+
+/* Glyph cells in an inserted record (NUL-terminated): a two-byte glyph is
+ * one cell, the separator 0xFF one cell. */
+static uint32_t record_cells(const uint8_t *rec, uint32_t n) {
+    uint32_t i = 0, cells = 0;
+    while (i < n) {
+        uint8_t b = rec[i];
+        i += (b == 0x12u || b == 0x13u || b == 0x15u) ? 2u : 1u;
+        cells++;
+    }
+    return cells;
+}
+
+/* Read the record an insert control draws: 0x07 nn = the 32-byte scratch
+ * record, 0x04 nn / 0x03 = a character's name. Returns the byte count. */
+static uint32_t insert_record(uint8_t code, uint8_t arg, uint8_t *rec, uint32_t *cells) {
+    uint32_t base, cap, n;
+    if (code == 0x07u) { base = INSERT_RECORD_BASE + INSERT_RECORD_SIZE * arg; cap = INSERT_RECORD_SIZE; }
+    else if (code == 0x04u) { base = NAME_RECORD_BASE + NAME_RECORD_STRIDE * arg; cap = NAME_MAX; }
+    else if (code == 0x03u) { base = NAME_RECORD_BASE + NAME_RECORD_STRIDE * psx_mod_read_byte(CUR_CHAR_INDEX); cap = NAME_MAX; }
+    else { *cells = MSG_INSERT_CELLS; return 0; }
+    for (n = 0; n < cap; n++) {
+        rec[n] = psx_mod_read_byte(base + n);
+        if (rec[n] == 0) break;
+    }
+    *cells = record_cells(rec, n);
+    return n;
+}
+
+/* The k-th insert control of the text row that follows the ruby row at
+ * src[i] (i at the row's INSERT_MARK). Returns 0 when there is none. */
+static int kth_insert_after(const uint8_t *src, uint32_t len, uint32_t i, uint32_t k,
+                            uint8_t *code, uint8_t *arg) {
+    uint32_t j = i, seen = 0;
+    while (j < len && src[j] != 0x0Eu) j += (src[j] == 0x12u || src[j] == 0x13u || src[j] == 0x15u) ? 2u : 1u;
+    if (j >= len) return 0;
+    j++;                                     /* past 0x0E */
+    if (j < len && src[j] == 0x01u) j++;     /* the newline into the text row */
+    while (j < len) {
+        uint8_t b = src[j];
+        if (b == 0x00u || b == 0x01u || b == 0x02u || b == 0x16u) return 0;
+        if (b == 0x03u || b == 0x04u || b == 0x07u || b == 0x08u) {
+            if (seen++ == k) {
+                *code = b;
+                *arg = (b == 0x03u) ? 0u : src[j + 1];
+                return 1;
+            }
+        }
+        switch (b) {
+        case 0x04: case 0x05: case 0x07: case 0x08: case 0x0A: case 0x0C:
+        case 0x0F: case 0x12: case 0x13: case 0x15: j += 2; break;
+        default: j += 1; break;
+        }
+    }
+    return 0;
+}
+
+/* Copy a furigana message, replacing each INSERT_MARK in a ruby row with the
+ * inserted name's fragment from the insert table, or with gaps of the
+ * name's real width. Everything else is copied byte for byte. */
+static uint32_t expand_markers(const uint8_t *src, uint32_t len, uint8_t *dst, uint32_t cap) {
+    uint32_t i = 0, o = 0, in_span = 0, k = 0;
+    uint8_t rec[INSERT_RECORD_SIZE];
+    while (i < len && o < cap) {
+        uint8_t b = src[i];
+        uint32_t adv = 1;
+        if (b == 0x0Du) { in_span = 1; k = 0; }
+        else if (b == 0x0Eu) in_span = 0;
+        else if (b == INSERT_MARK && in_span) {
+            uint8_t code = 0, arg = 0;
+            uint32_t n = 0, cells = 0, off = 0, flen = 0, j;
+            int have = kth_insert_after(src, len, i, k++, &code, &arg);
+            if (have) n = insert_record(code, arg, rec, &cells);
+            if (have && n && g_insert && lookup(g_insert, fnv1a64(rec, n), &off, &flen)
+                && o + flen <= cap) {
+                for (j = 0; j < flen; j++) dst[o++] = g_insert->blob[off + j];
+                g_frag_hits++;
+            } else {
+                for (j = 0; j < 2u * cells && o < cap; j++) dst[o++] = GAP_BYTE;
+            }
+            if (g_marks_expanded++ < 6)
+                say("bof3_localize: insert marker -> %s %02X/%02X, %u cells%s\n",
+                    have ? "insert" : "no insert", code, arg, cells, flen ? " (fragment)" : "");
+            i += 1;
+            continue;
+        }
+        switch (b) {
+        case 0x04: case 0x05: case 0x07: case 0x08: case 0x0A: case 0x0C:
+        case 0x0F: case 0x16: case 0x12: case 0x13: case 0x15: adv = 2; break;
+        default: break;
+        }
+        if (i + adv > len || o + adv > cap) break;
+        for (; adv; adv--) dst[o++] = src[i++];
+        if (b == 0x00u) break;
+    }
+    return o;
+}
+
 static void redirect_message(uint32_t ptr, const char *via, int log_every) {
     uint8_t jp[JP_MAX];
     uint8_t ins[INSERT_MAX];
@@ -312,7 +401,6 @@ static void redirect_message(uint32_t ptr, const char *via, int log_every) {
     n = msg_extent(ptr, jp, (AREA_BLOCK_HI - ptr < JP_MAX) ? AREA_BLOCK_HI - ptr : JP_MAX,
                    ins, &nins);
     if (!n) { g_skipped++; return; }
-    apply_inserts(ins, nins);
     h = fnv1a64(jp, n);
     if (!lookup(t, h, &off, &len)) {
         g_misses++;
@@ -334,7 +422,13 @@ static void redirect_message(uint32_t ptr, const char *via, int log_every) {
     }
     dst = g_ring + (g_next_slot % SLOT_COUNT) * SLOT_SIZE;
     g_next_slot++;
-    for (i = 0; i < len; i++) psx_mod_write_byte(dst + i, t->blob[off + i]);
+    {
+        static uint8_t out[SLOT_SIZE];
+        uint32_t olen = expand_markers(t->blob + off, len, out, SLOT_SIZE);
+        if (olen == 0 || olen == SLOT_SIZE) { g_skipped++; return; }
+        for (i = 0; i < olen; i++) psx_mod_write_byte(dst + i, out[i]);
+        len = olen;
+    }
     psx_mod_write_word(MSG_STR_BASE, dst);
     psx_mod_write_word(MSG_STR_CUR, dst);
     g_hits++;

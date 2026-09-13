@@ -420,12 +420,15 @@ all at 1:1 from the 8 px design. Tables regenerated: 4,542 / 5,699 entries,
 
 **Three corrections from the user's first play frame (same night):**
 
-- **The glyph rows start at page y 169, not 168** (the 168 grid line is
-  empty), and the **UV extent must be the size, not size − 1**: u is
-  interpolated from the vertex, so an extent of 7 over 8 px never reaches
-  the eighth texel row (the game's own 11-for-12 drops its cells' last
-  row, which is empty). Together those cut 2 px off every reading's foot
-  (こころ lost its bottom stroke). `names/font_small.toml` `page_y = 169`,
+- **The UV extent must be the size, not size − 1**: u is interpolated
+  from the vertex, so an extent of 7 over 8 px never reaches the eighth
+  texel row (the game's own 11-for-12 drops its cells' last row, which is
+  empty). That alone cut the feet off every reading (こころ lost its bottom
+  stroke). ~~The glyph rows start at page y 169, not 168~~ — a misread of
+  the same symptom, corrected on the user's next frame: the grid IS
+  168-based, a voiced kana keeps its **dakuten on the cell's top row**
+  (ど at 184, が at 176) and its body on rows 1–7, so an origin of 169 cut
+  every dakuten (戻 read もと). `names/font_small.toml` `page_y = 168`,
   extent `RUBY_PX`.
 - **The next-page arrow goes through the same sprite blitter** from a
   caller outside the renderer, and the row rule re-placed it onto the
@@ -451,10 +454,43 @@ same way (ceil((8n − 2) / 6)), keeping the wider ink footprint
 its stem hangs right, aligned with the stem's left edge, and takes a free
 half-cell on the left only past half a cell of overhang. Verified by
 encoding AREA018 slot 25 through the builder and injecting it on a field
-state: ひと / く / まえ each on their kanji.
+state: ひと / く / まえ each on their kanji. **And a reading may never
+start directly after another reading's consumed cells** (user's frame
+村の連中に, れんちゅう drawn against むら): the plugin tells readings apart
+only by a gap byte between them, so the left-steal and the placement both
+keep at least one gap byte as the boundary. **The check that would have
+caught it now runs at build time:** `--lint FILE` simulates the plugin's
+draw-time cursor (gap = 6 px; a kana after gaps starts at the cursor
+snapped up to the half-cell plus the gaps; a kana after a kana is 8 px
+on; the renderer adds 6 after a run) over every ruby row and writes the
+rows whose readings would not land where the builder put them. First run
+over the corpus: 13,420 rows, one bad — 調整終了, where the right-wall
+clamp put しゅうりょう straight after ちょうせい's consumed cells; that
+clamp now yields "no room" instead, and the lint is clean. Rows with an
+insert marker are skipped (2,523: the insert's width is a draw-time
+value), and 716 readings sit more than a half-cell off their stem because
+an earlier reading pushed them right, which is the intended collision
+rule, not an error.
 
-Left: the reading review pass; the 297 readings dropped after a runtime
-insert.
+**Inserts (2026-09-12, night; user's pickup frame まがった剣 を手に入れた
+with no readings):** a row with a runtime insert (`0x07 nn` item / skill /
+zenny record, `0x04 nn` / `0x03` character name, `0x08 nn` message) used
+to lose every reading to its right, because the inserted text's width is
+only known at draw time, and the inserted name itself lost its readings
+when the inline insert tables retired. Now the builder lays such a row out
+as if the insert were zero width and leaves `INSERT_MARK` (`0x11`) in the
+ruby row where it begins; `generated/bof3_insert_jp_furigana.c` carries,
+per item / ability name, a ruby-row **fragment** (gaps and kana reading
+the name, padded to the name's width — 109 names); and the plugin, which
+reads the filled records at `MsgBox_Reset` anyway, copies the message
+through `expand_markers()`: each marker becomes the fragment of the k-th
+insert in the following text row, or plain gaps of the record's real
+width (a name without kanji, a zenny amount, a character name; `0x08`
+gets the 11-cell budget). `0x11` is a shipped control in 101 text rows,
+but the marker exists only inside ruby rows the builder wrote and is
+always expanded before the engine sees the copy. The old record rewrite
+(`apply_inserts`) is gone: the furigana layout never writes a record.
+Table: 6,024 entries, 2,536 markers, 21,555 readings.
 
 ## The rendering route, reopened (2026-09-12)
 

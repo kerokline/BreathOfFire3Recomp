@@ -172,6 +172,8 @@ class Annotator:
         # of brackets inline, authored breaks are kept, and a page with
         # readings holds `rows_out` text rows (two pairs fit the 42 px box).
         self.furigana, self.rows_out = furigana, rows_out
+        self.lint = None                   # list of (text row, ruby row, [(reading, want, drawn)]) or None
+        self.last_placements = []
         # Cells budgeted for each runtime insert when a row is laid out.  The
         # English encoder's numbers, with the Ruby scopes raising 0x07 to a
         # whole row: an annotated item / skill name reaches 16 cells
@@ -460,6 +462,7 @@ class Annotator:
     FURIGANA_HEAD = b"\x0f\x13"        # shrink -6 forever: the page signature the plugin keys on
     RESET_HEAD = b"\x0f\x02"           # reset to 12 px forever, ahead of a page with its own effect
     GAP = 0x09                         # renderer no-op, stepper does not count it: a half-cell gap
+    INSERT_MARK = 0x11                 # never reaches the engine: the plugin expands it at open
     SPAN_OPEN, SPAN_CLOSE, PRESET = 0x0D, 0x0E, 0x0F
     INSERTS = (0x03, 0x04, 0x07, 0x08)
     HANGING = (0x2A, 0x3B)             # drawn one cell left of the origin at a row start
@@ -472,7 +475,7 @@ class Annotator:
     RUBY_PX = 8                        # a reading glyph is drawn 8 px wide (the 8 x 8 font)
     HALF_PX = 6                        # one gap byte / one half-cell
 
-    def ruby_row_for(self, row):
+    def ruby_row_for(self, row, limit=None):
         """The half-cell ruby row above one text row, as bytes (b'' when the
         row has no reading). A reading starts at 2 x its stem's first cell;
         one wider than its stem takes a free half-cell on the left first,
@@ -482,7 +485,10 @@ class Annotator:
         back (the plugin advances 8 px per kana). A reading past a runtime
         insert is dropped: the insert's width is only known at draw time."""
         half = [None] * (2 * self.width)
-        x, insert_seen, first = 0, False, True
+        markers = []                       # (half-cell, ) where a runtime insert begins
+        placements = []                    # (half-cell, kana count, stem cell) per reading, for the lint
+        self.last_placements = placements
+        x, first = 0, True
         for u in row:
             for it in u:
                 if it[0] == "g":
@@ -492,13 +498,18 @@ class Annotator:
                     x += 1
                 elif it[0] == "c":
                     if it[1][0] in self.INSERTS:
-                        insert_seen = True
-                    x += self.item_cells(it)
+                        # A runtime insert: its width is only known at draw
+                        # time, so the ruby row carries INSERT_MARK where it
+                        # begins and is laid out as if it were zero width;
+                        # the plugin expands the marker into the inserted
+                        # name's own ruby fragment, or into gaps of its
+                        # real width, when the message opens.
+                        markers.append(2 * max(x, 0))
+                        self.stats["ruby_insert_markers"] += 1
+                    else:
+                        x += self.item_cells(it)
                 elif it[0] == "ruby":
                     kana, stem = it[1], it[2]
-                    if insert_seen:
-                        self.stats["ruby_after_insert"] += 1
-                        continue
                     px = self.RUBY_PX * len(kana)
                     w = -(-px // self.HALF_PX)                      # half-cells the ink covers
                     # Half-cells the cursor consumes: the renderer advances 6
@@ -514,12 +525,29 @@ class Annotator:
                     # over 前 stays on 前; さばく over 砂 straddles it).
                     if px - 12 * stem > self.HALF_PX and s > 0 and half[s - 1] is None:
                         s -= 1
+                    # In a fragment (an inserted name) the cursor must end
+                    # exactly at the name's width, or every reading after the
+                    # insert starts late by the overrun: a reading that would
+                    # run past `limit` moves left while there is room.
+                    while limit and s + c > limit and s > 0 and half[s - 1] is None:
+                        s -= 1
                     s = max(s, 0)
-                    while s + w <= len(half) and any(h is not None for h in half[s:s + w]):
+                    # Move right past any earlier reading's cells -- and never
+                    # start directly after one's consumed cells (True): the
+                    # plugin tells readings apart only by a gap byte between
+                    # them, and without one the second reading continued the
+                    # first at the kana pitch (村の連中に: れんちゅう drawn
+                    # against むら, 2026-09-12).
+                    while s + w <= len(half) and (any(h is not None for h in half[s:s + w])
+                                                  or (s > 0 and half[s - 1] is True)):
                         s += 1
                     if s + w > len(half):
+                        # Against the right wall: only if that leaves the
+                        # boundary gap (the clamp put しゅうりょう straight after
+                        # ちょうせい's consumed cells on 調整終了 -- the one row
+                        # the lint caught).
                         s = len(half) - w
-                        if s < 0 or any(h is not None for h in half[s:]):
+                        if s < 0 or any(h is not None for h in half[s:]) or (s > 0 and half[s - 1] is True):
                             self.stats["ruby_no_room"] += 1
                             continue
                     # The kana go back to back from half-cell s. Cells up to
@@ -530,10 +558,93 @@ class Annotator:
                     for k in range(w):
                         half[s + k] = kana[k:k + 1] if k < len(kana) else (True if k < c else False)
                     self.stats["ruby_placed"] += 1
+                    placements.append((s, len(kana), x - stem))
         while half and half[-1] in (None, False):
             half.pop()
-        return b"".join(h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
-                        for h in half)
+        out = bytearray()
+        for i, h in enumerate(half + [None] * (max(markers) + 1 - len(half) if markers else 0)):
+            out += bytes([self.INSERT_MARK]) * markers.count(i)
+            if i < len(half):
+                out += h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
+        while out and out[-1] == self.GAP:
+            out.pop()
+        return bytes(out)
+
+    def ruby_fragment(self, nb):
+        """The ruby-row fragment for one inserted name (docs/FURIGANA.md
+        "Inserts"): the name's readings laid out as a row of their own,
+        padded with gaps so the cursor ends exactly at the name's width
+        (2 half-cells per cell), or None when the name has nothing to read."""
+        nb = nb.split(b"\0", 1)[0]
+        if not nb:
+            return None
+        _, pages, _ = parse(nb, self.single, self.page15, self.kanji_dec)
+        items = pages[0][0] if pages else []
+        units = self.units_for_page(items, _NeverSeen())
+        cells = sum(self.cells(u) for u in units)
+        frag = bytearray(self.ruby_row_for(units, limit=2 * cells))
+        if not any(b != self.GAP for b in frag):
+            return None
+        # Cursor model: kana consume 8 px each less 2 at the end of a run,
+        # gaps 6; pad to the name's width. (A run overhanging the name is
+        # left as is: the readings after it shift by the excess.)
+        consumed, run = 0, 0
+        for b in frag:
+            if b == self.GAP:
+                if run:
+                    consumed += -(-(self.RUBY_PX * run - 2) // self.HALF_PX) * self.HALF_PX
+                    run = 0
+                consumed += self.HALF_PX
+            else:
+                run += 1
+        if run:
+            consumed += -(-(self.RUBY_PX * run - 2) // self.HALF_PX) * self.HALF_PX
+        while consumed < 12 * cells:
+            frag.append(self.GAP)
+            consumed += self.HALF_PX
+        return bytes(frag)
+
+    def lint_row(self, ruby, placements):
+        """Simulate the plugin's draw-time cursor over one ruby row and check
+        that every reading's first kana lands where the builder put it
+        (6 px per half-cell). The plugin's rules: a gap byte is 6 px; a
+        kana right after gaps starts at the cursor snapped up to the next
+        half-cell plus the gaps; a kana right after another kana is drawn
+        8 px after it (the renderer advances 6, the plugin adds 2); the
+        renderer advances 6 after the last kana of a run. Rows with an
+        insert marker are skipped (the insert's width is a draw-time
+        value). Returns a list of (reading index, wanted x, drawn x)."""
+        if self.INSERT_MARK in ruby:
+            self.stats["lint_skipped_insert_rows"] += 1
+            return []
+        x, gaps, prev_kana, drawn = 0, 0, False, []
+        for b in ruby:
+            if b == self.GAP:
+                gaps += 1
+                prev_kana = False
+                continue
+            if gaps:
+                x = -(-x // self.HALF_PX) * self.HALF_PX + self.HALF_PX * gaps
+                gaps = 0
+            elif prev_kana:
+                x += self.RUBY_PX - self.HALF_PX
+            drawn.append(x)
+            x += self.HALF_PX                      # the renderer's own advance
+            prev_kana = True
+        bad, i = [], 0
+        for k, (s, n, stem_cell) in enumerate(placements):
+            if i >= len(drawn):
+                break
+            want = self.HALF_PX * s
+            if drawn[i] != want:
+                bad.append((k, want, drawn[i]))
+            if abs(want - 12 * stem_cell) > self.HALF_PX:
+                self.stats["lint_off_stem"] += 1
+            i += n
+        self.stats["lint_rows"] += 1
+        if bad:
+            self.stats["lint_bad_rows"] += 1
+        return bad
 
     def encode_furigana_page(self, items, term, seen, out):
         """One box page in the furigana layout, appended to `out`."""
@@ -546,7 +657,15 @@ class Annotator:
             return
         rows = self.rows_for(self.units_for_page(items, seen))
         text = [self.row_bytes(r) for r in rows]
-        ruby = [self.ruby_row_for(r) for r in rows]
+        ruby = []
+        for r in rows:
+            rb = self.ruby_row_for(r)
+            ruby.append(rb)
+            if self.lint is not None and rb:
+                bad = self.lint_row(rb, self.last_placements)
+                if bad:
+                    self.lint.append((decode_jp(self.row_bytes(r), self.single, self.page15),
+                                      decode_jp(rb, self.single, self.page15), bad))
         if not any(ruby):
             out += bytes([NEWLINE]).join(text) + term
             return
@@ -652,7 +771,7 @@ class _NeverSeen(set):
         pass
 
 
-def insert_entries(disc, ann, review=None):
+def insert_entries(disc, ann, review=None, fragment=False):
     """The runtime-insert table (docs/INSERT_RUBY.md): FNV-1a64 of the name
     bytes a 0x07 record holds -> the same name with readings.  The bytes the
     game copies into the record are the item tables' and the ability table's
@@ -677,7 +796,7 @@ def insert_entries(disc, ann, review=None):
         if h in seen:
             stats["duplicate"] += 1
             continue
-        enc = ann.annotate_name(nb)
+        enc = ann.ruby_fragment(nb) if fragment else ann.annotate_name(nb)
         if enc is None:
             stats["unchanged"] += 1
             continue
@@ -686,7 +805,7 @@ def insert_entries(disc, ann, review=None):
         stats["annotated"] += 1
         if review:
             review.write("%-10s %3d  %-16s -> %s\n" % (cat, rid, decode_jp(nb, ann.single, ann.page15),
-                                                      decode_jp(enc, ann.single, ann.page15)))
+                                                      enc.hex() if fragment else decode_jp(enc, ann.single, ann.page15)))
     return entries, stats
 
 
@@ -725,6 +844,9 @@ def main(argv=None):
                          "verbatim (docs/FURIGANA.md)")
     ap.add_argument("--rows-out", type=int, default=2,
                     help="furigana: text rows per page (two pairs fit the 42 px box)")
+    ap.add_argument("--lint", help="furigana: simulate the plugin's draw-time cursor over every ruby "
+                         "row and write the rows whose readings would not land where the builder "
+                         "put them (the check that would have caught 村の連中に)")
     args = ap.parse_args(argv)
     if not args.dict:
         args.dict = DICT_FOR_SCOPE[args.scope]
@@ -746,6 +868,8 @@ def main(argv=None):
                     ambiguous={} if args.ambiguous else None,
                     insert_width={0x07: args.insert_width},
                     furigana=args.furigana, rows_out=args.rows_out)
+    if args.lint and args.furigana:
+        ann.lint = []
     review = open(args.review, "w", encoding="utf-8") if args.review else None
     entries, seen_hash = [], set()
     stats = collections.Counter()
@@ -815,17 +939,37 @@ def main(argv=None):
           % (args.rows_out if args.furigana else args.rows, args.width,
              ann.stats["split_pages"], ann.stats["narration_pages"]))
     if args.furigana:
-        print("furigana pages %d (readings placed %d, dropped after an insert %d, no room %d); "
+        print("furigana pages %d (readings placed %d, insert markers %d, no room %d); "
               "pages with their own span / preset kept verbatim behind a reset: %d"
-              % (ann.stats["furigana_pages"], ann.stats["ruby_placed"], ann.stats["ruby_after_insert"],
+              % (ann.stats["furigana_pages"], ann.stats["ruby_placed"], ann.stats["ruby_insert_markers"],
                  ann.stats["ruby_no_room"], ann.stats["effect_pages"]))
+    if ann.lint is not None:
+        with open(args.lint, "w", encoding="utf-8") as f:
+            f.write("# Ruby rows whose readings would not draw where the builder put them\n"
+                    "# (text row / ruby row / reading index: wanted x -> drawn x, px from the row origin)\n\n")
+            for text_row, ruby_row, bad in ann.lint:
+                f.write("%s\n  %s\n  %s\n\n" % (text_row, ruby_row,
+                        "; ".join("#%d: %d -> %d" % b for b in bad)))
+        print("lint: %d ruby rows simulated, %d with a misplaced reading (%s), %d rows with an "
+              "insert skipped, %d readings placed more than a half-cell off their stem"
+              % (ann.stats["lint_rows"], ann.stats["lint_bad_rows"], args.lint,
+                 ann.stats["lint_skipped_insert_rows"], ann.stats["lint_off_stem"]))
     print("longest encoded message: %d bytes (%s); slot cap %d" % (longest + (args.max_len,)))
     top = sorted(((len(e), h) for h, e in entries), reverse=True)[:5]
     print("five longest: %s" % ", ".join("%d" % n for n, _ in top))
     if args.furigana:
-        # No runtime-insert table: an inserted name is drawn inline in the
-        # text row, where a reading has nowhere to go (docs/FURIGANA.md).
-        print("no insert table for the furigana layout (inserted names draw inline, unread)")
+        # The runtime-insert table for the furigana layout holds ruby-row
+        # FRAGMENTS, not annotated names: the plugin splices one in place of
+        # the INSERT_MARK above the inserted name (docs/FURIGANA.md "Inserts").
+        ireview = open(args.insert_review, "w", encoding="utf-8") if args.insert_review else None
+        ientries, istats = insert_entries(disc, ann, ireview, fragment=True)
+        if ireview:
+            ireview.close()
+        iblob = emit_c(args.insert_out, ientries, code=code, tool="tools/build_ruby_script.py",
+                       what="Japanese (Furigana) runtime-insert table (ruby fragments for item / ability names)",
+                       prefix="bof3_insert")
+        print("wrote %s: %d name fragments (%d blob bytes); %d names without kanji, %d duplicates"
+              % (args.insert_out, istats["annotated"], iblob, istats["unchanged"], istats["duplicate"]))
         return 0
 
     # The runtime-insert table: the same annotator over the item / ability
