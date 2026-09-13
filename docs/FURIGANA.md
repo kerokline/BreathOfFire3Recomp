@@ -454,7 +454,11 @@ same way (ceil((8n − 2) / 6)), keeping the wider ink footprint
 its stem hangs right, aligned with the stem's left edge, and takes a free
 half-cell on the left only past half a cell of overhang. Verified by
 encoding AREA018 slot 25 through the builder and injecting it on a field
-state: ひと / く / まえ each on their kanji.
+state: ひと / く / まえ each on their kanji. **And a reading may never
+start directly after another reading's consumed cells** (user's frame
+村の連中に, れんちゅう drawn against むら): the plugin tells readings apart
+only by a gap byte between them, so the left-steal and the placement both
+keep at least one gap byte as the boundary.
 
 **Inserts (2026-09-12, night; user's pickup frame まがった剣 を手に入れた
 with no readings):** a row with a runtime insert (`0x07 nn` item / skill /

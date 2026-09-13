@@ -528,7 +528,14 @@ class Annotator:
                     while limit and s + c > limit and s > 0 and half[s - 1] is None:
                         s -= 1
                     s = max(s, 0)
-                    while s + w <= len(half) and any(h is not None for h in half[s:s + w]):
+                    # Move right past any earlier reading's cells -- and never
+                    # start directly after one's consumed cells (True): the
+                    # plugin tells readings apart only by a gap byte between
+                    # them, and without one the second reading continued the
+                    # first at the kana pitch (村の連中に: れんちゅう drawn
+                    # against むら, 2026-09-12).
+                    while s + w <= len(half) and (any(h is not None for h in half[s:s + w])
+                                                  or (s > 0 and half[s - 1] is True)):
                         s += 1
                     if s + w > len(half):
                         s = len(half) - w
