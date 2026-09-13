@@ -372,6 +372,16 @@ static uint32_t expand_markers(const uint8_t *src, uint32_t len, uint8_t *dst, u
     while (i < len && o < cap) {
         uint8_t b = src[i];
         uint32_t adv = 1;
+        if (b == 0x14u) {
+            /* A choice block: three argument bytes, then NUL-terminated
+             * options. msg_extent() already bounded `len` at the last
+             * option's NUL, and the builder passes the block through
+             * verbatim, so copy the rest as it is -- stopping at the first
+             * NUL here dropped every option after the first (user's
+             * scrambled / empty choice boxes, 2026-09-13). */
+            while (i < len && o < cap) dst[o++] = src[i++];
+            break;
+        }
         if (b == 0x0Du) { in_span = 1; k = 0; }
         else if (b == 0x0Eu) in_span = 0;
         else if (b == INSERT_MARK && in_span) {
