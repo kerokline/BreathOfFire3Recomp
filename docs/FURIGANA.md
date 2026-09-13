@@ -453,8 +453,25 @@ half-cell on the left only past half a cell of overhang. Verified by
 encoding AREA018 slot 25 through the builder and injecting it on a field
 state: ひと / く / まえ each on their kanji.
 
-Left: the reading review pass; the 297 readings dropped after a runtime
-insert.
+**Inserts (2026-09-12, night; user's pickup frame まがった剣 を手に入れた
+with no readings):** a row with a runtime insert (`0x07 nn` item / skill /
+zenny record, `0x04 nn` / `0x03` character name, `0x08 nn` message) used
+to lose every reading to its right, because the inserted text's width is
+only known at draw time, and the inserted name itself lost its readings
+when the inline insert tables retired. Now the builder lays such a row out
+as if the insert were zero width and leaves `INSERT_MARK` (`0x11`) in the
+ruby row where it begins; `generated/bof3_insert_jp_furigana.c` carries,
+per item / ability name, a ruby-row **fragment** (gaps and kana reading
+the name, padded to the name's width — 109 names); and the plugin, which
+reads the filled records at `MsgBox_Reset` anyway, copies the message
+through `expand_markers()`: each marker becomes the fragment of the k-th
+insert in the following text row, or plain gaps of the record's real
+width (a name without kanji, a zenny amount, a character name; `0x08`
+gets the 11-cell budget). `0x11` is a shipped control in 101 text rows,
+but the marker exists only inside ruby rows the builder wrote and is
+always expanded before the engine sees the copy. The old record rewrite
+(`apply_inserts`) is gone: the furigana layout never writes a record.
+Table: 6,024 entries, 2,536 markers, 21,555 readings.
 
 ## The rendering route, reopened (2026-09-12)
 

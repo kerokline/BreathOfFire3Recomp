@@ -460,6 +460,7 @@ class Annotator:
     FURIGANA_HEAD = b"\x0f\x13"        # shrink -6 forever: the page signature the plugin keys on
     RESET_HEAD = b"\x0f\x02"           # reset to 12 px forever, ahead of a page with its own effect
     GAP = 0x09                         # renderer no-op, stepper does not count it: a half-cell gap
+    INSERT_MARK = 0x11                 # never reaches the engine: the plugin expands it at open
     SPAN_OPEN, SPAN_CLOSE, PRESET = 0x0D, 0x0E, 0x0F
     INSERTS = (0x03, 0x04, 0x07, 0x08)
     HANGING = (0x2A, 0x3B)             # drawn one cell left of the origin at a row start
@@ -482,7 +483,8 @@ class Annotator:
         back (the plugin advances 8 px per kana). A reading past a runtime
         insert is dropped: the insert's width is only known at draw time."""
         half = [None] * (2 * self.width)
-        x, insert_seen, first = 0, False, True
+        markers = []                       # (half-cell, ) where a runtime insert begins
+        x, first = 0, True
         for u in row:
             for it in u:
                 if it[0] == "g":
@@ -492,13 +494,18 @@ class Annotator:
                     x += 1
                 elif it[0] == "c":
                     if it[1][0] in self.INSERTS:
-                        insert_seen = True
-                    x += self.item_cells(it)
+                        # A runtime insert: its width is only known at draw
+                        # time, so the ruby row carries INSERT_MARK where it
+                        # begins and is laid out as if it were zero width;
+                        # the plugin expands the marker into the inserted
+                        # name's own ruby fragment, or into gaps of its
+                        # real width, when the message opens.
+                        markers.append(2 * max(x, 0))
+                        self.stats["ruby_insert_markers"] += 1
+                    else:
+                        x += self.item_cells(it)
                 elif it[0] == "ruby":
                     kana, stem = it[1], it[2]
-                    if insert_seen:
-                        self.stats["ruby_after_insert"] += 1
-                        continue
                     px = self.RUBY_PX * len(kana)
                     w = -(-px // self.HALF_PX)                      # half-cells the ink covers
                     # Half-cells the cursor consumes: the renderer advances 6
@@ -532,8 +539,48 @@ class Annotator:
                     self.stats["ruby_placed"] += 1
         while half and half[-1] in (None, False):
             half.pop()
-        return b"".join(h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
-                        for h in half)
+        out = bytearray()
+        for i, h in enumerate(half + [None] * (max(markers) + 1 - len(half) if markers else 0)):
+            out += bytes([self.INSERT_MARK]) * markers.count(i)
+            if i < len(half):
+                out += h if isinstance(h, bytes) else (b"" if h is True else bytes([self.GAP]))
+        while out and out[-1] == self.GAP:
+            out.pop()
+        return bytes(out)
+
+    def ruby_fragment(self, nb):
+        """The ruby-row fragment for one inserted name (docs/FURIGANA.md
+        "Inserts"): the name's readings laid out as a row of their own,
+        padded with gaps so the cursor ends exactly at the name's width
+        (2 half-cells per cell), or None when the name has nothing to read."""
+        nb = nb.split(b"\0", 1)[0]
+        if not nb:
+            return None
+        _, pages, _ = parse(nb, self.single, self.page15, self.kanji_dec)
+        items = pages[0][0] if pages else []
+        units = self.units_for_page(items, _NeverSeen())
+        cells = sum(self.cells(u) for u in units)
+        frag = bytearray(self.ruby_row_for(units))
+        if not any(b != self.GAP for b in frag):
+            return None
+        # Cursor model: kana consume 8 px each less 2 at the end of a run,
+        # gaps 6; pad to the name's width. (A run overhanging the name is
+        # left as is: the readings after it shift by the excess.)
+        consumed, run = 0, 0
+        for b in frag:
+            if b == self.GAP:
+                if run:
+                    consumed += -(-(self.RUBY_PX * run - 2) // self.HALF_PX) * self.HALF_PX
+                    run = 0
+                consumed += self.HALF_PX
+            else:
+                run += 1
+        if run:
+            consumed += -(-(self.RUBY_PX * run - 2) // self.HALF_PX) * self.HALF_PX
+        while consumed < 12 * cells:
+            frag.append(self.GAP)
+            consumed += self.HALF_PX
+        return bytes(frag)
 
     def encode_furigana_page(self, items, term, seen, out):
         """One box page in the furigana layout, appended to `out`."""
@@ -652,7 +699,7 @@ class _NeverSeen(set):
         pass
 
 
-def insert_entries(disc, ann, review=None):
+def insert_entries(disc, ann, review=None, fragment=False):
     """The runtime-insert table (docs/INSERT_RUBY.md): FNV-1a64 of the name
     bytes a 0x07 record holds -> the same name with readings.  The bytes the
     game copies into the record are the item tables' and the ability table's
@@ -677,7 +724,7 @@ def insert_entries(disc, ann, review=None):
         if h in seen:
             stats["duplicate"] += 1
             continue
-        enc = ann.annotate_name(nb)
+        enc = ann.ruby_fragment(nb) if fragment else ann.annotate_name(nb)
         if enc is None:
             stats["unchanged"] += 1
             continue
@@ -686,7 +733,7 @@ def insert_entries(disc, ann, review=None):
         stats["annotated"] += 1
         if review:
             review.write("%-10s %3d  %-16s -> %s\n" % (cat, rid, decode_jp(nb, ann.single, ann.page15),
-                                                      decode_jp(enc, ann.single, ann.page15)))
+                                                      enc.hex() if fragment else decode_jp(enc, ann.single, ann.page15)))
     return entries, stats
 
 
@@ -815,17 +862,26 @@ def main(argv=None):
           % (args.rows_out if args.furigana else args.rows, args.width,
              ann.stats["split_pages"], ann.stats["narration_pages"]))
     if args.furigana:
-        print("furigana pages %d (readings placed %d, dropped after an insert %d, no room %d); "
+        print("furigana pages %d (readings placed %d, insert markers %d, no room %d); "
               "pages with their own span / preset kept verbatim behind a reset: %d"
-              % (ann.stats["furigana_pages"], ann.stats["ruby_placed"], ann.stats["ruby_after_insert"],
+              % (ann.stats["furigana_pages"], ann.stats["ruby_placed"], ann.stats["ruby_insert_markers"],
                  ann.stats["ruby_no_room"], ann.stats["effect_pages"]))
     print("longest encoded message: %d bytes (%s); slot cap %d" % (longest + (args.max_len,)))
     top = sorted(((len(e), h) for h, e in entries), reverse=True)[:5]
     print("five longest: %s" % ", ".join("%d" % n for n, _ in top))
     if args.furigana:
-        # No runtime-insert table: an inserted name is drawn inline in the
-        # text row, where a reading has nowhere to go (docs/FURIGANA.md).
-        print("no insert table for the furigana layout (inserted names draw inline, unread)")
+        # The runtime-insert table for the furigana layout holds ruby-row
+        # FRAGMENTS, not annotated names: the plugin splices one in place of
+        # the INSERT_MARK above the inserted name (docs/FURIGANA.md "Inserts").
+        ireview = open(args.insert_review, "w", encoding="utf-8") if args.insert_review else None
+        ientries, istats = insert_entries(disc, ann, ireview, fragment=True)
+        if ireview:
+            ireview.close()
+        iblob = emit_c(args.insert_out, ientries, code=code, tool="tools/build_ruby_script.py",
+                       what="Japanese (Furigana) runtime-insert table (ruby fragments for item / ability names)",
+                       prefix="bof3_insert")
+        print("wrote %s: %d name fragments (%d blob bytes); %d names without kanji, %d duplicates"
+              % (args.insert_out, istats["annotated"], iblob, istats["unchanged"], istats["duplicate"]))
         return 0
 
     # The runtime-insert table: the same annotator over the item / ability
