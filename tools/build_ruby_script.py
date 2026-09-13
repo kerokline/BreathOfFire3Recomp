@@ -473,7 +473,7 @@ class Annotator:
     RUBY_PX = 8                        # a reading glyph is drawn 8 px wide (the 8 x 8 font)
     HALF_PX = 6                        # one gap byte / one half-cell
 
-    def ruby_row_for(self, row):
+    def ruby_row_for(self, row, limit=None):
         """The half-cell ruby row above one text row, as bytes (b'' when the
         row has no reading). A reading starts at 2 x its stem's first cell;
         one wider than its stem takes a free half-cell on the left first,
@@ -521,6 +521,12 @@ class Annotator:
                     # over 前 stays on 前; さばく over 砂 straddles it).
                     if px - 12 * stem > self.HALF_PX and s > 0 and half[s - 1] is None:
                         s -= 1
+                    # In a fragment (an inserted name) the cursor must end
+                    # exactly at the name's width, or every reading after the
+                    # insert starts late by the overrun: a reading that would
+                    # run past `limit` moves left while there is room.
+                    while limit and s + c > limit and s > 0 and half[s - 1] is None:
+                        s -= 1
                     s = max(s, 0)
                     while s + w <= len(half) and any(h is not None for h in half[s:s + w]):
                         s += 1
@@ -560,7 +566,7 @@ class Annotator:
         items = pages[0][0] if pages else []
         units = self.units_for_page(items, _NeverSeen())
         cells = sum(self.cells(u) for u in units)
-        frag = bytearray(self.ruby_row_for(units))
+        frag = bytearray(self.ruby_row_for(units, limit=2 * cells))
         if not any(b != self.GAP for b in frag):
             return None
         # Cursor model: kana consume 8 px each less 2 at the end of a run,
