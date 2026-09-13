@@ -439,10 +439,22 @@ all at 1:1 from the 8 px design. Tables regenerated: 4,542 / 5,699 entries,
   cursor y at row y − P while the glyph itself takes y from a1; the arrow
   then lands one row under the text (`analysis/xlate_shots/furigana_area014_arrow.png`).
 
-Left: the reading review pass; the 112 / 297 readings dropped after a
-runtime insert; a look at pages whose readings collide sideways (the
-builder pushes a later reading right, and an 8 px reading over a 12 px
-stem overhangs by 4 px per extra kana).
+**Gap arithmetic, corrected on the user's second play frame (レイ's
+「人が来る前に, readings drifting left along the row):** a reading's kana
+advance 8 each but the renderer adds only 6 after the last, so the cursor
+sits 8n − 2 past the reading's start — off the 6 px half-cell grid — and
+every later reading on the row started early by the remainder. The plugin
+now snaps the cursor up to the next half-cell from the row's origin before
+it counts gap bytes, and the builder counts a reading's consumed cells the
+same way (ceil((8n − 2) / 6)), keeping the wider ink footprint
+(ceil(8n / 6)) only to keep a later reading off it. A reading wider than
+its stem hangs right, aligned with the stem's left edge, and takes a free
+half-cell on the left only past half a cell of overhang. Verified by
+encoding AREA018 slot 25 through the builder and injecting it on a field
+state: ひと / く / まえ each on their kanji.
+
+Left: the reading review pass; the 297 readings dropped after a runtime
+insert.
 
 ## The rendering route, reopened (2026-09-12)
 

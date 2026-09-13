@@ -488,12 +488,23 @@ static int ruby_gap(struct CPUState *cpu, uint32_t p, int x_reg) {
     if (!n) return 0;
     step = 12 + (int16_t)psx_mod_read_half(MSG_SIZE_P);
     x = (int16_t)psx_mod_read_half(MSG_CUR_X);
-    psx_mod_write_half(MSG_CUR_X, (uint16_t)(x + step * n));
-    if (x_reg)
-        cpu->gpr[x_reg] = (uint32_t)((int32_t)cpu->gpr[x_reg] + step * n);
-    if (g_gap_hits++ < 4)
-        say("bof3_localize: ruby gap x%d before glyph at %08X (x %d -> %d)\n",
-            n, p, x, x + step * n);
+    {
+        /* A reading's kana advance 8 each but the renderer adds only 6 after
+         * the last, so the cursor sits off the half-cell grid after every
+         * reading (8n - 2 past its start) and the next reading drifted left
+         * by the remainder, accumulating along the row (user's frame,
+         * 2026-09-12). Snap up to the next half-cell from the row's origin
+         * before counting the gaps; the builder counts from the same place. */
+        int origin_x = (int16_t)psx_mod_read_half(MSG_ORIGIN_Y - 2u);
+        int rel = x - origin_x;
+        int snapped = origin_x + ((rel + step - 1) / step) * step;
+        int want = snapped + step * n;
+        psx_mod_write_half(MSG_CUR_X, (uint16_t)want);
+        if (x_reg)
+            cpu->gpr[x_reg] = (uint32_t)((int32_t)cpu->gpr[x_reg] + (want - x));
+        if (g_gap_hits++ < 4)
+            say("bof3_localize: ruby gap x%d before glyph at %08X (x %d -> %d)\n", n, p, x, want);
+    }
     return n;
 }
 
