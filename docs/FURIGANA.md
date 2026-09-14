@@ -510,6 +510,16 @@ x = 114, 手 at 162 and 入 at 186, て drawn at 162 and い at 186 (168 / 192
 before); the boot line reads `insert marker -> insert 07/00, 2 cells
 (fragment), overhang absorbed`.
 
+**Choice boxes (user's frames, same day: options scrambled or missing):**
+`expand_markers()` stopped its copy at the first NUL, and a `0x14` choice
+block's options are NUL-terminated, so only the first option reached the
+ring slot and the rest of the box drew whatever an earlier message had left
+there. From `0x14` on the block is now copied verbatim (`msg_extent` already
+bounds the message at the last option's NUL). Verified on the AREA150 desert
+prompt hosted synthetically in slot 0's area block
+(`analysis/xlate_shots/furigana_choice_area150.png`): はい / いいえ under
+夜（よる）を待（ま）って‥ / 砂漠（さばく）に出（で）ますか？, 31 → 49 bytes.
+
 ## The rendering route, reopened (2026-09-12)
 
 The user's framing: if the y spacing is controllable, the existing script
