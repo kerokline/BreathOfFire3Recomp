@@ -119,7 +119,7 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 | `0x801EB626` | `+0x06` **EXP yield** (u16, 8) — added to `0x80146328` on death | `Battle_EnemyDefeated` |
 | `0x801EB628` | `+0x08` **level** (u16, 10): the damage bonus term `+0x08 * (2..3) / 10` and the row-0 class for the turn-order variance (`Battle_LevelClass`) | `Battle_BaseDamage`, `Battle_BuildTurnOrder` |
 | `0x801EB634` | `+0x14` **HP** (u16) — `0x801EB74C` is enemy 1 | `Battle_ApplyDamage` |
-| `0x801EB638` | `+0x18` drop 1: u16 item (`category<<8 \| id`, `0x0004`), `+0x1A` chance class (3); `+0x1C`/`+0x1E` drop 2 (`0x0019`, class 1). Zeroed once dropped | `Battle_RollDrops` |
+| `0x801EB638` | `+0x18` drop 1: u16 item (`category<<8 \| id`, `0x0004`), `+0x1A` chance class (3); `+0x1C`/`+0x1E` drop 2 (`0x0019`, class 1). Zeroed once dropped. **Drop 1 is also the steal item and its class the steal level** — Pilfer/Steal roll `rand byte < rate[class] × AGI mod` in their own BMAGIC overlay and zero both on success ([`STEAL.md`](STEAL.md), 2026-09-13) | `Battle_RollDrops`, MAGIC065 `0x801EEF5C` |
 | `0x801EB640` | `+0x20` **max HP** (u16) — `0x801EB758` fed to the HUD; `+0x22` max AP (18) | `Battle_ApplyDamage`, `Battle_BeginAction` |
 | `0x801EB644` | `+0x24` **ATK** (19), `+0x26` **DEF** (11), `+0x28` **AGI** (7; the turn-order base, mirrors party `+0x24`), `+0x2A` (20) | `Battle_BeginAction` → `0x801EC27C`, `Battle_BuildTurnOrder` |
 | `0x801EB654` | `+0x34` type / size class byte (5) | `Battle_ScaleDamage` |

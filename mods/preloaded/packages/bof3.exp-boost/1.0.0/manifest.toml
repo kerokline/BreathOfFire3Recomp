@@ -1,0 +1,50 @@
+# EXP / zenny multipliers (docs/EXP_BOOST.md).
+#
+# One default-off feature with two bounded integer sliders. The work is done
+# by the trusted static plugin src/bof3_exp_boost.c, which the runtime
+# activates under the id below: it scales the dying enemy's EXP and zenny
+# yields at each kill, so the results-screen numbers, the per-member award
+# and multi-level gains all follow. A slider at 1 leaves that stat stock;
+# 0 grants nothing at all (no EXP, so no level-ups; no zenny).
+format_version = 6
+id = "bof3.exp-boost"
+version = "1.0.0"
+name = "EXP / Zenny Boost"
+author = "BreathOfFire3Recomp"
+description = "Multiply the EXP and zenny won in battle, each by its own slider."
+license = "MIT"
+resolver = "declarative"
+
+[[target]]
+game_id = "SLPS-00990"
+
+[[feature]]
+id = "boost"
+name = "EXP / Zenny multipliers"
+description = "Each enemy's EXP and zenny yields are multiplied when it falls. 1 = stock, 0 = none (no level-ups)."
+group = "Gameplay"
+default_enabled = false
+
+[[option]]
+feature = "boost"
+id = "exp"
+label = "EXP x"
+type = "integer"
+min = 0
+max = 50
+step = 1
+default = 10
+
+[[option]]
+feature = "boost"
+id = "zenny"
+label = "Zenny x"
+type = "integer"
+min = 0
+max = 50
+step = 1
+default = 10
+
+[[plugin]]
+feature = "boost"
+id = "bof3.exp-boost"

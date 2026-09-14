@@ -1,0 +1,47 @@
+# Pilfer / Steal always succeed (docs/STEAL.md).
+#
+# Both steal abilities run from their own BMAGIC overlay (Pilfer ぶんどり =
+# MAGIC065.EMI, Steal 盗む = MAGIC216.EMI, both loaded at 0x801EEC00). The
+# handler rolls  (Rand() & 0xFF) < table[drop class] * agility tier  and on
+# success moves the enemy's drop-1 item into the inventory and zeroes the
+# enemy's slot, so a stolen item cannot be stolen or dropped again.
+#
+# The patch turns the random byte into a constant 0 (`andi v0,v0,0xFF` ->
+# `andi v0,v0,0`), so the roll passes whenever the enemy's chance was
+# nonzero. Enemies whose class table entry is 0 stay unstealable, and an
+# enemy with no item still reports "nothing to steal". Offsets are
+# disc_user (LBA * 2048 + byte in file); LBAs from tools/file_ids.py.
+format_version = 6
+id = "bof3.steal-always"
+version = "1.0.0"
+name = "Steal Always Succeeds"
+author = "BreathOfFire3Recomp"
+description = "Rei's Pilfer and the Steal skill take the enemy's item on the first attempt whenever the enemy carries one."
+license = "MIT"
+resolver = "declarative"
+
+[[target]]
+game_id = "SLPS-00990"
+
+[[feature]]
+id = "steal-always"
+name = "Steal always succeeds"
+description = "Pilfer (ぶんどり) and Steal (盗む) never miss on an enemy that has an item to take."
+group = "Gameplay"
+default_enabled = false
+
+# MAGIC065.EMI (Pilfer), LBA 15210, file offset 0xB20 = guest 0x801EEF20
+[[patch]]
+feature = "steal-always"
+target = "disc_user"
+offset = 31152928
+expected = "ff 00 42 30"
+replace = "00 00 42 30"
+
+# MAGIC216.EMI (Steal), LBA 19376, file offset 0x9D4 = guest 0x801EEDD4
+[[patch]]
+feature = "steal-always"
+target = "disc_user"
+offset = 39684564
+expected = "ff 00 42 30"
+replace = "00 00 42 30"

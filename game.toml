@@ -43,7 +43,16 @@ strict = true
 # index without a reset (master talk, 2026-09-11), so the plugin redirects
 # again there. Changing this list changes the overlay config hash (the
 # dynamic shard cache name); the static overlays came out content-identical.
-mod_function_entry_funcs = ["0x8015042C", "0x80150F3C", "0x80150598", "0x8014F6BC", "0x80151F4C", "0x8014E494"]
+# The last one is a BATTLE.EMI#3 function (band 0x801D0C00, registry id 0x10)
+# for the EXP / zenny boost plugin src/bof3_exp_boost.c (docs/EXP_BOOST.md):
+# Battle_EnemyDefeated 0x801E542C, a plain jal target. The recompiler emits
+# the hook only at a function's prologue, and the BATL_END results phases
+# (0x801EF390 / 0x801EEF58 / 0x801EF810) are alias entries into larger
+# hosts, so hooking them emitted nothing. Overlay hook PCs land in the
+# compiled overlays, so they need a compile_overlays run, not a main
+# generate. (0x801DD564 BattleResult_AddExp was listed until 2026-09-13; the
+# built tree still carries that inert hook until the next overlay compile.)
+mod_function_entry_funcs = ["0x8015042C", "0x80150F3C", "0x80150598", "0x8014F6BC", "0x80151F4C", "0x8014E494", "0x801E542C"]
 
 [runtime]
 window_title = "BreathOfFire3 Recompiled"
