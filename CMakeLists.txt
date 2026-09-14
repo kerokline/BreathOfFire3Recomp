@@ -31,6 +31,9 @@ psxrecomp_add_game_runtime(psx-runtime
     WINDOW_TITLE "BreathOfFire3 Recompiled"
     DEFAULT_GAME_CONFIG_PATH "game.toml"
     MAX_PLAYERS 1
+    # Reviewed, default-off packages staged to <exe-dir>/mods/bundled on every
+    # build (psxrecomp/docs/MOD_PACKAGES.md "How bundled/ gets staged").
+    PRELOADED_MODS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded"
     LAUNCHER_BOXART "${CMAKE_CURRENT_SOURCE_DIR}/launcher_assets/img/boxart.tga"
     APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/assets/psxrecomp.ico"
     # Layer B: overlays statically extracted from the disc's .EMI containers
@@ -87,6 +90,12 @@ if(PSX_SPLIT_DEBUG)
         COMMENT "Splitting DWARF into $<TARGET_FILE_NAME:psx-runtime>.debug (PSX_SPLIT_DEBUG)"
         VERBATIM)
 endif()
+
+# EXP / zenny multiplier plugin (docs/EXP_BOOST.md): trusted static plugin
+# selected by mods/preloaded/packages/bof3.exp-boost; hook PCs are the
+# BATL_END entries in game.toml mod_function_entry_funcs. Always built --
+# it is inert until the launcher enables a feature.
+target_sources(psx-runtime PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/bof3_exp_boost.c")
 
 # Script localization plugin (docs/LOCALIZATION_APPLY.md). The tables are
 # generated locally into generated/bof3_xlate_<code>.c -- English by
