@@ -242,7 +242,7 @@ named (`names/functions.toml`, `symbols.toml`):
 (`BATTLE.EMI 0x801DD820`) reads a 6 x 3 halfword table at `0x801EAF80`:
 row = index 0..5, column = the actor's kind (`obj+0x2C`, 0..2), and the
 entries are simply `0x03nn / 0x04nn / 0x05nn` — so **bank = 3 + the
-party slot's kind, id = index**, and the three banks carry identical
+actor's voice-set index, id = index**, and the three banks carry identical
 six-cue tables because they are the three characters' personal sets. What
 the six indices are, from the callers:
 
@@ -292,9 +292,12 @@ overlay call site seen at `0x801EEF8C`, plus the interpreter path), so the
 identity of a battle sound is **cue + the resident spell overlay**.
 `se_watch` keys labels by that context (`magic:<name>`, else
 `field`/`battle`, else `tables:<hash>`) and dumps every new table to
-`analysis/se_tables/`. The per-slot banks 3/4/5 follow **party position**
-(the `obj+0x2C` column: Ryu in slot 0 = bank 3, Nina slot 1 = bank 4, Momo
-slot 2 = bank 5), not the character id — swap the formation to confirm.
+`analysis/se_tables/`. The banks 3/4/5 are **per character, not per position**: the player moved
+Ryu and Momo on the battle field and Ryu stayed `0x03xx`, Momo `0x05xx`
+(2026-09-17). The `obj+0x2C` column is therefore a voice-set index given
+to each member when the party's voice banks are loaded (Ryu 0, Nina 1,
+Momo 2 in that party); whether it follows the *menu* party order or the
+character id is still untested.
 
 **Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
 family, and across all 141 `BMAGIC` overlays only 12 call it, all with
