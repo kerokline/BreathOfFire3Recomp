@@ -19,19 +19,24 @@ export's FUN_* boundaries for that overlay as a last resort.
     python tools/se_watch.py --port 4370 --label            # ...and ask what you heard
     python tools/scene.py run --slot 2 -- python tools/se_watch.py --port {port} --seconds 30 --press circle
 
-Appends one JSON row per cue to analysis/se_timeline.jsonl. With --label the
-watcher pauses after each *new* cue (stdin must be a terminal), asks what the
-sound was, and upserts the answer into names/se_cues.toml (status =
-"evidence", the session and frame as the citation); Enter skips, and a cue
-that already has a label is printed with it and not asked again. The bank 1
+Appends one JSON row per cue to analysis/se_timeline.jsonl. Every cue is
+also RESOLVED to the sound it makes right now (tools/se_resolve.py: cue
+entry -> VAB program/tone -> VAG -> the sample bytes in SPU RAM, hashed),
+because a cue word is a slot, not a sound: spells, areas and party changes
+put other samples behind the same words. With --label the watcher pauses
+after each *new sound* (stdin must be a terminal), asks what it was, and
+upserts the answer into names/se_cues.toml keyed by the sample hash
+(status = "evidence", the session, frame, cue and context as the citation);
+Enter skips. A sound already labelled is printed with its label, and the
+cue word + context it arrived through is added to that sound's `cues` list,
+so the file accumulates which slots map to which sounds. The bank 1
 and bank 2 tables are swapped for battle (SOUND_CUES.md "Live contents"), so
 the label is keyed by cue AND mode. Mode is NOT the resident overlay
 (BATTLE.EMI stays in the swap slot after a fight, while the area's own code
 is already playing field cues): it is the live bank 1+2 cue table at
 0x80148718..0x80148810 hashed against the two tables the savestates hold
 (slot00/02 = field, slot03 = battle; docs/SOUND_CUES.md "Live contents"),
-which is what decides what a cue word sounds like. That is not the whole
-identity either: 80 of the 144 BMAGIC spell overlays carry a 32/64 KB
+which is a useful column even though the sample hash is the identity: 80 of the 144 BMAGIC spell overlays carry a 32/64 KB
 sample payload (a type-3 .EMI section) and trigger it as cue 0x100, and
 the tables themselves are rewritten as areas and spells load (five hashes
 in one 2026-09-17 session), so the same cue word is a different sound per
@@ -62,6 +67,7 @@ CUES_TOML = os.path.join(ROOT, "names", "se_cues.toml")
 
 import callstack_diff as cd   # noqa: E402
 import name_map               # noqa: E402
+import se_resolve             # noqa: E402
 
 CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
 CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
@@ -69,10 +75,6 @@ GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
 TABLES_LO, TABLES_HI = 0x80148718, 0x80148810     # bank 1 + bank 2 cue tables (2 x 31 x 4)
 TABLES_DIR = os.path.join(ROOT, "analysis", "se_tables")
 MAGIC_BAND = 0x801EEC00                            # BMAGIC swap band
-# Cues the player confirmed sound the same on every screen (2026-09-17: the menu
-# select / cancel / swipe set). They are labelled under the context "any" unless a
-# spell overlay is resident, because a loaded spell can fire 0x100 with its own samples.
-CONTEXT_FREE = {0x100, 0x101, 0x102, 0x103, 0x104, 0x105, 0x106, 0x107}
 TABLE_MODES = {                                    # md5 of that span, from saves/openbios (2026-09-17)
     "79b02fe1aa36a99d5c6e6cd96ae6fe74": "field",   # slot00 title, slot02 AREA014 field
     "229197bba0c628f87fd4e2b7431dc09a": "battle",  # slot03 regular field battle
@@ -220,31 +222,34 @@ def context_of(bands, tables_md5, raw, seen):
 # ----------------------------------------------------------------- labels
 
 def load_labels():
+    """{sound_id: {id, label, status, evidence, cues:[...]}} from names/se_cues.toml."""
     if not os.path.exists(CUES_TOML):
         return {}
     d = tomllib.load(open(CUES_TOML, "rb"))
-    return {(int(c["cue"]), c.get("mode", "unknown")): c for c in d.get("cue", [])}
+    return {c["id"]: dict(c, cues=list(c.get("cues", []))) for c in d.get("sound", [])}
 
 
 def save_labels(labels):
-    rows = ["# names/se_cues.toml -- what each SE_Play cue sounds like, heard in play.",
-            "#   cue    bank<<8 | id as SE_Play receives it (docs/SOUND_CUES.md)",
-            "#   mode   the context that fixes what the cue word sounds like: magic:<overlay>",
-            "#          (a spell's own sample payload is loaded), field | battle (the bank 1+2",
-            "#          cue tables match a savestate), or tables:<md5 prefix> for a table not",
-            "#          yet seen in a savestate (its bytes are in analysis/se_tables/), or any",
-            "#          for the menu set 0x100..0x107 the player confirmed is the same everywhere",
-            "#   label  what was heard, in the player's words",
-            "#   status evidence (heard live) | hypothesis",
-            "#   evidence  se_watch session and frame of the hearing, nearest caller",
+    rows = ["# names/se_cues.toml -- the sound catalogue, keyed by the SAMPLE, not the cue word.",
+            "#   id        md5 (12 hex) of the VAG sample bytes in SPU RAM that the cue resolved to",
+            "#             (tools/se_resolve.py); the same word plays other samples after a spell,",
+            "#             an area or a party change, so the word is only a slot",
+            "#   label     what was heard, in the player's words",
+            "#   status    evidence (heard live) | hypothesis",
+            "#   evidence  first hearing: se_watch session, frame, cue word, context, vab/prog/tone/vag",
+            "#   cues      every 'cue@context' this sample was reached through, e.g. 0x0302@battle",
+            "#   centre / shift / size   pitch and length of the sample as the VAB describes it",
             ""]
-    for (cue, mode), c in sorted(labels.items()):
-        rows.append("[[cue]]")
-        rows.append("cue = 0x%04X" % cue)
-        rows.append('mode = "%s"' % mode)
+    for sid, c in sorted(labels.items(), key=lambda kv: kv[0]):
+        rows.append("[[sound]]")
+        rows.append('id = "%s"' % sid)
         rows.append('label = "%s"' % c["label"].replace('"', "'"))
         rows.append('status = "%s"' % c.get("status", "evidence"))
         rows.append('evidence = "%s"' % c.get("evidence", "").replace('"', "'"))
+        rows.append("cues = [%s]" % ", ".join('"%s"' % x for x in c.get("cues", [])))
+        for k in ("centre", "shift", "size"):
+            if k in c:
+                rows.append("%s = %d" % (k, c[k]))
         rows.append("")
     with open(CUES_TOML, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(rows))
@@ -270,6 +275,7 @@ def main():
         raise SystemExit("--label needs a terminal on stdin")
     namer = Namer()
     labels = load_labels()
+    read_ram, read_spu = se_resolve.live_readers(a.port)
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     prev, armed = cd.wtrace_arm_ranges(a.port, [(CELL_ID, CELL_BANK + 4)])
     print("se_watch: armed 0x%08X-0x%08X (%s), session %s -> %s, %d label(s) known" % (
@@ -298,17 +304,22 @@ def main():
                     cue = (bank << 8) | cue_id if bank >= 0 and cue_id >= 0 else -1
                     ra = int(e["ra"], 16)
                     caller, ovl = namer.name(ra, bands)
-                    label_ctx = "any" if (cue in CONTEXT_FREE and not mode.startswith("magic:")) else mode
-                    known = labels.get((cue, mode)) or labels.get((cue, "any"))
-                    fallback = None
-                    if known is None and cue >= 0:
-                        for (c2, m2), lab in labels.items():
-                            if c2 == cue and (fallback is None or m2 in ("field", "battle")):
-                                fallback = (m2, lab)
+                    res, why = None, ""
+                    if cue >= 0:
+                        try:
+                            res = se_resolve.resolve(read_ram, read_spu, cue)
+                        except se_resolve.Unresolved as ex:
+                            why = str(ex)
+                        except Exception as ex:      # debug server hiccup: keep the row, lose the sound
+                            why = "resolve failed: %s" % ex
+                    sound = res["sound"] if res else None
+                    known = labels.get(sound) if sound else None
+                    via = "%s@%s" % ("0x%04X" % cue, mode)
                     row = {"session": session, "frame": int(e["frame"]),
                            "t": dt.datetime.now().isoformat(timespec="seconds"),
                            "cue": "0x%04X" % cue if cue >= 0 else "?", "bank": bank,
                            "id": cue_id, "mode": mode, "tables_md5": tables_md5, "area": area,
+                           "sound": sound, "resolve": res if res else why,
                            "store_pc_bank": e_bank["pc"] if e_bank else None,
                            "store_pc_id": e_id["pc"] if e_id else None,
                            "ra": e["ra"], "caller_nearest": caller, "caller_overlay": ovl,
@@ -318,32 +329,29 @@ def main():
                     with open(a.out, "a", encoding="utf-8") as fh:
                         fh.write(json.dumps(row) + "\n")
                     n += 1
-                    print("[f%d] cue %s (%s) ra=%s %-30s %s" % (
-                        row["frame"], row["cue"], mode, e["ra"],
+                    desc = ("snd %s vab%d p%d t%d c%d" % (sound, res["vab"], res["prog"], res["tone"], res["centre"])
+                            if res else ("(%s)" % why if why else "(half a call: ring gap)"))
+                    print("[f%d] cue %s (%s) %-34s ra=%s %-26s %s" % (
+                        row["frame"], row["cue"], mode, desc, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
-                        ("= " + known["label"]) if known else
-                        ("~ %s [%s]" % (fallback[1]["label"], fallback[0])) if fallback else
-                        ("(unlabelled)" if cue >= 0 else "(half a call: ring gap)")), flush=True)
-                    if a.label and not known and cue >= 0:
+                        ("= " + known["label"]) if known else ("(unlabelled)" if sound else "")), flush=True)
+                    if known and via not in known["cues"]:
+                        known["cues"].append(via)
+                        save_labels(labels)
+                    if a.label and sound and not known:
                         try:
-                            if fallback:
-                                ans = input("   what was that sound? (Enter = same as [%s] '%s', - = skip) "
-                                            % (fallback[0], fallback[1]["label"])).strip()
-                                if ans == "":
-                                    ans = fallback[1]["label"]
-                                elif ans == "-":
-                                    ans = ""
-                            else:
-                                ans = input("   what was that sound? (Enter = skip) ").strip()
+                            ans = input("   what was that sound? (Enter = skip) ").strip()
                         except EOFError:
                             ans = ""
                         if ans:
-                            labels[(cue, label_ctx)] = {
-                                "cue": cue, "mode": label_ctx, "label": ans, "status": "evidence",
-                                "evidence": "se_watch %s f%d, ra %s %s%s" % (
-                                    session, row["frame"], e["ra"], (ovl + ":") if caller else "", caller)}
+                            labels[sound] = {
+                                "id": sound, "label": ans, "status": "evidence",
+                                "evidence": "se_watch %s f%d via %s, ra %s %s%s, vab%d prog%d tone%d vag%d spu %s" % (
+                                    session, row["frame"], via, e["ra"], (ovl + ":") if caller else "", caller,
+                                    res["vab"], res["prog"], res["tone"], res["vag"], res["spu"]),
+                                "cues": [via], "centre": res["centre"], "shift": res["shift"], "size": res["size"]}
                             save_labels(labels)
-                            print("   -> names/se_cues.toml: 0x%04X/%s = %s" % (cue, label_ctx, ans), flush=True)
+                            print("   -> names/se_cues.toml: %s = %s" % (sound, ans), flush=True)
                 last_frame = fr
             if a.seconds and time.time() - t0 >= a.seconds:
                 break

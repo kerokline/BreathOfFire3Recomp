@@ -320,10 +320,44 @@ and the write trace cannot see past that wrapper because `SE_Play`'s `ra`
 is inside it. Next step for spells: arm the trace on `SE_PlayTracked`'s
 own first store (`0x8018BC94`) or add the wrapper to `se_watch`.
 
+## Cataloguing by sample, not by cue word (2026-09-17)
+
+The player's diagnosis after three sessions: the cue word is a **slot**.
+Battle saves an array, executes from the array, and the slot holds whatever
+is needed to reach a sound — so `0x302+0x304` is "slot 0's swing" for any
+character with any weapon, `0x100` is "the loaded spell's sample", and a
+label on the word is only true for the state that was loaded. The stable
+identity is the sample itself. `tools/se_resolve.py` follows the runtime's
+own chain from a cue word to the bytes that will play:
+
+| step | where | what |
+|---|---|---|
+| cue entry | `0x8014869C + bank*0x7C + id*4` | `{flags, pan\|prog, tone\|pri, chord\|voice}`; `flags & 7` overrides the VAB |
+| VAB header | libsnd registry `0x8018EB18[vab]` | what `SsVabOpenHead` registered — **not** the game's `0x80148A14` pointers, which lag behind |
+| tone attributes | libsnd `0x8018EB60[vab] + prog*0x200 + tone*0x20` | `+2` vol, `+3` pan, `+4` centre, `+5` shift, `+0x16` VAG index |
+| VAG size table | header `+0x20 + nprog*0x10 + ps*0x200` | 256 u16 in 8-byte units; `nprog` is 0x80 for header byte `0x70` and version > 4 |
+| sample | libsnd `0x80191550[vab]` + sum of the earlier VAG sizes | read from SPU RAM (`spu_ram`, 4 KB per call) and hashed |
+
+Checked on the savestates: `0x202` is a 5,776-byte VAG at `0x60CF0`
+(centre 52) in battle and a 9,584-byte one at `0x562E0` in the field;
+`0x302` keeps its VAG slot but the bytes differ between `slot02` and
+`slot03`, which is the party-slot behaviour heard in play. `se_watch`
+now resolves every cue live, keys `names/se_cues.toml` by the sample's
+md5, and records each `cue@context` a sample was reached through, so the
+file accumulates the slot map as a by-product. The cue-keyed catalogue
+from the first three sessions is kept as
+`analysis/se_cues_by_cue_2026-09-17.toml` (the merged menu wording is in
+the commit that reset it).
+
+Limits: banks whose VAB libsnd has not reopened resolve to "not a VAB"
+(the 2026-09-05 savestates show this for vabs 5 and 6; live play does
+not), and the hash covers the sample only — the same VAG at another
+centre note is listed once with its first pitch.
+
 ## Open
 
 - **Hear one.** No trace yet pairs a cue id with an audible sound.
-  `tools/se_watch.py` is the hook: a write trace on the two halfwords
+  `tools/se_watch.py` is the hook (labels keyed by sample, see below): a write trace on the two halfwords
   `SE_Play` stores first (`0x8018BD7C` id, `0x8018BD80` bank) — the same
   no-framework-change trick as `tools/load_watch.py` — logs every cue with
   its caller to `analysis/se_timeline.jsonl` during any play session, and
