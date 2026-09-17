@@ -30,8 +30,15 @@ the label is keyed by cue AND mode. Mode is NOT the resident overlay
 is already playing field cues): it is the live bank 1+2 cue table at
 0x80148718..0x80148810 hashed against the two tables the savestates hold
 (slot00/02 = field, slot03 = battle; docs/SOUND_CUES.md "Live contents"),
-which is what decides what a cue word sounds like. Anything else is
-"unknown" and the row carries the hash so a third table can be added. Run it beside area_poller.py; both are read-only on the runtime
+which is what decides what a cue word sounds like. That is not the whole
+identity either: 80 of the 144 BMAGIC spell overlays carry a 32/64 KB
+sample payload (a type-3 .EMI section) and trigger it as cue 0x100, and
+the tables themselves are rewritten as areas and spells load (five hashes
+in one 2026-09-17 session), so the same cue word is a different sound per
+loaded spell. The label key is therefore (cue, context) where context is
+the resident BMAGIC overlay's name (band 0x801EEC00) when one is loaded,
+else "field" / "battle" from the table hash, else "tables:<hash8>". Every
+new table hash is dumped once to analysis/se_tables/<md5>.bin for decode. Run it beside area_poller.py; both are read-only on the runtime
 (this one arms write-trace ranges and puts the previous ones back on exit).
 
 Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
@@ -58,6 +65,8 @@ CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
 CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
 GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
 TABLES_LO, TABLES_HI = 0x80148718, 0x80148810     # bank 1 + bank 2 cue tables (2 x 31 x 4)
+TABLES_DIR = os.path.join(ROOT, "analysis", "se_tables")
+MAGIC_BAND = 0x801EEC00                            # BMAGIC swap band
 TABLE_MODES = {                                    # md5 of that span, from saves/openbios (2026-09-17)
     "79b02fe1aa36a99d5c6e6cd96ae6fe74": "field",   # slot00 title, slot02 AREA014 field
     "229197bba0c628f87fd4e2b7431dc09a": "battle",  # slot03 regular field battle
@@ -165,18 +174,37 @@ def resident_now(port):
         return {}
 
 
-def mode_of(port):
-    """('field' | 'battle' | 'unknown', md5) from the live bank 1+2 cue tables."""
+def tables_now(port):
+    """(md5, raw) of the live bank 1+2 cue tables, ('', b'') when unreadable."""
     try:
         import resident
         r = resident.q("read_ram", port, addr="0x%08X" % TABLES_LO, len=TABLES_HI - TABLES_LO)
         raw = bytes.fromhex(r["hex"]) if r.get("hex") else b""
     except Exception:
-        return "unknown", ""
+        return "", b""
     if len(raw) != TABLES_HI - TABLES_LO:
-        return "unknown", ""
-    h = hashlib.md5(raw).hexdigest()
-    return TABLE_MODES.get(h, "unknown"), h
+        return "", b""
+    return hashlib.md5(raw).hexdigest(), raw
+
+
+def context_of(bands, tables_md5, raw, seen):
+    """The label context: the resident spell overlay's name if one is loaded
+    (its sample payload decides what the cue sounds like), else field/battle
+    by table hash, else the hash itself. Dumps each new table once."""
+    if tables_md5 and tables_md5 not in seen:
+        seen.add(tables_md5)
+        try:
+            os.makedirs(TABLES_DIR, exist_ok=True)
+            with open(os.path.join(TABLES_DIR, tables_md5 + ".bin"), "wb") as fh:
+                fh.write(raw)
+        except OSError:
+            pass
+    m = bands.get(MAGIC_BAND)
+    if m is not None and m.get("id") is not None and not m.get("wrong_band"):
+        return "magic:" + str(m.get("name", "?"))
+    if tables_md5 in TABLE_MODES:
+        return TABLE_MODES[tables_md5]
+    return ("tables:" + tables_md5[:8]) if tables_md5 else "unknown"
 
 
 # ----------------------------------------------------------------- labels
@@ -191,8 +219,10 @@ def load_labels():
 def save_labels(labels):
     rows = ["# names/se_cues.toml -- what each SE_Play cue sounds like, heard in play.",
             "#   cue    bank<<8 | id as SE_Play receives it (docs/SOUND_CUES.md)",
-            "#   mode   field | battle | unknown -- banks 1 and 2 are swapped for battle,",
-            "#          so the same cue word is a different sound in a fight",
+            "#   mode   the context that fixes what the cue word sounds like: magic:<overlay>",
+            "#          (a spell's own sample payload is loaded), field | battle (the bank 1+2",
+            "#          cue tables match a savestate), or tables:<md5 prefix> for a table not",
+            "#          yet seen in a savestate (its bytes are in analysis/se_tables/)",
             "#   label  what was heard, in the player's words",
             "#   status evidence (heard live) | hypothesis",
             "#   evidence  se_watch session and frame of the hearing, nearest caller",
@@ -236,6 +266,7 @@ def main():
     t0 = time.time()
     last_frame = cd.cur_frame(a.port)
     n = 0
+    seen_tables = set()
     try:
         if a.press or a.hold:
             cd.press_buttons(a.port, a.press, a.press_frames, a.press_gap, hold=a.hold or None)
@@ -248,17 +279,24 @@ def main():
                     print("se_watch: write ring truncated in frames %d-%d, cues may be missing" % (
                         last_frame + 1, fr), flush=True)
                 bands = resident_now(a.port) if rows else {}
-                mode, tables_md5 = mode_of(a.port) if rows else ("unknown", "")
+                tables_md5, raw = tables_now(a.port) if rows else ("", b"")
+                mode = context_of(bands, tables_md5, raw, seen_tables) if rows else "unknown"
+                area = bands.get(0x801F2C00, {}).get("name", "")
                 for bank, cue_id, e_id, e_bank in pair_rows(rows):
                     e = e_id or e_bank
                     cue = (bank << 8) | cue_id if bank >= 0 and cue_id >= 0 else -1
                     ra = int(e["ra"], 16)
                     caller, ovl = namer.name(ra, bands)
-                    known = labels.get((cue, mode)) or labels.get((cue, "unknown"))
+                    known = labels.get((cue, mode))
+                    fallback = None
+                    if known is None and cue >= 0:
+                        for (c2, m2), lab in labels.items():
+                            if c2 == cue and (fallback is None or m2 in ("field", "battle")):
+                                fallback = (m2, lab)
                     row = {"session": session, "frame": int(e["frame"]),
                            "t": dt.datetime.now().isoformat(timespec="seconds"),
                            "cue": "0x%04X" % cue if cue >= 0 else "?", "bank": bank,
-                           "id": cue_id, "mode": mode, "tables_md5": tables_md5,
+                           "id": cue_id, "mode": mode, "tables_md5": tables_md5, "area": area,
                            "store_pc_bank": e_bank["pc"] if e_bank else None,
                            "store_pc_id": e_id["pc"] if e_id else None,
                            "ra": e["ra"], "caller_nearest": caller, "caller_overlay": ovl,
@@ -272,10 +310,19 @@ def main():
                         row["frame"], row["cue"], mode, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
                         ("= " + known["label"]) if known else
+                        ("~ %s [%s]" % (fallback[1]["label"], fallback[0])) if fallback else
                         ("(unlabelled)" if cue >= 0 else "(half a call: ring gap)")), flush=True)
                     if a.label and not known and cue >= 0:
                         try:
-                            ans = input("   what was that sound? (Enter = skip) ").strip()
+                            if fallback:
+                                ans = input("   what was that sound? (Enter = same as [%s] '%s', - = skip) "
+                                            % (fallback[0], fallback[1]["label"])).strip()
+                                if ans == "":
+                                    ans = fallback[1]["label"]
+                                elif ans == "-":
+                                    ans = ""
+                            else:
+                                ans = input("   what was that sound? (Enter = skip) ").strip()
                         except EOFError:
                             ans = ""
                         if ans:

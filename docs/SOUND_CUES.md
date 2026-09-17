@@ -280,6 +280,22 @@ from `Battle_Impact_Step`.
 `SE_Play(0x600 | obj->0xE0 << 1)` — the object's byte `+0xE0` is its
 creature sound type 0..7 and bank 6's 16 cues are 8 programs x tones 0/2.
 
+**A cue word is not a sound once a spell is loaded.** Third session
+(2026-09-17): the same `0x100` through `SE_PlayTracked` was a different
+sound per spell cast, and Ryu's `0x305` a different line on two casts. The
+`.EMI` census explains it: **80 of the 144 `BMAGIC` overlays carry a type-3
+section of 8..64 KB** (dests like `0x1A080200` / `0x1C080200`, a sample
+payload for the SPU), and the bank 1+2 cue tables were rewritten five
+times in one session (five distinct hashes). A spell therefore loads its
+own samples behind the same program slot and fires them as `0x100` (one
+overlay call site seen at `0x801EEF8C`, plus the interpreter path), so the
+identity of a battle sound is **cue + the resident spell overlay**.
+`se_watch` keys labels by that context (`magic:<name>`, else
+`field`/`battle`, else `tables:<hash>`) and dumps every new table to
+`analysis/se_tables/`. The per-slot banks 3/4/5 follow **party position**
+(the `obj+0x2C` column: Ryu in slot 0 = bank 3, Nina slot 1 = bank 4, Momo
+slot 2 = bank 5), not the character id — swap the formation to confirm.
+
 **Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
 family, and across all 141 `BMAGIC` overlays only 12 call it, all with
 bank 1 (menu) constants. Whatever distinctive sound a spell has therefore
