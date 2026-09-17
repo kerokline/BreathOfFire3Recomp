@@ -296,8 +296,10 @@ identity of a battle sound is **cue + the resident spell overlay**.
 Ryu and Momo on the battle field and Ryu stayed `0x03xx`, Momo `0x05xx`
 (2026-09-17). The `obj+0x2C` column is therefore a voice-set index given
 to each member when the party's voice banks are loaded (Ryu 0, Nina 1,
-Momo 2 in that party); whether it follows the *menu* party order or the
-character id is still untested.
+Momo 2 in that party); the *menu* party order does not move it either
+(same player, same day). Open: whether a member who leaves and rejoins,
+or a fourth character, keeps a fixed index per character id or takes the
+first free voice slot.
 
 **Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
 family, and across all 141 `BMAGIC` overlays only 12 call it, all with
