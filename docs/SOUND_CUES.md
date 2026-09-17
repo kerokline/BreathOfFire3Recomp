@@ -324,8 +324,9 @@ is the **bank id 0..6**, not an address ([`EMI_TYPES.md`](EMI_TYPES.md)):
 | 8 | **the cue-table entries**: 4 bytes per cue word `{flags, pan\|prog, tone\|priority, chord\|voice}` | copied to the head of bank's 31-entry table at `0x8014869C + bank*0x7C`; a 16-byte record defines `bank<<8 \| 0..3`. Entries past the record are **not cleared**, so the previous occupant's words stay reachable — which is why the live table hash keeps changing and why a menu word can play a spell's sample |
 | 7 | the VAB body (the VAG samples) | uploaded to the bank's SPU RAM slot (`0x80191550[bank]`) |
 
-`MAGIC069.EMI` (リリフ / Heal), the three-sound "Command" the player
-heard: one program, four VAGs; the type-8 record installs `0x100..0x103`
+`MAGIC069.EMI` (めいれい / Influence — the player's "Command"; the ability
+table's names are one record off the engine ids, see [`STEAL.md`](STEAL.md),
+so engine id 69 is row 68), the three-sound skill the player heard: one program, four VAGs; the type-8 record installs `0x100..0x103`
 as tones 0/2/4/6 → VAG 1/2/3/4, and the catalogue hashes match the disc
 bytes exactly — VAG 1 = "Target", VAG 2 = "Whisk Away", VAG 4 = "Locked
 On" (VAG 3, 29,040 bytes, was not heard). The *order* of the three is the
@@ -384,20 +385,19 @@ centre note is listed once with its first pitch.
 ## Names for every sample, by convention (2026-09-17)
 
 The player's rule, now `tools/audio_banks.py names --apply`: a sample is
-named **after the file that owns it plus its VAG number** — `Heal
-(MAGIC069) 1`, `Rei 3`, `System 10`. Owner = the first file carrying those
+named **after the file that owns it plus its VAG number** — `Influence 1`,
+`Rei 3`, `System 10`. Owner = the first file carrying those
 bytes by family precedence (`COMN_SE`, `BATTLE`, `BATL_*`, `MAGIC`, `BOSS`,
 `ENEMY`, the party files, then `AREA`), lowest-numbered within a family.
 The display stem is the ability name (`names/magic.toml`), the area alias
 (`names/areas.toml`), the character for a party-file bank
 (`names/characters.toml`), else the file stem; two owners whose display
-collides but whose samples differ keep the stem (`Heal (MAGIC069)` vs `Heal
-(MAGIC173)`, `Ryu (BPLD012)` vs `Ryu (BPLD034)` — the adult and the child
-voice). All 833 samples got a unique name; `names/se_cues.toml` carries it
+collides but whose samples differ keep the stem (`Ryu (BPLD012)` vs `Ryu (BPLD034)` — the adult and the child voice). All 833 samples got a unique name; `names/se_cues.toml` carries it
 as `auto` beside the player's `label`, with status `derived` until someone
 listens. The ten samples labelled so far all agree with their auto names
-(Rei 1 = "Rei - Pilfer", Rei 6 = "Strike", Teepo 5 = "Nega", Heal 1/2/4 =
-Target / Whisk Away / Locked On).
+(Rei 1 = "Rei - Pilfer", Rei 6 = "Strike", Teepo 5 = "Nega", Influence
+1/2/4 = Target / Whisk Away / Locked On). Spell stems apply the one-record
+shift of the ability names (engine id N = abilities row N-1).
 
 **The party voice files decode the slot behaviour.** `BPLD034.EMI` is the
 party of character ids 0, 3, 4 (`names/characters.toml`: 0 Ryu, 1 Nina, 2

@@ -119,14 +119,28 @@ def decode(t):
     return dict(file=t["file"], bank=t["bank"], ps=ps, vs=vs, tones=tones, vags=vags, cues=cues)
 
 
+ABILITIES = os.path.join(ROOT, "names", "abilities.toml")
+
+
 def spell_names():
-    """MAGICnnn.EMI -> 'jp / en' from names/magic.toml."""
-    if not os.path.exists(MAGIC):
+    """MAGICnnn.EMI -> 'jp / en' of the ability that loads it.
+
+    names/magic.toml pairs each engine ability id with its file, but the NAMES
+    in names/abilities.toml are shifted one record against the engine ids
+    (docs/STEAL.md; the extractor pairs name[8] with the previous record), so
+    the name of engine id N is abilities row N-1. Direction confirmed by ear
+    2026-09-17: MAGIC070 was heard as リリフ (Heal, row 69) and MAGIC069 as
+    the targeting/'command' skill = めいれい (Influence, row 68)."""
+    if not (os.path.exists(MAGIC) and os.path.exists(ABILITIES)):
         return {}
-    d = tomllib.load(open(MAGIC, "rb"))
+    rows = [v for v in tomllib.load(open(ABILITIES, "rb")).values() if isinstance(v, list)][0]
+    by_id = {int(r["id"]): r for r in rows if "id" in r}
     out = {}
-    for r in d.get("ability", []):
-        out.setdefault(r.get("file", ""), []).append("%s/%s" % (r.get("jp", ""), r.get("en", "")))
+    for r in tomllib.load(open(MAGIC, "rb")).get("ability", []):
+        name_row = by_id.get(int(r["id"]) - 1)
+        if not r.get("file") or name_row is None:
+            continue
+        out.setdefault(r["file"], []).append("%s/%s" % (name_row.get("jp", ""), name_row.get("en") or name_row.get("us") or ""))
     return {k: " | ".join(sorted(set(v))) for k, v in out.items()}
 
 

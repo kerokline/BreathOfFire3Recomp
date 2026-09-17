@@ -14,7 +14,7 @@
 [[sound]]
 id = "001b9c7f5d31"
 label = ""
-auto = "Sudden Death 2"
+auto = "Celerity 2"
 status = "derived"
 evidence = "auto name from MAGIC062.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -95,7 +95,7 @@ disc = ["AREA038.EMI#b2#vag6", "AREA039.EMI#b2#vag6"]
 [[sound]]
 id = "02bd751e1e88"
 label = ""
-auto = "Mighty Chop+Evil Eye 1"
+auto = "WardOfLight+Resist 1"
 status = "derived"
 evidence = "auto name from MAGIC043.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -302,7 +302,7 @@ disc = ["BOSS050.EMI#b6#vag1", "AREA170.EMI#b2#vag12", "AREA197.EMI#b2#vag12"]
 [[sound]]
 id = "08353dc14fb9"
 label = ""
-auto = "Flame Strike 2"
+auto = "ThundrStrike 2"
 status = "derived"
 evidence = "auto name from MAGIC004.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -410,7 +410,7 @@ disc = ["BOSS036.EMI#b6#vag1", "AREA075.EMI#b2#vag4"]
 [[sound]]
 id = "0bee9c9fb844"
 label = ""
-auto = "Influence 2"
+auto = "Foretell 2"
 status = "derived"
 evidence = "auto name from MAGIC068.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -428,7 +428,7 @@ disc = ["AREA052.EMI#b2#vag9"]
 [[sound]]
 id = "0bf39251df20"
 label = ""
-auto = "MeteorStrike (MAGIC226) 1"
+auto = "MeteorStrike 1"
 status = "derived"
 evidence = "auto name from MAGIC226.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -467,7 +467,7 @@ disc = ["BPLD012.EMI#b3#vag1", "BPLD015.EMI#b3#vag1", "BPLD016.EMI#b3#vag1", "BP
 [[sound]]
 id = "0ce42fb48613"
 label = ""
-auto = "Weretiger 2"
+auto = "Sudden Death 2"
 status = "derived"
 evidence = "auto name from MAGIC063.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -488,7 +488,7 @@ disc = ["BPLD034.EMI#b4#vag3", "BPLU034.EMI#b4#vag3"]
 [[sound]]
 id = "0e00f6d5e252"
 label = ""
-auto = "Flame Claw 1"
+auto = "Doom Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC132.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -506,7 +506,7 @@ disc = ["AREA038.EMI#b2#vag9", "AREA039.EMI#b2#vag9"]
 [[sound]]
 id = "0e7fee075345"
 label = ""
-auto = "ShadowBreath 1"
+auto = "DivineBreath 1"
 status = "derived"
 evidence = "auto name from MAGIC125.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -596,7 +596,7 @@ disc = ["A085SE2.EMI#b2#vag2"]
 [[sound]]
 id = "11014bf489f5"
 label = ""
-auto = "Demonbane 1"
+auto = "Holy Strike 1"
 status = "derived"
 evidence = "auto name from MAGIC156.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -632,7 +632,7 @@ disc = ["BOSS051.EMI#b6#vag1"]
 [[sound]]
 id = "11ba98577de9"
 label = ""
-auto = "Mind Flay 3"
+auto = "Mind Sword 3"
 status = "derived"
 evidence = "auto name from MAGIC006.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -680,7 +680,7 @@ disc = ["AREA032.EMI#b2#vag9"]
 [[sound]]
 id = "133eab13207a"
 label = ""
-auto = "Drain 1"
+auto = "Leech Power 1"
 status = "derived"
 evidence = "auto name from MAGIC078.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -689,7 +689,7 @@ disc = ["MAGIC078.EMI#b1#vag1"]
 [[sound]]
 id = "134661330c30"
 label = "'Target' Noise"
-auto = "Heal (MAGIC069) 1"
+auto = "Influence 1"
 status = "evidence"
 evidence = "se_watch 20260917T120645 f39680 via 0x0100@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
 cues = ["0x0100@magic:MAGIC069"]
@@ -782,7 +782,7 @@ disc = ["AREA009.EMI#b2#vag6"]
 [[sound]]
 id = "161aa0764ac7"
 label = ""
-auto = "Tempest 3"
+auto = "Combustion 3"
 status = "derived"
 evidence = "auto name from MAGIC222.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -800,7 +800,7 @@ disc = ["AREA078.EMI#b2#vag4", "AREA079.EMI#b2#vag4", "AREA080.EMI#b2#vag4", "AR
 [[sound]]
 id = "1656adb307f5"
 label = ""
-auto = "Identify 1"
+auto = "Tornado 1"
 status = "derived"
 evidence = "auto name from MAGIC059.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -890,7 +890,7 @@ disc = ["AREA027.EMI#b2#vag3"]
 [[sound]]
 id = "1a1a75936510"
 label = ""
-auto = "Sanctuary 1"
+auto = "Bone Dance 1"
 status = "derived"
 evidence = "auto name from MAGIC057.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -899,7 +899,7 @@ disc = ["MAGIC057.EMI#b1#vag1"]
 [[sound]]
 id = "1a9dbea58da5"
 label = ""
-auto = "Slow 1"
+auto = "Silence 1"
 status = "derived"
 evidence = "auto name from MAGIC087.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -908,7 +908,7 @@ disc = ["MAGIC087.EMI#b1#vag1"]
 [[sound]]
 id = "1ac2c46ea282"
 label = ""
-auto = "Blitz+Syphon+Aura+コシが痛い+Whelp Breath 2"
+auto = "Triple Blow+SpiritBlast+Giant Growth+Multistrike+Double Blow 2"
 status = "derived"
 evidence = "auto name from MAGIC018.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1010,7 +1010,7 @@ disc = ["AREA082.EMI#b2#vag3"]
 [[sound]]
 id = "1e5f56f5a05b"
 label = ""
-auto = "Pilfer 1"
+auto = "Weretiger 1"
 status = "derived"
 evidence = "auto name from MAGIC064.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1028,7 +1028,7 @@ disc = ["AREA135.EMI#b2#vag11", "AREA136.EMI#b2#vag11"]
 [[sound]]
 id = "1e723353f5fd"
 label = ""
-auto = "Magma Breath 2"
+auto = "Aura Breath 2"
 status = "derived"
 evidence = "auto name from MAGIC218.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1046,7 +1046,7 @@ disc = ["AREA009.EMI#b2#vag11"]
 [[sound]]
 id = "1ff1427b6c5b"
 label = ""
-auto = "Jolt 1"
+auto = "Blizzard 1"
 status = "derived"
 evidence = "auto name from MAGIC096.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1055,7 +1055,7 @@ disc = ["MAGIC096.EMI#b1#vag1"]
 [[sound]]
 id = "2026c816c13f"
 label = ""
-auto = "Disembowel 1"
+auto = "Aura 1"
 status = "derived"
 evidence = "auto name from MAGIC019.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1121,7 +1121,7 @@ disc = ["AREA147.EMI#b2#vag6", "AREA148.EMI#b2#vag6", "AREA149.EMI#b2#vag6", "AR
 [[sound]]
 id = "20c6118a67a5"
 label = ""
-auto = "Intimidate 2"
+auto = "Magic Ball 2"
 status = "derived"
 evidence = "auto name from MAGIC172.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1139,7 +1139,7 @@ disc = ["AREA092.EMI#b2#vag1"]
 [[sound]]
 id = "219502a8eb25"
 label = ""
-auto = "Doom Breath 1"
+auto = "KaiserBreath 1"
 status = "derived"
 evidence = "auto name from MAGIC131.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1175,7 +1175,7 @@ disc = ["AREA022.EMI#b2#vag9", "AREA026.EMI#b2#vag6", "AREA028.EMI#b2#vag4"]
 [[sound]]
 id = "22ba2ee5a94b"
 label = ""
-auto = "Blunt+Tarbaby+Weaken+Flare+Absorb 1"
+auto = "Blunt+Tarbaby+Slow+Weaken+Molasses 1"
 status = "derived"
 evidence = "auto name from MAGIC088.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1337,7 +1337,7 @@ disc = ["AREA051.EMI#b2#vag1"]
 [[sound]]
 id = "294a904c0cc5"
 label = ""
-auto = "Death 1"
+auto = "Kyrie 1"
 status = "derived"
 evidence = "auto name from MAGIC105.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1355,7 +1355,7 @@ disc = ["BOSS008.EMI#b6#vag1", "BOSS012.EMI#b6#vag1"]
 [[sound]]
 id = "29e75bf82f3d"
 label = ""
-auto = "Main Cannon 1"
+auto = "Corona 1"
 status = "derived"
 evidence = "auto name from MAGIC137.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1373,7 +1373,7 @@ disc = ["AREA025.EMI#b2#vag10"]
 [[sound]]
 id = "2a21fc18f542"
 label = ""
-auto = "Mind Sword+Holy Strike 1"
+auto = "Flame Strike+Pyrokinesis 1"
 status = "derived"
 evidence = "auto name from MAGIC005.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1382,7 +1382,7 @@ disc = ["MAGIC005.EMI#b1#vag1"]
 [[sound]]
 id = "2b17b3fb38b7"
 label = ""
-auto = "Cyclone 2"
+auto = "Myollnir 2"
 status = "derived"
 evidence = "auto name from MAGIC099.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1418,7 +1418,7 @@ disc = ["AREA007.EMI#b2#vag3", "AREA174.EMI#b2#vag12"]
 [[sound]]
 id = "2bf6b23a4d36"
 label = ""
-auto = "ThundrStrike 1"
+auto = "Super Combo 1"
 status = "derived"
 evidence = "auto name from MAGIC003.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1664,7 +1664,7 @@ disc = ["AREA128.EMI#b2#vag11", "AREA187.EMI#b2#vag11"]
 [[sound]]
 id = "37f72add9b45"
 label = ""
-auto = "Molasses 1"
+auto = "Wind Strike 1"
 status = "derived"
 evidence = "auto name from MAGIC029.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1673,7 +1673,7 @@ disc = ["MAGIC029.EMI#b1#vag1"]
 [[sound]]
 id = "386fa819fee9"
 label = ""
-auto = "ThundrStrike 2"
+auto = "Super Combo 2"
 status = "derived"
 evidence = "auto name from MAGIC003.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1682,7 +1682,7 @@ disc = ["MAGIC003.EMI#b1#vag2"]
 [[sound]]
 id = "38b3e0179bde"
 label = ""
-auto = "Typhoon 2"
+auto = "Cyclone 2"
 status = "derived"
 evidence = "auto name from MAGIC100.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1745,7 +1745,7 @@ disc = ["AREA119.EMI#b2#vag12"]
 [[sound]]
 id = "39668b57d6bc"
 label = ""
-auto = "ThundrBreath 1"
+auto = "Icebreath (MAGIC123) 1"
 status = "derived"
 evidence = "auto name from MAGIC123.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1781,7 +1781,7 @@ disc = ["AREA068.EMI#b2#vag4"]
 [[sound]]
 id = "3a8653c13696"
 label = ""
-auto = "Giant Growth+Magic Ball 2"
+auto = "Astral Warp+Shadowwalk 2"
 status = "derived"
 evidence = "auto name from MAGIC017.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1847,7 +1847,7 @@ disc = ["AREA172.EMI#b2#vag13"]
 [[sound]]
 id = "3d1ce42ac6dc"
 label = ""
-auto = "DragonBreath 1"
+auto = "Whelp Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC120.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1856,7 +1856,7 @@ disc = ["MAGIC120.EMI#b1#vag1", "MAGIC122.EMI#b1#vag1"]
 [[sound]]
 id = "3d334295a499"
 label = ""
-auto = "Lavaburst 1"
+auto = "Ovum 1"
 status = "derived"
 evidence = "auto name from MAGIC052.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1874,7 +1874,7 @@ disc = ["AREA119.EMI#b2#vag13"]
 [[sound]]
 id = "3e29cb7fbb95"
 label = ""
-auto = "Sanctuary 3"
+auto = "Bone Dance 3"
 status = "derived"
 evidence = "auto name from MAGIC057.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1883,7 +1883,7 @@ disc = ["MAGIC057.EMI#b1#vag3", "MAGIC081.EMI#b1#vag1", "AREA108.EMI#b2#vag12", 
 [[sound]]
 id = "3e6191c766c2"
 label = ""
-auto = "Jump 1"
+auto = "Gloom 1"
 status = "derived"
 evidence = "auto name from MAGIC159.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1919,7 +1919,7 @@ disc = ["AREA121.EMI#b2#vag15", "AREA131.EMI#b2#vag13", "AREA132.EMI#b2#vag13", 
 [[sound]]
 id = "401c45451d89"
 label = ""
-auto = "Influence 1"
+auto = "Foretell 1"
 status = "derived"
 evidence = "auto name from MAGIC068.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1928,7 +1928,7 @@ disc = ["MAGIC068.EMI#b1#vag1", "MAGIC069.EMI#b1#vag3"]
 [[sound]]
 id = "40a301556a5f"
 label = ""
-auto = "Lavaburst 2"
+auto = "Ovum 2"
 status = "derived"
 evidence = "auto name from MAGIC052.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -1973,7 +1973,7 @@ disc = ["AREA025.EMI#b2#vag2"]
 [[sound]]
 id = "438a56a4d24e"
 label = ""
-auto = "Heal (MAGIC173) 1"
+auto = "Intimidate 1"
 status = "derived"
 evidence = "auto name from MAGIC173.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2018,7 +2018,7 @@ disc = ["AREA071.EMI#b2#vag5"]
 [[sound]]
 id = "45190f000677"
 label = ""
-auto = "Drain 2"
+auto = "Leech Power 2"
 status = "derived"
 evidence = "auto name from MAGIC078.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2198,7 +2198,7 @@ disc = ["AREA050.EMI#b2#vag2"]
 [[sound]]
 id = "4b45646fdc30"
 label = ""
-auto = "Frost 2"
+auto = "Inferno 2"
 status = "derived"
 evidence = "auto name from MAGIC093.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2363,7 +2363,7 @@ disc = ["AREA025.EMI#b2#vag1"]
 [[sound]]
 id = "523c7abdf168"
 label = ""
-auto = "The World+Miyakuri 1"
+auto = "Ragnarok 1"
 status = "derived"
 evidence = "auto name from MAGIC110.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2390,7 +2390,7 @@ disc = ["AREA040.EMI#b2#vag4", "AREA041.EMI#b2#vag9", "AREA042.EMI#b2#vag4", "AR
 [[sound]]
 id = "536ff045e142"
 label = ""
-auto = "Remedy 1"
+auto = "Fire Whip 1"
 status = "derived"
 evidence = "auto name from MAGIC114.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2417,7 +2417,7 @@ disc = ["BOSS038.EMI#b6#vag2"]
 [[sound]]
 id = "53fae9ba03db"
 label = ""
-auto = "Snooze 2"
+auto = "Accession 2"
 status = "derived"
 evidence = "auto name from MAGIC151.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2426,7 +2426,7 @@ disc = ["MAGIC151.EMI#b1#vag2"]
 [[sound]]
 id = "544044b6039a"
 label = ""
-auto = "Firebreath 2"
+auto = "DragonBreath 2"
 status = "derived"
 evidence = "auto name from MAGIC121.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2435,7 +2435,7 @@ disc = ["MAGIC121.EMI#b1#vag2"]
 [[sound]]
 id = "550005d77dde"
 label = ""
-auto = "Pyrokinesis 1"
+auto = "Mighty Chop 1"
 status = "derived"
 evidence = "auto name from MAGIC154.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2462,7 +2462,7 @@ disc = ["BOSS028.EMI#b6#vag1", "AREA077.EMI#b2#vag8"]
 [[sound]]
 id = "55ba9a5bd1b5"
 label = ""
-auto = "Foretell 2"
+auto = "Chill 2"
 status = "derived"
 evidence = "auto name from MAGIC067.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2525,7 +2525,7 @@ disc = ["AREA028.EMI#b2#vag6"]
 [[sound]]
 id = "584e81afb52a"
 label = ""
-auto = "Blizzard 3"
+auto = "Iceblast 3"
 status = "derived"
 evidence = "auto name from MAGIC095.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2543,7 +2543,7 @@ disc = ["AREA075.EMI#b2#vag2"]
 [[sound]]
 id = "58800b03ceaf"
 label = ""
-auto = "Magma Breath 1"
+auto = "Aura Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC218.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2624,7 +2624,7 @@ disc = ["DRG06_00.EMI#b3#vag1"]
 [[sound]]
 id = "5a0499e4568d"
 label = ""
-auto = "Drain 3"
+auto = "Leech Power 3"
 status = "derived"
 evidence = "auto name from MAGIC078.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2687,7 +2687,7 @@ disc = ["AREA103.EMI#b2#vag4"]
 [[sound]]
 id = "5b0ec61ec469"
 label = ""
-auto = "Geo Breath 2"
+auto = "Magma Breath 2"
 status = "derived"
 evidence = "auto name from MAGIC219.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2723,7 +2723,7 @@ disc = ["AREA100.EMI#b2#vag6"]
 [[sound]]
 id = "5bb30df69d96"
 label = ""
-auto = "Flying Kick 1"
+auto = "Snap 1"
 status = "derived"
 evidence = "auto name from MAGIC013.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2732,7 +2732,7 @@ disc = ["MAGIC013.EMI#b1#vag1"]
 [[sound]]
 id = "5c1b70eb84aa"
 label = ""
-auto = "Firebreath 1"
+auto = "DragonBreath 1"
 status = "derived"
 evidence = "auto name from MAGIC121.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2816,7 +2816,7 @@ disc = ["A108SE2.EMI#b2#vag2"]
 [[sound]]
 id = "5f0cb428520b"
 label = ""
-auto = "Fire Whip 2"
+auto = "Pentagram 2"
 status = "derived"
 evidence = "auto name from MAGIC113.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2888,7 +2888,7 @@ disc = ["AREA095.EMI#b2#vag2", "AREA096.EMI#b2#vag2"]
 [[sound]]
 id = "63721d288776"
 label = ""
-auto = "Doom Breath 3"
+auto = "KaiserBreath 3"
 status = "derived"
 evidence = "auto name from MAGIC131.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2915,7 +2915,7 @@ disc = ["BOSS054.EMI#b6#vag2"]
 [[sound]]
 id = "6485bd79e3e1"
 label = ""
-auto = "Snooze 3"
+auto = "Accession 3"
 status = "derived"
 evidence = "auto name from MAGIC151.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2924,7 +2924,7 @@ disc = ["MAGIC151.EMI#b1#vag3"]
 [[sound]]
 id = "64fd3b4bbd47"
 label = ""
-auto = "Vitalize 1"
+auto = "Restore 1"
 status = "derived"
 evidence = "auto name from MAGIC072.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3014,7 +3014,7 @@ disc = ["AREA050.EMI#b2#vag3"]
 [[sound]]
 id = "67374546b4c1"
 label = ""
-auto = "Rest 1"
+auto = "UtmostAttack 1"
 status = "derived"
 evidence = "auto name from MAGIC116.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3032,7 +3032,7 @@ disc = ["AREA051.EMI#b2#vag3"]
 [[sound]]
 id = "6838148e7681"
 label = ""
-auto = "Shining Claw 1"
+auto = "Thunder Claw 1"
 status = "derived"
 evidence = "auto name from MAGIC135.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3059,7 +3059,7 @@ disc = ["DRG03_00.EMI#b3#vag4", "DRG03_01.EMI#b5#vag4", "DRG03_02.EMI#b4#vag4", 
 [[sound]]
 id = "695d79952c69"
 label = ""
-auto = "Typhoon 1"
+auto = "Cyclone 1"
 status = "derived"
 evidence = "auto name from MAGIC100.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3077,7 +3077,7 @@ disc = ["AREA044.EMI#b2#vag11", "AREA048.EMI#b2#vag11"]
 [[sound]]
 id = "6a576e43d434"
 label = ""
-auto = "Mind's Eye 1"
+auto = "Berserk 1"
 status = "derived"
 evidence = "auto name from MAGIC041.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3185,7 +3185,7 @@ disc = ["AREA172.EMI#b2#vag6", "AREA173.EMI#b2#vag6", "AREA186.EMI#b2#vag6"]
 [[sound]]
 id = "6e5b3d9e19c9"
 label = ""
-auto = "Tempest 2"
+auto = "Combustion 2"
 status = "derived"
 evidence = "auto name from MAGIC222.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3212,7 +3212,7 @@ disc = ["BOSS022.EMI#b6#vag5", "BOSS031.EMI#b6#vag5", "BPLD012.EMI#b5#vag5", "BP
 [[sound]]
 id = "6f88d6d9b579"
 label = ""
-auto = "Last Resort 1"
+auto = "Monopolize 1"
 status = "derived"
 evidence = "auto name from MAGIC166.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3266,7 +3266,7 @@ disc = ["BOSS024.EMI#b6#vag2"]
 [[sound]]
 id = "70e4c63d4637"
 label = ""
-auto = "Pollen 1"
+auto = "Frost Strike 1"
 status = "derived"
 evidence = "auto name from MAGIC049.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3357,7 +3357,7 @@ disc = ["AREA011.EMI#b2#vag2", "AREA022.EMI#b2#vag1"]
 [[sound]]
 id = "7361521c0fc8"
 label = ""
-auto = "Protect+Lark 1"
+auto = "Drain 1"
 status = "derived"
 evidence = "auto name from MAGIC079.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3366,7 +3366,7 @@ disc = ["MAGIC079.EMI#b1#vag1"]
 [[sound]]
 id = "73656d1b75e0"
 label = "'Locked On' Noise"
-auto = "Heal (MAGIC069) 4"
+auto = "Influence 4"
 status = "evidence"
 evidence = "se_watch 20260917T120645 f39702 via 0x0103@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone6 vag4 spu 0x501B0"
 cues = ["0x0103@magic:MAGIC069"]
@@ -3378,7 +3378,7 @@ disc = ["MAGIC069.EMI#b1#vag4"]
 [[sound]]
 id = "73cbc45be786"
 label = ""
-auto = "ThundrStrike 4"
+auto = "Super Combo 4"
 status = "derived"
 evidence = "auto name from MAGIC003.EMI#vag4 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3441,7 +3441,7 @@ disc = ["BOSS034.EMI#b6#vag3"]
 [[sound]]
 id = "766e9e98d5ce"
 label = ""
-auto = "Iceblast 1"
+auto = "Frost 1"
 status = "derived"
 evidence = "auto name from MAGIC094.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3450,7 +3450,7 @@ disc = ["MAGIC094.EMI#b1#vag1"]
 [[sound]]
 id = "76ce74255e48"
 label = ""
-auto = "ThundrBreath 2"
+auto = "Icebreath (MAGIC123) 2"
 status = "derived"
 evidence = "auto name from MAGIC123.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3504,7 +3504,7 @@ disc = ["AREA175.EMI#b2#vag8", "AREA176.EMI#b2#vag8", "AREA177.EMI#b2#vag8", "AR
 [[sound]]
 id = "78dee03c64fa"
 label = ""
-auto = "Thunder Claw 1"
+auto = "Frost Claw 1"
 status = "derived"
 evidence = "auto name from MAGIC134.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3627,7 +3627,7 @@ disc = ["AREA012.EMI#b2#vag1"]
 [[sound]]
 id = "7d6cb78f869e"
 label = ""
-auto = "Frost Strike 1"
+auto = "Dream Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC048.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3663,7 +3663,7 @@ disc = ["AREA066.EMI#b2#vag4"]
 [[sound]]
 id = "7f90ef0dc4d2"
 label = "Thunder Magic?"
-auto = "Myollnir 1"
+auto = "Lightning 1"
 status = "evidence"
 evidence = "se_watch 20260917T120645 f28082 via 0x0100@magic:MAGIC098, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
 cues = ["0x0100@magic:MAGIC098"]
@@ -3768,7 +3768,7 @@ disc = ["AREA003.EMI#b2#vag12", "AREA008.EMI#b2#vag12"]
 [[sound]]
 id = "819f4b12ab69"
 label = ""
-auto = "SpiritBlast 1"
+auto = "Bonebreak 1"
 status = "derived"
 evidence = "auto name from MAGIC021.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3912,7 +3912,7 @@ disc = ["AREA043.EMI#b2#vag10"]
 [[sound]]
 id = "85db672f79d0"
 label = ""
-auto = "Gaea´sBreath 2"
+auto = "Geo Breath 2"
 status = "derived"
 evidence = "auto name from MAGIC220.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3939,7 +3939,7 @@ disc = ["PL012.EMI#b1#vag15", "PL015.EMI#b1#vag15", "PL016.EMI#b1#vag14", "PL025
 [[sound]]
 id = "862b199d5aee"
 label = ""
-auto = "Lightning 1"
+auto = "Jolt 1"
 status = "derived"
 evidence = "auto name from MAGIC097.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3948,7 +3948,7 @@ disc = ["MAGIC097.EMI#b1#vag1"]
 [[sound]]
 id = "86818fd48e71"
 label = ""
-auto = "Devour+Depress 1"
+auto = "Hypnotize+Confuse 1"
 status = "derived"
 evidence = "auto name from MAGIC108.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3957,7 +3957,7 @@ disc = ["MAGIC108.EMI#b1#vag1"]
 [[sound]]
 id = "8767df081b95"
 label = ""
-auto = "Pilfer 3"
+auto = "Weretiger 3"
 status = "derived"
 evidence = "auto name from MAGIC064.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -3966,7 +3966,7 @@ disc = ["MAGIC064.EMI#b1#vag3"]
 [[sound]]
 id = "88016be21179"
 label = ""
-auto = "Charm 3"
+auto = "Demonbane 3"
 status = "derived"
 evidence = "auto name from MAGIC157.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4020,7 +4020,7 @@ disc = ["AREA098.EMI#b2#vag2"]
 [[sound]]
 id = "899fb4677eb5"
 label = ""
-auto = "MeteorStrike (MAGIC226) 2"
+auto = "MeteorStrike 2"
 status = "derived"
 evidence = "auto name from MAGIC226.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4047,7 +4047,7 @@ disc = ["AREA100.EMI#b2#vag9"]
 [[sound]]
 id = "8b5f57bae4a7"
 label = ""
-auto = "Charm 1"
+auto = "Demonbane 1"
 status = "derived"
 evidence = "auto name from MAGIC157.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4101,7 +4101,7 @@ disc = ["AREA000.EMI#b2#vag8", "AREA001.EMI#b2#vag8", "AREA002.EMI#b2#vag8", "AR
 [[sound]]
 id = "8c977d0bce63"
 label = ""
-auto = "Mind Flay 2"
+auto = "Mind Sword 2"
 status = "derived"
 evidence = "auto name from MAGIC006.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4110,7 +4110,7 @@ disc = ["MAGIC006.EMI#b1#vag2"]
 [[sound]]
 id = "8d0ac220aac3"
 label = ""
-auto = "Weretiger 1"
+auto = "Sudden Death 1"
 status = "derived"
 evidence = "auto name from MAGIC063.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4119,7 +4119,7 @@ disc = ["MAGIC063.EMI#b1#vag1", "MAGIC106.EMI#b1#vag1"]
 [[sound]]
 id = "8d2c8ac3c5f4"
 label = ""
-auto = "Kyrie 2"
+auto = "Sirocco 2"
 status = "derived"
 evidence = "auto name from MAGIC104.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4167,7 +4167,7 @@ disc = ["BPLD012.EMI#b3#vag4", "BPLD015.EMI#b3#vag4", "BPLD016.EMI#b3#vag4", "BP
 [[sound]]
 id = "8f7f4bcca038"
 label = ""
-auto = "Silence 1"
+auto = "Barrier 1"
 status = "derived"
 evidence = "auto name from MAGIC086.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4212,7 +4212,7 @@ disc = ["AREA067.EMI#b2#vag2"]
 [[sound]]
 id = "917274a4b20e"
 label = ""
-auto = "Raise Dead 1"
+auto = "Purify 1"
 status = "derived"
 evidence = "auto name from MAGIC075.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4230,7 +4230,7 @@ disc = ["DRG01_00.EMI#b3#vag6", "DRG01_01.EMI#b5#vag6", "DRG01_02.EMI#b4#vag6", 
 [[sound]]
 id = "9240edc00849"
 label = ""
-auto = "Snooze 4"
+auto = "Accession 4"
 status = "derived"
 evidence = "auto name from MAGIC151.EMI#vag4 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4257,7 +4257,7 @@ disc = ["AREA108.EMI#b2#vag10", "AREA109.EMI#b2#vag10", "A108SE2.EMI#b2#vag7"]
 [[sound]]
 id = "9326bd19cd50"
 label = ""
-auto = "とつげき 1"
+auto = "ShadowBreath 1"
 status = "derived"
 evidence = "auto name from MAGIC126.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4392,7 +4392,7 @@ disc = ["AREA052.EMI#b2#vag7"]
 [[sound]]
 id = "97c5f9bfccff"
 label = ""
-auto = "Slow 2"
+auto = "Silence 2"
 status = "derived"
 evidence = "auto name from MAGIC087.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4428,7 +4428,7 @@ disc = ["AREA134.EMI#b2#vag9"]
 [[sound]]
 id = "983973d0b2e0"
 label = ""
-auto = "DivineBreath 1"
+auto = "ThundrBreath 1"
 status = "derived"
 evidence = "auto name from MAGIC124.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4446,7 +4446,7 @@ disc = ["DRG05_00.EMI#b3#vag6", "DRG05_01.EMI#b5#vag6", "DRG05_02.EMI#b4#vag6", 
 [[sound]]
 id = "98faf8b8c048"
 label = ""
-auto = "Frost Claw 1"
+auto = "Flame Claw 1"
 status = "derived"
 evidence = "auto name from MAGIC133.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4464,7 +4464,7 @@ disc = ["AREA034.EMI#b2#vag2", "AREA108.EMI#b2#vag1", "AREA109.EMI#b2#vag1", "A1
 [[sound]]
 id = "993868fee041"
 label = ""
-auto = "MeteorStrike (MAGIC225) 1"
+auto = "Temptation 1"
 status = "derived"
 evidence = "auto name from MAGIC225.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4599,7 +4599,7 @@ disc = ["AREA144.EMI#b2#vag4"]
 [[sound]]
 id = "9d08def4625c"
 label = ""
-auto = "Ebonfire 1"
+auto = "Howling 1"
 status = "derived"
 evidence = "auto name from MAGIC054.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4617,7 +4617,7 @@ disc = ["AREA103.EMI#b2#vag3"]
 [[sound]]
 id = "9d6c03085e65"
 label = ""
-auto = "Sanctuary 2"
+auto = "Bone Dance 2"
 status = "derived"
 evidence = "auto name from MAGIC057.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4644,7 +4644,7 @@ disc = ["AREA105.EMI#b2#vag4", "AREA106.EMI#b2#vag4", "AREA107.EMI#b2#vag4"]
 [[sound]]
 id = "9e96915c5622"
 label = ""
-auto = "Disembowel 2"
+auto = "Aura 2"
 status = "derived"
 evidence = "auto name from MAGIC019.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4707,7 +4707,7 @@ disc = ["AREA030.EMI#b2#vag13", "AREA089.EMI#b2#vag13", "AREA129.EMI#b2#vag13"]
 [[sound]]
 id = "a0818fc3b803"
 label = ""
-auto = "ShadowBreath 2"
+auto = "DivineBreath 2"
 status = "derived"
 evidence = "auto name from MAGIC125.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4716,7 +4716,7 @@ disc = ["MAGIC125.EMI#b1#vag2"]
 [[sound]]
 id = "a18835cdac80"
 label = ""
-auto = "Chill 1"
+auto = "Tsunami 1"
 status = "derived"
 evidence = "auto name from MAGIC066.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4734,7 +4734,7 @@ disc = ["AREA040.EMI#b2#vag3", "AREA042.EMI#b2#vag3"]
 [[sound]]
 id = "a1b5b33edf08"
 label = ""
-auto = "Gaea´sBreath 3"
+auto = "Geo Breath 3"
 status = "derived"
 evidence = "auto name from MAGIC220.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4842,7 +4842,7 @@ disc = ["AREA009.EMI#b2#vag7"]
 [[sound]]
 id = "a4c21c2b5244"
 label = ""
-auto = "Remedy 3"
+auto = "Fire Whip 3"
 status = "derived"
 evidence = "auto name from MAGIC114.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4923,7 +4923,7 @@ disc = ["ENEMY105.EMI#b6#vag3", "ENEMY106.EMI#b6#vag3", "ENEMY107.EMI#b6#vag3", 
 [[sound]]
 id = "a785dfada812"
 label = ""
-auto = "Mind Flay 1"
+auto = "Mind Sword 1"
 status = "derived"
 evidence = "auto name from MAGIC006.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4944,7 +4944,7 @@ disc = ["BPLD034.EMI#b4#vag5", "BPLU034.EMI#b4#vag5"]
 [[sound]]
 id = "a811795a1a89"
 label = ""
-auto = "Unmotivate 1"
+auto = "Chlorine 1"
 status = "derived"
 evidence = "auto name from MAGIC009.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4953,7 +4953,7 @@ disc = ["MAGIC009.EMI#b1#vag1", "MAGIC050.EMI#b1#vag1", "MAGIC145.EMI#b1#vag1", 
 [[sound]]
 id = "a88dd0f5ad0c"
 label = ""
-auto = "Tempest 1"
+auto = "Combustion 1"
 status = "derived"
 evidence = "auto name from MAGIC222.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -4980,7 +4980,7 @@ disc = ["BOSS049.EMI#b6#vag2"]
 [[sound]]
 id = "a8c6d46dce8b"
 label = ""
-auto = "Vigor 1"
+auto = "Vitalize 1"
 status = "derived"
 evidence = "auto name from MAGIC073.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5016,7 +5016,7 @@ disc = ["AREA108.EMI#b2#vag13", "AREA109.EMI#b2#vag13"]
 [[sound]]
 id = "a8f876cedebc"
 label = ""
-auto = "Venom 1"
+auto = "Holocaust 1"
 status = "derived"
 evidence = "auto name from MAGIC129.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5034,7 +5034,7 @@ disc = ["BPLD247.EMI#b5#vag3", "BPLD257.EMI#b5#vag3", "BPLD267.EMI#b5#vag3", "BP
 [[sound]]
 id = "a93f10b8cf82"
 label = ""
-auto = "Restore+Steroids 1"
+auto = "Rejuvenate+Healing Herb 1"
 status = "derived"
 evidence = "auto name from MAGIC071.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5043,7 +5043,7 @@ disc = ["MAGIC071.EMI#b1#vag1"]
 [[sound]]
 id = "aa178356c922"
 label = "'Whoosh' Noise"
-auto = "Bone Dance 1"
+auto = "Sacrifice 1"
 status = "evidence"
 evidence = "se_watch 20260917T120645 f45452 via 0x0100@magic:MAGIC103, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
 cues = ["0x0100@magic:MAGIC103"]
@@ -5148,7 +5148,7 @@ disc = ["BOSS032.EMI#b6#vag1"]
 [[sound]]
 id = "ad4b716734c6"
 label = ""
-auto = "つぶらなひとみ+WardOfLight 1"
+auto = "Mind's Eye+Counter 1"
 status = "derived"
 evidence = "auto name from MAGIC042.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5169,7 +5169,7 @@ disc = ["BATL_RET.EMI#b1#vag2", "BATL_SE.EMI#b1#vag2"]
 [[sound]]
 id = "adca0069b994"
 label = ""
-auto = "Magma Breath 3"
+auto = "Aura Breath 3"
 status = "derived"
 evidence = "auto name from MAGIC218.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5250,7 +5250,7 @@ disc = ["AREA009.EMI#b2#vag9"]
 [[sound]]
 id = "b040527570bc"
 label = ""
-auto = "KaiserBreath 2"
+auto = "Venom 2"
 status = "derived"
 evidence = "auto name from MAGIC130.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5358,7 +5358,7 @@ disc = ["BOSS015.EMI#b6#vag2"]
 [[sound]]
 id = "b263bfcfbe09"
 label = ""
-auto = "Intimidate 1"
+auto = "Magic Ball 1"
 status = "derived"
 evidence = "auto name from MAGIC172.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5385,7 +5385,7 @@ disc = ["AREA082.EMI#b2#vag7"]
 [[sound]]
 id = "b3a93835e02e"
 label = ""
-auto = "Flame Strike 1"
+auto = "ThundrStrike 1"
 status = "derived"
 evidence = "auto name from MAGIC004.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5412,7 +5412,7 @@ disc = ["AREA041.EMI#b2#vag4", "AREA056.EMI#b2#vag4"]
 [[sound]]
 id = "b4d0f74ce312"
 label = ""
-auto = "Fire Whip 3"
+auto = "Pentagram 3"
 status = "derived"
 evidence = "auto name from MAGIC113.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5421,7 +5421,7 @@ disc = ["MAGIC113.EMI#b1#vag3"]
 [[sound]]
 id = "b4fd1691519c"
 label = ""
-auto = "Bone Dart 1"
+auto = "Evil Eye 1"
 status = "derived"
 evidence = "auto name from MAGIC044.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5457,7 +5457,7 @@ disc = ["AREA038.EMI#b2#vag4", "AREA039.EMI#b2#vag4"]
 [[sound]]
 id = "b60af8a8684e"
 label = ""
-auto = "Sacrifice 1"
+auto = "Ebonfire 1"
 status = "derived"
 evidence = "auto name from MAGIC055.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5484,7 +5484,7 @@ disc = ["AREA026.EMI#b2#vag10"]
 [[sound]]
 id = "b6a70c504705"
 label = ""
-auto = "Blitz+Syphon+Aura+コシが痛い+Whelp Breath 1"
+auto = "Triple Blow+SpiritBlast+Giant Growth+Multistrike+Double Blow 1"
 status = "derived"
 evidence = "auto name from MAGIC018.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5547,7 +5547,7 @@ disc = ["AREA038.EMI#b2#vag8", "AREA039.EMI#b2#vag8"]
 [[sound]]
 id = "b844294f3954"
 label = ""
-auto = "Fire Whip 1"
+auto = "Pentagram 1"
 status = "derived"
 evidence = "auto name from MAGIC113.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5565,7 +5565,7 @@ disc = ["AREA040.EMI#b2#vag1", "AREA042.EMI#b2#vag1"]
 [[sound]]
 id = "b9039090c570"
 label = ""
-auto = "Devour+Depress 2"
+auto = "Hypnotize+Confuse 2"
 status = "derived"
 evidence = "auto name from MAGIC108.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5673,7 +5673,7 @@ disc = ["BPLD012.EMI#b4#vag4", "BPLD015.EMI#b4#vag4", "BPLD016.EMI#b4#vag4", "BP
 [[sound]]
 id = "bb2e7ca07bc9"
 label = ""
-auto = "Inferno 1"
+auto = "Fireblast 1"
 status = "derived"
 evidence = "auto name from MAGIC092.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5754,7 +5754,7 @@ disc = ["AREA023.EMI#b2#vag9"]
 [[sound]]
 id = "be69b6164ffd"
 label = ""
-auto = "Focus 1"
+auto = "War Shout 1"
 status = "derived"
 evidence = "auto name from MAGIC038.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -5961,7 +5961,7 @@ disc = ["AREA030.EMI#b2#vag3", "AREA072.EMI#b2#vag3", "AREA089.EMI#b2#vag3", "AR
 [[sound]]
 id = "c55f2093b911"
 label = ""
-auto = "Accession 1"
+auto = "Eye Beam 1"
 status = "derived"
 evidence = "auto name from MAGIC150.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6033,7 +6033,7 @@ disc = ["AREA044.EMI#b2#vag3", "AREA048.EMI#b2#vag3"]
 [[sound]]
 id = "ca3ae349d076"
 label = ""
-auto = "テンプテーション+Hurricane 1"
+auto = "Tempest+Hurricane 1"
 status = "derived"
 evidence = "auto name from MAGIC223.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6078,7 +6078,7 @@ disc = ["ENEMY052.EMI#b6#vag1", "ENEMY072.EMI#b6#vag1", "ENEMY073.EMI#b6#vag1", 
 [[sound]]
 id = "cab8c58fe748"
 label = ""
-auto = "Quake 1"
+auto = "Typhoon 1"
 status = "derived"
 evidence = "auto name from MAGIC101.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6105,7 +6105,7 @@ disc = ["MAGIC111.EMI#b1#vag2"]
 [[sound]]
 id = "cb6c25349506"
 label = ""
-auto = "Ragnarok 1"
+auto = "Depress 1"
 status = "derived"
 evidence = "auto name from MAGIC109.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6168,7 +6168,7 @@ disc = ["BOSS019.EMI#b6#vag3"]
 [[sound]]
 id = "cd2f8dd3e6b3"
 label = ""
-auto = "Paralyzer 1"
+auto = "Main Cannon 1"
 status = "derived"
 evidence = "auto name from MAGIC138.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6207,7 +6207,7 @@ disc = ["ENEMY027.EMI#b6#vag1", "ENEMY028.EMI#b6#vag1", "ENEMY056.EMI#b6#vag2", 
 [[sound]]
 id = "cdcf6b7e2f22"
 label = ""
-auto = "凶気 1"
+auto = "Charm 1"
 status = "derived"
 evidence = "auto name from MAGIC158.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6252,7 +6252,7 @@ disc = ["BPLD012.EMI#b4#vag2", "BPLD015.EMI#b4#vag2", "BPLD016.EMI#b4#vag2", "BP
 [[sound]]
 id = "cffd9b29c2f3"
 label = ""
-auto = "Bonebreak 1"
+auto = "Disembowel 1"
 status = "derived"
 evidence = "auto name from MAGIC020.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6333,7 +6333,7 @@ disc = ["BOSS020.EMI#b6#vag3"]
 [[sound]]
 id = "d2eedddce401"
 label = ""
-auto = "Remedy 2"
+auto = "Fire Whip 2"
 status = "derived"
 evidence = "auto name from MAGIC114.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6387,7 +6387,7 @@ disc = ["AREA077.EMI#b2#vag4", "AREA119.EMI#b2#vag11"]
 [[sound]]
 id = "d4761c68fe88"
 label = ""
-auto = "Corona 1"
+auto = "Shining Claw 1"
 status = "derived"
 evidence = "auto name from MAGIC136.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6417,7 +6417,7 @@ disc = ["COMN_SE.EMI#b1#vag10", "BATTLE.EMI#b1#vag10", "BATTLE2.EMI#b1#vag10", "
 [[sound]]
 id = "d54b3c1a1272"
 label = ""
-auto = "Pollen 2"
+auto = "Frost Strike 2"
 status = "derived"
 evidence = "auto name from MAGIC049.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6426,7 +6426,7 @@ disc = ["MAGIC049.EMI#b1#vag2"]
 [[sound]]
 id = "d587141bd59e"
 label = ""
-auto = "Berserk 1"
+auto = "Enlighten 1"
 status = "derived"
 evidence = "auto name from MAGIC040.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6498,7 +6498,7 @@ disc = ["AREA000.EMI#b2#vag4", "AREA001.EMI#b2#vag4", "AREA002.EMI#b2#vag4", "AR
 [[sound]]
 id = "d84dccdb56f5"
 label = ""
-auto = "Giant Growth+Magic Ball 1"
+auto = "Astral Warp+Shadowwalk 1"
 status = "derived"
 evidence = "auto name from MAGIC017.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6543,7 +6543,7 @@ disc = ["PL012.EMI#b1#vag1", "PL015.EMI#b1#vag1", "PL016.EMI#b1#vag1", "PL025.EM
 [[sound]]
 id = "d92f0fce1f36"
 label = ""
-auto = "Snooze 1"
+auto = "Accession 1"
 status = "derived"
 evidence = "auto name from MAGIC151.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6597,7 +6597,7 @@ disc = ["AREA040.EMI#b2#vag2", "AREA042.EMI#b2#vag2", "AREA044.EMI#b2#vag8", "AR
 [[sound]]
 id = "dad8b149ca48"
 label = ""
-auto = "Gaea´sBreath 1"
+auto = "Geo Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC220.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6606,7 +6606,7 @@ disc = ["MAGIC220.EMI#b1#vag1", "MAGIC221.EMI#b1#vag1"]
 [[sound]]
 id = "dadc45f295cc"
 label = "'Whisk Away' Noise"
-auto = "Heal (MAGIC069) 2"
+auto = "Influence 2"
 status = "evidence"
 evidence = "se_watch 20260917T120645 f39736 via 0x0101@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone2 vag2 spu 0x41F30"
 cues = ["0x0101@magic:MAGIC069"]
@@ -6645,7 +6645,7 @@ disc = ["AREA027.EMI#b2#vag5"]
 [[sound]]
 id = "dd3642f55142"
 label = ""
-auto = "Feign Swing+Enlighten 1"
+auto = "Focus+Meditation 1"
 status = "derived"
 evidence = "auto name from MAGIC039.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6699,7 +6699,7 @@ disc = ["AREA012.EMI#b2#vag4"]
 [[sound]]
 id = "e0559ae03dfe"
 label = ""
-auto = "Blizzard 1"
+auto = "Iceblast 1"
 status = "derived"
 evidence = "auto name from MAGIC095.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6708,7 +6708,7 @@ disc = ["MAGIC095.EMI#b1#vag1"]
 [[sound]]
 id = "e05e154b60e2"
 label = ""
-auto = "Accession 3"
+auto = "Eye Beam 3"
 status = "derived"
 evidence = "auto name from MAGIC150.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6753,7 +6753,7 @@ disc = ["AREA108.EMI#b2#vag6", "AREA109.EMI#b2#vag6"]
 [[sound]]
 id = "e1c529d8f90e"
 label = ""
-auto = "MeteorStrike (MAGIC225) 2"
+auto = "Temptation 2"
 status = "derived"
 evidence = "auto name from MAGIC225.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6789,7 +6789,7 @@ disc = ["AREA068.EMI#b2#vag1"]
 [[sound]]
 id = "e414e12c927c"
 label = ""
-auto = "Blizzard 2"
+auto = "Iceblast 2"
 status = "derived"
 evidence = "auto name from MAGIC095.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6852,7 +6852,7 @@ disc = ["AREA078.EMI#b2#vag11", "AREA079.EMI#b2#vag11", "AREA080.EMI#b2#vag11", 
 [[sound]]
 id = "e62029317ddd"
 label = ""
-auto = "Doom Breath 2"
+auto = "KaiserBreath 2"
 status = "derived"
 evidence = "auto name from MAGIC131.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6879,7 +6879,7 @@ disc = ["BOSS037.EMI#b6#vag1"]
 [[sound]]
 id = "e652d3c60b2f"
 label = ""
-auto = "とつげき 3"
+auto = "ShadowBreath 3"
 status = "derived"
 evidence = "auto name from MAGIC126.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6915,7 +6915,7 @@ disc = ["AREA041.EMI#b2#vag3", "AREA056.EMI#b2#vag3"]
 [[sound]]
 id = "e76eb8f9f5c9"
 label = ""
-auto = "Astral Warp 1"
+auto = "Air Raid 1"
 status = "derived"
 evidence = "auto name from MAGIC016.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6933,7 +6933,7 @@ disc = ["AREA075.EMI#b2#vag6"]
 [[sound]]
 id = "e7da6f8bf036"
 label = ""
-auto = "Kyrie 1"
+auto = "Sirocco 1"
 status = "derived"
 evidence = "auto name from MAGIC104.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -6960,7 +6960,7 @@ disc = ["AREA144.EMI#b2#vag2"]
 [[sound]]
 id = "e8dcef446577"
 label = ""
-auto = "Simoon 1"
+auto = "Quake 1"
 status = "derived"
 evidence = "auto name from MAGIC102.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7005,7 +7005,7 @@ disc = ["AREA119.EMI#b2#vag7"]
 [[sound]]
 id = "eae8bdde81ae"
 label = ""
-auto = "The World+Miyakuri 2"
+auto = "Ragnarok 2"
 status = "derived"
 evidence = "auto name from MAGIC110.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7041,7 +7041,7 @@ disc = ["AREA131.EMI#b2#vag12", "AREA132.EMI#b2#vag12", "AREA133.EMI#b2#vag12"]
 [[sound]]
 id = "ec270cfebcaa"
 label = ""
-auto = "Tornado 1"
+auto = "Sanctuary 1"
 status = "derived"
 evidence = "auto name from MAGIC058.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7059,7 +7059,7 @@ disc = ["DRG06_00.EMI#b3#vag2"]
 [[sound]]
 id = "eda6231a0ff6"
 label = ""
-auto = "とつげき 2"
+auto = "ShadowBreath 2"
 status = "derived"
 evidence = "auto name from MAGIC126.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7131,7 +7131,7 @@ disc = ["AREA041.EMI#b2#vag1", "AREA056.EMI#b2#vag1"]
 [[sound]]
 id = "f07afacec6dd"
 label = ""
-auto = "Icebreath (MAGIC046) 1"
+auto = "Firebreath (MAGIC046) 1"
 status = "derived"
 evidence = "auto name from MAGIC046.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7212,7 +7212,7 @@ disc = ["PL016.EMI#b1#vag13", "PL026.EMI#b1#vag13", "PL056.EMI#b1#vag14", "PL267
 [[sound]]
 id = "f3f8540286fb"
 label = ""
-auto = "Howling 1"
+auto = "Lavaburst 1"
 status = "derived"
 evidence = "auto name from MAGIC053.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7248,7 +7248,7 @@ disc = ["AREA100.EMI#b2#vag3", "AREA112.EMI#b2#vag8", "AREA138.EMI#b2#vag3", "AR
 [[sound]]
 id = "f4def0d74e24"
 label = ""
-auto = "Confuse 1"
+auto = "Sleep 1"
 status = "derived"
 evidence = "auto name from MAGIC107.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7329,7 +7329,7 @@ disc = ["AREA082.EMI#b2#vag10"]
 [[sound]]
 id = "f6d40f188b55"
 label = ""
-auto = "Bonebreak 2"
+auto = "Disembowel 2"
 status = "derived"
 evidence = "auto name from MAGIC020.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7356,7 +7356,7 @@ disc = ["AREA077.EMI#b2#vag7"]
 [[sound]]
 id = "f8220ffb1d2c"
 label = ""
-auto = "Protect 2"
+auto = "RottenBreath 2"
 status = "derived"
 evidence = "auto name from MAGIC081.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7524,7 +7524,7 @@ disc = ["AREA009.EMI#b2#vag3"]
 [[sound]]
 id = "fe2e69fba0c1"
 label = ""
-auto = "Geo Breath 1"
+auto = "Magma Breath 1"
 status = "derived"
 evidence = "auto name from MAGIC219.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7533,7 +7533,7 @@ disc = ["MAGIC219.EMI#b1#vag1"]
 [[sound]]
 id = "fe35f62ade34"
 label = ""
-auto = "Rejuvenate+Healing Herb 1"
+auto = "Heal+Absorb 1"
 status = "derived"
 evidence = "auto name from MAGIC070.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7551,7 +7551,7 @@ disc = ["BPLD278.EMI#b5#vag3", "BPLD478.EMI#b5#vag3", "BPLD578.EMI#b5#vag3", "BP
 [[sound]]
 id = "fee8378a28c6"
 label = ""
-auto = "Sudden Death 1"
+auto = "Celerity 1"
 status = "derived"
 evidence = "auto name from MAGIC062.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -7560,7 +7560,7 @@ disc = ["MAGIC062.EMI#b1#vag1", "MAGIC082.EMI#b1#vag1", "MAGIC083.EMI#b1#vag1", 
 [[sound]]
 id = "feece977568f"
 label = ""
-auto = "Quake 2"
+auto = "Typhoon 2"
 status = "derived"
 evidence = "auto name from MAGIC101.EMI#vag2 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
