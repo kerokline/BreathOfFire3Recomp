@@ -233,9 +233,14 @@ writer), so it is part of that file load or its DMA.
 
 ## Open
 
-- **Hear one.** No trace yet pairs a cue id with an audible sound; a
-  function-entry hook on `SE_Play` logging `a0` against play would label
-  banks 1 and 2 in an afternoon; note that both tables are swapped for battle, so a cue id means different sounds in the field and in a fight.
+- **Hear one.** No trace yet pairs a cue id with an audible sound.
+  `tools/se_watch.py` is the hook: a write trace on the two halfwords
+  `SE_Play` stores first (`0x8018BD7C` id, `0x8018BD80` bank) — the same
+  no-framework-change trick as `tools/load_watch.py` — logs every cue with
+  its caller to `analysis/se_timeline.jsonl` during any play session, and
+  `--label` asks what was heard and writes `names/se_cues.toml`, keyed by
+  cue *and* mode because both tables are swapped for battle. Written
+  2026-09-17, not yet run against a live game.
 - Set 1 (seven banks) has not been observed in a savestate.
 - `0x8018BD5C` is the extra-voice count and `0x8018BD84` the tone-attribute
   offset; the rest of `0x8018BC80..0x8018BD84` is the per-voice parameter
