@@ -113,6 +113,7 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 |---|---|---|
 | `0x801EB5A5` | byte passed to engine `0x800A0680` on status clear (actor/sprite id) *?* | `Battle_CalcDamage` |
 | `0x801EB61D` | family/type byte (`1`, `4` double specific weapon types) | `Battle_CalcDamage` |
+| `0x801EB691` | `+0x71` byte: **hit-sound class** (column of the engine table `0x800B202C`, same classes as weapon record byte `+0x0D`) | `Battle_PlayHitSound` `0x800A8764` (SOUND_CUES.md) |
 | `0x801EB620` | `+0x00` halfword: bit 4 = 50 % miss chance against it (`0xE0` in `slot03`) | `Battle_HitCheck_EnemyTarget` |
 | `0x801EB622` | `+0x02` status-flag halfword (`0x4000` set on death by `Battle_EnemyDefeated`) | `Battle_CalcDamage` |
 | `0x801EB624` | `+0x04` **zenny yield** (u16, 10) — added to the battle total `0x8014632C` on death and then zeroed | `Battle_EnemyDefeated` (`c_order.json`) |

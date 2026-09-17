@@ -233,6 +233,62 @@ handlers read. The header pointers in the savestates identify the set:
 the cue tables is not visible statically (the tables have no boot-EXE
 writer), so it is part of that file load or its DMA.
 
+## Battle: how a cue is chosen (2026-09-17, second live session)
+
+The battle cues are not looked up per spell. Three mechanisms, all now
+named (`names/functions.toml`, `symbols.toml`):
+
+**Per-character cues, banks 3/4/5.** `Battle_PlayActorCue(index)`
+(`BATTLE.EMI 0x801DD820`) reads a 6 x 3 halfword table at `0x801EAF80`:
+row = index 0..5, column = the actor's kind (`obj+0x2C`, 0..2), and the
+entries are simply `0x03nn / 0x04nn / 0x05nn` — so **bank = 3 + the
+party slot's kind, id = index**, and the three banks carry identical
+six-cue tables because they are the three characters' personal sets. What
+the six indices are, from the callers:
+
+| index | chosen by | evidence |
+|---|---|---|
+| 2, then 4 | `Battle_SwingCue_Step` (`0x801DFA14`, twin `0x801E1FA8`): the normal swing pair | Ryu `0x402+0x404`, Nina `0x502+0x504` in one frame |
+| 3, then 4 | same, when `Rand(3) % 100 < ctx+0xAA` (the crit roll — it also sets bit 7 of `0x801462E4`) | the crit variant |
+| 1 / 0 | `Battle_Impact_Step` (`0x801DFF0C`) on damage, by `ctx+0x128 & 2` | |
+| 5, then 3 | `0x801E1814` | unnamed step |
+
+So Nina's `0x502+0x504` labelled "Chlorine" is her **slot's swing pair**,
+fired for 毒撃 because 毒撃 (ability 8, type 3) is a physical skill; the
+same pair plays for her normal attack. It is not the spell's sound.
+
+**Hit sounds, bank 2.** `Battle_PlayHitSound` (engine `0x800A8764`):
+`class` = the equipped **weapon record byte `+0x0D`** for a party member
+(`0x801C9F24 + id*0x14`), or the **enemy record byte `+0x71`**
+(`0x801EB620 + n*0x118`); cue = `0x800B202C[crit][class]`:
+
+| class | weapons | normal | crit |
+|---|---|---|---|
+| 0 | staves, rods, sticks | `0x202` | `0x203` |
+| 1 | daggers | `0x200` | `0x201` |
+| 2 | swords | `0x200` | `0x201` |
+| 3 | (none in the weapon table) | `0x200` | `0x201` |
+| 4 | (none) | `0x202` | `0x203` |
+| 5 | ammo, chrysms, shells | `0x202` | `0x203` |
+| 6 | spears | `0x200` | `0x201` |
+
+Constants elsewhere in the battle table: `0x204` (`0x801E4794`, the
+enemy-side hit), `0x205` (miss, heard), `0x206` through `SE_PlayTracked`
+from `Battle_Impact_Step`.
+
+**Creature cues, bank 6.** `Battle_PlayCreatureCue` (`0x801E39BC`):
+`SE_Play(0x600 | obj->0xE0 << 1)` — the object's byte `+0xE0` is its
+creature sound type 0..7 and bank 6's 16 cues are 8 programs x tones 0/2.
+
+**Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
+family, and across all 141 `BMAGIC` overlays only 12 call it, all with
+bank 1 (menu) constants. Whatever distinctive sound a spell has therefore
+comes through the effect interpreter, most likely `SE_PlayTracked`
+(`0x8015E10C`, which records the keyed voices in the effect object) —
+and the write trace cannot see past that wrapper because `SE_Play`'s `ra`
+is inside it. Next step for spells: arm the trace on `SE_PlayTracked`'s
+own first store (`0x8018BC94`) or add the wrapper to `se_watch`.
+
 ## Open
 
 - **Hear one.** No trace yet pairs a cue id with an audible sound.

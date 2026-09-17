@@ -1039,3 +1039,48 @@ status = "evidence"
 evidence = "read from BATTLE.EMI#15 2026-09-08: sub = u32[0x800B39F0 + ((a0 >> 8) & 0xFF)*4] (four u8 sub-tables 0x800B3A00 n=100, 0x800B3A64 n=92, 0x800B3AC0 n=72, 0x800B3B08 n=96); row = u8[sub + (a0 & 0xFF)]; then the same 0x800B3538 row -> File_LoadRequest as Magic_LoadForAbility. BATTLE.EMI#3 0x801D3ED0 repeats the lookup inline"
 note = "which item category each sub-table is (the sizes match no items.toml table exactly) is open"
 
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DD820
+name = "Battle_PlayActorCue"
+args = ["index"]
+status = "evidence"
+evidence = "ghidra decomp 2026-09-17 (BATTLE_EMI3): SE_Play(*(u16*)(0x801EAF80 + actor_kind*2 + index*6)) with actor_kind = *(u16*)(*0x8014624C + 0x2C); the table is 6 rows x 3 halfwords {0x03nn, 0x04nn, 0x05nn} so index = cue id and the actor's kind picks bank 3/4/5 (the three identical per-slot cue tables, SOUND_CUES.md); se_watch 20260917T073716: Ryu 0x402+0x404, Nina 0x502+0x504 through ra 0x801DD864 (this function's tail)"
+note = "SOUND_CUES.md, Battle: how a cue is chosen"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801DFA14
+name = "Battle_SwingCue_Step"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-17: counts obj+9 down, on zero rolls Rand(3)%100 < ctx+0xAA (crit rate) -> flag 0x80 in 0x801462E4 and actor cue 3, else cue 2 (cue 3 unconditionally when 0x800A5EC0() != 0), then cue 4, obj+2++; se_watch: the 0x402+0x404 / 0x502+0x504 pairs at one frame"
+note = "SOUND_CUES.md, Battle: how a cue is chosen"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E1FA8
+name = "Battle_SwingCue_Step2"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-17: byte-for-byte the same body as Battle_SwingCue_Step without the leading 0x801DEE08() call (crit roll vs ctx+0xAA, actor cue 3/2 then 4)"
+note = "SOUND_CUES.md, Battle: how a cue is chosen"
+
+[[function]]
+overlay = "8a80230efd4a882da0558fde6eb0badb"
+pc = 0x801E39BC
+name = "Battle_PlayCreatureCue"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-17: after 0x801E3070 and the obj+9 countdown, if 0x801462E6 == 0: SE_Play(0x600 | obj->0xE0 << 1) (bank 6 = 8 creature sound types x tones 0/2, obj = *0x801EB458), else 0x801E5230(*obj->0xE8); se_watch: 0x600 / 0x60A rows in battle"
+note = "SOUND_CUES.md, Battle: how a cue is chosen"
+
+[[function]]
+overlay = "4065db04716614f63106a242d5160285"
+pc = 0x800A8764
+name = "Battle_PlayHitSound"
+args = []
+status = "evidence"
+evidence = "ghidra decomp 2026-09-17 (BATTLE_EMI15): class = party (0x80146370 < 3) ? weapon record byte +0x0D of the equipped weapon (0x801C9F24 + id*0x14, id from ctx 0x80145F0E) : enemy record byte +0x71 (0x801EB620 + n*0x118); SE_Play(*(u16*)(0x800B202C + class*2 + crit*0xE)), crit = bit 7 of 0x801462E4 set by Battle_SwingCue_Step; the table rows are normal {202,200,200,200,202,202,200} / crit {203,201,201,201,203,203,201}; weapon classes: 0 staves, 1 daggers, 2 swords, 5 ammo, 6 spears (names/items.toml raw[5]); called from Battle_Impact_Step 0x801DFF0C via ra 0x800A8830"
+note = "SOUND_CUES.md, Battle: how a cue is chosen"

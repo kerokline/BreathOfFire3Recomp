@@ -3894,3 +3894,10 @@ name = "Boot_Init"
 emit = false
 status = "evidence"
 note = "ghidra decomp 2026-09-17: task 0 registered by Main_FrameLoop -- clear VRAM 0x8014E458(0,0,0x400,0x200), SPU init 0x8015D6F0, SoundSet_Layout(0), File_LoadRequest(0x261) and spin on 0x801636F0, reverb 0x28, zero the 0x10B0-byte game block 0x801448D4, party flags 0x8014494C.., 9 halfwords 0x8017FEE4 -> 0x80145AB0, then hands over to task 1 = 0x8014EB20"
+
+[[func]]
+pc = 0x8015E10C
+name = "SE_PlayTracked"
+emit = false
+status = "confirmed"
+note = "ghidra decomp 2026-09-17: (cue) clears the four voice slots 0x8018BC94/BCBC/BCE4/BD0C to 0xFFFF, SE_Play(cue), then packs the voices SE_Play keyed (5 bits each, bits 8..27) into the current object's word *0x1F800044+0x70 and sets bit 3 of its flags, so the object can track/stop its own sound. No boot caller (overlay entry point); the write trace sees SE_Play's ra INSIDE this wrapper (0x8015E140), so se_watch rows naming it have a hidden overlay caller. Battle_Impact_Step calls it with 0x206"

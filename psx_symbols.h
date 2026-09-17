@@ -136,6 +136,10 @@
 #define PSX_FN_SE_PollKeyStatus 0x8015DA34u
 #define func_8015DA34 SE_PollKeyStatus  /* alias */
 
+/* confirmed: ghidra decomp 2026-09-17: (cue) clears the four voice slots 0x8018BC94/BCBC/BCE4/BD0C to 0xFFFF, SE_Play(cue), then packs the voices SE_Play keyed (5 bits each, bits 8..27) into the current object's word *0x1F800044+0x70 and sets bit 3 of its flags, so the object can track/stop its own sound. No boot caller (overlay entry point); the write trace sees SE_Play's ra INSIDE this wrapper (0x8015E140), so se_watch rows naming it have a hidden overlay caller. Battle_Impact_Step calls it with 0x206 */
+#define PSX_FN_SE_PlayTracked 0x8015E10Cu
+#define func_8015E10C SE_PlayTracked  /* alias */
+
 /* evidence: ghidra decomp 2026-09-17: (cue, volL_idx, volR_idx) -- 0x8018BD50/54 = attenuation curve 0x80182C00[idx] (0x51 shorts, 0x3FFF..0), then SE_Play(cue); the caller must OR 0x8000 into a panned cue or SE_Play resets the volume. No boot caller (overlay use) */
 #define PSX_FN_SE_PlayVol 0x8015E1B8u
 #define func_8015E1B8 SE_PlayVol  /* alias */

@@ -4,7 +4,7 @@
 
 Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer claims about it. An address alone does not say whether it is code or data (81.6% of `.text` is overlay zero fill, and named data shares addresses with sibling code — `DATA_ISLANDS.md`), and one address can resolve to several overlay functions because bands share load addresses (`AREA_PCS.md`). Unnamed is not a defect: most cited addresses are RAM variables, which `symbols.toml` has no table for.
 
-1071 distinct addresses · 159 resolve to a name · 912 do not.
+1087 distinct addresses · 165 resolve to a name · 922 do not.
 
 | Address | Region | Identity | Cited by |
 |---|---|---|---|
@@ -66,6 +66,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x800A0680` | text | in band_80093800 [overlay band] +0xCE80 | `BATTLE_RAM.md`, `GHIDRA.md` |
 | `0x800A783C` | text | in band_80093800 [overlay band] +0x1403C | `BATTLE_RAM.md` |
 | `0x800A79AC` | text | Formation_ApplyStatMods [hypothesis] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `BATTLE_RAM.md`, `STATUS.md`, `remote-plan-2026-09-05.md` |
+| `0x800A8764` | text | Battle_PlayHitSound [evidence] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `BATTLE_RAM.md`, `SOUND_CUES.md` |
 | `0x800A8AD4` | text | Battle_InitEncounterKind [hypothesis] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `GHIDRA.md`, `STATUS.md`, `loader_records/BOSS.md`, `remote-plan-2026-09-05.md` |
 | `0x800A8AF8` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x24 (nearest below, span unknown) | `loader_records/BOSS.md` |
 | `0x800A8B10` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x3C (nearest below, span unknown) | `loader_records/BOSS.md` |
@@ -86,6 +87,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x800B165C` | text | in band_80093800 [overlay band] +0x1DE5C | `BATTLE_RAM.md`, `HANDOFF.md`, `STATUS.md` |
 | `0x800B19A4` | text | in band_80093800 [overlay band] +0x1E1A4 | `OVERLAY_HEADERS.md` |
 | `0x800B19A8` | text | in band_80093800 [overlay band] +0x1E1A8 | `OVERLAY_HEADERS.md` |
+| `0x800B202C` | text | in band_80093800 [overlay band] +0x1E82C | `BATTLE_RAM.md`, `SOUND_CUES.md` |
 | `0x800B2048` | text | in band_80093800 [overlay band] +0x1E848 | `ADDRESS_MAPS.md`, `HANDOFF.md`, `LOADER_RECORDS.md`, `README.md`, `STATUS.md`, `loader_records/BOSS.md` |
 | `0x800B3450` | text | Magic_AbilityRow (struct) in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `HANDOFF.md`, `OVERLAY_HEADERS.md`, `STATUS.md` |
 | `0x800B3538` | text | Magic_EffectTable (struct) in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `HANDOFF.md`, `OVERLAY_HEADERS.md`, `STATUS.md`, `loader_records/SCENARIO.md` |
@@ -272,7 +274,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801462DE` | text | in band_80117000 [overlay band] +0x2F2DE | `BATTLE_RAM.md` |
 | `0x801462DF` | text | in band_80117000 [overlay band] +0x2F2DF | `BATTLE_RAM.md` |
 | `0x801462E0` | text | in band_80117000 [overlay band] +0x2F2E0 | `BATTLE_RAM.md` |
-| `0x801462E4` | text | in band_80117000 [overlay band] +0x2F2E4 | `BATTLE_RAM.md`, `STATUS.md`, `STEAL.md` |
+| `0x801462E4` | text | in band_80117000 [overlay band] +0x2F2E4 | `BATTLE_RAM.md`, `SOUND_CUES.md`, `STATUS.md`, `STEAL.md` |
 | `0x801462E6` | text | in band_80117000 [overlay band] +0x2F2E6 | `BATTLE_RAM.md`, `LOADER_RECORDS.md`, `STATUS.md`, `loader_records/BOSS.md` |
 | `0x801462E8` | text | in band_80117000 [overlay band] +0x2F2E8 | `loader_records/BOSS.md` |
 | `0x801462EF` | text | in band_80117000 [overlay band] +0x2F2EF | `BATTLE_RAM.md` |
@@ -459,10 +461,13 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8015D508` | text | in boot_exe_image [exe image] +0xC9D08 | `GHIDRA.md` |
 | `0x8015D5F0` | text | in boot_exe_image [exe image] +0xC9DF0 | `GHIDRA.md` |
 | `0x8015DA34` | text | SE_PollKeyStatus [confirmed] boot | `SOUND_CUES.md`, `STATUS.md` |
+| `0x8015E10C` | text | SE_PlayTracked [confirmed] boot | `SOUND_CUES.md` |
 | `0x8015E1B8` | text | SE_PlayVol [evidence] boot | `SOUND_CUES.md` |
 | `0x8015E210` | text | SE_PlayAtObject [evidence] boot | `SOUND_CUES.md` |
 | `0x8015E5F8` | text | SE_PlayNearSelf [evidence] boot | `SOUND_CUES.md` |
 | `0x8015E908` | text | SE_Play [confirmed] boot | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `GHIDRA.md`, `HANDOFF.md`, `README.md`, `SOUND_CUES.md`, `STATUS.md`, `TEXT_ENGINE.md`, `WORLD_ITEMS.md` |
+| `0x8015E91C` | text | ≤ SE_Play (boot) +0x14 (nearest below, span unknown) | `SOUND_CUES.md` |
+| `0x8015E93C` | text | ≤ SE_Play (boot) +0x34 (nearest below, span unknown) | `SOUND_CUES.md` |
 | `0x801621F8` | text | SoundSet_Layout [confirmed] boot | `SOUND_CUES.md`, `STATUS.md` |
 | `0x801625AC` | text | unnamed function root (seeds/ghidra_funcs.txt) | `loader_records/AREA.md`, `loader_records/BOSS.md` |
 | `0x801625B0` | text | ≤ SoundSet_Layout (boot) +0x3B8 (nearest below, span unknown) | `loader_records/AREA.md` |
@@ -594,6 +599,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8018BBB4` | text | in boot_exe_image [exe image] +0xF83B4 | `BRINGUP.md` |
 | `0x8018BC2C` | text | in boot_exe_image [exe image] +0xF842C | `BRINGUP.md`, `OVERLAYS.md` |
 | `0x8018BC80` | text | in boot_exe_image [exe image] +0xF8480 | `SOUND_CUES.md` |
+| `0x8018BC94` | text | in boot_exe_image [exe image] +0xF8494 | `SOUND_CUES.md` |
 | `0x8018BD50` | text | in boot_exe_image [exe image] +0xF8550 | `SOUND_CUES.md` |
 | `0x8018BD54` | text | in boot_exe_image [exe image] +0xF8554 | `SOUND_CUES.md` |
 | `0x8018BD5C` | text | in boot_exe_image [exe image] +0xF855C | `SOUND_CUES.md` |
@@ -601,7 +607,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8018BD64` | text | in boot_exe_image [exe image] +0xF8564 | `SOUND_CUES.md` |
 | `0x8018BD68` | text | in boot_exe_image [exe image] +0xF8568 | `SOUND_CUES.md` |
 | `0x8018BD6C` | text | in boot_exe_image [exe image] +0xF856C | `SOUND_CUES.md` |
-| `0x8018BD7C` | text | in boot_exe_image [exe image] +0xF857C | `SOUND_CUES.md` |
+| `0x8018BD7C` | text | in boot_exe_image [exe image] +0xF857C | `HANDOFF.md`, `SOUND_CUES.md` |
 | `0x8018BD80` | text | in boot_exe_image [exe image] +0xF8580 | `SOUND_CUES.md` |
 | `0x8018BD84` | text | in boot_exe_image [exe image] +0xF8584 | `SOUND_CUES.md` |
 | `0x8018EAB8` | text | in boot_exe_image [exe image] +0xFB2B8 | `SOUND_CUES.md` |
@@ -786,7 +792,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801C995C` | text | in band_80196800 [overlay band] +0x3315C | `IDEAS.md`, `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801C9E64` | text | in band_80196800 [overlay band] +0x33664 | `TEXT_TABLES.md` |
 | `0x801C9E7C` | text | in band_80196800 [overlay band] +0x3367C | `TEXT_TABLES.md` |
-| `0x801C9F24` | text | in band_80196800 [overlay band] +0x33724 | `TEXT_TABLES.md` |
+| `0x801C9F24` | text | in band_80196800 [overlay band] +0x33724 | `SOUND_CUES.md`, `TEXT_TABLES.md` |
 | `0x801C9F2F` | text | in band_80196800 [overlay band] +0x3372F | `BATTLE_RAM.md` |
 | `0x801CA5A0` | text | in band_80196800 [overlay band] +0x33DA0 | `TEXT_TABLES.md` |
 | `0x801CA718` | text | in band_80196800 [overlay band] +0x33F18 | `STATUS.md`, `TEXT_TABLES.md` |
@@ -901,27 +907,34 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801DD264` | text | AutoBattle_FillCommands [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md` |
 | `0x801DD564` | text | BattleResult_AddExp [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `EXP_BOOST.md`, `GHIDRA.md`, `STATUS.md` |
 | `0x801DD644` | text | ≤ BattleResult_AddExp (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xE0 (nearest below, span unknown) | `STATUS.md` |
+| `0x801DD820` | text | Battle_PlayActorCue [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `SOUND_CUES.md` |
 | `0x801DE074` | text | ≤ Battle_WriteBackMember (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x800 (nearest below, span unknown) | `GHIDRA.md` |
 | `0x801DE098` | text | ≤ Battle_WriteBackMember (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x824 (nearest below, span unknown) | `OVERLAYS.md`, `STATUS.md` |
 | `0x801DF3AC` | text | ≤ Battle_InitMemberActor (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x4E4 (nearest below, span unknown) | `BATTLE_RAM.md`, `GHIDRA.md` |
 | `0x801DF9D0` | text | ≤ Attack_SetAnim (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x100 (nearest below, span unknown) | `IDEAS.md` |
 | `0x801DFA04` | text | Attack_Action [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `GHIDRA.md`, `IDEAS.md` |
-| `0x801DFB18` | text | ≤ Attack_Action (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x114 (nearest below, span unknown) | `IDEAS.md` |
-| `0x801DFB90` | text | ≤ Attack_Action (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x18C (nearest below, span unknown) | `GHIDRA.md` |
+| `0x801DFA14` | text | Battle_SwingCue_Step [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `SOUND_CUES.md` |
+| `0x801DFB18` | text | ≤ Battle_SwingCue_Step (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x104 (nearest below, span unknown) | `IDEAS.md` |
+| `0x801DFB90` | text | ≤ Battle_SwingCue_Step (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x17C (nearest below, span unknown) | `GHIDRA.md` |
 | `0x801DFC68` | text | Battle_ResolveAction_Party [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md` |
+| `0x801DFF0C` | text | ≤ Battle_ResolveAction_Party (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x2A4 (nearest below, span unknown) | `SOUND_CUES.md` |
 | `0x801E00EC` | text | Examine_LearnCheck [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `GHIDRA.md`, `IDEAS.md` |
 | `0x801E0400` | text | Defend_Action [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `GHIDRA.md`, `IDEAS.md` |
 | `0x801E0434` | text | ≤ Defend_Action (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x34 (nearest below, span unknown) | `IDEAS.md` |
 | `0x801E04B4` | text | Examine_State_Cue [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `IDEAS.md` |
 | `0x801E06C8` | text | ≤ Examine_State_Nop (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x58 (nearest below, span unknown) | `IDEAS.md` |
+| `0x801E1814` | text | in band_801D0C00 [overlay band] +0x10C14 | `SOUND_CUES.md` |
 | `0x801E19A0` | text | Actor_SkillItemDone [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md` |
 | `0x801E1D58` | text | Actor_ActionDone [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md` |
-| `0x801E2464` | text | ≤ Actor_ActionDone (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x70C (nearest below, span unknown) | `loader_records/SCENARIO.md` |
+| `0x801E1FA8` | text | Battle_SwingCue_Step2 [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `SOUND_CUES.md` |
+| `0x801E2464` | text | ≤ Battle_SwingCue_Step2 (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x4BC (nearest below, span unknown) | `loader_records/SCENARIO.md` |
 | `0x801E2500` | text | Examine_EnemyMove_Tick [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `IDEAS.md` |
-| `0x801E3AE0` | text | in band_801D0C00 [overlay band] +0x12EE0 | `IDEAS.md` |
+| `0x801E39BC` | text | Battle_PlayCreatureCue [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `SOUND_CUES.md` |
+| `0x801E3AE0` | text | ≤ Battle_PlayCreatureCue (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x124 (nearest below, span unknown) | `IDEAS.md` |
 | `0x801E3B8C` | text | Battle_ResolveAction_Enemy [hypothesis] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md` |
 | `0x801E40B4` | text | ≤ Battle_ResolveAction_Enemy (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x528 (nearest below, span unknown) | `STEAL.md` |
 | `0x801E42C0` | text | ≤ Battle_ResolveAction_Enemy (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x734 (nearest below, span unknown) | `IDEAS.md`, `STATUS.md`, `STEAL.md` |
+| `0x801E4794` | text | ≤ Battle_ResolveAction_Enemy (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xC08 (nearest below, span unknown) | `SOUND_CUES.md` |
 | `0x801E5230` | text | in band_801D0C00 [overlay band] +0x14630 | `IDEAS.md` |
 | `0x801E524C` | text | in band_801D0C00 [overlay band] +0x1464C | `IDEAS.md` |
 | `0x801E525C` | text | Battle_RollDrops [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `STATUS.md` |
@@ -952,6 +965,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801EAF3E` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x81A (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EAF50` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x82C (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EAF70` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x84C (nearest below, span unknown) | `BATTLE_RAM.md` |
+| `0x801EAF80` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x85C (nearest below, span unknown) | `SOUND_CUES.md` |
 | `0x801EB448` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xD24 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB458` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xD34 (nearest below, span unknown) | `EXP_BOOST.md`, `STATUS.md` |
 | `0x801EB460` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xD3C (nearest below, span unknown) | `BATTLE_RAM.md`, `STATUS.md` |
@@ -960,7 +974,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801EB5A0` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xE7C (nearest below, span unknown) | `OVERLAY_HEADERS.md`, `remote-plan-2026-09-05.md` |
 | `0x801EB5A5` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xE81 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB61D` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEF9 (nearest below, span unknown) | `BATTLE_RAM.md` |
-| `0x801EB620` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFC (nearest below, span unknown) | `BATTLE_RAM.md` |
+| `0x801EB620` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFC (nearest below, span unknown) | `BATTLE_RAM.md`, `SOUND_CUES.md` |
 | `0x801EB622` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFE (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB624` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF00 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB626` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF02 (nearest below, span unknown) | `BATTLE_RAM.md` |
@@ -972,6 +986,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801EB644` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF20 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB648` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF24 (nearest below, span unknown) | `STEAL.md` |
 | `0x801EB654` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF30 (nearest below, span unknown) | `BATTLE_RAM.md` |
+| `0x801EB691` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF6D (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB69C` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF78 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB69D` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF79 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB6A0` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF7C (nearest below, span unknown) | `BATTLE_RAM.md` |
@@ -1037,6 +1052,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801F2E6C` | text | in band_801F2C00 [overlay band] +0x26C | `IDEAS.md`, `STATUS.md` |
 | `0x801F3BBC` | text | in band_801F2C00 [overlay band] +0xFBC | `WORLD_ITEMS.md` |
 | `0x801F3DFC` | text | in band_801F2C00 [overlay band] +0x11FC | `WORLD_ITEMS.md` |
+| `0x801F3F18` | text | in band_801F2C00 [overlay band] +0x1318 | `SOUND_CUES.md` |
 | `0x801F3FF8` | text | in band_801F2C00 [overlay band] +0x13F8 | `loader_records/AREA.md` |
 | `0x801F403C` | text | engine loader entry: area 145 handler[4] in AREA145 (BIN/WORLD03/AREA145.EMI#14) | `loader_records/AREA.md` |
 | `0x801F4154` | text | in band_801F2C00 [overlay band] +0x1554 | `IDEAS.md` |

@@ -262,7 +262,8 @@ def main():
                            "store_pc_bank": e_bank["pc"] if e_bank else None,
                            "store_pc_id": e_id["pc"] if e_id else None,
                            "ra": e["ra"], "caller_nearest": caller, "caller_overlay": ovl,
-                           "args": e.get("args"), "s": e.get("s"),
+                           "a": [e.get(k) for k in ("a0", "a1", "a2", "a3")],
+                           "s": [e.get(k) for k in ("s0", "s1", "s2", "s3", "s4", "s5")],
                            "label": known["label"] if known else ""}
                     with open(a.out, "a", encoding="utf-8") as fh:
                         fh.write(json.dumps(row) + "\n")
