@@ -36,7 +36,9 @@ sample payload (a type-3 .EMI section) and trigger it as cue 0x100, and
 the tables themselves are rewritten as areas and spells load (five hashes
 in one 2026-09-17 session), so the same cue word is a different sound per
 loaded spell. The label key is therefore (cue, context) where context is
-the resident BMAGIC overlay's name (band 0x801EEC00) when one is loaded,
+the resident BMAGIC overlay's name (band 0x801EEC00, only when the
+occupant is a MAGICnnn overlay -- SHOP.EMI#8 and BATL_END.EMI#0 share the
+band and linger there until a spell overwrites them) when one is loaded,
 else "field" / "battle" from the table hash, else "tables:<hash8>". Every
 new table hash is dumped once to analysis/se_tables/<md5>.bin for decode. Run it beside area_poller.py; both are read-only on the runtime
 (this one arms write-trace ranges and puts the previous ones back on exit).
@@ -201,7 +203,11 @@ def context_of(bands, tables_md5, raw, seen):
             pass
     m = bands.get(MAGIC_BAND)
     if m is not None and m.get("id") is not None and not m.get("wrong_band"):
-        return "magic:" + str(m.get("name", "?"))
+        # the band is shared: SHOP.EMI#8 / BATL_END.EMI#0 also live here and stay
+        # until a spell overwrites them, so only a BMAGIC occupant is a spell context
+        src = str(m.get("file", "")) + " " + str(m.get("name", ""))
+        if "MAGIC" in src.upper():
+            return "magic:" + str(m.get("name", "?"))
     if tables_md5 in TABLE_MODES:
         return TABLE_MODES[tables_md5]
     return ("tables:" + tables_md5[:8]) if tables_md5 else "unknown"
