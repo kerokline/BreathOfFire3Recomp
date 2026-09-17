@@ -20,6 +20,18 @@
 #define PSX_FN_stup0 0x8014AAACu
 #define func_8014AAAC stup0  /* alias */
 
+/* confirmed: ghidra decomp 2026-09-17: __main, init 0x8014AC18, DrawSyncCallback(0x8014B0F8), task 0 = Boot_Init, then forever: VSync(2), Rand, PutDispEnv/PutDrawEnv(db block 0x80143E68), DrawOTag(+0x8C), SE_PollKeyStatus, db 0x80143D44 ^= 1 (blocks 0x80143D48 / +0x90), ClearOTagR(8), Packet_FrameReset, 0x8014B630, 0x80163A00, frame counter 0x80143EF8 = VSync(1), DrawSync(0), Packet_FlushToOT, 0x80143E6C++ */
+#define PSX_FN_Main_FrameLoop 0x8014AAC8u
+#define func_8014AAC8 Main_FrameLoop  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: called from Main_FrameLoop right after the buffer flip -- cursor 0x80145988 = 0x80018000 + db*0x9000, the 8 chain tails 0x801459CC[i] = the frame's dummy heads 0x8014598C + db*0x20 + i*4, zeroes the 56 sprite-slot records at 0x80142CC0 (stride 0x30, +0x20/+0x28 by db), heap pointers 0x801459F4 = 0x800E4800, 0x801459F8 = 0x800F5000 */
+#define PSX_FN_Packet_FrameReset 0x8014AF98u
+#define func_8014AF98 Packet_FrameReset  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: end of Main_FrameLoop after DrawSync(0) -- for layer 0..7: AddPrims(drawenv+0x70+layer*4, head 0x8014598C[db][layer], tail 0x801459CC[layer]) links each committed chain into the 8-entry reverse OT (ClearOTagR(...,8), DrawOTag from entry 7), so layer 0 draws last / on top */
+#define PSX_FN_Packet_FlushToOT 0x8014B06Cu
+#define func_8014B06C Packet_FlushToOT  /* alias */
+
 /* guessed: wtrace battlebegin.json 2026-09-05: writes the actor present flag C+0 1 804 times (unchanged) across field and battle -- the per-actor frame task; 2420 B, 8 callees (largest boot function by insns after the text engine) */
 #define PSX_FN_Actor_Task 0x8014C3C8u
 #define func_8014C3C8 Actor_Task  /* alias */
@@ -31,6 +43,14 @@
 /* guessed: wtrace battlebegin.json 2026-09-05: writes C+0x4A/+0x58 every ~2 frames per slot (1 622 changing writes); siblings 0x8014DA8C (+0x4A/+0x58/+0x5A) and 0x8014D9E0 (+0x4A) -- sprite animation counters */
 #define PSX_FN_Actor_AnimTick 0x8014D86Cu
 #define func_8014D86C Actor_AnimTick  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17 (40 insns, confidence verified): (layer, size) commits the GPU packet the caller built at the cursor *0x80145988 -- CatPrim(tail[layer & 0xFF], cursor), tail[layer] = cursor, cursor += size & 0xFF -- where tail = 0x801459CC[8] and the cursor lives in the per-frame arena 0x80018000 + db*0x9000 (db = 0x80143D44). Bound: cursor + size < 0x80020FCC + db*0x9000 (arena end - 0x34); over budget the packet is silently dropped, nothing is linked. Layers are the 8 OT entries of the frame's DRAWENV block (Packet_FlushToOT); text uses 1, window frames 6/7, 30 boot callers + 36 constant-a0 sites in the game-mode overlay. Was the 'packet-commit hook' in FURIGANA.md */
+#define PSX_FN_Packet_Commit 0x8014E494u
+#define func_8014E494 Packet_Commit  /* alias */
+
+/* evidence: ghidra decomp 2026-09-17: task 0 registered by Main_FrameLoop -- clear VRAM 0x8014E458(0,0,0x400,0x200), SPU init 0x8015D6F0, SoundSet_Layout(0), File_LoadRequest(0x261) and spin on 0x801636F0, reverb 0x28, zero the 0x10B0-byte game block 0x801448D4, party flags 0x8014494C.., 9 halfwords 0x8017FEE4 -> 0x80145AB0, then hands over to task 1 = 0x8014EB20 */
+#define PSX_FN_Boot_Init 0x8014E974u
+#define func_8014E974 Boot_Init  /* alias */
 
 /* confirmed: wtrace npc_talk.json 2026-09-05 (slot04, AREA000 NPC talk): the only writer of the box string base 0x801490A8 / stepper pointer 0x801490AC (store pcs 0x8015037C/84) and of the message index 0x801490A4 (0x80150394), a0=3 from GAME.EMI Script_ShowMessage 0x801A2858; ghidra: (u16 idx) ptr = 0x80010000 + u16[0x80010000 + 2*idx] (area script block, table at +0), MsgBox_Reset(), index stored last. 0 boot-EXE callers: only overlays open messages. Message 3 decoded off the disc at 0x245 = the taxes/Windia line, two pages split by code 0x02 */
 #define PSX_FN_Msg_OpenScript 0x8015034Cu
@@ -111,6 +131,62 @@
 /* confirmed: Flag_Toggle(bits, index) -> bits[index>>3] ^= 1 << (index&7) -- eleven instructions, disasm 2026-09-07 (tools/disasm_exe.py 8015BFE4:11); the xor sibling the Flag_Test note already pointed at */
 #define PSX_FN_Flag_Toggle 0x8015BFE4u
 #define func_8015BFE4 Flag_Toggle  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: once per frame from Main_FrameLoop -- 0x8018EAB8[v] = SpuGetKeyStatus(1 << v) for v = 0..23; SE_Play reads it to decide whether a lower-priority cue may steal a voice */
+#define PSX_FN_SE_PollKeyStatus 0x8015DA34u
+#define func_8015DA34 SE_PollKeyStatus  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: (cue) clears the four voice slots 0x8018BC94/BCBC/BCE4/BD0C to 0xFFFF, SE_Play(cue), then packs the voices SE_Play keyed (5 bits each, bits 8..27) into the current object's word *0x1F800044+0x70 and sets bit 3 of its flags, so the object can track/stop its own sound. No boot caller (overlay entry point); the write trace sees SE_Play's ra INSIDE this wrapper (0x8015E140), so se_watch rows naming it have a hidden overlay caller. Battle_Impact_Step calls it with 0x206 */
+#define PSX_FN_SE_PlayTracked 0x8015E10Cu
+#define func_8015E10C SE_PlayTracked  /* alias */
+
+/* evidence: ghidra decomp 2026-09-17: (cue, volL_idx, volR_idx) -- 0x8018BD50/54 = attenuation curve 0x80182C00[idx] (0x51 shorts, 0x3FFF..0), then SE_Play(cue); the caller must OR 0x8000 into a panned cue or SE_Play resets the volume. No boot caller (overlay use) */
+#define PSX_FN_SE_PlayVol 0x8015E1B8u
+#define func_8015E1B8 SE_PlayVol  /* alias */
+
+/* evidence: ghidra decomp 2026-09-17: (cue, obj) -- distance of field object 0x801468B8 + obj*0x98 (+2 x, +6 z) from the listener 0x80145EC0/EC4 in five 0x16/0x12/0xC/8/6 boxes picks the curve index 0x40/0x40/0x31/0x21/0x11 into 0x80182C00 for both channels, SE_Play once per box entered. No boot caller */
+#define PSX_FN_SE_PlayAtObject 0x8015E210u
+#define func_8015E210 SE_PlayAtObject  /* alias */
+
+/* evidence: ghidra decomp 2026-09-17: (cue) -- same five distance boxes as SE_PlayAtObject but for the current object *0x1F800044 (+0x36 x, +0x3A z) against 0x80149304/308, and SE_Play(cue | 0x8000) so the picked volume survives. No boot caller */
+#define PSX_FN_SE_PlayNearSelf 0x8015E5F8u
+#define func_8015E5F8 SE_PlayNearSelf  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17 + live tables from saves/openbios slot00/02/03: (cue) with cue = bank<<8 | id, bank 0..6 via the handler table 0x80182CA4 (SE_CueSetup_Bank0..6 fill the voice params from the bank's 31-entry cue table 0x8014869C + bank*0x7C and its VAB header 0x80148A14[bank]); bit 0x8000 keeps the caller's L/R volume 0x8018BD50/54 (else 0x17FF when the cue is panned); up to 4 chord voices SsUtKeyOnV(voice, vab, prog, tone, note, fine, volL, volR) on SPU voices 16..23, panned cues scaled by (0x80-pan)/pan >>7 and SsUtSetDetVVol'd; a re-trigger on the same voice with lower priority (0x8018BD60 < 0x8018BD64) while SE_PollKeyStatus still shows it keyed (0x8018EAB8[voice]) is dropped. Callers: MsgBox_Step 0x0A code (0x2xx), menus 0x100..0x107, Field_GiveZenny 0x106, 69 sites in the battle engine */
+#define PSX_FN_SE_Play 0x8015E908u
+#define func_8015E908 SE_Play  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: SE_Play handler table 0x80182CA4[0]; cue entry 0x8014869C + id*4 = {flags (low 3 bits = VAB override, applied via 0x80148A14[n]), pan bit7 | prog, tone<<4 | priority, chord<<5 | voice}; tone attributes from the VAB header 0x80148A14[0] + 0x820 + 0x80182B58[prog] + 0x80182B60[tone] (+2 vol, +3 pan, +5 centre, +6 shift); chord voices 1..3 use tone+n, voice+n wrapped into 16..23 */
+#define PSX_FN_SE_CueSetup_Bank0 0x8015F384u
+#define func_8015F384 SE_CueSetup_Bank0  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 1 (cues 0x100..): table 0x80148718, VAB 0x80148A18; same shape as SE_CueSetup_Bank0. Live: 15 menu/system cues in the field set, a different 15 in the battle set */
+#define PSX_FN_SE_CueSetup_Bank1 0x8015F99Cu
+#define func_8015F99C SE_CueSetup_Bank1  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 2 (cues 0x200.., the MsgBox_Step 0x0A code): table 0x80148794, VAB 0x80148A1C; same shape as SE_CueSetup_Bank0. Live: 21 cues */
+#define PSX_FN_SE_CueSetup_Bank2 0x8015FFB8u
+#define func_8015FFB8 SE_CueSetup_Bank2  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 3: table 0x80148810, VAB 0x80148A20; same shape as SE_CueSetup_Bank0. Live: 6 cues in the field/battle sets, none on the title set */
+#define PSX_FN_SE_CueSetup_Bank3 0x801605D4u
+#define func_801605D4 SE_CueSetup_Bank3  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 4: table 0x8014888C, VAB 0x80148A24; same shape as SE_CueSetup_Bank0 */
+#define PSX_FN_SE_CueSetup_Bank4 0x80160BF0u
+#define func_80160BF0 SE_CueSetup_Bank4  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 5: table 0x80148908, VAB 0x80148A28; same shape as SE_CueSetup_Bank0 */
+#define PSX_FN_SE_CueSetup_Bank5 0x8016120Cu
+#define func_8016120C SE_CueSetup_Bank5  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: handler 6: table 0x80148984, VAB 0x80148A2C; same shape as SE_CueSetup_Bank0. Live: 16 cues = 8 programs x 2 tones */
+#define PSX_FN_SE_CueSetup_Bank6 0x80161828u
+#define func_80161828 SE_CueSetup_Bank6  /* alias */
+
+/* confirmed: ghidra decomp 2026-09-17: (set 0..2) lays the set's 7 VAB header/body pairs out back to back from 0x8011A000 using the per-set tables 0x80182CC0 (SPU RAM start per bank), 0x80182D14 (header bytes), 0x80182D68 (body bytes), stride 0x1C; writes the 7 bank descriptors 0x80146778 + bank*0x14 {spu addr, header, body, cue table, bank id} and the header pointers 0x80148A14[7] that SE_CueSetup_Bank* read. Set 0 (title) = 3 banks, set 1 = 7, set 2 = 2. Called from Boot_Init with set 0 before File_LoadRequest(0x261) */
+#define PSX_FN_SoundSet_Layout 0x801621F8u
+#define func_801621F8 SoundSet_Layout  /* alias */
 
 /* confirmed: Disc-file loader entry, a0 = file id (2026-09-08, read from the EXE): stores a0 at 0x80146464, buffer 0x800E4800 at 0x80146460, fills the 24-byte slot array 0x8014649C with 0xFF, then File_LBA(a0) via 0x80162B50 -> 0x80146674/0x80146804 and kicks the CD state machine (0x80146490 = 0 until done). The file id indexes the LBA table 0x80182DBC (tools/file_ids.py). Called with immediates from every overlay: game-mode dispatcher 0x8014EB20 passes 0x262 = GAME.EMI, 0x8014E9A0 passes 0x261 = FIRST.EMI, BATL_END/BATTLE pass 0x80143F00 + 0x2AB = AREA<n>.EMI, the battle engine passes u16[0x800B3538 + row*8] = a BMAGIC file (tools/magic_map.py). LIVE: cast_magic.json 2026-09-08 (file slot 1, Ryu+Nina, hold Up + Circle x6): File_LoadRequest store 0x801629F0 wrote file id 0x156 (MAGIC070) at f+336 and 0x170 (MAGIC100) at f+724, both with ra = 0x800AB160 inside Magic_LoadForAbility; the band header word 0x801EEC00 then went 0x142 -> 0x16E (MAGIC070's registry id) at f+362 and -> 0x186 (MAGIC100's) at f+744, written by CD_getsector 0x80177ACC from CdReadyCallback -- the section lands straight from the CD buffer, header first */
 #define PSX_FN_File_LoadRequest 0x801629CCu

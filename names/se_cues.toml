@@ -1,0 +1,196 @@
+# names/se_cues.toml -- what each SE_Play cue sounds like, heard in play.
+#   cue    bank<<8 | id as SE_Play receives it (docs/SOUND_CUES.md)
+#   mode   field | battle | unknown -- banks 1 and 2 are swapped for battle,
+#          so the same cue word is a different sound in a fight
+#   label  what was heard, in the player's words
+#   status evidence (heard live) | hypothesis
+#   evidence  se_watch session and frame of the hearing, nearest caller
+
+[[cue]]
+cue = 0x0000
+mode = "unknown"
+label = "Intro"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f358, ra 0xBFC06694 "
+
+[[cue]]
+cue = 0x0100
+mode = "battle"
+label = "Battle Menu Down"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f23556, ra 0x800942D0 BATTLE:SkillMenu_Confirm"
+
+[[cue]]
+cue = 0x0100
+mode = "field"
+label = "Unknown (World Map)"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4654, ra 0x801D7750 Battle_PhaseStep_Exit2"
+
+[[cue]]
+cue = 0x0101
+mode = "battle"
+label = "Battle Menu Select?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f21682, ra 0x801D2198 BATTLE:BattleMenu_DirectionHold"
+
+[[cue]]
+cue = 0x0101
+mode = "field"
+label = "Memory Card File Select"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f8498, ra 0x801E57CC START:FUN_801e5764"
+
+[[cue]]
+cue = 0x0102
+mode = "field"
+label = "Unknown (Still World Map)"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4786, ra 0x801D7470 Battle_PhaseStep_Exit2"
+
+[[cue]]
+cue = 0x0103
+mode = "field"
+label = "Unknown (Still World Map) 2"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4908, ra 0x801D5724 Battle_BeginAction"
+
+[[cue]]
+cue = 0x0104
+mode = "battle"
+label = "Battle Confirm"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f20042, ra 0x801D2050 BATTLE:Battle_RoundStart"
+
+[[cue]]
+cue = 0x0104
+mode = "field"
+label = "Memory Card Select"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f7655, ra 0x801E53A0 START:FUN_801e525c"
+
+[[cue]]
+cue = 0x0105
+mode = "field"
+label = "Start Screen"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f2531, ra 0x801D1114 "
+
+[[cue]]
+cue = 0x0106
+mode = "battle"
+label = "Battle Cancel"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f20610, ra 0x80093EA0 BATTLE:Cmd_ConfirmAttack"
+
+[[cue]]
+cue = 0x0106
+mode = "field"
+label = "Exit Menu?"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4498, ra 0x801D314C Battle_BeginAction"
+
+[[cue]]
+cue = 0x0200
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "Battle_PlayHitSound normal hit, weapon class 1/2/3/6 (dagger, sword, spear); se_watch 20260917T073716 f25904, ra 0x800A8830 BATTLE:Formation_ApplyStatMods"
+
+[[cue]]
+cue = 0x0202
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "Battle_PlayHitSound normal hit, weapon class 0/4/5 (staff, ammo) or an enemy with record +0x71 in those classes; in the field the same word is AREA052's conveyor loop; se_watch 20260917T073716 f25046, ra 0x800A8830 BATTLE:Formation_ApplyStatMods"
+
+[[cue]]
+cue = 0x0203
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25770, ra 0x800A8830 BATTLE:Formation_ApplyStatMods"
+
+[[cue]]
+cue = 0x0204
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "constant at 0x801E4794, the enemy-side hit; se_watch 20260917T073716 f25080, ra 0x801E47A4 BATTLE:Battle_ResolveAction_Enemy"
+
+[[cue]]
+cue = 0x0205
+mode = "battle"
+label = "Attack Miss"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f30759, ra 0x801E4474 BATTLE:Battle_ResolveAction_Enemy"
+
+[[cue]]
+cue = 0x0300
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25344, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0302
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25888, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0304
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25888, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0402
+mode = "battle"
+label = "Ryu Sword"
+status = "evidence"
+evidence = "Ryu's slot cue index 2 = swing; the sword timbre is the character bank, the hit that follows (0x200/0x202) is the weapon class; se_watch 20260917T073716 f31101, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0403
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25722, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0404
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "second layer of Ryu's swing pair (index 4); se_watch 20260917T073716 f25722, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0502
+mode = "battle"
+label = "Chlorine Spell Sound"
+status = "evidence"
+evidence = "Nina's slot cue index 2 = the swing pair (Battle_SwingCue_Step), fired for the physical skill 毒撃 and for her normal attack; NOT spell-specific; se_watch 20260917T073716 f24980, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0504
+mode = "battle"
+label = "Nina Crit"
+status = "evidence"
+evidence = "second layer of the swing pair (index 4), same for every action that swings; se_watch 20260917T073716 f24980, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0600
+mode = "battle"
+label = "Nina Wand"
+status = "evidence"
+evidence = "Battle_PlayCreatureCue: creature sound type 0 of the current object, not a wand; se_watch 20260917T073716 f30915, ra 0x801E3A50 BATTLE:Examine_EnemyMove_Tick"
+
+[[cue]]
+cue = 0x060A
+mode = "battle"
+label = "Combat End?"
+status = "evidence"
+evidence = "se_watch 20260917T073716 f25198, ra 0x8015E140 boot:SE_PollKeyStatus"

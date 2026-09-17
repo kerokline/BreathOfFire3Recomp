@@ -133,8 +133,9 @@ overlay), `0x8017ED4C`, `0x8017AF98`, `0x8017CC50`, `0x801503F8`, `0x8015E908`
 six: `0x8017AF98` = `GetTPage`, `0x8017CC50` = `SetDrawMode`; `0x801503F8` is
 `Msg_SystemPtr` (text engine). The "file-API wrappers" at `0x8017F7B0-0x8017F830` are the LIBAPI BIOS
 thunks, now named (`open` `0x8017F7B4`, `lseek`, `read`, `write`, `close`,
-`format`, `firstfile`, `nextfile`). Still game code, unnamed: `0x8014E494`
-and `0x8015E908` (sound trigger, called by the message stepper's `0x0A` code).
+`format`, `firstfile`, `nextfile`). The last two were named 2026-09-17: `0x8014E494` = `Packet_Commit`
+(GFX_PACKETS.md) and `0x8015E908` = `SE_Play` (SOUND_CUES.md), the sound
+trigger behind the message stepper's `0x0A` code.
 
 **Rules vs draw.** Neither battle overlay touches the GTE (0 cop2
 functions in each); the 52 GTE functions are all in the boot EXE. The
