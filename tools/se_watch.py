@@ -52,7 +52,7 @@ new table hash is dumped once to analysis/se_tables/<md5>.bin for decode. Run it
 Enemies: a bank-6 cue names a creature slot (0x600 + 2*slot + tone) in the
 area's ENEMYnnn group (SOUND_CUES.md "Enemies"). On every bank-6 cue the
 watcher reads the current enemy object (*0x801EB458, its working record at
-obj - 0x80: +0x60 species slot, +0x08 level, +0x20 max HP, +0x04 zenny,
+obj + 0x80: +0x60 species slot, +0x08 level, +0x20 max HP, +0x04 zenny,
 +0x06 EXP, +0x24/26/28 ATK/DEF/AGI) and, with --label, asks which enemy
 that was -- read the name off the screen -- writing names/enemies.toml
 keyed by area + slot with the stat signature and the sample ids heard.
@@ -83,7 +83,7 @@ DISC_INDEX = os.path.join(ROOT, "names", "audio_banks.toml")
 ENEMIES_TOML = os.path.join(ROOT, "names", "enemies.toml")
 CUR_OBJECT = 0x801EB458          # BATTLE.EMI: current actor object (docs/BATTLE_RAM.md)
 ENEMY_REC0, ENEMY_STRIDE, ENEMY_MAX = 0x801EB620, 0x118, 8
-OBJ_TO_REC = -0x80               # obj+0x84 is record+0x04 (zenny), EXP_BOOST.md
+OBJ_TO_REC = 0x80                # obj+0x84 is record+0x04 (zenny): record = obj + 0x80 (EXP_BOOST.md; slot03: obj 0x801EB5A0 -> record 0)
 
 
 def read_enemy(read_ram):

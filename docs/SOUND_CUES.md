@@ -399,7 +399,8 @@ boss fights add a `BOSSnnn` bank-6 set of one program for the boss itself.
 
 **Naming them from play:** the slot byte is record `+0x60`, the same index
 the engine uses for the enemy's AI script row, and the working record
-(`obj - 0x80`, `docs/BATTLE_RAM.md`) carries level, max HP, EXP, zenny and
+(`obj + 0x80`: the object at `0x801EB5A0` owns record 0 at `0x801EB620`,
+`docs/BATTLE_RAM.md`) carries level, max HP, EXP, zenny and
 ATK/DEF/AGI. On every bank-6 cue `se_watch` reads the current enemy's
 record and, with `--label`, asks for the on-screen name once per (area,
 slot), writing `names/enemies.toml` with the stat signature and the sample
