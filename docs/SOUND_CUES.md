@@ -381,6 +381,35 @@ Limits: banks whose VAB libsnd has not reopened resolve to "not a VAB"
 not), and the hash covers the sample only — the same VAG at another
 centre note is listed once with its first pitch.
 
+## Names for every sample, by convention (2026-09-17)
+
+The player's rule, now `tools/audio_banks.py names --apply`: a sample is
+named **after the file that owns it plus its VAG number** — `Heal
+(MAGIC069) 1`, `Rei 3`, `System 10`. Owner = the first file carrying those
+bytes by family precedence (`COMN_SE`, `BATTLE`, `BATL_*`, `MAGIC`, `BOSS`,
+`ENEMY`, the party files, then `AREA`), lowest-numbered within a family.
+The display stem is the ability name (`names/magic.toml`), the area alias
+(`names/areas.toml`), the character for a party-file bank
+(`names/characters.toml`), else the file stem; two owners whose display
+collides but whose samples differ keep the stem (`Heal (MAGIC069)` vs `Heal
+(MAGIC173)`, `Ryu (BPLD012)` vs `Ryu (BPLD034)` — the adult and the child
+voice). All 833 samples got a unique name; `names/se_cues.toml` carries it
+as `auto` beside the player's `label`, with status `derived` until someone
+listens. The ten samples labelled so far all agree with their auto names
+(Rei 1 = "Rei - Pilfer", Rei 6 = "Strike", Teepo 5 = "Nega", Heal 1/2/4 =
+Target / Whisk Away / Locked On).
+
+**The party voice files decode the slot behaviour.** `BPLD034.EMI` is the
+party of character ids 0, 3, 4 (`names/characters.toml`: 0 Ryu, 1 Nina, 2
+Garr, 3 Teepo, 4 Rei, 5 Momo, 6 Peco), its three triplets are banks 3/4/5
+in digit order, and the digits are sorted — so the file for Ryu/Nina/Momo
+is `BPLD015` (banks 3/4/5 = Ryu/Nina/Momo) and after Peco replaces Nina it
+is `BPLD056` (Ryu/Momo/Peco) — which is exactly why Momo moved from bank 5 to bank 4 when Nina (1)
+left and Peco (6) joined, and why neither the menu order nor the field
+position moved anything. `BPLU*` is byte-identical to `BPLD*`; `BRTD/U`
+carry a second set for the same characters (tagged `(BRT)`); `PL*` are the
+field parties (bank 1); `RYUD/U` are the dragon forms.
+
 ## Open
 
 - **Hear one.** No trace yet pairs a cue id with an audible sound.

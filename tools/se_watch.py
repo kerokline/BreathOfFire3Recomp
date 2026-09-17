@@ -82,7 +82,7 @@ def disc_index():
         base = b["file"].split("/")[-1]
         for v in b.get("vags", []):
             if v.get("md5"):
-                out.setdefault(v["md5"], []).append("%s#vag%d" % (base, v["n"]))
+                out.setdefault(v["md5"], []).append("%s#b%d#vag%d" % (base, b["bank"], v["n"]))
     return out
 
 CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
@@ -250,8 +250,10 @@ def save_labels(labels):
             "#   id        md5 (12 hex) of the VAG sample bytes in SPU RAM that the cue resolved to",
             "#             (tools/se_resolve.py); the same word plays other samples after a spell,",
             "#             an area or a party change, so the word is only a slot",
-            "#   label     what was heard, in the player's words",
-            "#   status    evidence (heard live) | hypothesis",
+            "#   label     what was heard, in the player's words ('' until someone listens)",
+            "#   auto      the deterministic name: owner file's ability/alias/stem + VAG number",
+            "#             (tools/audio_banks.py names); readable code should use label, else auto",
+            "#   status    evidence (heard live) | hypothesis | derived (auto name only)",
             "#   evidence  first hearing: se_watch session, frame, cue word, context, vab/prog/tone/vag",
             "#   cues      every 'cue@context' this sample was reached through, e.g. 0x0302@battle",
             "#   centre / shift / size   pitch and length of the sample as the VAB describes it",
@@ -261,6 +263,8 @@ def save_labels(labels):
         rows.append("[[sound]]")
         rows.append('id = "%s"' % sid)
         rows.append('label = "%s"' % c["label"].replace('"', "'"))
+        if c.get("auto"):
+            rows.append('auto = "%s"' % c["auto"].replace('"', "'"))
         rows.append('status = "%s"' % c.get("status", "evidence"))
         rows.append('evidence = "%s"' % c.get("evidence", "").replace('"', "'"))
         rows.append("cues = [%s]" % ", ".join('"%s"' % x for x in c.get("cues", [])))
@@ -283,17 +287,22 @@ def ask_pending(pending, labels, session):
     print("   -- %d new sound(s); Enter = skip --" % len(items), flush=True)
     for q in items:
         row, res = q["row"], q["res"]
-        if row["sound"] in labels:
+        if labels.get(row["sound"], {}).get("label"):
             continue
         try:
-            ans = input("   [f%d] %s via %s (%s%s) vab%d p%d t%d: what was it? " % (
+            ans = input("   [f%d] %s via %s (%s%s) vab%d p%d t%d%s: what was it? " % (
                 row["frame"], row["sound"], q["via"], (q["ovl"] + ":") if q["caller"] else "", q["caller"],
-                res["vab"], res["prog"], res["tone"])).strip()
+                res["vab"], res["prog"], res["tone"],
+                (" [Enter = '%s', - = skip]" % q["auto"]) if q.get("auto") else " [Enter = skip]")).strip()
         except EOFError:
             ans = ""
-        if not ans:
+        if q.get("auto") and ans == "":
+            ans = q["auto"]
+        elif ans in ("", "-"):
             continue
+        old = labels.get(row["sound"], {})
         labels[row["sound"]] = {
+            "auto": old.get("auto", q.get("auto", "")), "disc": old.get("disc", []),
             "id": row["sound"], "label": ans, "status": "evidence",
             "evidence": "se_watch %s f%d via %s, ra %s %s%s, vab%d prog%d tone%d vag%d spu %s" % (
                 session, row["frame"], q["via"], q["ra"], (q["ovl"] + ":") if q["caller"] else "", q["caller"],
@@ -366,7 +375,9 @@ def main():
                         except Exception as ex:      # debug server hiccup: keep the row, lose the sound
                             why = "resolve failed: %s" % ex
                     sound = res["sound"] if res else None
-                    known = labels.get(sound) if sound else None
+                    entry = labels.get(sound) if sound else None
+                    known = entry if (entry and entry.get("label")) else None
+                    auto = entry.get("auto", "") if entry else ""
                     via = "%s@%s" % ("0x%04X" % cue, mode)
                     row = {"session": session, "frame": int(e["frame"]),
                            "t": dt.datetime.now().isoformat(timespec="seconds"),
@@ -391,13 +402,13 @@ def main():
                     print("[f%d] cue %s (%s) %-34s ra=%s %-26s %s" % (
                         row["frame"], row["cue"], mode, desc, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
-                        ("= " + known["label"]) if known else ("(unlabelled)" if sound else "")), flush=True)
-                    if known and via not in known["cues"]:
-                        known["cues"].append(via)
+                        ("= " + known["label"]) if known else (("~ " + auto) if auto else ("(unlabelled)" if sound else ""))), flush=True)
+                    if entry is not None and via not in entry["cues"]:
+                        entry["cues"].append(via)
                         save_labels(labels)
                     if a.label and sound and not known and sound not in pending:
                         pending[sound] = dict(
-                            row=row, via=via, ra=e["ra"], ovl=ovl, caller=caller, res=res)
+                            row=row, via=via, ra=e["ra"], ovl=ovl, caller=caller, res=res, auto=auto)
                         last_cue_t = time.time()
                 last_frame = fr
             if pending and (a.label_gap <= 0 or time.time() - last_cue_t >= a.label_gap):

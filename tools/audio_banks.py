@@ -21,6 +21,21 @@ disc file + VAG number with no guessing.
     python tools/audio_banks.py show MAGIC069            # one file's sheet
     python tools/audio_banks.py index                    # -> names/audio_banks.toml (every triplet)
     python tools/audio_banks.py join [--apply]           # catalogue sound id -> disc VAG(s); --apply writes `disc`
+    python tools/audio_banks.py names [--apply]          # deterministic "Owner N" name for every sample; --apply -> se_cues.toml `auto`
+
+Naming convention (player's rule, 2026-09-17): a sample is named after the
+file that OWNS it plus its VAG number in that file -- "Heal 1", "Heal 2".
+When several files carry the same bytes the owner is the first by family
+precedence (COMN_SE, BATTLE, BATL_*, MAGIC, BOSS, ENEMY, the party voice
+files, then AREA), and within a family the lowest-numbered file. A file
+with one triplet per bank (the party files) names by bank too: "BPLD034
+b4 2"; two owners with the same display name keep their file stem: "Heal
+(MAGIC173) 1". Disc homes are written as FILE.EMI#bN#vagM. Spell
+files take the ability name from names/magic.toml (en, else jp; several
+abilities on one file are joined with '+'), areas their alias from
+names/areas.toml, everything else its file stem. These are `auto` names:
+a label the player typed always wins, and an untyped sample is written as
+status "derived" so se_watch can offer the auto name as the default.
 
 Needs analysis/emi_sections.json (tools/emi_survey.py) and the extracted
 BIN/ tree (--bin-root, default D:\\BoFIII).
@@ -29,6 +44,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import struct
 import sys
 import tomllib
@@ -114,6 +130,102 @@ def spell_names():
     return {k: " | ".join(sorted(set(v))) for k, v in out.items()}
 
 
+FAMILY_ORDER = ["COMN_SE", "BATTLE", "BATL_", "MAGIC", "BOSS", "ENEMY",
+                "BPLD", "BPLU", "PL", "BRTD", "BRTU", "RYUD", "RYUU", "DRG", "AREA"]
+
+
+def family_rank(base):
+    for i, f in enumerate(FAMILY_ORDER):
+        if base.startswith(f):
+            return i
+    return len(FAMILY_ORDER)
+
+
+def area_aliases():
+    p = os.path.join(ROOT, "names", "areas.toml")
+    if not os.path.exists(p):
+        return {}
+    out = {}
+    for r in tomllib.load(open(p, "rb")).get("area", []):
+        if r.get("alias"):
+            out[str(r.get("file", "")).split("/")[-1].upper()] = r["alias"]
+    return out
+
+
+PARTY_FILES = re.compile(r"^(BPLD|BPLU|BRTD|BRTU)(\d+)\.EMI$", re.I)
+
+
+def character_names():
+    p = os.path.join(ROOT, "names", "characters.toml")
+    if not os.path.exists(p):
+        return {}
+    d = tomllib.load(open(p, "rb"))
+    rows = [v for v in d.values() if isinstance(v, list)]
+    return {int(r["id"]): (r.get("en") or r.get("us") or r.get("jp")) for r in (rows[0] if rows else []) if "id" in r}
+
+
+def owner_display(base, spells, areas, bank=None, chars=None):
+    """The natural-language stem for a file: ability name, area alias, the
+    character a party file's bank belongs to, or the file stem. A party file
+    BPLD034 is the party of character ids 0, 3, 4 and its banks 3/4/5 are those
+    characters in digit order (names/characters.toml), which is also why the
+    voice slots are re-dealt only on a party change."""
+    stem = base[:-4] if base.upper().endswith(".EMI") else base
+    m = PARTY_FILES.match(base)
+    if m and bank is not None and chars:
+        digits = m.group(2)
+        i = bank - 3
+        if 0 <= i < len(digits) and int(digits[i]) in chars:
+            fam = m.group(1).upper()
+            # BPLD/BPLU are the party voice sets; BRTD/BRTU carry a different set for
+            # the same characters, so they keep their family tag instead of colliding
+            return chars[int(digits[i])] + ("" if fam.startswith("BPL") else " (%s)" % fam[:3])
+    if base in spells:
+        names = []
+        for pair in spells[base].split(" | "):
+            jp, _, en = pair.partition("/")
+            names.append(en.strip() or jp.strip())
+        return "+".join(dict.fromkeys(n for n in names if n)) or stem
+    if base.upper() in areas:
+        return areas[base.upper()]
+    if base.upper() == "COMN_SE.EMI":
+        return "System"
+    if base.upper().startswith("BATL_"):
+        return "Battle" + stem[5:].title()
+    return stem
+
+
+def auto_names(bin_root=BIN_ROOT):
+    """sample md5 -> (auto name, owner 'FILE.EMI#vagN', [all homes])."""
+    spells, areas, chars = spell_names(), area_aliases(), character_names()
+    homes, banks_of, sets_of = {}, {}, {}
+    for t in triplets(bin_root):
+        d = decode(t)
+        if not d:
+            continue
+        base = d["file"].split("/")[-1]
+        banks_of.setdefault(base, set()).add(d["bank"])
+        disp = owner_display(base, spells, areas, d["bank"], chars)
+        # the sample lists behind one display name: "Rei" from 17 party files is one set,
+        # "Heal" from MAGIC069 and MAGIC173 is two -> only the latter needs the file stem
+        sets_of.setdefault(disp, set()).add(tuple(v["md5"] for v in d["vags"]))
+        for v in d["vags"]:
+            if v["md5"]:
+                homes.setdefault(v["md5"], []).append((family_rank(base), base, d["bank"], v["n"]))
+    out = {}
+    for md5, hs in homes.items():
+        hs.sort()
+        rank, base, bank, n = hs[0]
+        disp = owner_display(base, spells, areas, bank, chars)
+        stem = base[:-4] if base.upper().endswith(".EMI") else base
+        if len(sets_of[disp]) > 1:
+            disp = "%s (%s)" % (disp, stem)
+        slot = ("b%d " % bank) if (len(banks_of[base]) > 1 and disp.startswith(stem)) else ""
+        out[md5] = ("%s %s%d" % (disp, slot, n), "%s#b%d#vag%d" % (base, bank, n),
+                    ["%s#b%d#vag%d" % (b, bk, k) for _, b, bk, k in hs])
+    return out
+
+
 def labels():
     if not os.path.exists(CUES):
         return {}
@@ -178,7 +290,7 @@ def cmd_join(a):
             continue
         for v in d["vags"]:
             if v["md5"]:
-                by_md5.setdefault(v["md5"], []).append("%s#vag%d" % (d["file"].split("/")[-1], v["n"]))
+                by_md5.setdefault(v["md5"], []).append("%s#b%d#vag%d" % (d["file"].split("/")[-1], d["bank"], v["n"]))
     matched = 0
     for sid, c in sorted(lab.items()):
         where = by_md5.get(sid, [])
@@ -206,6 +318,36 @@ def cmd_join(a):
     return 0
 
 
+def cmd_names(a):
+    names = auto_names(a.bin_root)
+    lab = labels()
+    for md5, (name, owner, homes) in sorted(names.items(), key=lambda kv: kv[1][0]):
+        print("%s %-32s %-22s %s" % (md5, name, owner, ("= " + lab[md5]["label"]) if md5 in lab and lab[md5].get("label") else ""))
+    print("%d samples named; %d already carry a player label" % (len(names), sum(1 for m in names if m in lab and lab[m].get("label"))))
+    if not a.apply:
+        return 0
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import se_watch
+    cat = se_watch.load_labels()
+    added = updated = 0
+    for md5, (name, owner, homes) in names.items():
+        c = cat.get(md5)
+        if c is None:
+            cat[md5] = {"id": md5, "label": "", "status": "derived", "auto": name,
+                        "evidence": "auto name from %s (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)" % owner,
+                        "cues": [], "disc": homes[:12]}
+            added += 1
+        else:
+            if c.get("auto") != name:
+                c["auto"] = name
+                updated += 1
+            if not c.get("disc"):
+                c["disc"] = homes[:12]
+    se_watch.save_labels(cat)
+    print("%s: %d derived entries added, %d auto names updated, %d total" % (CUES, added, updated, len(cat)))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
@@ -214,6 +356,7 @@ def main():
     s = sub.add_parser("show"); s.add_argument("file"); s.set_defaults(fn=cmd_show)
     s = sub.add_parser("index"); s.set_defaults(fn=cmd_index)
     s = sub.add_parser("join"); s.add_argument("--apply", action="store_true"); s.set_defaults(fn=cmd_join)
+    s = sub.add_parser("names"); s.add_argument("--apply", action="store_true"); s.set_defaults(fn=cmd_names)
     a = ap.parse_args()
     return a.fn(a)
 
