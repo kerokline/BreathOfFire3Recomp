@@ -33,7 +33,9 @@ no handler: the words after the seven pointers at `0x80182CA4` are the
 
 ## What one call does (`SE_Play`, 0x8015E908)
 
-1. `0x8018BD7C = id`, `0x8018BD80 = bank`, then `SE_CueSetup_Bank<bank>()`
+1. `0x8018BD80 = bank` (the *first* store, `sh` at `0x8015E91C`), then
+   `0x8018BD7C = id` (`0x8015E93C`) — the decompiler prints them the other
+   way round, which cost the first `se_watch` session — then `SE_CueSetup_Bank<bank>()`
    fills the voice parameter block `0x8018BC80..0x8018BD84` from the bank's
    cue table entry and its VAB header (below).
 2. If the cue is panned (`0x8018BD6C == 0x80`), each of the 1..4 voices'
@@ -239,8 +241,13 @@ writer), so it is part of that file load or its DMA.
   no-framework-change trick as `tools/load_watch.py` — logs every cue with
   its caller to `analysis/se_timeline.jsonl` during any play session, and
   `--label` asks what was heard and writes `names/se_cues.toml`, keyed by
-  cue *and* mode because both tables are swapped for battle. Written
-  2026-09-17, not yet run against a live game.
+  cue *and* mode because both tables are swapped for battle. First live run
+  2026-09-17: the write trace fires per call and the paired cues match
+  what was heard (menu cursor left/right are two cues, item-list up/down
+  one); that run's four labels are `hypothesis` because the pairing was
+  wrong before the fix. The caller name is resolved against the overlay
+  actually resident in the swap slot, falling back to the Ghidra export's
+  `FUN_*` boundary for `START.EMI`, which has one human name so far.
 - Set 1 (seven banks) has not been observed in a savestate.
 - `0x8018BD5C` is the extra-voice count and `0x8018BD84` the tone-attribute
   offset; the rest of `0x8018BC80..0x8018BD84` is the per-voice parameter

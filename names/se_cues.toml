@@ -1,0 +1,35 @@
+# names/se_cues.toml -- what each SE_Play cue sounds like, heard in play.
+#   cue    bank<<8 | id as SE_Play receives it (docs/SOUND_CUES.md)
+#   mode   field | battle | unknown -- banks 1 and 2 are swapped for battle,
+#          so the same cue word is a different sound in a fight
+#   label  what was heard, in the player's words
+#   status evidence (heard live) | hypothesis
+#   evidence  se_watch session and frame of the hearing, nearest caller
+
+[[cue]]
+cue = 0x0100
+mode = "field"
+label = "Unknown (World Map)"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4654, ra 0x801D7750 Battle_PhaseStep_Exit2"
+
+[[cue]]
+cue = 0x0102
+mode = "field"
+label = "Unknown (Still World Map)"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4786, ra 0x801D7470 Battle_PhaseStep_Exit2"
+
+[[cue]]
+cue = 0x0103
+mode = "field"
+label = "Unknown (Still World Map) 2"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4908, ra 0x801D5724 Battle_BeginAction"
+
+[[cue]]
+cue = 0x0106
+mode = "field"
+label = "Exit Menu?"
+status = "hypothesis"
+evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4498, ra 0x801D314C Battle_BeginAction"

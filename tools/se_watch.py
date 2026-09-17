@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 """Sound-cue timeline: every SE_Play call, live, with its cue and caller.
 
-`SE_Play(cue)` (0x8015E908, docs/SOUND_CUES.md) stores the cue's id at
-0x8018BD7C and its bank at 0x8018BD80 before it does anything else, so a
-write trace on those two halfwords is a function-entry hook with no
-framework change and no plugin: each row carries the cue word, the store PC,
-the caller's return address (a0..a3 / s0..s3 at the store) and the frame.
-The caller resolves through symbols.toml and names/functions.toml.
+`SE_Play(cue)` (0x8015E908, docs/SOUND_CUES.md) stores the cue's bank at
+0x8018BD80 (sh at 0x8015E91C) and then its id at 0x8018BD7C (sh at
+0x8015E93C) before it does anything else, and nothing else writes either
+cell, so a write trace on those two halfwords is a function-entry hook with
+no framework change and no plugin: each row carries the cue word, the store
+PC, the caller's return address (a0..a3 / s0..s3 at the store) and the
+frame. The two stores of one call are consecutive trace entries (only these
+cells are armed), which is how they are paired -- NOT by decompiler order,
+which had them backwards on 2026-09-17 and mislabelled the first session.
+The caller resolves through symbols.toml, then names/functions.toml for
+the overlays actually resident (tools/resident.py -- a swap-slot ra must
+not get a BATTLE.EMI name while START.EMI is loaded), then the Ghidra
+export's FUN_* boundaries for that overlay as a last resort.
 
     python tools/se_watch.py --port 4370                    # during play, Ctrl-C to stop
     python tools/se_watch.py --port 4370 --label            # ...and ask what you heard
@@ -27,6 +34,7 @@ Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
 """
 import argparse
 import datetime as dt
+import glob
 import json
 import os
 import sys
@@ -41,49 +49,119 @@ CUES_TOML = os.path.join(ROOT, "names", "se_cues.toml")
 import callstack_diff as cd   # noqa: E402
 import name_map               # noqa: E402
 
-CELL_ID = 0x8018BD7C      # SE_Play: id   (u16)
-CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), stored right after the id
+CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
+CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
+GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
 
 
-def function_starts():
-    """sorted [(pc, name)] over symbols.toml + names/functions.toml."""
-    starts = []
-    p = os.path.join(ROOT, "symbols.toml")
-    if os.path.exists(p):
-        for f in tomllib.load(open(p, "rb")).get("func", []):
-            starts.append((int(f["pc"]), f["name"]))
-    for (_md5, pc), e in name_map.load_function_names().items():
-        starts.append((int(pc), e["name"]))
-    return sorted(starts)
+class Namer:
+    """ra -> nearest known function start at or below it, restricted to the
+    boot EXE plus the overlays resident right now (by md5)."""
+
+    # docs/OVERLAY_EXTRACTION.md ten-band map: each band ends where the next begins
+    BAND_END = {0x80093800: 0x800B4004, 0x800C1800: 0x800C3600, 0x80196800: 0x801CE400,
+                0x801CE000: 0x801D0C00, 0x801CE400: 0x801D0C00, 0x801D0C00: 0x801EEC00,
+                0x801EEC00: 0x801F2C00, 0x801F2C00: 0x801F6C00, 0x801F6C00: 0x80200000}
+
+    def __init__(self):
+        self.boot = []
+        p = os.path.join(ROOT, "symbols.toml")
+        if os.path.exists(p):
+            for f in tomllib.load(open(p, "rb")).get("func", []):
+                self.boot.append((int(f["pc"]), f["name"]))
+        self.boot.sort()
+        self.by_md5 = {}            # md5 -> sorted [(pc, name)] from names/functions.toml
+        for (md5, pc), e in name_map.load_function_names().items():
+            self.by_md5.setdefault(md5, []).append((int(pc), e["name"]))
+        for v in self.by_md5.values():
+            v.sort()
+        self.ghidra = {}            # md5 -> sorted [(pc, FUN_name)] from analysis/ghidra exports
+        for meta in glob.glob(os.path.join(GHIDRA_DIR, "*.meta.json")):
+            try:
+                m = json.load(open(meta, encoding="utf-8"))
+                md5 = m.get("source_md5") or m.get("md5")
+                prog = os.path.basename(meta)[:-len(".meta.json")]
+                ex = json.load(open(os.path.join(GHIDRA_DIR, prog + ".json"), encoding="utf-8"))
+                self.ghidra[md5] = sorted((int(f["entry"], 16), f["name"]) for f in ex["functions"])
+            except (OSError, ValueError, KeyError):
+                continue
+
+    @staticmethod
+    def _nearest(pc, starts):
+        lo, hi = 0, len(starts)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if starts[mid][0] <= pc:
+                lo = mid + 1
+            else:
+                hi = mid
+        if lo == 0:
+            return None
+        spc, name = starts[lo - 1]
+        # nearest known start at or below ra -- a label, not proof the ra is inside it
+        return (spc, name) if pc - spc < 0x4000 else None
+
+    def name(self, ra, resident):
+        """resident: {band: {md5, name, ...}} = resident.resident_ids()['bands'].
+        Returns (label, overlay_name); label '' when nothing known covers ra."""
+        for base, e in resident.items():
+            md5 = e.get("md5")
+            if not md5 or e.get("wrong_band"):
+                continue
+            if not (base <= ra < self.BAND_END.get(base, base + 0x4000)):
+                continue
+            hit = self._nearest(ra, self.by_md5.get(md5, []))
+            if hit is None:
+                hit = self._nearest(ra, self.ghidra.get(md5, []))
+            return (hit[1] if hit else "", e.get("name", ""))
+        hit = self._nearest(ra, self.boot)
+        return (hit[1] if hit else "", "boot" if hit else "")
 
 
-def name_for(pc, starts):
-    lo, hi = 0, len(starts)
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if starts[mid][0] <= pc:
-            lo = mid + 1
+def pair_rows(rows):
+    """Group the drained trace rows (seq order) into SE_Play calls: a bank
+    store followed by the id store with the next seq. Yields
+    (bank, id, id_entry, bank_entry); a missing half is -1 / None, never
+    guessed from a neighbouring call."""
+    pending = None   # bank entry waiting for its id
+    for e in rows:
+        phys = int(e["addr"], 16) & 0x1FFFFFFF
+        seq = int(e["seq"])
+        if phys == CELL_BANK & 0x1FFFFFFF:
+            if pending is not None:
+                yield (int(pending["new"], 16) & 0xF, -1, None, pending)
+            pending = e
+            continue
+        if phys != CELL_ID & 0x1FFFFFFF:
+            continue
+        cue_id = int(e["new"], 16) & 0xFF
+        if pending is not None and int(pending["seq"]) + 1 == seq:
+            yield (int(pending["new"], 16) & 0xF, cue_id, e, pending)
         else:
-            hi = mid
-    if lo == 0:
-        return ""
-    spc, name = starts[lo - 1]
-    # nearest known start at or below ra -- a label, not proof the ra is inside it
-    return name if pc - spc < 0x4000 else ""
+            if pending is not None:
+                yield (int(pending["new"], 16) & 0xF, -1, None, pending)
+            yield (-1, cue_id, e, None)
+        pending = None
+    if pending is not None:
+        yield (int(pending["new"], 16) & 0xF, -1, None, pending)
 
 
-def mode_of(port):
-    """'battle' | 'field' | 'unknown' from the overlay resident in the game-mode
-    swap slot 0x801D0C00 (BATTLE.EMI there = a fight; anything else = field)."""
+def resident_now(port):
+    """{band: {...}} from tools/resident.py, {} when the debug server cannot say."""
     try:
         import resident
-        r = resident.resident_ids(port)
+        return resident.resident_ids(port)["bands"]
     except Exception:
-        return "unknown"
-    e = r["bands"].get(0x801D0C00)
+        return {}
+
+
+def mode_of(bands):
+    """'battle' | 'field' | 'unknown' from the overlay resident in the game-mode
+    swap slot 0x801D0C00 (BATTLE.EMI there = a fight; anything else = field)."""
+    e = bands.get(0x801D0C00)
     if e is None or e.get("id") is None:
         return "unknown"
-    return "battle" if "BATTLE" in str(e.get("file", "")).upper() else "field"
+    return "battle" if "BATTLE" in str(e.get("file", "") or e.get("name", "")).upper() else "field"
 
 
 # ----------------------------------------------------------------- labels
@@ -134,7 +212,7 @@ def main():
 
     if a.label and not sys.stdin.isatty():
         raise SystemExit("--label needs a terminal on stdin")
-    starts = function_starts()
+    namer = Namer()
     labels = load_labels()
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     prev, armed = cd.wtrace_arm_ranges(a.port, [(CELL_ID, CELL_BANK + 4)])
@@ -143,7 +221,6 @@ def main():
     t0 = time.time()
     last_frame = cd.cur_frame(a.port)
     n = 0
-    pending_id = None   # (frame, id, entry) of the id store waiting for its bank store
     try:
         if a.press or a.hold:
             cd.press_buttons(a.port, a.press, a.press_frames, a.press_gap, hold=a.hold or None)
@@ -155,38 +232,31 @@ def main():
                 if trunc:
                     print("se_watch: write ring truncated in frames %d-%d, cues may be missing" % (
                         last_frame + 1, fr), flush=True)
-                for e in rows:
-                    phys = int(e["addr"], 16) & 0x1FFFFFFF
-                    if phys == CELL_ID & 0x1FFFFFFF:
-                        pending_id = (int(e["frame"]), int(e["new"], 16) & 0xFF, e)
-                        continue
-                    if phys != CELL_BANK & 0x1FFFFFFF:
-                        continue
-                    bank = int(e["new"], 16) & 0xF
-                    if pending_id is None or pending_id[0] != int(e["frame"]):
-                        # a bank store without its id store in the same frame: SE_Play always
-                        # writes both, so this is a ring gap -- record what we have
-                        cue_id = -1
-                    else:
-                        cue_id = pending_id[1]
-                    pending_id = None
-                    cue = (bank << 8) | (cue_id & 0xFF) if cue_id >= 0 else -1
+                bands = resident_now(a.port) if rows else {}
+                mode = mode_of(bands)
+                for bank, cue_id, e_id, e_bank in pair_rows(rows):
+                    e = e_id or e_bank
+                    cue = (bank << 8) | cue_id if bank >= 0 and cue_id >= 0 else -1
                     ra = int(e["ra"], 16)
-                    mode = mode_of(a.port)
+                    caller, ovl = namer.name(ra, bands)
                     known = labels.get((cue, mode)) or labels.get((cue, "unknown"))
                     row = {"session": session, "frame": int(e["frame"]),
                            "t": dt.datetime.now().isoformat(timespec="seconds"),
                            "cue": "0x%04X" % cue if cue >= 0 else "?", "bank": bank,
                            "id": cue_id, "mode": mode,
-                           "store_pc": e["pc"], "ra": e["ra"], "caller_nearest": name_for(ra, starts),
+                           "store_pc_bank": e_bank["pc"] if e_bank else None,
+                           "store_pc_id": e_id["pc"] if e_id else None,
+                           "ra": e["ra"], "caller_nearest": caller, "caller_overlay": ovl,
                            "args": e.get("args"), "s": e.get("s"),
                            "label": known["label"] if known else ""}
                     with open(a.out, "a", encoding="utf-8") as fh:
                         fh.write(json.dumps(row) + "\n")
                     n += 1
-                    print("[f%d] cue %s (%s) ra=%s %-28s %s" % (
-                        row["frame"], row["cue"], mode, e["ra"], row["caller_nearest"],
-                        ("= " + known["label"]) if known else "(unlabelled)"), flush=True)
+                    print("[f%d] cue %s (%s) ra=%s %-30s %s" % (
+                        row["frame"], row["cue"], mode, e["ra"],
+                        ("%s:%s" % (ovl, caller)) if caller else "",
+                        ("= " + known["label"]) if known else
+                        ("(unlabelled)" if cue >= 0 else "(half a call: ring gap)")), flush=True)
                     if a.label and not known and cue >= 0:
                         try:
                             ans = input("   what was that sound? (Enter = skip) ").strip()
@@ -195,8 +265,8 @@ def main():
                         if ans:
                             labels[(cue, mode)] = {
                                 "cue": cue, "mode": mode, "label": ans, "status": "evidence",
-                                "evidence": "se_watch %s f%d, ra %s %s" % (
-                                    session, row["frame"], e["ra"], row["caller_nearest"])}
+                                "evidence": "se_watch %s f%d, ra %s %s%s" % (
+                                    session, row["frame"], e["ra"], (ovl + ":") if caller else "", caller)}
                             save_labels(labels)
                             print("   -> names/se_cues.toml: 0x%04X/%s = %s" % (cue, mode, ans), flush=True)
                 last_frame = fr
