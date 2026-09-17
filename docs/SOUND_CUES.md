@@ -406,8 +406,8 @@ wiki's Orc page matches やけっぱちオーク L18 HP100 AP20 50/17/11/30 EXP5
 zenny62 field for field). `tools/enemy_table.py extract` writes all 200
 tables to `names/enemies.toml` (448 species rows, 168 distinct names) and
 merges English names from `names/enemy_gloss.toml`, seeded from the
-Breath of Fire wiki's enemy list (168 of 168; the Tower's Ice Toad
-really is named with the single character ギ). `se_watch` reads the name
+Breath of Fire wiki's enemy list (168 of 168; the Tower frog is
+named just Gi / ギ in both releases, filed by the wiki as Ice Toad). `se_watch` reads the name
 live from the same table on every bank-6 cue, and `--label` only asks for
 an English name when the gloss lacks one. The audio catalogue names bank-6
 samples by species: `Lizard (ENEMY040) 1`.

@@ -6114,7 +6114,7 @@ disc = ["MAGIC109.EMI#b1#vag1"]
 [[sound]]
 id = "cbaf6fc53baa"
 label = ""
-auto = "Ice Toad (ENEMY040) 7"
+auto = "Gi (ENEMY040) 7"
 status = "derived"
 evidence = "auto name from ENEMY040.EMI#vag7 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
