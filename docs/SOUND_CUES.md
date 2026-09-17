@@ -292,33 +292,60 @@ creature sound type 0..7 and bank 6's 16 cues are 8 programs x tones 0/2.
 
 **A cue word is not a sound once a spell is loaded.** Third session
 (2026-09-17): the same `0x100` through `SE_PlayTracked` was a different
-sound per spell cast, and Ryu's `0x305` a different line on two casts. The
-`.EMI` census explains it: **80 of the 144 `BMAGIC` overlays carry a type-3
-section of 8..64 KB** (dests like `0x1A080200` / `0x1C080200`, a sample
-payload for the SPU), and the bank 1+2 cue tables were rewritten five
-times in one session (five distinct hashes). A spell therefore loads its
-own samples behind the same program slot and fires them as `0x100` (one
-overlay call site seen at `0x801EEF8C`, plus the interpreter path), so the
-identity of a battle sound is **cue + the resident spell overlay**.
-`se_watch` keys labels by that context (`magic:<name>`, else
-`field`/`battle`, else `tables:<hash>`) and dumps every new table to
-`analysis/se_tables/`. The banks 3/4/5 are **per character, not per position**: the player moved
-Ryu and Momo on the battle field and Ryu stayed `0x03xx`, Momo `0x05xx`
-(2026-09-17). The `obj+0x2C` column is therefore a voice-set index given
-to each member when the party's voice banks are loaded (Ryu 0, Nina 1,
-Momo 2 in that party); the *menu* party order does not move it either
-(same player, same day). Open: whether a member who leaves and rejoins,
-or a fourth character, keeps a fixed index per character id or takes the
-first free voice slot.
+sound per spell cast, and Ryu's `0x305` a different line on two casts.
+The reason is the audio triplet every sound-bearing `.EMI` carries (next
+section): a spell ships its own miniature VAB and the cue entries that
+point at it, installed over bank 1's slot. The identity of a battle sound
+is therefore the **sample**, which is what `se_watch` now labels. (An
+earlier reading blamed the type-3 sections; those are art.) The per-slot
+banks 3/4/5 are dealt at party load — see the bank model above.
 
-**Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
-family, and across all 141 `BMAGIC` overlays only 12 call it, all with
+**Spells.** 12 of the 141 `BMAGIC` overlays call `SE_Play` directly, all
+with bank 1 words — those are their own sample triggers (`MAGIC064`:
+`0x100/0x101/0x102`, `MAGIC113` six calls); the rest fire through the
+effect interpreter and `SE_PlayTracked`. `MAGIC008.EMI` (毒撃) contains no
+call to the `SE_Play` family, and across all 141 `BMAGIC` overlays only 12 call it, all with
 bank 1 (menu) constants. Whatever distinctive sound a spell has therefore
 comes through the effect interpreter, most likely `SE_PlayTracked`
 (`0x8015E10C`, which records the keyed voices in the effect object) —
 and the write trace cannot see past that wrapper because `SE_Play`'s `ra`
 is inside it. Next step for spells: arm the trace on `SE_PlayTracked`'s
 own first store (`0x8018BC94`) or add the wrapper to `se_watch`.
+
+## Inside an .EMI: the audio triplet (2026-09-17)
+
+The "consistent spot" the player asked for. Every sound-bearing `.EMI`
+carries a run of three sections with the same TOC `+0x04`, which for these
+is the **bank id 0..6**, not an address ([`EMI_TYPES.md`](EMI_TYPES.md)):
+
+| type | content | how the runtime uses it |
+|---|---|---|
+| 6 | a VAB header (`pBAV`, `0xC20` bytes for one program) | registered as VAB *bank* in libsnd (`0x8018EB18[bank]`); its tone attributes map tone → VAG, centre note, volume |
+| 8 | **the cue-table entries**: 4 bytes per cue word `{flags, pan\|prog, tone\|priority, chord\|voice}` | copied to the head of bank's 31-entry table at `0x8014869C + bank*0x7C`; a 16-byte record defines `bank<<8 \| 0..3`. Entries past the record are **not cleared**, so the previous occupant's words stay reachable — which is why the live table hash keeps changing and why a menu word can play a spell's sample |
+| 7 | the VAB body (the VAG samples) | uploaded to the bank's SPU RAM slot (`0x80191550[bank]`) |
+
+`MAGIC069.EMI` (リリフ / Heal), the three-sound "Command" the player
+heard: one program, four VAGs; the type-8 record installs `0x100..0x103`
+as tones 0/2/4/6 → VAG 1/2/3/4, and the catalogue hashes match the disc
+bytes exactly — VAG 1 = "Target", VAG 2 = "Whisk Away", VAG 4 = "Locked
+On" (VAG 3, 29,040 bytes, was not heard). The *order* of the three is the
+spell's script, run by the effect interpreter; the sounds are the body.
+
+Who lives in which bank, from the 901 triplets on the disc
+(`tools/audio_banks.py index` → `names/audio_banks.toml`):
+
+| bank | files | what |
+|---|---|---|
+| 1 | `COMN_SE.EMI`, `BATTLE*.EMI`, `BOSS*.EMI` (11 entries), `BATL_RET`/`BATL_SE` (4), `MAGIC*` (1..6) | the system set — the menu blings the player confirmed as context-free are `COMN_SE`'s VAGs 1..8, duplicated in every battle file — and each spell's own samples over `0x100..` |
+| 2 | `BATTLE*.EMI`, `BOSS*.EMI` (7), `AREAnnn.EMI` (3..13) | field / battle effects |
+| 3, 4, 5 | `BPLCHAR/BPLD*.EMI`, `BPLU*.EMI` (207 files) | the party voice slots; the file name carries the character ids of the party they were built for |
+| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds |
+
+`tools/audio_banks.py join --apply` writes each catalogue sound's disc
+homes into `names/se_cues.toml` (`disc = [...]`); 28 of the first 29
+labelled sounds matched (the one miss is a 352-byte blip that appears in
+1,548 files under other hashes' neighbours). `se_watch` prints the first
+disc home beside each resolved cue.
 
 ## Cataloguing by sample, not by cue word (2026-09-17)
 

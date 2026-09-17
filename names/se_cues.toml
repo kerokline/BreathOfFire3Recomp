@@ -1,0 +1,327 @@
+# names/se_cues.toml -- the sound catalogue, keyed by the SAMPLE, not the cue word.
+#   id        md5 (12 hex) of the VAG sample bytes in SPU RAM that the cue resolved to
+#             (tools/se_resolve.py); the same word plays other samples after a spell,
+#             an area or a party change, so the word is only a slot
+#   label     what was heard, in the player's words
+#   status    evidence (heard live) | hypothesis
+#   evidence  first hearing: se_watch session, frame, cue word, context, vab/prog/tone/vag
+#   cues      every 'cue@context' this sample was reached through, e.g. 0x0302@battle
+#   centre / shift / size   pitch and length of the sample as the VAB describes it
+
+[[sound]]
+id = "037bdb476817"
+label = "'Bling' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f4057 via 0x0102@tables:3e40abae, ra 0x801E51EC START:FUN_801e51cc, vab1 prog0 tone4 vag3 spu 0x41FA0"
+cues = ["0x0102@tables:3e40abae", "0x0102@tables:8413debc", "0x0102@tables:a5ecfe08"]
+disc = ["BATL_END.EMI#vag3", "BATTLE.EMI#vag3", "BATTLE2.EMI#vag3", "COMN_SE.EMI#vag3", "BOSS001.EMI#vag3", "BOSS002.EMI#vag3", "BOSS004.EMI#vag3", "BOSS007.EMI#vag3", "BOSS008.EMI#vag3", "BOSS012.EMI#vag3", "BOSS013.EMI#vag3", "BOSS014.EMI#vag3"]
+centre = 40
+shift = 0
+size = 4608
+
+[[sound]]
+id = "0438b24b187b"
+label = "Exit Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f8652 via 0x0106@tables:a5ecfe08, ra 0x801D54B4 START:FUN_801d545c, vab1 prog1 tone4 vag3 spu 0x40A50"
+cues = ["0x0106@tables:a5ecfe08", "0x0106@tables:3ff368d4"]
+disc = ["PL012.EMI#vag3", "PL015.EMI#vag3", "PL016.EMI#vag3", "PL025.EMI#vag3", "PL026.EMI#vag3", "PL034.EMI#vag3", "PL056.EMI#vag3", "PL247.EMI#vag3", "PL257.EMI#vag3", "PL267.EMI#vag3", "PL278.EMI#vag3", "PL27A.EMI#vag3"]
+centre = 52
+shift = 67
+size = 6496
+
+[[sound]]
+id = "04f189936b3c"
+label = "Magic Damage"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f29974 via 0x0500@magic:MAGIC097, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab5 prog0 tone0 vag3 spu 0x6CBD0"
+cues = ["0x0500@magic:MAGIC097"]
+disc = ["BPLD034.EMI#vag3", "BPLD247.EMI#vag3", "BPLD457.EMI#vag3", "BPLD467.EMI#vag3", "BPLD478.EMI#vag3", "BPLU034.EMI#vag3", "BPLU247.EMI#vag3", "BPLU457.EMI#vag3", "BPLU467.EMI#vag3", "BPLU478.EMI#vag3", "REID00.EMI#vag3", "REID01.EMI#vag3"]
+centre = 41
+shift = 59
+size = 1568
+
+[[sound]]
+id = "0c8f5c54033d"
+label = "Magic Damage"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f29934 via 0x0300@magic:MAGIC097, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab3 prog0 tone0 vag1 spu 0x5B170"
+cues = ["0x0300@magic:MAGIC097"]
+disc = ["BPLD012.EMI#vag1", "BPLD015.EMI#vag1", "BPLD016.EMI#vag1", "BPLD025.EMI#vag1", "BPLD026.EMI#vag1", "BPLD034.EMI#vag1", "BPLD056.EMI#vag1", "BPLU012.EMI#vag1", "BPLU015.EMI#vag1", "BPLU016.EMI#vag1", "BPLU025.EMI#vag1", "BPLU026.EMI#vag1"]
+centre = 41
+shift = 59
+size = 2368
+
+[[sound]]
+id = "0d9711228cab"
+label = "Magic Damage"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f29954 via 0x0400@magic:MAGIC097, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab4 prog0 tone0 vag3 spu 0x65860"
+cues = ["0x0400@magic:MAGIC097"]
+disc = ["BPLD034.EMI#vag3", "BPLU034.EMI#vag3"]
+centre = 38
+shift = 59
+size = 3792
+
+[[sound]]
+id = "129cd9b5d32b"
+label = "Command Skill"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f39658 via 0x0505@magic:MAGIC069, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab5 prog2 tone0 vag2 spu 0x6AEB0"
+cues = ["0x0505@magic:MAGIC069"]
+disc = ["BPLD034.EMI#vag2", "BPLD247.EMI#vag2", "BPLD457.EMI#vag2", "BPLD467.EMI#vag2", "BPLD478.EMI#vag2", "BPLU034.EMI#vag2", "BPLU247.EMI#vag2", "BPLU457.EMI#vag2", "BPLU467.EMI#vag2", "BPLU478.EMI#vag2", "REID00.EMI#vag2", "REID01.EMI#vag2"]
+centre = 40
+shift = 0
+size = 7456
+
+[[sound]]
+id = "134661330c30"
+label = "'Target' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f39680 via 0x0100@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
+cues = ["0x0100@magic:MAGIC069"]
+disc = ["MAGIC069.EMI#vag1"]
+centre = 24
+shift = 0
+size = 16016
+
+[[sound]]
+id = "1c9bde0fc642"
+label = "Enemy Magic Damage"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f28152 via 0x0204@magic:MAGIC098, ra 0x801E47A4 BATTLE:Battle_ResolveAction_Enemy, vab2 prog0 tone8 vag1 spu 0x520F0"
+cues = ["0x0204@magic:MAGIC098", "0x0204@magic:MAGIC103"]
+disc = ["BATTLE.EMI#vag1", "BATTLE2.EMI#vag1", "BOSS001.EMI#vag1", "BOSS002.EMI#vag1", "BOSS004.EMI#vag1", "BOSS007.EMI#vag1", "BOSS008.EMI#vag1", "BOSS012.EMI#vag1", "BOSS013.EMI#vag1", "BOSS014.EMI#vag1", "BOSS015.EMI#vag1", "BOSS017.EMI#vag1"]
+centre = 46
+shift = 85
+size = 5184
+
+[[sound]]
+id = "2099aa05647d"
+label = "?"
+status = "hypothesis"
+evidence = "se_watch 20260917T095049 f20696 via 0x0102@tables:8413debc, ra 0x801D7468 START:Menu_EquipConfirm, vab1 prog0 tone4 vag8 spu 0x46820"
+cues = ["0x0102@tables:8413debc"]
+disc = ["PL015.EMI#vag8", "PL025.EMI#vag13", "PL056.EMI#vag8", "PL247.EMI#vag13", "PL257.EMI#vag13", "PL457.EMI#vag13", "PL567.EMI#vag8", "PL578.EMI#vag8", "AREA131.EMI#vag6", "AREA132.EMI#vag6", "AREA133.EMI#vag6"]
+centre = 54
+shift = 0
+size = 6688
+
+[[sound]]
+id = "2f51e3e62b68"
+label = "'Big Bling' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f1633 via 0x0105@tables:3e40abae, ra 0x801D1114 , vab1 prog0 tone10 vag1 spu 0x6C6D0"
+cues = ["0x0105@tables:3e40abae"]
+disc = ["BATL_END.EMI#vag1", "BATTLE.EMI#vag1", "BATTLE2.EMI#vag1", "COMN_SE.EMI#vag1", "BOSS001.EMI#vag1", "BOSS002.EMI#vag1", "BOSS004.EMI#vag1", "BOSS007.EMI#vag1", "BOSS008.EMI#vag1", "BOSS012.EMI#vag1", "BOSS013.EMI#vag1", "BOSS014.EMI#vag1"]
+centre = 45
+shift = 0
+size = 14160
+
+[[sound]]
+id = "3c10d12c488d"
+label = "'Squish' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f15970 via 0x0106@tables:8413debc, ra 0x801D58CC START:FUN_801d5724, vab1 prog0 tone12 vag8 spu 0x4A0A0"
+cues = ["0x0106@tables:8413debc", "0x0106@tables:cf666e28", "0x0106@tables:a5ecfe08", "0x0106@magic:MAGIC069"]
+disc = ["BATL_END.EMI#vag8", "BATTLE.EMI#vag8", "BATTLE2.EMI#vag8", "COMN_SE.EMI#vag8", "BOSS001.EMI#vag8", "BOSS002.EMI#vag8", "BOSS004.EMI#vag8", "BOSS007.EMI#vag8", "BOSS008.EMI#vag8", "BOSS012.EMI#vag8", "BOSS013.EMI#vag8", "BOSS014.EMI#vag8"]
+centre = 45
+shift = 0
+size = 1792
+
+[[sound]]
+id = "516e7266978d"
+label = "'Small Bling' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f10376 via 0x0105@tables:a143d170, ra 0x801B6790 GAME:Field_SearchSpot, vab1 prog1 tone2 vag2 spu 0x3EFE0"
+cues = ["0x0105@tables:a143d170", "0x0105@tables:3ff368d4", "0x0105@tables:d6dc5ead"]
+disc = ["BATL_END.EMI#vag5", "BATTLE.EMI#vag5", "BATTLE2.EMI#vag5", "COMN_SE.EMI#vag5", "BOSS001.EMI#vag5", "BOSS002.EMI#vag5", "BOSS004.EMI#vag5", "BOSS007.EMI#vag5", "BOSS008.EMI#vag5", "BOSS012.EMI#vag5", "BOSS013.EMI#vag5", "BOSS014.EMI#vag5"]
+centre = 44
+shift = 87
+size = 6768
+
+[[sound]]
+id = "5dfc65805d6e"
+label = "Rei - Pilfer"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f19176 via 0x0504@magic:MAGIC065, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab5 prog1 tone0 vag1 spu 0x6A3A0"
+cues = ["0x0504@magic:MAGIC065"]
+disc = ["BPLD034.EMI#vag1", "BPLD247.EMI#vag1", "BPLD457.EMI#vag1", "BPLD467.EMI#vag1", "BPLD478.EMI#vag1", "BPLU034.EMI#vag1", "BPLU247.EMI#vag1", "BPLU457.EMI#vag1", "BPLU467.EMI#vag1", "BPLU478.EMI#vag1", "REID00.EMI#vag1", "REID01.EMI#vag1"]
+centre = 45
+shift = 67
+size = 2832
+
+[[sound]]
+id = "70f277c2d738"
+label = "Exit Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f8652 via 0x0102@tables:a5ecfe08, ra 0x801D54AC START:FUN_801d545c, vab1 prog0 tone4 vag7 spu 0x469E0"
+cues = ["0x0102@tables:a5ecfe08"]
+centre = 60
+shift = 0
+size = 352
+
+[[sound]]
+id = "73656d1b75e0"
+label = "'Locked On' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f39702 via 0x0103@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone6 vag4 spu 0x501B0"
+cues = ["0x0103@magic:MAGIC069"]
+disc = ["MAGIC069.EMI#vag4"]
+centre = 47
+shift = 0
+size = 7744
+
+[[sound]]
+id = "7ae0d26a3932"
+label = "Pilfer - Hit"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f19216 via 0x0200@magic:MAGIC065, ra 0x800A8830 BATTLE:Battle_PlayHitSound, vab2 prog0 tone0 vag2 spu 0x53530"
+cues = ["0x0200@magic:MAGIC065", "0x0200@magic:MAGIC001"]
+disc = ["BATTLE.EMI#vag2", "BATTLE2.EMI#vag2", "BOSS001.EMI#vag2", "BOSS002.EMI#vag2", "BOSS004.EMI#vag2", "BOSS007.EMI#vag2", "BOSS008.EMI#vag2", "BOSS012.EMI#vag2", "BOSS013.EMI#vag2", "BOSS014.EMI#vag2", "BOSS015.EMI#vag2", "BOSS017.EMI#vag2"]
+centre = 47
+shift = 0
+size = 4112
+
+[[sound]]
+id = "7ba0ef9786d2"
+label = "Jump?"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f45204 via 0x0203@magic:MAGIC001, ra 0x8015E140 boot:SE_PlayTracked, vab2 prog0 tone6 vag6 spu 0x57DE0"
+cues = ["0x0203@magic:MAGIC001"]
+disc = ["BATTLE.EMI#vag6", "BATTLE2.EMI#vag6", "BOSS001.EMI#vag6", "BOSS002.EMI#vag6", "BOSS004.EMI#vag6", "BOSS007.EMI#vag6", "BOSS008.EMI#vag6", "BOSS012.EMI#vag6", "BOSS013.EMI#vag6", "BOSS014.EMI#vag6", "BOSS015.EMI#vag6", "BOSS017.EMI#vag6"]
+centre = 49
+shift = 57
+size = 6800
+
+[[sound]]
+id = "7f90ef0dc4d2"
+label = "Thunder Magic?"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f28082 via 0x0100@magic:MAGIC098, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
+cues = ["0x0100@magic:MAGIC098"]
+disc = ["MAGIC098.EMI#vag1", "MAGIC143.EMI#vag1"]
+centre = 26
+shift = 0
+size = 25376
+
+[[sound]]
+id = "809fa7e71a40"
+label = "'Normal Bling' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f2547 via 0x0101@tables:3e40abae, ra 0x801E42FC START:FUN_801e42c0, vab1 prog0 tone2 vag2 spu 0x417F0"
+cues = ["0x0101@tables:3e40abae", "0x0101@tables:8413debc", "0x0100@tables:8413debc", "0x0101@tables:cf666e28", "0x0101@magic:MAGIC070", "0x0101@tables:a5ecfe08", "0x0100@tables:a5ecfe08", "0x0101@tables:d71cef95", "0x0100@tables:d71cef95", "0x0100@magic:MAGIC097", "0x0101@magic:MAGIC097", "0x0101@magic:MAGIC069", "0x0100@magic:MAGIC069"]
+disc = ["BATL_END.EMI#vag2", "BATTLE.EMI#vag2", "BATTLE2.EMI#vag2", "COMN_SE.EMI#vag2", "BOSS001.EMI#vag2", "BOSS002.EMI#vag2", "BOSS004.EMI#vag2", "BOSS007.EMI#vag2", "BOSS008.EMI#vag2", "BOSS012.EMI#vag2", "BOSS013.EMI#vag2", "BOSS014.EMI#vag2"]
+centre = 26
+shift = 0
+size = 1968
+
+[[sound]]
+id = "8d7d683e3849"
+label = "Rei 'Strike' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f45204 via 0x0503@magic:MAGIC001, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab5 prog0 tone6 vag6 spu 0x6F8B0"
+cues = ["0x0503@magic:MAGIC001"]
+disc = ["BPLD034.EMI#vag6", "BPLD247.EMI#vag6", "BPLD457.EMI#vag6", "BPLD467.EMI#vag6", "BPLD478.EMI#vag6", "BPLU034.EMI#vag6", "BPLU247.EMI#vag6", "BPLU457.EMI#vag6", "BPLU467.EMI#vag6", "BPLU478.EMI#vag6", "REID00.EMI#vag6", "REID01.EMI#vag6"]
+centre = 46
+shift = 59
+size = 5088
+
+[[sound]]
+id = "a7cf919faae8"
+label = "Teepo - 'Nega'"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f45410 via 0x0405@magic:MAGIC103, ra 0x801DD864 BATTLE:Battle_PlayActorCue, vab4 prog2 tone0 vag5 spu 0x67150"
+cues = ["0x0405@magic:MAGIC103"]
+disc = ["BPLD034.EMI#vag5", "BPLU034.EMI#vag5"]
+centre = 41
+shift = 59
+size = 5568
+
+[[sound]]
+id = "aa178356c922"
+label = "'Whoosh' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f45452 via 0x0100@magic:MAGIC103, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone0 vag1 spu 0x3E0A0"
+cues = ["0x0100@magic:MAGIC103"]
+disc = ["MAGIC056.EMI#vag1", "MAGIC103.EMI#vag1"]
+centre = 30
+shift = 0
+size = 35520
+
+[[sound]]
+id = "abdb3f6fabc5"
+label = "'Squelch' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f17504 via 0x0103@tables:8413debc, ra 0x801D5708 START:FUN_801d5708, vab1 prog0 tone6 vag7 spu 0x498C0"
+cues = ["0x0103@tables:8413debc", "0x0103@tables:cf666e28", "0x0103@magic:MAGIC070", "0x0103@tables:a5ecfe08", "0x0103@tables:d71cef95", "0x0103@magic:MAGIC097", "0x0103@magic:MAGIC069"]
+disc = ["BATL_END.EMI#vag7", "BATTLE.EMI#vag7", "BATTLE2.EMI#vag7", "COMN_SE.EMI#vag7", "BOSS001.EMI#vag7", "BOSS002.EMI#vag7", "BOSS004.EMI#vag7", "BOSS007.EMI#vag7", "BOSS008.EMI#vag7", "BOSS012.EMI#vag7", "BOSS013.EMI#vag7", "BOSS014.EMI#vag7"]
+centre = 41
+shift = 0
+size = 2016
+
+[[sound]]
+id = "ad94837cc081"
+label = "Quick Accept?"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f19066 via 0x0104@tables:3bb21e46, ra 0x801D2050 BATTLE:Battle_RoundStart, vab1 prog0 tone8 vag2 spu 0x3F280"
+cues = ["0x0104@tables:3bb21e46", "0x0104@magic:MAGIC097", "0x0104@magic:MAGIC069"]
+disc = ["BATL_RET.EMI#vag2", "BATL_SE.EMI#vag2"]
+centre = 50
+shift = 85
+size = 6736
+
+[[sound]]
+id = "cdbb1172b761"
+label = "Thunder Magic?"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f29798 via 0x0601@magic:MAGIC097, ra 0x801E4C48 BATTLE:Battle_ResolveAction_Enemy, vab6 prog0 tone2 vag1 spu 0x71CC0"
+cues = ["0x0601@magic:MAGIC097"]
+disc = ["ENEMY027.EMI#vag1", "ENEMY028.EMI#vag1", "ENEMY056.EMI#vag2", "ENEMY056.EMI#vag7", "ENEMY063.EMI#vag2", "ENEMY063.EMI#vag7", "ENEMY076.EMI#vag3", "ENEMY076.EMI#vag6"]
+centre = 43
+shift = 65
+size = 6672
+
+[[sound]]
+id = "d4f4826cb2e5"
+label = "Quick Exit"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f13072 via 0x0102@tables:3ff368d4, ra 0x801D5D38 START:FUN_801d5c4c, vab1 prog0 tone4 vag7 spu 0x469E0"
+cues = ["0x0102@tables:3ff368d4"]
+disc = ["BATL_END.EMI#vag10", "BATL_RET.EMI#vag4", "BATL_SE.EMI#vag4", "BATTLE.EMI#vag10", "BATTLE2.EMI#vag10", "COMN_SE.EMI#vag10", "ENEMY000.EMI#vag1", "ENEMY000.EMI#vag2", "ENEMY000.EMI#vag3", "ENEMY000.EMI#vag4", "ENEMY000.EMI#vag5", "ENEMY000.EMI#vag6"]
+centre = 60
+shift = 0
+size = 352
+
+[[sound]]
+id = "dadc45f295cc"
+label = "'Whisk Away' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f39736 via 0x0101@magic:MAGIC069, ra 0x8015E140 boot:SE_PlayTracked, vab1 prog0 tone2 vag2 spu 0x41F30"
+cues = ["0x0101@magic:MAGIC069"]
+disc = ["MAGIC069.EMI#vag2"]
+centre = 26
+shift = 0
+size = 28944
+
+[[sound]]
+id = "f8306ad214f1"
+label = "Enemy Absorb/Heal?"
+status = "evidence"
+evidence = "se_watch 20260917T120645 f28110 via 0x0206@magic:MAGIC098, ra 0x801E3F94 BATTLE:Battle_ResolveAction_Enemy, vab2 prog0 tone12 vag7 spu 0x59870"
+cues = ["0x0206@magic:MAGIC098"]
+disc = ["BATTLE.EMI#vag7", "BATTLE2.EMI#vag7", "BOSS001.EMI#vag7", "BOSS002.EMI#vag7", "BOSS004.EMI#vag7", "BOSS007.EMI#vag7", "BOSS008.EMI#vag7", "BOSS012.EMI#vag7", "BOSS013.EMI#vag7", "BOSS014.EMI#vag7", "BOSS015.EMI#vag7", "BOSS017.EMI#vag7"]
+centre = 56
+shift = 0
+size = 5424
+
+[[sound]]
+id = "f8d4e40b88f6"
+label = "'Swoosh' Noise"
+status = "evidence"
+evidence = "se_watch 20260917T095049 f4497 via 0x0104@tables:3e40abae, ra 0x801E53A0 START:FUN_801e525c, vab1 prog0 tone8 vag6 spu 0x46570"
+cues = ["0x0104@tables:3e40abae", "0x0104@tables:8413debc", "0x0104@tables:cf666e28", "0x0104@magic:MAGIC070", "0x0104@tables:a5ecfe08", "0x0104@tables:d71cef95", "0x0104@magic:MAGIC097", "0x0104@magic:MAGIC069"]
+disc = ["BATL_END.EMI#vag6", "BATTLE.EMI#vag6", "BATTLE2.EMI#vag6", "COMN_SE.EMI#vag6", "BOSS001.EMI#vag6", "BOSS002.EMI#vag6", "BOSS004.EMI#vag6", "BOSS007.EMI#vag6", "BOSS008.EMI#vag6", "BOSS012.EMI#vag6", "BOSS013.EMI#vag6", "BOSS014.EMI#vag6"]
+centre = 36
+shift = 0
+size = 13136

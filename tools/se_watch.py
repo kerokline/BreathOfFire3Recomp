@@ -70,6 +70,21 @@ import callstack_diff as cd   # noqa: E402
 import name_map               # noqa: E402
 import se_resolve             # noqa: E402
 
+DISC_INDEX = os.path.join(ROOT, "names", "audio_banks.toml")
+
+
+def disc_index():
+    """sample md5 -> ['FILE.EMI#vagN', ...] from names/audio_banks.toml (tools/audio_banks.py index)."""
+    if not os.path.exists(DISC_INDEX):
+        return {}
+    out = {}
+    for b in tomllib.load(open(DISC_INDEX, "rb")).get("bank", []):
+        base = b["file"].split("/")[-1]
+        for v in b.get("vags", []):
+            if v.get("md5"):
+                out.setdefault(v["md5"], []).append("%s#vag%d" % (base, v["n"]))
+    return out
+
 CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
 CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
 GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
@@ -240,6 +255,7 @@ def save_labels(labels):
             "#   evidence  first hearing: se_watch session, frame, cue word, context, vab/prog/tone/vag",
             "#   cues      every 'cue@context' this sample was reached through, e.g. 0x0302@battle",
             "#   centre / shift / size   pitch and length of the sample as the VAB describes it",
+            "#   disc      where the same bytes sit on the disc: FILE.EMI#vagN (tools/audio_banks.py join --apply)",
             ""]
     for sid, c in sorted(labels.items(), key=lambda kv: kv[0]):
         rows.append("[[sound]]")
@@ -251,6 +267,8 @@ def save_labels(labels):
         for k in ("centre", "shift", "size"):
             if k in c:
                 rows.append("%s = %d" % (k, c[k]))
+        if c.get("disc"):
+            rows.append("disc = [%s]" % ", ".join('"%s"' % x for x in c["disc"]))
         rows.append("")
     with open(CUES_TOML, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(rows))
@@ -308,6 +326,7 @@ def main():
     namer = Namer()
     labels = load_labels()
     read_ram, read_spu = se_resolve.live_readers(a.port)
+    disc = disc_index()
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     prev, armed = cd.wtrace_arm_ranges(a.port, [(CELL_ID, CELL_BANK + 4)])
     print("se_watch: armed 0x%08X-0x%08X (%s), session %s -> %s, %d label(s) known" % (
@@ -363,8 +382,12 @@ def main():
                     with open(a.out, "a", encoding="utf-8") as fh:
                         fh.write(json.dumps(row) + "\n")
                     n += 1
-                    desc = ("snd %s vab%d p%d t%d c%d" % (sound, res["vab"], res["prog"], res["tone"], res["centre"])
+                    where = disc.get(sound, []) if sound else []
+                    on_disc = (where[0] + (" +%d" % (len(where) - 1) if len(where) > 1 else "")) if where else ""
+                    desc = ("snd %s vab%d p%d t%d c%d %s" % (sound, res["vab"], res["prog"], res["tone"], res["centre"], on_disc)
                             if res else ("(%s)" % why if why else "(half a call: ring gap)"))
+                    if res:
+                        row["disc"] = where[:12]
                     print("[f%d] cue %s (%s) %-34s ra=%s %-26s %s" % (
                         row["frame"], row["cue"], mode, desc, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
