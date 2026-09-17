@@ -232,8 +232,13 @@ OpenBIOS, 0 on retail), which is why an earlier version of the harness
 subtracted them from the headline "so they would not mask the result". Mega
 Man X6 falsified that: there the OpenBIOS B0 vector burns 2,361,470
 instructions over 1,180,735 entries with the ranges off and **vanishes
-entirely** with them on, because once the bless verdict is clean the vector
-body dispatches native. Subtracting them hid a 130 insn/frame win. The tool
+entirely** with them on. (The explanation this note first gave, "once the
+bless verdict is clean the vector body dispatches native", is withdrawn
+2026-09-17: no compiled body exists at `0xB0`, and the emitted native-stub
+guard rejected OpenBIOS's stub bytes regardless of bless state —
+[`vector-stub-shapes.md`](vector-stub-shapes.md). Why MMX6's B0 count fell
+to zero is unexplained and should be re-measured on that fix.) Subtracting
+them hid a 130 insn/frame win. The tool
 now reports kernel and all-interp as the headline and shows the split as
 diagnosis only. On *this* title they stay interpreted and are now 87% of what
 OpenBIOS kernel RAM still interprets, so they remain the next lever here

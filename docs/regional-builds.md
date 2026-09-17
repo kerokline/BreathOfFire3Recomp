@@ -242,9 +242,12 @@ within a region, and map destinations across regions.
 - **`DEMO.EMI` section 5** ships the JP image on the PAL English disc but a
   distinct one on the US disc (pattern `A B A C D`, the only section of 37 that
   breaks the language pattern). Unexplained.
-- **Whether the `GAME.EMI` section 0 string table needs translating at all**, or
-  is debug/internal. It is ~15 KB and 505 word-like runs in the US build; nobody
-  has read what it contains.
+- ~~Whether the `GAME.EMI` section 0 string table needs translating at all~~
+  **Read 2026-09-17:** it is the item and ability name tables the menus draw
+  (five item tables + the ability table, `name[12]` records against the JP
+  `name[8]`), paired record-for-record with the JP tables in
+  [`TEXT_TABLES.md`](TEXT_TABLES.md) "The US names". Yes, it needs
+  translating, and the JP field width is the constraint.
 - Whether the Western builds use **proportional glyph advance** or keep the JP
   fixed 12 px cell with narrower art. This is the one thing worth mining the US
   or EU EXE for, and it is now cheap: import `SLUS_004.22` as a second Ghidra

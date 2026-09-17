@@ -82,6 +82,12 @@ profile on purpose (rule 18), and it is a smaller and riskier prize than the
 overlay region. Discuss before touching, and not before the Axis B round. The
 A0/B0/C0 vector trampolines are untouched by design and are now 87 % of what
 OpenBIOS kernel RAM still interprets — the next lever if one is needed.
+**2026-09-17: pulled.** They were not untouched by design — the generated
+dispatch already had a native path for the vectors whose byte guard knew
+only the retail stub shape; OpenBIOS's shape now matches too
+([`vector-stub-shapes.md`](vector-stub-shapes.md), fork branch
+`feat/openbios-vector-stub-shape`, vectors 459 → 0 per frame headless).
+The kernel residual is now the declared patch ranges only.
 **2026-09-09:** the text encoding is fully readable *and writable* — the
 single-byte half was read off the font sheet (`tools/font_sheet.py` →
 [`names/font.toml`](../names/font.toml)) and 100% of the area scripts' glyph
@@ -990,6 +996,16 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
+- **2026-09-17: the submodule checkout sits on fork branch
+  `integration/vector-stub-plus-367` `b30cdcf5` = upstream `master`
+  `193a60b8` + `8b50cd09` (the two-shape call-vector guard, open as
+  [#381](https://github.com/RetroPortingToolKit/psxrecomp/pull/381), branch `feat/openbios-vector-stub-shape`) + the #367
+  cherry-pick.** Same content as `4a792379` + the fix, which is what
+  `build-relprof` and both BIOS backends in `psxrecomp/generated/` were
+  built and measured from ([`vector-stub-shapes.md`](vector-stub-shapes.md)).
+  Bump the title gitlink to `b30cdcf5` now, or straight to master once both
+  #367 and #381 merge; the integration branch exists only so the gitlink
+  points at something pushed.
 - **`psxrecomp` is pinned to `4a792379` = upstream `master` `193a60b8` + one
   commit on `fix/static-overlay-reconcile-cache-dir`, open as
   [#367](https://github.com/RetroPortingToolKit/psxrecomp/pull/367)**
@@ -1280,7 +1296,10 @@ un_dbg.cmd` (`relprof` / `--launcher` / extra args pass through): it
 
 ## Open questions
 
-- The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.
+- ~~The ~15 KB string table inside `GAME.EMI` §0 — nobody has read it.~~
+  Read 2026-09-17: it is the item/ability name tables of `TEXT_TABLES.md`,
+  now paired with the US disc's names (`text_tables.py --us-cue`, `us` column
+  in `names/items.toml` / `abilities.toml`).
 - **The BIOS exception handler interprets on both BIOSes** (Psy-Q kernel patches unbless it; 44.6 % of all interpreted work) — [`kernel-patch-sites.md`](kernel-patch-sites.md), upstream asks listed there.
 - Why `DEMO.EMI` §5 ships the JP image on the PAL English disc.
 - Whether the Western builds use proportional glyph advance.

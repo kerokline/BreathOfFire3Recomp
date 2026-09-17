@@ -240,6 +240,67 @@ already exists in the art.
   ([`LOCALIZATION.md`](LOCALIZATION.md)) now have their id order and their
   8-byte field widths, which is the constraint an English name must fit.
 
+## The US names — the same table off the US disc (2026-09-17)
+
+[`regional-builds.md`](regional-builds.md) had counted "a ~15 KB string table
+inside `GAME.EMI` section 0" in the US build and left it as "nobody has read
+what it contains". It is **this table**: the five item tables and the ability
+table, in the same record order, with every `name[8]` widened to `name[12]`.
+`text_tables.py --us-cue <US .cue> extract` reads it and adds a `us` column to
+`items.toml` and `abilities.toml`.
+
+| Table | JP `GAME.EMI#0` (dest `0x80196800`) | US `GAME.EMI#0` (dest `0x80195800`) | stride JP → US |
+|---|---|---|---|
+| consumables | `0x801C995C` | `0x801C8964` | 14 → 18 |
+| key items | `0x801C9E64` | `0x801C8FDC` | 12 → 16 |
+| weapons | `0x801C9F24` | `0x801C90DC` | 20 → 24 |
+| armour | `0x801CA5A0` | `0x801C98A4` | 18 → 22 |
+| accessories | `0x801CAA68` | `0x801C9E7C` | 16 → 20 |
+| abilities | `0x801CB230` | `0x801CA718` | 16 → 20 |
+
+**Evidence that it is the same table, not one that starts alike:** the tool
+reads the US record at every JP index and compares *every numeric field* the
+JP record carries (price, power, ref, flags, the ability param bytes) —
+538 records, 0 mismatches — and refuses to write on any. The five US item
+tables also chain `start + count × stride` exactly, as the JP ones do, and the
+ability table follows the accessories after the same `0x48C` gap.
+
+What the pairing changed:
+
+- **33 rows gained an English name** the wiki glossary had no row for:
+  `なし` = `Nothing` ×5, `パーツA..H` = `Part A..H`, `ホーンドマリーナ` =
+  `Spearfish`, `IDカード` = `ID Card`, `カードキーA/B`, `バゼラード` =
+  `Baselard`, `ハルバート` = `Halberd`, `バグナク` = `Tiger Claws`,
+  `皮よろい` = `LeatherArmor`, `ノクトゴーグル` = `UV Glasses`,
+  `マーチャントパス` = `Coupons`, `コシが痛い` = `Bad back`, `つぶらなひとみ`
+  = `Hypnotize`, `ねらい撃ち` = `Target`, `パリア` = `Barrier`, and more.
+- **Three glossary rows differ from the shipped string.** The `us` column
+  records what Capcom shipped, not what is right: `とっこう薬` (特効薬, a
+  specific remedy — the wiki's *Wonder Drug* is the literal reading) shipped
+  as `Ginseng`, a localizer's choice; `シンカー` is `Sinker` (wiki: Sinkar);
+  `ファイアブレス` / `アイスブレス` at ids 121/122 are `Flame Breath` /
+  `Frost Breath` (the same JP names at ids 45/46 are `Firebreath` /
+  `Icebreath` on the US disc too — the wiki collapsed the pair; the glossary
+  cannot tell them apart because it joins on the JP string).
+- **Eleven abilities the wiki names are `Noting` on the US disc** (sic — the
+  placeholder is misspelt in all 12 rows that carry it): `しろはた`, `ラーク`,
+  `ザワルド`, `サラニ` ×2, `ゴボウセイ`, `すみ`, `すみすみ`, `死の爆弾`,
+  `ルーレット`, `ミヤクリ`. Cut or enemy-only content whose names the US
+  build never shipped; the wiki's names for them are not from this table.
+- **The US name alphabet is ASCII plus one code:** `0x8E` (16 uses, always
+  where an apostrophe belongs — `Mage<8e>s Robes`, `Mind<8e>s Eye`). Two ASCII
+  bytes are repurposed as glyphs: `=` where the wiki shows a hyphen
+  (`Fish=head`, `Man=o<8e>=War`) and `>` where it shows a full stop
+  (`Lgt>Clothing`). Consistent with the JP finding that `0x3E`/`0x3F`/`0x40`
+  are symbols, not ASCII; the US atlas itself is still unread, so the tool
+  keeps the raw bytes.
+
+So the answer to the regional-builds question is: **yes, it needs translating**
+— it is the item and ability names the menus draw — and the constraint is the
+one already recorded: 8 bytes per name in the JP layout against 12 in the US.
+Every `us` string longer than 8 bytes (most of them) does not fit the JP record
+as stored, which is why the US build widened the field.
+
 ## Open
 
 - **Masters.** `FIRST.EMI#11` (`0x80014000` band) is not a record table: it is

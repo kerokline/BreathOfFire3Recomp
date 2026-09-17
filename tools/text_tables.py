@@ -11,6 +11,8 @@ docs/TEXT_TABLES.md for the layouts and how each one was established.
     python tools/text_tables.py extract                   # -> names/{items,abilities,places,characters}.toml
     python tools/text_tables.py show items [--category weapon]
     python tools/text_tables.py show abilities | places | characters
+    python tools/text_tables.py --us-cue "isos/Breath of Fire III (USA).cue" extract
+                                                          # + the `us` column: the US disc's own names
 
 Disc bytes come from the .cue in game.toml (read through tools/disc_ls.py,
 never modified) or, with --bin-root, from an already-extracted BIN/ tree.
@@ -353,6 +355,64 @@ ITEM_TABLES = [
 ABILITY_TABLE = dict(start=0x801CB230, stride=16, end=0x801CC070, expect=227, name=(8, 8),
                      fields=[("b0", 0, "B"), ("b1", 1, "B"), ("b2", 2, "B"), ("b3", 3, "B"),
                              ("u16_4", 4, "H"), ("u16_6", 6, "H")])
+# The US disc (SLUS-00422) ships the same tables in its own GAME.EMI section 0
+# (dest 0x80195800): the same record order and the same numeric fields, with
+# every name field widened from 8 to 12 bytes (so each stride grows by 4 and
+# the fields after the name shift by 4).  The five item tables chain
+# start + count*stride exactly as the JP ones do; the ability table sits after
+# the same 0x48C gap.  Read 2026-09-17 off the US disc (docs/TEXT_TABLES.md
+# "The US names").
+US_GAME = ("BIN/ETC/GAME.EMI", 0x80195800)
+US_STARTS = {"consumable": 0x801C8964, "key": 0x801C8FDC, "weapon": 0x801C90DC,
+             "armour": 0x801C98A4, "accessory": 0x801C9E7C, "ability": 0x801CA718}
+US_NAME_LEN = 12
+
+
+def us_layout(t, key):
+    """The US record layout for a JP table dict: name +4 wide, later fields +4."""
+    grow = US_NAME_LEN - t["name"][1]
+    name_off = t["name"][0]
+    fields = [(n, off + grow if off >= name_off else off, code) for n, off, code in t["fields"]]
+    return dict(start=US_STARTS[key], stride=t["stride"] + grow, name=(name_off, US_NAME_LEN), fields=fields)
+
+
+def decode_us_name(d):
+    """One US name field: ASCII, 0xFF = space, 0x00 ends it.  Anything else
+    is the US font's own glyph code, kept as <hh> (the US atlas is not read)."""
+    out = []
+    for b in d:
+        if b == 0:
+            break
+        if b == 0xFF:
+            out.append(" ")
+        elif 0x20 <= b < 0x7F:
+            out.append(chr(b))
+        else:
+            out.append("<%02x>" % b)
+    return "".join(out)
+
+
+def pair_us(us_sec, recs, layout, label):
+    """Read the US records that sit at the same indices as `recs` and attach
+    each name as `us`.  Every numeric field the JP record carries must match
+    the US one at the same index -- that equality is what proves the two
+    tables are the same table, not two that merely start alike."""
+    mismatch = []
+    for r in recs:
+        ram = layout["start"] + r["id"] * layout["stride"]
+        raw = us_sec.at(ram, layout["stride"])
+        r["us"] = decode_us_name(raw[layout["name"][0]:layout["name"][0] + layout["name"][1]])
+        r["us_ram"] = ram
+        for fname, off, code in layout["fields"]:
+            v = struct.unpack_from("<" + code, raw, off)[0]
+            if r.get(fname) != v:
+                mismatch.append((r["id"], fname, r.get(fname), v))
+    if mismatch:
+        raise SystemExit("%s: %d numeric fields differ JP vs US (first: id %d %s jp=%r us=%r) -- "
+                         "the US layout hypothesis is wrong" % ((label, len(mismatch)) + mismatch[0]))
+    return recs
+
+
 MTEST = ("BIN/ETC/MTEST.EMI", 0x801D0C00)
 PLACES = dict(header=0x801D0C00, names=0x801D0D94, stride=10, expect=200)
 COMMU02 = ("BIN/ETC/COMMU02.EMI", 0x801D0C00)
@@ -403,8 +463,9 @@ def scan_records(sec, start, stride, end, name, fields):
     return recs
 
 
-def read_items(disc, gloss):
+def read_items(disc, gloss, us=None):
     sec = disc.section(*GAME)
+    us_sec = us.section(*US_GAME) if us else None
     out = []
     for t in ITEM_TABLES:
         recs = scan_records(sec, t["start"], t["stride"], t["end"], t["name"], t["fields"])
@@ -416,11 +477,13 @@ def read_items(disc, gloss):
             if t["cat"] is not None:
                 r["cat"] = t["cat"]
             r["en"], r["gloss_section"], r["note"] = gloss.lookup(r["jp"], GLOSS_SECTIONS[t["category"]])
+        if us_sec:
+            pair_us(us_sec, recs, us_layout(t, t["category"]), t["category"] + " table")
         out.append((t, recs))
     return sec, out
 
 
-def read_abilities(disc, gloss):
+def read_abilities(disc, gloss, us=None):
     sec = disc.section(*GAME)
     t = ABILITY_TABLE
     recs = scan_records(sec, t["start"], t["stride"], t["end"], t["name"], t["fields"])
@@ -429,6 +492,8 @@ def read_abilities(disc, gloss):
     for r in recs:
         r["type"] = r["b1"] & 3
         r["en"], r["gloss_section"], r["note"] = gloss.lookup(r["jp"], GLOSS_SECTIONS["ability"])
+    if us:
+        pair_us(us.section(*US_GAME), recs, us_layout(t, "ability"), "ability table")
     return sec, recs
 
 
@@ -654,28 +719,39 @@ def cmd_extract(args, disc, gloss):
     os.makedirs(outdir, exist_ok=True)
     written = []
 
-    sec, tables = read_items(disc, gloss)
+    us = args.us_disc
+    sec, tables = read_items(disc, gloss, us)
     recs = [r for _, rs in tables for r in rs]
     layout = ["%s: %#010x stride %d count %d" % (t["category"], t["start"], t["stride"], len(rs)) for t, rs in tables]
+    us_meta = []
+    if us:
+        us_sec = us.section(*US_GAME)
+        us_meta = [("us_disc", us.label), ("us_source", us_sec.source()), ("us_section_md5", us_sec.md5),
+                   ("us_section_dest", "0x%08X" % us_sec.dest),
+                   ("us_layout", ["%s: %#010x stride %d" % (k, US_STARTS[k], us_layout(t, k)["stride"])
+                                  for k, t in [(t["category"], t) for t in ITEM_TABLES] + [("ability", ABILITY_TABLE)]])]
     header = ("# names/items.toml -- id->name for every item table in GAME.EMI, generated by\n"
               "# tools/text_tables.py extract (do not hand-edit; re-run instead).\n"
               "# Five separate tables, one per inventory category (docs/TEXT_TABLES.md):\n"
               "#   category   cat  (inventory list at 0x80145048 + cat*128; key items 0x80145448)\n"
               "#   id         record index = the byte the saves and the RAM hold\n"
               "#   jp / en    the name as stored / the wiki glossary's English (empty = no row)\n"
+              "#   us         the name the US disc (SLUS-00422) stores at the same id, 12-byte field,\n"
+              "#              <hh> = a US font code the US atlas would name (present only with --us-cue)\n"
               "#   price      u16 shop price (consumables: the -20 per 薬草 seen in the shop trace)\n"
               "#   power      u16 ATK (weapon) / DEF (armour) bonus -- hypothesis until save_tool verifies it\n"
               "#   ref        u16, 0x40xx/0x41xx -- an index into something shared with the ability table (unread)\n"
               "#   flags / u16_* / raw   the other record bytes, undecoded")
     emit(os.path.join(outdir, "items.toml"), header,
-         common_meta(disc, sec, [("layout", layout)]), "item", recs,
-         ["category", "cat", "id", "ram", "jp", "en", "note", "gloss_section", "price", "power", "flags",
+         common_meta(disc, sec, [("layout", layout)] + us_meta), "item", recs,
+         ["category", "cat", "id", "ram", "jp", "en", "us", "note", "gloss_section", "price", "power", "flags",
           "ref", "u16_8", "u16_10", "u16_12", "raw"])
     written.append(("items.toml", len(recs)))
 
-    sec, recs = read_abilities(disc, gloss)
+    sec, recs = read_abilities(disc, gloss, us)
     header = ("# names/abilities.toml -- id->name for the ability/skill table GAME.EMI 0x801CB230\n"
               "# (16-byte records: 8 param bytes then name[8]), generated by tools/text_tables.py.\n"
+              "#   us      the US disc's name at the same id (20-byte records, name[12]; with --us-cue)\n"
               "#   id      record index = the byte in the record's four ability lists (+0x5C/+0x66/+0x70/+0x7A)\n"
               "#   type    b1 & 3 -- which of the four lists AbilityList_ForType (boot 0x80167514) files it in\n"
               "#           (0 healing, 1 support, 2 attack magic, 3 skills -- a reading of the names)\n"
@@ -684,8 +760,8 @@ def cmd_extract(args, disc, gloss):
               "#   u16_6   flags read by SkillMenu_Confirm; runs 0x40FC + id for the first 200-odd ids\n"
               "#   b2, b3, raw   undecoded (b5 = AP cost is a hypothesis; see docs/TEXT_TABLES.md)")
     emit(os.path.join(outdir, "abilities.toml"), header,
-         common_meta(disc, sec, [("start", "0x801CB230"), ("stride", 16), ("count", len(recs))]),
-         "ability", recs, ["id", "ram", "jp", "en", "note", "gloss_section", "type", "b0", "b1", "b2", "b3", "u16_4", "u16_6", "raw"])
+         common_meta(disc, sec, [("start", "0x801CB230"), ("stride", 16), ("count", len(recs))] + us_meta),
+         "ability", recs, ["id", "ram", "jp", "en", "us", "note", "gloss_section", "type", "b0", "b1", "b2", "b3", "u16_4", "u16_6", "raw"])
     written.append(("abilities.toml", len(recs)))
 
     sec, head_u32, recs = read_places(disc, gloss)
@@ -726,18 +802,18 @@ def cmd_extract(args, disc, gloss):
 
 def cmd_show(args, disc, gloss):
     if args.table == "items":
-        _, tables = read_items(disc, gloss)
+        _, tables = read_items(disc, gloss, args.us_disc)
         for t, recs in tables:
             if args.category and t["category"] != args.category:
                 continue
             print("# %s  %#010x stride %d  %d records" % (t["category"], t["start"], t["stride"], len(recs)))
             for r in recs:
                 extra = " ".join("%s=%d" % (k, r[k]) for k in ("price", "power") if k in r)
-                print("%3d %-10s %-22s %s  raw %s" % (r["id"], r["jp"], r["en"] or "", extra, r["raw"]))
+                print("%3d %-10s %-22s %-14s %s  raw %s" % (r["id"], r["jp"], r["en"] or "", r.get("us", ""), extra, r["raw"]))
     elif args.table == "abilities":
-        _, recs = read_abilities(disc, gloss)
+        _, recs = read_abilities(disc, gloss, args.us_disc)
         for r in recs:
-            print("%3d %#04x t%d %-10s %-18s raw %s" % (r["id"], r["id"], r["type"], r["jp"], r["en"] or "", r["raw"]))
+            print("%3d %#04x t%d %-10s %-18s %-14s raw %s" % (r["id"], r["id"], r["type"], r["jp"], r["en"] or "", r.get("us", ""), r["raw"]))
     elif args.table == "places":
         _, head, recs = read_places(disc, gloss)
         print("# head u32 %#x" % head)
@@ -770,6 +846,8 @@ def main(argv=None):
     ap.add_argument("--bin-root", help="extracted BIN/ directory instead of the .cue")
     ap.add_argument("--kanji-table", default=DEFAULT_KANJI)
     ap.add_argument("--glossary", default=DEFAULT_GLOSSARY)
+    ap.add_argument("--us-cue", help="US disc .cue (SLUS-00422): adds the `us` name column to items/abilities")
+    ap.add_argument("--us-bin-root", help="extracted US BIN/ directory instead of --us-cue")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("extract", help="write names/*.toml")
     p.add_argument("--out-dir", default=os.path.join(ROOT, "names"))
@@ -787,6 +865,7 @@ def main(argv=None):
     if gloss.path is None:
         print("warning: no glossary at %s -- en column left empty" % args.glossary, file=sys.stderr)
     disc = Disc(cue=args.cue, bin_root=args.bin_root)
+    args.us_disc = Disc(cue=args.us_cue, bin_root=args.us_bin_root) if (args.us_cue or args.us_bin_root) else None
     return args.fn(args, disc, gloss)
 
 
