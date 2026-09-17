@@ -261,6 +261,15 @@ sightings = ["20260902T071817:f159977", "20260902T071817:f187331", "20260902T071
 shots = ["analysis/area_shots/AREA033_f160235.png", "analysis/area_shots/AREA033_f187589.png", "analysis/area_shots/AREA033_f270037.png"]
 
 [[area]]
+file = "BIN/WORLD00/AREA037.EMI"
+script_md5 = "d427064733afc587c31ff76f8703fd4f"
+alias = "Wyndia"
+status = "evidence"
+evidence = "named live by player during session 20260915T203226 at frame 5111; shot analysis/area_shots/AREA037_f5111.png"
+sightings = ["20260915T203226:f5111"]
+shots = ["analysis/area_shots/AREA037_f5111.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA039.EMI"
 script_md5 = "7db9c62b69fbc6d37161dd4195d9a5d1"
 alias = "Wyndia Castle - Throne Room"
@@ -270,6 +279,15 @@ sightings = ["20260907T200534:f856982"]
 shots = ["analysis/area_shots/AREA039_f856982.png"]
 
 [[area]]
+file = "BIN/WORLD01/AREA040.EMI"
+script_md5 = "3ce0db8704d015e23115c5d5dd60b61d"
+alias = "Inside Tower"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 251830; shot analysis/area_shots/AREA040_f251830.png"
+sightings = ["20260916T081817:f251830"]
+shots = ["analysis/area_shots/AREA040_f251830.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA041.EMI"
 script_md5 = "6cafa0398a8fec75748a52a43dab96d5"
 alias = "Wyndia Jail"
@@ -277,6 +295,24 @@ status = "evidence"
 evidence = "named live by player during session 20260907T200534 at frame 934449; shot analysis/area_shots/AREA041_f934449.png"
 sightings = ["20260907T200534:f934449"]
 shots = ["analysis/area_shots/AREA041_f934449.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA042.EMI"
+script_md5 = "f128f8964a0fc17f767410be5ba5f832"
+alias = "Tower"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 183940; shot analysis/area_shots/AREA042_f183940.png"
+sightings = ["20260916T081817:f183940"]
+shots = ["analysis/area_shots/AREA042_f183940.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA044.EMI"
+script_md5 = "4f48abdd6276e56bf1cf502fee70f7e4"
+alias = "Upper Tower"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 347183; shot analysis/area_shots/AREA044_f347183.png"
+sightings = ["20260916T081817:f347183"]
+shots = ["analysis/area_shots/AREA044_f347183.png"]
 
 [[area]]
 file = "BIN/WORLD01/AREA045.EMI"
@@ -297,6 +333,24 @@ sightings = ["20260909T075022:f543484"]
 shots = ["analysis/area_shots/AREA046_f543484.png"]
 
 [[area]]
+file = "BIN/WORLD01/AREA047.EMI"
+script_md5 = "e20631941af14a04016942d468a1dc0a"
+alias = "Wyndia Castle Wall"
+status = "evidence"
+evidence = "named live by player during session 20260916T074923 at frame 2081; shot analysis/area_shots/AREA047_f2081.png"
+sightings = ["20260916T074923:f2081"]
+shots = ["analysis/area_shots/AREA047_f2081.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA048.EMI"
+script_md5 = "fde0b07a6d84ba01ac092d94f08b8708"
+alias = "Tower Top"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 412374; shot analysis/area_shots/AREA048_f412374.png"
+sightings = ["20260916T081817:f412374"]
+shots = ["analysis/area_shots/AREA048_f412374.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA049.EMI"
 script_md5 = "99078881ac603a52b60710f996df4a14"
 alias = "Research Plant"
@@ -306,6 +360,15 @@ sightings = []
 shots = []
 
 [[area]]
+file = "BIN/WORLD01/AREA050.EMI"
+script_md5 = "ad36ccdfe26d4b62f9ba75ee0e85e954"
+alias = "Tournament Grounds"
+status = "evidence"
+evidence = "named live by player during session 20260916T074923 at frame 20483; shot analysis/area_shots/AREA050_f20483.png"
+sightings = ["20260916T074923:f20483"]
+shots = ["analysis/area_shots/AREA050_f20483.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA051.EMI"
 script_md5 = "edd0b6bec16d90d41b11c62521bebcc4"
 alias = "Mount Mourangi"
@@ -313,6 +376,42 @@ status = "evidence"
 evidence = "named live by player during session 20260907T200534 at frame 802860; shot analysis/area_shots/AREA051_f802860.png"
 sightings = ["20260907T200534:f802860"]
 shots = ["analysis/area_shots/AREA051_f802860.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA052.EMI"
+script_md5 = "19852675624dbed4719b9aa8f39fa3eb"
+alias = "Dump Site"
+status = "evidence"
+evidence = "named live by player during session 20260916T174522 at frame 38672; shot analysis/area_shots/AREA052_f38672.png"
+sightings = ["20260916T174522:f38672"]
+shots = ["analysis/area_shots/AREA052_f38672.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA054.EMI"
+script_md5 = "cd9d68258451b0b44cf0bf8c5daee79f"
+alias = "Tower Rocket"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 438197; shot analysis/area_shots/AREA054_f438197.png"
+sightings = ["20260916T081817:f438197"]
+shots = ["analysis/area_shots/AREA054_f438197.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA055.EMI"
+script_md5 = "24850859b3f0f9b055c424e01665cb6e"
+alias = "Wisdom Tree's ?"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 516981; shot analysis/area_shots/AREA055_f516981.png"
+sightings = ["20260916T081817:f516981"]
+shots = ["analysis/area_shots/AREA055_f516981.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA056.EMI"
+script_md5 = "020987f2b57015c3c6f47001aacce7c5"
+alias = "Wyndia - Tomb Exit"
+status = "evidence"
+evidence = "named live by player during session 20260915T203226 at frame 22069; shot analysis/area_shots/AREA056_f22069.png"
+sightings = ["20260915T203226:f22069"]
+shots = ["analysis/area_shots/AREA056_f22069.png"]
 
 [[area]]
 file = "BIN/WORLD01/AREA057.EMI"
@@ -369,6 +468,33 @@ sightings = ["20260909T075022:f404480"]
 shots = ["analysis/area_shots/AREA065_f404480.png"]
 
 [[area]]
+file = "BIN/WORLD01/AREA068.EMI"
+script_md5 = "3bea09cb8225a82b74e9c77d601a4c92"
+alias = "Tea Shop"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 447588; shot analysis/area_shots/AREA068_f447588.png"
+sightings = ["20260916T081817:f447588"]
+shots = ["analysis/area_shots/AREA068_f447588.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA069.EMI"
+script_md5 = "672a8dc16070a76c9baa43ef3b5452e2"
+alias = "Eggnog Highway"
+status = "evidence"
+evidence = "named live by player during session 20260916T074923 at frame 5804; shot analysis/area_shots/AREA069_f5804.png"
+sightings = ["20260916T074923:f5804"]
+shots = ["analysis/area_shots/AREA069_f5804.png"]
+
+[[area]]
+file = "BIN/WORLD01/AREA071.EMI"
+script_md5 = "061fa956c4fb3de94944ca7f42ee20ca"
+alias = "Boumou Mountain - Farside"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 122930; shot analysis/area_shots/AREA071_f122930.png"
+sightings = ["20260916T081817:f122930"]
+shots = ["analysis/area_shots/AREA071_f122930.png"]
+
+[[area]]
 file = "BIN/WORLD01/AREA074.EMI"
 script_md5 = "be8f96473692c9e9084f8f42a726c31e"
 alias = "Urukan Tapa"
@@ -423,6 +549,15 @@ sightings = ["20260902T071817:f270980", "20260902T082638:f276241"]
 shots = ["analysis/area_shots/AREA090_f271238.png", "analysis/area_shots/AREA090_f276241.png"]
 
 [[area]]
+file = "BIN/WORLD02/AREA091.EMI"
+script_md5 = "10eb094856ab248df924bd82ce67b63b"
+alias = "Meryleep's Pond"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 511140; shot analysis/area_shots/AREA091_f511140.png"
+sightings = ["20260916T081817:f511140"]
+shots = ["analysis/area_shots/AREA091_f511140.png"]
+
+[[area]]
 file = "BIN/WORLD02/AREA094.EMI"
 script_md5 = "e2778ee724a9824edb7cd185bcb466ee"
 alias = "Rapala Docks"
@@ -448,6 +583,15 @@ status = "evidence"
 evidence = "named live by player during session 20260909T075022 at frame 495205; shot analysis/area_shots/AREA098_f495205.png"
 sightings = ["20260909T075022:f495205"]
 shots = ["analysis/area_shots/AREA098_f495205.png"]
+
+[[area]]
+file = "BIN/WORLD02/AREA099.EMI"
+script_md5 = "574282233e9f00d79555e8235b4e1bfc"
+alias = "Boumou Mountain"
+status = "evidence"
+evidence = "named live by player during session 20260916T081817 at frame 36339; shot analysis/area_shots/AREA099_f36339.png"
+sightings = ["20260916T081817:f36339"]
+shots = ["analysis/area_shots/AREA099_f36339.png"]
 
 [[area]]
 file = "BIN/WORLD02/AREA100.EMI"

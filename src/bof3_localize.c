@@ -145,7 +145,8 @@ static const Bof3XlateTable g_inserts[] = {
 #define MSG_INSERT_CELLS   11u          /* 0x08: a message by index, width unknown -- the budget */
 #define INSERT_TABLE_COUNT (sizeof g_inserts / sizeof g_inserts[0] - 1u)
 
-static uint32_t g_ring;                /* guest address of the slot ring, 0 until first use */
+static uint32_t g_ring;                /* guest address of the slot ring, 0 = allocation failed */
+static int      alloc_ring(void);
 static uint32_t g_next_slot;
 static const Bof3XlateTable *g_table;  /* the active language's table, NULL = leave JP */
 static const Bof3XlateTable *g_insert; /* its insert table, NULL = leave the records */
@@ -457,14 +458,9 @@ static void redirect_message(uint32_t ptr, const char *via, int log_every) {
     }
     if (len > SLOT_SIZE) { g_skipped++; return; }
 
-    if (!g_ring) {
-        g_ring = psx_mod_alloc_guest_memory(SLOT_SIZE * SLOT_COUNT, 16u);
-        if (!g_ring) {
-            say("bof3_localize: enhancement memory allocation failed; script tables off\n");
-            g_table = NULL;
-            return;
-        }
-        say("bof3_localize: ring at %08X\n", g_ring);
+    if (!g_ring && !alloc_ring()) {
+        g_table = NULL;
+        return;
     }
     dst = g_ring + (g_next_slot % SLOT_COUNT) * SLOT_SIZE;
     g_next_slot++;
@@ -773,10 +769,28 @@ static void parse_rowy(const char *spec) {
     }
 }
 
+/* The slot ring lives in enhancement memory (0x9F000000). Allocate it at
+ * registration, not on the first translated message: the runtime stamps the
+ * enhancement-memory layout into every savestate header and refuses a load
+ * whose layout differs from the process's current one, so a lazily grown
+ * aperture made states saved after the first dialogue unloadable in a fresh
+ * session (and pre-dialogue states unloadable after one). One allocation at
+ * startup keeps the layout identical for the life of every process. */
+static int alloc_ring(void) {
+    g_ring = psx_mod_alloc_guest_memory(SLOT_SIZE * SLOT_COUNT, 16u);
+    if (!g_ring) {
+        say("bof3_localize: enhancement memory allocation failed; script tables off\n");
+        return 0;
+    }
+    say("bof3_localize: ring at %08X\n", g_ring);
+    return 1;
+}
+
 PSX_MOD_CONSTRUCTOR(bof3_register_localize_plugin) {
     size_t i;
     const char *ybump = getenv("BOF3_RUBY_YBUMP");
     int okr, oks, okq;
+    (void)alloc_ring();
     g_ybump = ybump ? atoi(ybump) : 0;
     if (getenv("BOF3_RUBY_ROWY"))
         parse_rowy(getenv("BOF3_RUBY_ROWY"));
