@@ -300,13 +300,15 @@ pin on 2026-09-01 (see Log).
   merge. Refreshed against master 2026-09-15 (`26756c2` → `20e0540`, merge not
   rebase, one conflict resolved upstream-first). The `recomp-ui` pin moves back
   to upstream master when it lands.
-- **The Axis B harvest is much thinner than its session count suggests**
-  (found 2026-09-11 while picking the next target). `pc_coverage.py` reports 11
-  of the 14 recorded session ids as provable subsets of `20260904T093558` —
-  they sample the *same process*, so they are re-harvests of one session, not
-  new coverage. Counted honestly (`--merge-duplicates`) every band sits between
-  **3.3 % and 18.8 %** harvested and four are not even estimable. Axis B has
-  effectively had no new content since 2026-09-04. See *Next up 1*.
+- ~~**The Axis B harvest is much thinner than its session count suggests**~~
+  **Retracted 2026-09-16.** The "11 duplicate sessions" and the 3.3–18.8 %
+  band coverage were an artifact of `pc_coverage.py`'s subset detector: it
+  merged with union-find, so any session that banked zero new PCs (a subset
+  of *every* session, since all share the same kernel / boot-EXE core) glued
+  unrelated sessions together. The 2026-09-13 boss session it called a
+  re-harvest holds 29 PCs no other session saw. Fixed (no transitivity; an id
+  is absorbed only into a superset of itself), and the coverage percentages
+  are retired as the headline — see *Next up 1*.
 - **Savestate compatibility across the framework bump** is unchecked; the
   `savestate.c` rework (`47bda817`) made pre-merge `.pst` files load with
   `last_ok: 0` once already. In-game memory-card saves are the reliable path.
@@ -336,33 +338,47 @@ pin on 2026-09-01 (see Log).
    a boss and a party change on the 08:44 exe should show
    `harvest_interp_pcs.py` reporting few or no new interior entries; if it
    still reports many, the records are incomplete (the 18 data-classed areas,
-   the world map, the PLP tail run are the known gaps). What follows is
-   unchanged: With the kernel
-   retired, the game-text + overlay region is what is left: 1.54 G interpreted
-   instructions across 2 911 PCs, and the harvest behind it is 3.3–18.8 %
-   complete per band (see *In flight*). `pc_coverage.py` names the content to
-   play, worst-covered first:
+   the world map, the PLP tail run are the known gaps).
+   **Proven in play 2026-09-13/16:** a new boss (BOSS012/013) added 11
+   BOSS-band PCs, each entered once for 1–26 instructions; two and a half
+   hours of new WORLD01/02 areas added 19. The seeds hold.
 
-   | Band | Coverage | What to play |
-   |---|---|---|
-   | `0x80117000` Research Plant | **never sampled** | the Research Plant / Plant areas |
-   | `0x800C1800` BOSS ×35 | 3.3 % | boss fights — any, all of them |
-   | `0x80196800` field/map core | 4.7 % | ordinary field walking and map transitions |
-   | `0x801CE400` PLCHAR ×19 | 9.0 % | party members on screen, form changes |
-   | `0x801D0C00` BATTLE+ETC+SCENARIO | 11.4 % | regular battles, scenario cutscenes |
+   **The headline metric is now interpreted instructions per frame, lower is
+   better** (`python tools/interp_rate.py`, also printed by every harvest).
+   The coverage table that used to sit here measured the *size of the
+   harvested set* against an estimated population, and once the bands were
+   seeded from the disc that population became tiny by design — the estimate
+   read 1.8–5 % and looked like a failing harvest when the truth was
+   "nothing left to harvest". A PSX frame is ~560 000 guest instructions:
 
-   Repetition of *seen* content adds ~0, and re-harvesting one running process
-   adds nothing at all — that is what produced the 11 duplicate ids. One long
-   session through new areas is worth more than ten polls of a running one.
-   Everything after the harvest is mechanical (`axis_b_loop.sh`).
-1b. **The A0/B0/C0 vector trampolines are now the whole kernel residual**
-   (87 % of what OpenBIOS kernel RAM still interprets after #346): 180 M
-   instructions over **90 M entries** at `0xB0`, i.e. ~2 instructions each, so
-   the cost is a dispatch round-trip per kernel call rather than instruction
-   count. The profile excludes them by design (runtime-written trampolines,
-   rule 18). Plan step 5 — **discuss before touching**, and only after the
-   Axis B round, since it is a smaller prize than the overlay region and a
-   riskier one.
+   | Session (build-relprof, OpenBIOS) | Frames | Interp insns / frame | Of guest |
+   |---|---:|---:|---:|
+   | 2026-09-12 evening | 212 324 | 301 | 0.05 % |
+   | 2026-09-13 boss + WORLD00 | 155 625 | 336 | 0.06 % |
+   | 2026-09-16 morning, WORLD01/02 | 536 607 | 392 | 0.07 % |
+   | 2026-09-16 evening | 304 965 | 382 | 0.07 % |
+
+   Short runs parked in one screen read high (4 900–5 800 on the two
+   sub-25 000-frame rows) and the runtime's frame counter can restart inside
+   a session while the interpreted-instruction counter does not, so compare
+   long walks only. What those 300–400 instructions are: the A0/B0/C0 kernel
+   trampolines, the OpenBIOS exception-handler prologue at `0x27B4` (declared
+   words × entries, rule 18), and the boot-EXE stub run `0x80164D28..E90` that
+   battle transitions dirty — none harvestable by play. Play still pays for
+   proof (BOSS / PLCHAR / SCENARIO seeds) and for translation coverage; the
+   loop after a harvest stays mechanical (`axis_b_loop.sh`).
+1b. **NEXT (queued 2026-09-16 for the following session): the A0/B0/C0
+   vector trampolines.** They are the whole kernel residual (87 % of what
+   OpenBIOS kernel RAM still interprets after #346): 180 M instructions over
+   **90 M entries** at `0xB0`, i.e. ~2 instructions each, so the cost is a
+   dispatch round-trip per kernel call rather than instruction count, and
+   they are most of the 300–400 interpreted instructions per frame above.
+   The profile excludes them by design (runtime-written trampolines, rule
+   18); this is plan step 5 of
+   [`upstream-kernel-bless-plan.md`](upstream-kernel-bless-plan.md). Axis B
+   has converged (item 1), so the precondition is met. It is a framework
+   change, so it starts with a design note here and lands as a psxrecomp PR;
+   measure with `tools/interp_rate.py` before and after on the same walk.
 2. ~~**Ship the two psxrecomp fork branches**~~ **DONE** — `feat/dirty-pc-enrichment`
    and `fix/static-fragments-per-variant` both reached upstream master, which
    is why the pin sits on plain `ed55299b` and no fork branch carries anything
@@ -482,6 +498,7 @@ Ghidra GUI running. Prior text-decode work at `D:\BoFIII`.
 
 | Date | Entry |
 |---|---|
+| 2026-09-16 | **The "thin harvest" was a tool artifact; the headline metric is now interpreted instructions per frame.** The user's new-area / new-boss sessions banked "underwhelming" PC counts, so the harvest was audited end to end: it is correct. Every session since 2026-09-12 carries ids, area stamps and occupancy CRCs; the boss session added 11 BOSS-band PCs (each 1 entry, ≤ 26 instructions — the boss ran native) and the WORLD01/02 walk added 19. What was wrong was `pc_coverage.py duplicate_sessions`: union-find merged through zero-gain sessions (subsets of every session, since all share the kernel / boot-EXE core), so the boss session with 29 exclusive PCs was reported as a re-harvest of 2026-09-12, and the 3.3–18.8 % / 1.8–5 % coverage figures were built on that merge. Fixed (absorb only into a superset of itself, no transitivity; the report now says "subset sessions" and admits it cannot tell a re-harvest from a fresh run on covered content). The 2026-09-11 Log entry below is superseded. Coverage was also measuring the wrong thing after the seeding, so it is retired as the headline: `harvest_interp_pcs.py` now prints **interpreted instructions per frame** (and no longer prints a meaningless interp-vs-dispatches percentage), `area_poller.py` records it per harvest, and new [`tools/interp_rate.py`](../tools/interp_rate.py) tabulates it per session from the timeline. Long walks read **290–390 per frame = 0.05–0.07 % of the guest**, all of it kernel trampolines, the `0x27B4` prologue and the `0x80164D28..E90` boot-EXE stubs. Queued next: the A0/B0/C0 trampolines (*Next up 1b*). |
 | 2026-09-15 | **Pins bumped: psxrecomp `baca0a8a` → `4a792379`, recomp-ui `26756c2` → `20e0540`.** Our [psxrecomp#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346) merged 2026-09-12 (`c5390e42`); the pin is upstream master `193a60b8` (62 commits on) plus one commit, because **plain master cannot regenerate this title**: upstream `3a174fab` calls a DLL-only reconciliation at the tail of `compile_overlays.main()` with `cache_dir`, which `--static` never binds, so every static run wrote its output and then died with `UnboundLocalError`, exit 1, aborting `axis_b_loop.sh` before the rebuild. Fixed and opened as [psxrecomp#367](https://github.com/RetroPortingToolKit/psxrecomp/pull/367), with `compile_overlays_static_tail` (fails on master, passes on the fix; `test_aot_overlay_pipeline.py` still 24/24). [recomp-ui#48](https://github.com/RetroPortingToolKit/recomp-ui/pull/48) had collided with master again — master's `cb7e54b` independently fixed the same two launcher bugs (duplicate ImGui IDs on shortcut rows, Backspace unbind); merged master in and resolved upstream-first, keeping only what master lacks (no-gamepad pad-column gating, Select-chord labels, the `None` unbind persistence). #48 now reads MERGEABLE/CLEAN. **Regenerated across the bump:** 7 base-EXE shards moved, overlay codegen hash `0x4fe894d2`, 772 overlay units; BIOS dispatch totals unchanged (OpenBIOS 3990, retail 13012) and still no dispatch key inside a declared range. **Trap:** `build-relprof` had drifted to `Release` with `PSX_DEBUG_TOOLS=OFF` (an unset build type defaults to Release in `runtime.cmake`, and cached options persist), so the first rebuilt exe booted with no debug server; reconfigured with every option explicit (HANDOFF → *Building against the pin*). **Verified** on the corrected tree: debug server listening, frames 9 → 10 520 in 30 s headless, `kernel_bless` mismatch 0 with 3 patch ranges / 26 skips, localization plugin registered, `.exe.debug` sidecar present. |
 | 2026-09-13 | **EXP / zenny boost sliders built and proven — the first trusted static plugin.** `src/bof3_exp_boost.c` + `mods/preloaded/packages/bof3.exp-boost` (one feature, two integer sliders 1..50): one hook at `Battle_EnemyDefeated 0x801E542C` scales the dying enemy's yields through the current-object pointer `0x801EB458`, so totals, awards and level-ups follow. Headless proof on the user's one-attack-left anchor: 84/6 → 840/60, Teepo +864, wallet +60, same tick count as stock; sliders go down to 0, and the user verified in play that EXP 0 / zenny 10 gives a 0-EXP, no-level-up win with zenny still awarded. Traps paid for: hooks are emitted only at prologues (the BATL_END results phases are alias entries → nothing emitted, unit byte-identical); function-entry callbacks fire whether or not the feature is enabled; the `0x801D0C00` band is shared (check registry id `0x10`); `psx_mod_function_entry` gets `a0` garbage there — read the game's own pointer. [`EXP_BOOST.md`](EXP_BOOST.md) |
 | 2026-09-13 | **Steal roll found and the first gameplay mod package shipped.** Pilfer/Steal roll inside their own BMAGIC overlays (MAGIC065 / MAGIC216 at `0x801EEC00`): `(Rand() & 0xFF) < rate[enemy drop class] × agility mod`, rate table `0,1,3,6,12,16,32,32`, mod 4..12 by AGI difference — word for word the community wiki table; the stolen item is enemy drop slot 1 and is cleared on success. Found by a write-traced replay loop (`tools/steal_hunt.py`) plus a Rand-only function filter that lists every roll with its caller; the game-mode function `0x801E42C0` was a false lead. `mods/preloaded/packages/bof3.steal-always` (format 6, two guarded `disc_user` patches turning the random byte into 0) proven 6/6 headless vs 0/22 stock; `CMakeLists.txt` now declares `PRELOADED_MODS_DIR`. Trap: `names/abilities.toml` / `magic.toml` names are shifted one record against the engine's ids (`0x41` is Pilfer, labelled Tsunami). [`STEAL.md`](STEAL.md) |

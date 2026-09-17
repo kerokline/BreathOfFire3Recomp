@@ -40,6 +40,13 @@ the harvest is mechanical — §1 below. Also left: naming areas off their
 screenshots, the tier-1/2 runtime enrichment, per-occupant fragment demands
 (would cut `generated/` 1.6 GB → ~400 MB), and the translation reading review.
 
+**2026-09-16:** the "3.3 % to 18.8 %" and "11 of 14 session ids are subsets"
+claims in the paragraph above were a bug in `pc_coverage.py`'s subset
+detector (union-find bridged through zero-gain sessions) and are withdrawn;
+the boss session it discounted holds 29 exclusive PCs. Coverage is retired
+as the Axis B headline — read **interpreted instructions per frame** from
+`tools/interp_rate.py` instead (long walks: 290–390, 0.05–0.07 % of the
+guest, all kernel trampolines + owned boot-EXE text). STATUS.md → *Next up 1*.
 **2026-09-12:** the premise of the paragraph above changed. Play was never
 finding anything the disc does not hold: every overlay family's entry points
 live in engine records — the AREA descriptor table `0x801802EC`, the SCENARIO

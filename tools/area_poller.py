@@ -283,8 +283,11 @@ def cmd_watch(a):
         except Exception as e:
             print(f"[f{fr}]   harvest ({why}) failed: {e}", file=sys.stderr)
             return None
+        ipf = r.get("interp_per_frame")
         print(f"[f{fr}]   harvest ({why}): {r['new']} new PCs, observed set {r['after']} "
-              f"({r['entered']} entered)")
+              f"({r['entered']} entered); interpreted "
+              f"{'%.0f' % ipf if ipf is not None else '?'} insns/frame this run "
+              f"(lower is better)")
         if r.get("area"):
             # "0 new PCs, N stamped" is the healthy shape once an area has been
             # walked before: nothing undiscovered left, but the attribution for
@@ -314,6 +317,7 @@ def cmd_watch(a):
                "new": r["new"], "total": r["after"], "entered": r["entered"],
                "stamped": r.get("stamped", 0), "area_file": r.get("area"),
                "interp": r["interp"], "native": r["native"],
+               "interp_per_frame": r.get("interp_per_frame"),
                "coverage": g.get("coverage"), "est_total": g.get("estimate")}
         if occ:
             row.update({"occ_seed": occ["seed"],
