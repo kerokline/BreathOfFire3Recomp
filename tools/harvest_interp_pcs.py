@@ -480,7 +480,10 @@ def occ_split(rows, captures=None):
                        Cannot be played away; this is the real residual list.
       kernel           crc=0 and PC < 0x10000: the BIOS kernel copy in RAM.
       bootexe          crc=0 in SLPS_009.90 text outside every band: a boot
-                       EXE page written at run time.
+                       EXE PC with no native entry (a computed jump into the
+                       middle of a block, or -- rarer -- a page written at run
+                       time; this tool does not check which). The decompressor
+                       copy loop was the former (docs/computed-stride-jump.md).
       none             crc=0 in no band and no owner: genuinely outside
                        compiled code (was mislabelled onto interior_new rows
                        until 2026-09-07 evening).
