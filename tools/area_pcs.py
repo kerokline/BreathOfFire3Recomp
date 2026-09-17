@@ -82,7 +82,7 @@ SEARCH_CHAIN = [
     (0x80165AA4, "Inventory_Add",        "boot EXE",  "credit the item"),
     (0x80166720, "(item name pointer)",  "boot EXE",  "name into the message buffer"),
     (0x801503AC, "(message open)",       "boot EXE",  "messages 1 / 2 / 3"),
-    (0x8015E908, "(sound cue)",          "boot EXE",  "cue 0x106"),
+    (0x8015E908, "SE_Play",              "boot EXE",  "cue 0x106"),
     (0x8017ED6C, "(sprintf)",            "boot EXE",  "formats the zenny amount"),
 ]
 

@@ -29,7 +29,7 @@ every one of the 54 areas that hold anything, and by no others:
 | `0x80165AA4` | `Inventory_Add` | boot EXE |
 | `0x80166720` | item-name pointer | boot EXE |
 | `0x801503AC` | message open | boot EXE |
-| `0x8015E908` | sound cue | boot EXE |
+| `0x8015E908` | `SE_Play` | boot EXE |
 | `0x8017ED6C` | sprintf | boot EXE |
 
 All eleven are in bands the current `generated/` tree compiles (GAME.EMI

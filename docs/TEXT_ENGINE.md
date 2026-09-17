@@ -80,7 +80,7 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 | `0x06` | reset colour |
 | `0x07` | insert from 32-byte record table at `0x801490D3 + 0x20 * next_byte` |
 | `0x08` | **insert message by index** — see the table formula above |
-| `0x0A` | play sound — `0x8015E908(next_byte \| 0x200)` |
+| `0x0A` | play sound — `SE_Play(next_byte \| 0x200)` (`0x8015E908`, bank 2; [`SOUND_CUES.md`](SOUND_CUES.md)) |
 | `0x0C` | (string head only) speaker/portrait id in the next byte → `0x801490CA`; consumed by `MsgBox_Reset`, never seen by the stepper |
 | `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1 with an 8-frame delay; the renderer's handler for it is a no-op, so nothing moves — the `y += 8` this row used to claim was that delay count misread, corrected 2026-09-12) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
 | `0x0D` / `0x0E` | **open / close an emphasis span** (flag `0x8014909D` / `0x801490A0`). Read statically as enable/disable drawing; the script says otherwise — 105 opens, 105 closes, 106 `0x0F` uses, and every `0x0F` in the disc follows a closed span (`<0d>えらいっ<40><0e><0f><0a>`). The span is what the effect is applied to |
