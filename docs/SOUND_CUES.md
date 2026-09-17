@@ -340,7 +340,7 @@ Who lives in which bank, from the 901 triplets on the disc
 | 1 | `COMN_SE.EMI`, `BATTLE*.EMI`, `BOSS*.EMI` (11 entries), `BATL_RET`/`BATL_SE` (4), `MAGIC*` (1..6) | the system set — the menu blings the player confirmed as context-free are `COMN_SE`'s VAGs 1..8, duplicated in every battle file — and each spell's own samples over `0x100..` |
 | 2 | `BATTLE*.EMI`, `BOSS*.EMI` (7), `AREAnnn.EMI` (3..13) | field / battle effects |
 | 3, 4, 5 | `BPLCHAR/BPLD*.EMI`, `BPLU*.EMI` (207 files) | the party voice slots; the file name carries the character ids of the party they were built for |
-| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds |
+| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds: **one enemy file per area** (`ENEMYnnn` = `AREAnnn`'s encounter group, no area file carries a bank 6 of its own), 8 programs = 8 species slots, cue `0x600 + 2*slot + tone`; the object's creature byte `+0xE0` is its slot in that group. 58 distinct groups; the set in 123 files (towns, story rooms, the world map, Dauna Mine) is the generic one, and the 77 others are the fight areas (Cedar Woods, Nu Cave, McNeil Manor, the Tower, Mount Mourangi, the Dump Site…). Boss files add a 1-program set for the boss |
 
 `tools/audio_banks.py join --apply` writes each catalogue sound's disc
 homes into `names/se_cues.toml` (`disc = [...]`); 28 of the first 29
@@ -381,6 +381,21 @@ Limits: banks whose VAB libsnd has not reopened resolve to "not a VAB"
 (the 2026-09-05 savestates show this for vabs 5 and 6; live play does
 not), and the hash covers the sample only — the same VAG at another
 centre note is listed once with its first pitch.
+
+## Enemies: set groups per area, not a party-style concatenation (2026-09-17)
+
+The party voice files are built per character combination; the enemy
+files are not. Every `ENEMYnnn.EMI` is a ready-made **group of up to 8
+species** — 8 programs, 16 cue entries `0x600..0x60F` = slot × 2 + tone —
+and the number is the area's: no `AREA` file has a bank 6 of its own, and
+the files with a non-generic set are precisely the areas with random
+encounters (Cedar Woods 3/5/8/9/10, Nu Cave 22, McNeil Manor 27/28, the
+Tower 40/42/44/48, Mount Mourangi 51, Dump Site 52 …), while towns, story
+rooms and the world map carry the one generic set found in 123 files. So
+an enemy's creature byte `+0xE0` selects its slot within the area's group,
+and naming a bank-6 sample means naming the species in slot n of area
+nnn's encounter table — the enemy table this repo does not have yet. The
+boss fights add a `BOSSnnn` bank-6 set of one program for the boss itself.
 
 ## Names for every sample, by convention (2026-09-17)
 
