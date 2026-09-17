@@ -143,6 +143,14 @@ are the AI/behaviour bytes `EnemyAI_ChooseActions` walks (the "`0x800E407C`
 script" is record 0's `+0x7C`). Extracted for all 200 areas by
 `tools/enemy_table.py` → `names/enemies.toml`.
 
+**To check later:** the wiki shows a 3 × 3 resistance grid per species
+(values 0..7). It is not a plain byte run in the record (searched 2026-09-17
+for PainWeed's `7 7 7 / 7 7 5 / 4 4 2`), so it is encoded or packed
+somewhere in `+0x00..0x47`. Decoding it would also adjudicate the two
+wiki/US-disc name-pair disagreements noted in `names/enemy_gloss.toml`
+(PainWeed/RankWeed, Charyb/Scylla), and the drop slots (`+0x18..`) against
+the wiki's steal/drop columns.
+
 ### Persistent character records — boot-EXE data, `0x80144964 + roster*0xA4`, 8 records
 
 Base and stride are **proven by code**: `Char_RecalcStats` compares its
