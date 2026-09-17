@@ -49,6 +49,15 @@ else "field" / "battle" from the table hash, else "tables:<hash8>". Every
 new table hash is dumped once to analysis/se_tables/<md5>.bin for decode. Run it beside area_poller.py; both are read-only on the runtime
 (this one arms write-trace ranges and puts the previous ones back on exit).
 
+Enemies: a bank-6 cue names a creature slot (0x600 + 2*slot + tone) in the
+area's ENEMYnnn group (SOUND_CUES.md "Enemies"). On every bank-6 cue the
+watcher reads the current enemy object (*0x801EB458, its working record at
+obj - 0x80: +0x60 species slot, +0x08 level, +0x20 max HP, +0x04 zenny,
++0x06 EXP, +0x24/26/28 ATK/DEF/AGI) and, with --label, asks which enemy
+that was -- read the name off the screen -- writing names/enemies.toml
+keyed by area + slot with the stat signature and the sample ids heard.
+Two or three named fights per area pin the slot -> species order.
+
 Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
 """
 import argparse
@@ -71,6 +80,65 @@ import name_map               # noqa: E402
 import se_resolve             # noqa: E402
 
 DISC_INDEX = os.path.join(ROOT, "names", "audio_banks.toml")
+ENEMIES_TOML = os.path.join(ROOT, "names", "enemies.toml")
+CUR_OBJECT = 0x801EB458          # BATTLE.EMI: current actor object (docs/BATTLE_RAM.md)
+ENEMY_REC0, ENEMY_STRIDE, ENEMY_MAX = 0x801EB620, 0x118, 8
+OBJ_TO_REC = -0x80               # obj+0x84 is record+0x04 (zenny), EXP_BOOST.md
+
+
+def read_enemy(read_ram):
+    """The current enemy's record fields, or None when the current object is not
+    an enemy (a party member's object lives elsewhere)."""
+    import struct
+    try:
+        obj = struct.unpack("<I", read_ram(CUR_OBJECT, 4))[0]
+    except Exception:
+        return None
+    rec = obj + OBJ_TO_REC
+    if not (ENEMY_REC0 <= rec < ENEMY_REC0 + ENEMY_MAX * ENEMY_STRIDE) or (rec - ENEMY_REC0) % ENEMY_STRIDE:
+        return None
+    try:
+        b = read_ram(rec, 0x70)
+    except Exception:
+        return None
+    if len(b) < 0x70:
+        return None
+    u16 = lambda o: struct.unpack_from("<H", b, o)[0]
+    return dict(n=(rec - ENEMY_REC0) // ENEMY_STRIDE, rec="0x%08X" % rec, slot=b[0x60],
+                level=u16(0x08), max_hp=u16(0x20), hp=u16(0x14), zenny=u16(0x04), exp=u16(0x06),
+                atk=u16(0x24), df=u16(0x26), agi=u16(0x28), size=b[0x34])
+
+
+def load_enemies():
+    if not os.path.exists(ENEMIES_TOML):
+        return {}
+    d = tomllib.load(open(ENEMIES_TOML, "rb"))
+    return {(e["area"], int(e["slot"])): dict(e, sounds=list(e.get("sounds", []))) for e in d.get("enemy", [])}
+
+
+def save_enemies(en):
+    rows = ["# names/enemies.toml -- enemy species by area and creature slot, read off the screen.",
+            "#   area      the AREAnnn resident when the enemy sounded (its ENEMYnnn audio group,",
+            "#             its 8-row AI script table: record +0x60 indexes both)",
+            "#   slot      record +0x60 = creature slot 0..7 (bank-6 cue = 0x600 + 2*slot + tone)",
+            "#   name      the on-screen name, in the player's words",
+            "#   level / max_hp / exp / zenny / atk / def / agi / size   the working record when first heard",
+            "#   sounds    sample ids (names/se_cues.toml) this enemy has been heard making",
+            "#   evidence  se_watch session and frame of the first hearing",
+            ""]
+    for (area, slot), e in sorted(en.items()):
+        rows.append("[[enemy]]")
+        rows.append('area = "%s"' % area)
+        rows.append("slot = %d" % slot)
+        rows.append('name = "%s"' % e["name"].replace('"', "'"))
+        for k in ("level", "max_hp", "exp", "zenny", "atk", "def", "agi", "size"):
+            if k in e:
+                rows.append("%s = %d" % (k, e[k]))
+        rows.append("sounds = [%s]" % ", ".join('"%s"' % x for x in e.get("sounds", [])))
+        rows.append('evidence = "%s"' % e.get("evidence", "").replace('"', "'"))
+        rows.append("")
+    with open(ENEMIES_TOML, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(rows))
 
 
 def disc_index():
@@ -312,6 +380,29 @@ def ask_pending(pending, labels, session):
         print("   -> names/se_cues.toml: %s = %s" % (row["sound"], ans), flush=True)
 
 
+def ask_enemies(pending, enemies, area, session):
+    """Ask the on-screen name of every enemy slot heard for the first time in this area."""
+    items = sorted(pending.items(), key=lambda kv: kv[1]["frame"])
+    pending.clear()
+    print("   -- %d enemy slot(s) not yet named in %s; Enter = skip --" % (len(items), area or "?"), flush=True)
+    for (ar, slot), q in items:
+        en = q["en"]
+        try:
+            ans = input("   [f%d] %s slot %d  L%d HP%d EXP%d zenny%d ATK%d DEF%d AGI%d: which enemy? " % (
+                q["frame"], ar, slot, en["level"], en["max_hp"], en["exp"], en["zenny"], en["atk"], en["df"], en["agi"])).strip()
+        except EOFError:
+            ans = ""
+        if not ans:
+            continue
+        enemies[(ar, slot)] = {"area": ar, "slot": slot, "name": ans,
+                               "level": en["level"], "max_hp": en["max_hp"], "exp": en["exp"], "zenny": en["zenny"],
+                               "atk": en["atk"], "def": en["df"], "agi": en["agi"], "size": en["size"],
+                               "sounds": [q["sound"]] if q.get("sound") else [],
+                               "evidence": "se_watch %s f%d, record %s" % (session, q["frame"], en["rec"])}
+        save_enemies(enemies)
+        print("   -> names/enemies.toml: %s slot %d = %s" % (ar, slot, ans), flush=True)
+
+
 # ----------------------------------------------------------------- main
 
 def main():
@@ -336,6 +427,8 @@ def main():
     labels = load_labels()
     read_ram, read_spu = se_resolve.live_readers(a.port)
     disc = disc_index()
+    enemies = load_enemies()
+    pending_enemies = {}    # (area, slot) -> first sighting, asked with the sounds
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     prev, armed = cd.wtrace_arm_ranges(a.port, [(CELL_ID, CELL_BANK + 4)])
     print("se_watch: armed 0x%08X-0x%08X (%s), session %s -> %s, %d label(s) known" % (
@@ -399,6 +492,21 @@ def main():
                             if res else ("(%s)" % why if why else "(half a call: ring gap)"))
                     if res:
                         row["disc"] = where[:12]
+                    en = read_enemy(read_ram) if bank == 6 else None
+                    en_known = enemies.get((area, en["slot"])) if (en and area) else None
+                    if en:
+                        row["enemy"] = en
+                        if en_known:
+                            if sound and sound not in en_known["sounds"]:
+                                en_known["sounds"].append(sound)
+                                save_enemies(enemies)
+                        elif area and (area, en["slot"]) not in pending_enemies:
+                            pending_enemies[(area, en["slot"])] = dict(en=en, frame=int(e["frame"]), sound=sound)
+                            last_cue_t = time.time()
+                    if en:
+                        desc += "  enemy slot %d L%d HP%d/%d%s" % (
+                            en["slot"], en["level"], en["hp"], en["max_hp"],
+                            (" = " + en_known["name"]) if en_known else "")
                     print("[f%d] cue %s (%s) %-34s ra=%s %-26s %s" % (
                         row["frame"], row["cue"], mode, desc, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
@@ -411,16 +519,22 @@ def main():
                             row=row, via=via, ra=e["ra"], ovl=ovl, caller=caller, res=res, auto=auto)
                         last_cue_t = time.time()
                 last_frame = fr
-            if pending and (a.label_gap <= 0 or time.time() - last_cue_t >= a.label_gap):
-                ask_pending(pending, labels, session)
+            if (pending or pending_enemies) and (a.label_gap <= 0 or time.time() - last_cue_t >= a.label_gap):
+                if pending:
+                    ask_pending(pending, labels, session)
+                if pending_enemies and a.label:
+                    ask_enemies(pending_enemies, enemies, area, session)
             if a.seconds and time.time() - t0 >= a.seconds:
                 break
     except KeyboardInterrupt:
         pass
     finally:
-        if pending:
+        if pending or pending_enemies:
             try:
-                ask_pending(pending, labels, session)
+                if pending:
+                    ask_pending(pending, labels, session)
+                if pending_enemies and a.label:
+                    ask_enemies(pending_enemies, enemies, area, session)
             except (KeyboardInterrupt, EOFError):
                 pass
         cd.wtrace_restore(a.port, prev)

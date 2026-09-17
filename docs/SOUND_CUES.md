@@ -397,6 +397,16 @@ and naming a bank-6 sample means naming the species in slot n of area
 nnn's encounter table — the enemy table this repo does not have yet. The
 boss fights add a `BOSSnnn` bank-6 set of one program for the boss itself.
 
+**Naming them from play:** the slot byte is record `+0x60`, the same index
+the engine uses for the enemy's AI script row, and the working record
+(`obj - 0x80`, `docs/BATTLE_RAM.md`) carries level, max HP, EXP, zenny and
+ATK/DEF/AGI. On every bank-6 cue `se_watch` reads the current enemy's
+record and, with `--label`, asks for the on-screen name once per (area,
+slot), writing `names/enemies.toml` with the stat signature and the sample
+ids heard. Two or three named fights per area pin the slot → species
+order; the stat signature lets the same species be recognised in another
+area's group even before it is named there.
+
 ## Names for every sample, by convention (2026-09-17)
 
 The player's rule, now `tools/audio_banks.py names --apply`: a sample is
