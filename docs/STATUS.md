@@ -429,6 +429,16 @@ pin on 2026-09-01 (see Log).
    intro caps ~45 fps on dbg — settle pace-bound vs CPU-bound on a windowed run;
    the intro does not execute headless).
 
+8. **Audio, what is left after 2026-09-17** ([`SOUND_CUES.md`](SOUND_CUES.md)):
+   the effects side is closed (cue words are slots, every sample named and
+   homed, enemies named from the area tables). Open: **music** (sequences,
+   the 16 sequencer voices, fades — untouched); the effect interpreter's
+   sound opcode (only needed to change *when* a spell sounds); the enemy
+   record's **resistance grid and drop slots** against the wiki, which would
+   also adjudicate the two wiki/US-disc name-pair disagreements; and the
+   one-record **ability-name shift** still carried by `text_tables.py` and
+   `names/magic.toml`'s name columns (`audio_banks.py` compensates).
+
 ## Known issues, non-blocking
 
 - **Starvation watchdog `exit(2)`**, reported as `reason: atexit` /
