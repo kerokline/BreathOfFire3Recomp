@@ -1,7 +1,10 @@
 # names/se_cues.toml -- what each SE_Play cue sounds like, heard in play.
 #   cue    bank<<8 | id as SE_Play receives it (docs/SOUND_CUES.md)
-#   mode   field | battle | unknown -- banks 1 and 2 are swapped for battle,
-#          so the same cue word is a different sound in a fight
+#   mode   the context that fixes what the cue word sounds like: magic:<overlay>
+#          (a spell's own sample payload is loaded), field | battle (the bank 1+2
+#          cue tables match a savestate), or tables:<md5 prefix> for a table not
+#          yet seen in a savestate (its bytes are in analysis/se_tables/), or any
+#          for the menu set 0x100..0x107 the player confirmed is the same everywhere
 #   label  what was heard, in the player's words
 #   status evidence (heard live) | hypothesis
 #   evidence  se_watch session and frame of the hearing, nearest caller
@@ -15,129 +18,45 @@ evidence = "se_watch 20260917T073716 f358, ra 0xBFC06694 "
 
 [[cue]]
 cue = 0x0100
-mode = "battle"
-label = "Battle Menu Down"
+mode = "magic:MAGIC009"
+label = "Defense?"
 status = "evidence"
-evidence = "se_watch 20260917T073716 f23556, ra 0x800942D0 BATTLE:SkillMenu_Confirm"
-
-[[cue]]
-cue = 0x0100
-mode = "field"
-label = "Unknown (World Map)"
-status = "hypothesis"
-evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4654, ra 0x801D7750 Battle_PhaseStep_Exit2"
-
-[[cue]]
-cue = 0x0100
-mode = "tables:f3b9cfe0"
-label = "RiRiPu"
-status = "evidence"
-evidence = "se_watch 20260917T081539 f15415, ra 0x801EEF8C "
+evidence = "se_watch 20260917T084107 f45936, ra 0x8015E140 boot:SE_PlayTracked"
 
 [[cue]]
 cue = 0x0101
-mode = "battle"
-label = "Battle Menu Select?"
+mode = "magic:SHOP"
+label = "Menu Card File Select"
 status = "evidence"
-evidence = "se_watch 20260917T073716 f21682, ra 0x801D2198 BATTLE:BattleMenu_DirectionHold"
-
-[[cue]]
-cue = 0x0101
-mode = "field"
-label = "Memory Card File Select"
-status = "evidence"
-evidence = "se_watch 20260917T073716 f8498, ra 0x801E57CC START:FUN_801e5764"
-
-[[cue]]
-cue = 0x0101
-mode = "tables:3e40abae"
-label = "Quiet Menu Move"
-status = "evidence"
-evidence = "se_watch 20260917T081539 f4610, ra 0x801E57CC START:FUN_801e5764"
+evidence = "se_watch 20260917T083025 f8560, ra 0x801E57CC START:FUN_801e5764"
 
 [[cue]]
 cue = 0x0102
-mode = "field"
-label = "Unknown (Still World Map)"
-status = "hypothesis"
-evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4786, ra 0x801D7470 Battle_PhaseStep_Exit2"
-
-[[cue]]
-cue = 0x0102
-mode = "tables:3e40abae"
-label = "Menu Select"
+mode = "magic:SHOP"
+label = "Start Screen - Swipe Sound"
 status = "evidence"
-evidence = "se_watch 20260917T081539 f3051, ra 0x801E51EC START:FUN_801e51cc"
-
-[[cue]]
-cue = 0x0103
-mode = "field"
-label = "Unknown (Still World Map) 2"
-status = "hypothesis"
-evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4908, ra 0x801D5724 Battle_BeginAction"
-
-[[cue]]
-cue = 0x0103
-mode = "tables:cf666e28"
-label = "Magic Select"
-status = "evidence"
-evidence = "se_watch 20260917T081539 f11809, ra 0x8009445C BATTLE:SkillMenu_Confirm"
+evidence = "se_watch 20260917T083025 f2903, ra 0x801E51EC START:FUN_801e51cc"
 
 [[cue]]
 cue = 0x0104
-mode = "battle"
-label = "Battle Confirm"
+mode = "magic:MAGIC009"
+label = "Battle Select"
 status = "evidence"
-evidence = "se_watch 20260917T073716 f20042, ra 0x801D2050 BATTLE:Battle_RoundStart"
+evidence = "se_watch 20260917T084107 f47478, ra 0x801D2050 BATTLE:Battle_RoundStart"
 
 [[cue]]
 cue = 0x0104
-mode = "field"
-label = "Memory Card Select"
+mode = "magic:SHOP"
+label = "Menu Card Select"
 status = "evidence"
-evidence = "se_watch 20260917T073716 f7655, ra 0x801E53A0 START:FUN_801e525c"
+evidence = "se_watch 20260917T083025 f4635, ra 0x801E53A0 START:FUN_801e525c"
 
 [[cue]]
 cue = 0x0104
-mode = "tables:3e40abae"
-label = "Menu Select"
+mode = "tables:f0226872"
+label = "Momo Attack"
 status = "evidence"
-evidence = "se_watch 20260917T081539 f3131, ra 0x801E53A0 START:FUN_801e525c"
-
-[[cue]]
-cue = 0x0105
-mode = "field"
-label = "Start Screen"
-status = "evidence"
-evidence = "se_watch 20260917T073716 f2531, ra 0x801D1114 "
-
-[[cue]]
-cue = 0x0105
-mode = "tables:3e40abae"
-label = "Start Screen"
-status = "evidence"
-evidence = "se_watch 20260917T081539 f1693, ra 0x801D1114 "
-
-[[cue]]
-cue = 0x0106
-mode = "battle"
-label = "Battle Cancel"
-status = "evidence"
-evidence = "se_watch 20260917T073716 f20610, ra 0x80093EA0 BATTLE:Cmd_ConfirmAttack"
-
-[[cue]]
-cue = 0x0106
-mode = "field"
-label = "Exit Menu?"
-status = "hypothesis"
-evidence = "CUE WORD UNRELIABLE: paired by the pre-fix se_watch (id taken from the previous call, caller named against BATTLE.EMI while START.EMI was resident) -- relabel with the fixed tool; se_watch 20260917T070921 f4498, ra 0x801D314C Battle_BeginAction"
-
-[[cue]]
-cue = 0x0106
-mode = "tables:cf666e28"
-label = "Menu Quit"
-status = "evidence"
-evidence = "se_watch 20260917T081539 f13381, ra 0x800943FC BATTLE:SkillMenu_Confirm"
+evidence = "se_watch 20260917T083612 f23763, ra 0x801D2050 BATTLE:Battle_RoundStart"
 
 [[cue]]
 cue = 0x0200
@@ -155,10 +74,24 @@ evidence = "Battle_PlayHitSound normal hit, weapon class 0/4/5 (staff, ammo) or 
 
 [[cue]]
 cue = 0x0202
+mode = "magic:MAGIC009"
+label = "Defense?"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f46242, ra 0x800A8830 BATTLE:Battle_PlayHitSound"
+
+[[cue]]
+cue = 0x0202
 mode = "tables:10fd08aa"
 label = "?"
 status = "evidence"
 evidence = "se_watch 20260917T081539 f18413, ra 0x800A8830 BATTLE:Battle_PlayHitSound"
+
+[[cue]]
+cue = 0x0202
+mode = "tables:f0226872"
+label = "Enemy Dead"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f45706, ra 0x800A8830 BATTLE:Battle_PlayHitSound"
 
 [[cue]]
 cue = 0x0203
@@ -182,11 +115,25 @@ status = "evidence"
 evidence = "constant at 0x801E4794, the enemy-side hit; se_watch 20260917T073716 f25080, ra 0x801E47A4 BATTLE:Battle_ResolveAction_Enemy"
 
 [[cue]]
+cue = 0x0204
+mode = "magic:MAGIC009"
+label = "Enemy Dead"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f45744, ra 0x801E47A4 BATTLE:Battle_ResolveAction_Enemy"
+
+[[cue]]
 cue = 0x0205
 mode = "battle"
 label = "Attack Miss"
 status = "evidence"
 evidence = "se_watch 20260917T073716 f30759, ra 0x801E4474 BATTLE:Battle_ResolveAction_Enemy"
+
+[[cue]]
+cue = 0x0205
+mode = "magic:MAGIC009"
+label = "Defense?"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f46010, ra 0x8015E140 boot:SE_PlayTracked"
 
 [[cue]]
 cue = 0x0206
@@ -260,6 +207,13 @@ evidence = "se_watch 20260917T081539 f15997, ra 0x801DD864 BATTLE:Battle_PlayAct
 
 [[cue]]
 cue = 0x0500
+mode = "magic:MAGIC009"
+label = "Defense?"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f46242, ra 0x801DD864 BATTLE:Battle_PlayActorCue"
+
+[[cue]]
+cue = 0x0500
 mode = "tables:f0226872"
 label = "Physical Attack"
 status = "evidence"
@@ -273,11 +227,25 @@ status = "evidence"
 evidence = "Nina's slot cue index 2 = the swing pair (Battle_SwingCue_Step), fired for the physical skill 毒撃 and for her normal attack; NOT spell-specific; se_watch 20260917T073716 f24980, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
 
 [[cue]]
+cue = 0x0502
+mode = "tables:f0226872"
+label = "MoMo Attack"
+status = "evidence"
+evidence = "se_watch 20260917T083612 f27145, ra 0x801DD864 BATTLE:Battle_PlayActorCue"
+
+[[cue]]
 cue = 0x0504
 mode = "battle"
 label = "Nina Crit"
 status = "evidence"
 evidence = "second layer of the swing pair (index 4), same for every action that swings; se_watch 20260917T073716 f24980, ra 0x801DD864 BATTLE:CharId_ToRosterIndex"
+
+[[cue]]
+cue = 0x0504
+mode = "tables:f0226872"
+label = "MoMo Hit"
+status = "evidence"
+evidence = "se_watch 20260917T083612 f27145, ra 0x801DD864 BATTLE:Battle_PlayActorCue"
 
 [[cue]]
 cue = 0x0505
@@ -306,3 +274,17 @@ mode = "battle"
 label = "Combat End?"
 status = "evidence"
 evidence = "se_watch 20260917T073716 f25198, ra 0x8015E140 boot:SE_PollKeyStatus"
+
+[[cue]]
+cue = 0x060A
+mode = "magic:MAGIC009"
+label = "Defense?"
+status = "evidence"
+evidence = "se_watch 20260917T084107 f45858, ra 0x8015E140 boot:SE_PlayTracked"
+
+[[cue]]
+cue = 0x060C
+mode = "tables:f0226872"
+label = "-"
+status = "evidence"
+evidence = "se_watch 20260917T083612 f24039, ra 0x801E3A50 BATTLE:Battle_PlayCreatureCue"

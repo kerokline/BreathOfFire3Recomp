@@ -69,6 +69,10 @@ GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
 TABLES_LO, TABLES_HI = 0x80148718, 0x80148810     # bank 1 + bank 2 cue tables (2 x 31 x 4)
 TABLES_DIR = os.path.join(ROOT, "analysis", "se_tables")
 MAGIC_BAND = 0x801EEC00                            # BMAGIC swap band
+# Cues the player confirmed sound the same on every screen (2026-09-17: the menu
+# select / cancel / swipe set). They are labelled under the context "any" unless a
+# spell overlay is resident, because a loaded spell can fire 0x100 with its own samples.
+CONTEXT_FREE = {0x100, 0x101, 0x102, 0x103, 0x104, 0x105, 0x106, 0x107}
 TABLE_MODES = {                                    # md5 of that span, from saves/openbios (2026-09-17)
     "79b02fe1aa36a99d5c6e6cd96ae6fe74": "field",   # slot00 title, slot02 AREA014 field
     "229197bba0c628f87fd4e2b7431dc09a": "battle",  # slot03 regular field battle
@@ -228,7 +232,8 @@ def save_labels(labels):
             "#   mode   the context that fixes what the cue word sounds like: magic:<overlay>",
             "#          (a spell's own sample payload is loaded), field | battle (the bank 1+2",
             "#          cue tables match a savestate), or tables:<md5 prefix> for a table not",
-            "#          yet seen in a savestate (its bytes are in analysis/se_tables/)",
+            "#          yet seen in a savestate (its bytes are in analysis/se_tables/), or any",
+            "#          for the menu set 0x100..0x107 the player confirmed is the same everywhere",
             "#   label  what was heard, in the player's words",
             "#   status evidence (heard live) | hypothesis",
             "#   evidence  se_watch session and frame of the hearing, nearest caller",
@@ -293,7 +298,8 @@ def main():
                     cue = (bank << 8) | cue_id if bank >= 0 and cue_id >= 0 else -1
                     ra = int(e["ra"], 16)
                     caller, ovl = namer.name(ra, bands)
-                    known = labels.get((cue, mode))
+                    label_ctx = "any" if (cue in CONTEXT_FREE and not mode.startswith("magic:")) else mode
+                    known = labels.get((cue, mode)) or labels.get((cue, "any"))
                     fallback = None
                     if known is None and cue >= 0:
                         for (c2, m2), lab in labels.items():
@@ -332,12 +338,12 @@ def main():
                         except EOFError:
                             ans = ""
                         if ans:
-                            labels[(cue, mode)] = {
-                                "cue": cue, "mode": mode, "label": ans, "status": "evidence",
+                            labels[(cue, label_ctx)] = {
+                                "cue": cue, "mode": label_ctx, "label": ans, "status": "evidence",
                                 "evidence": "se_watch %s f%d, ra %s %s%s" % (
                                     session, row["frame"], e["ra"], (ovl + ":") if caller else "", caller)}
                             save_labels(labels)
-                            print("   -> names/se_cues.toml: 0x%04X/%s = %s" % (cue, mode, ans), flush=True)
+                            print("   -> names/se_cues.toml: 0x%04X/%s = %s" % (cue, label_ctx, ans), flush=True)
                 last_frame = fr
             if a.seconds and time.time() - t0 >= a.seconds:
                 break
