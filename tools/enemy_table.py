@@ -19,11 +19,17 @@ L18 HP100 EXP58 zenny62 ATK50 DEF17 AGI11 is species 3 of that table,
 やけっぱちオーク, and the same stat halfwords sit in the disc section.
 
     python tools/enemy_table.py extract        # -> names/enemies.toml (generated; do not hand-edit)
+    python tools/enemy_table.py --us-cue "isos/Breath of Fire III (USA).cue" extract
+                                               # + the `us` column: the US disc's own 8-character names
     python tools/enemy_table.py show AREA048   # one area's species
     python tools/enemy_table.py species        # distinct species (name + stats) and where they appear
 
-English names are kept apart, by hand or from play, in names/enemy_gloss.toml
-(`[[gloss]] jp = "...", en = "..."`); `extract` merges them into the `en` column.
+The US disc (SLUS-00422) ships the same table in the same section with the
+name field in ASCII (0xFF = space): that is the string the US game prints,
+8 characters at most ("BossGbln", "Ice Toad"), read with --us-cue into the
+`us` column. `en` is the wiki's editorial full name from
+names/enemy_gloss.toml (`[[gloss]] jp = "...", en = "..."`), hand-editable;
+readable code should prefer `us`, then `en`, then `jp`.
 """
 import argparse
 import json
@@ -83,6 +89,31 @@ def tables(bin_root=BIN_ROOT):
     return out
 
 
+def us_tables(cue):
+    """{area number: {slot: US name}} from the US disc, same section, ASCII names."""
+    import text_tables as tt
+    disc = tt.Disc(cue=cue)
+    out = {}
+    for path in disc._entries:
+        m = re.search(r"/AREA(\d+)\.EMI$", path)
+        if not m:
+            continue
+        raw = disc.read(path)
+        emi = tt.Emi(raw, path)
+        sec = [e for e in emi.entries if e["dest"] == TABLE_DEST]
+        if not sec:
+            continue
+        b = raw[sec[0]["offset"]:sec[0]["offset"] + sec[0]["size"]]
+        names = {}
+        for k in range(8):
+            r = b[k * REC:(k + 1) * REC]
+            st = struct.unpack_from("<16H", r, STATS_OFF)
+            if st[STAT_IDX["level"]] or st[STAT_IDX["max_hp"]]:
+                names[k] = tt.decode_us_name(r[NAME_OFF:NAME_OFF + NAME_LEN])
+        out[int(m.group(1))] = names
+    return out
+
+
 def gloss():
     if not os.path.exists(GLOSS):
         return {}
@@ -98,12 +129,15 @@ def signature(d):
 def cmd_extract(a):
     t = tables(a.bin_root)
     g = gloss()
+    us = us_tables(a.us_cue) if a.us_cue else {}
     lines = ["# names/enemies.toml -- every area's enemy species table, read off the disc by",
              "# tools/enemy_table.py extract (do not hand-edit; English names go in names/enemy_gloss.toml).",
              "#   area    AREAnnn: the table is that file's 0x800E4000 section (ENEMYnnn.EMI is its audio)",
              "#   slot    species index 0..7 = enemy record +0x60 = AI script row = bank-6 cue 0x600 + 2*slot",
              "#   jp      the 8-byte name field at record +0x48 (game kana codes -> tools/jptext.py)",
-             "#   en      from names/enemy_gloss.toml when someone has read the screen",
+             "#   us      the US disc's own name at the same slot (ASCII, 8 chars max; with --us-cue) -- the",
+             "#           string the US game prints; prefer it over en for readability",
+             "#   en      the wiki's full name from names/enemy_gloss.toml (editorial, not the name card)",
              "#   level / max_hp / exp / zenny / atk / def / agi   the stat halfwords at record +0x54",
              "", "[meta]", 'generator = "tools/enemy_table.py"', "areas = %d" % len(t),
              "species_rows = %d" % sum(len(v) for v in t.values()), ""]
@@ -113,6 +147,8 @@ def cmd_extract(a):
             lines.append('area = "AREA%03d"' % n)
             lines.append("slot = %d" % k)
             lines.append('jp = "%s"' % d["jp"].replace('"', "'"))
+            if us:
+                lines.append('us = "%s"' % us.get(n, {}).get(k, "").replace('"', "'"))
             lines.append('en = "%s"' % g.get(d["jp"], "").replace('"', "'"))
             for k2 in ("level", "max_hp", "exp", "zenny", "atk", "df", "agi"):
                 lines.append("%s = %d" % ("def" if k2 == "df" else k2, d[k2]))
@@ -150,6 +186,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     ap.add_argument("--bin-root", default=BIN_ROOT)
+    ap.add_argument("--us-cue", default=None, help="the US disc .cue: adds the `us` (in-game 8-char) name column")
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("extract"); s.set_defaults(fn=cmd_extract)
     s = sub.add_parser("show"); s.add_argument("area"); s.set_defaults(fn=cmd_show)

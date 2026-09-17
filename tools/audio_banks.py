@@ -179,7 +179,7 @@ def species_names():
     out = {}
     for r in tomllib.load(open(ENEMIES, "rb")).get("enemy", []):
         n = int(re.sub(r"\D", "", r["area"]))
-        out.setdefault(n, {})[int(r["slot"])] = (r.get("en") or r.get("jp") or "")
+        out.setdefault(n, {})[int(r["slot"])] = (r.get("us") or r.get("en") or r.get("jp") or "")
     return out
 
 

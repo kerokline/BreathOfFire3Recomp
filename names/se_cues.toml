@@ -755,7 +755,7 @@ disc = ["ENEMY027.EMI#b6#vag9", "ENEMY108.EMI#b6#vag5", "ENEMY109.EMI#b6#vag4", 
 [[sound]]
 id = "151b51866d8a"
 label = ""
-auto = "PainWeed (ENEMY052) 3"
+auto = "RankWeed (ENEMY052) 3"
 status = "derived"
 evidence = "auto name from ENEMY052.EMI#vag3 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2171,7 +2171,7 @@ disc = ["BOSS013.EMI#b6#vag1"]
 [[sound]]
 id = "4aa520f6a3b5"
 label = ""
-auto = "Multi Bot (ENEMY124) 1"
+auto = "MultiBot (ENEMY124) 1"
 status = "derived"
 evidence = "auto name from ENEMY124.EMI#vag1 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []
@@ -2297,7 +2297,7 @@ disc = ["DRG07_00.EMI#b3#vag4", "DRG07_01.EMI#b5#vag4", "DRG07_02.EMI#b4#vag4", 
 [[sound]]
 id = "4f52bb96ce71"
 label = ""
-auto = "Dragonfly (ENEMY111) 4"
+auto = "Dragnfly (ENEMY111) 4"
 status = "derived"
 evidence = "auto name from ENEMY111.EMI#vag4 (tools/audio_banks.py names: owner = first by family, lowest file; N = VAG index)"
 cues = []

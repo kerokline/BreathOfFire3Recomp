@@ -409,8 +409,14 @@ merges English names from `names/enemy_gloss.toml`, seeded from the
 Breath of Fire wiki's enemy list (168 of 168; the Tower frog's
 Japanese name really is the single character ギ, Ice Toad in English). `se_watch` reads the name
 live from the same table on every bank-6 cue, and `--label` only asks for
-an English name when the gloss lacks one. The audio catalogue names bank-6
-samples by species: `Lizard (ENEMY040) 1`.
+an English name when the gloss lacks one. **The US disc has the same table
+in the same section with the name in ASCII** — the 8-character string the
+US game prints (`--us-cue`, the `us` column, all 448 rows): the wiki's
+titles are editorial full names, and the two disagree on 13 rows, two of
+them real swaps (the disc's `PainWeed` is the wiki's RankWeed and vice
+versa; the disc's `Charyb` is the wiki's Scylla and vice versa). Readable
+names should take `us`, then `en`, then `jp`, which is what the audio
+catalogue does: `Lizard (ENEMY040) 1`, `Ice Toad (ENEMY040) …`.
 
 ## Names for every sample, by convention (2026-09-17)
 
