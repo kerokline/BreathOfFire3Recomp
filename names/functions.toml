@@ -1046,7 +1046,7 @@ pc = 0x801DD820
 name = "Battle_PlayActorCue"
 args = ["index"]
 status = "evidence"
-evidence = "ghidra decomp 2026-09-17 (BATTLE_EMI3): SE_Play(*(u16*)(0x801EAF80 + actor_kind*2 + index*6)) with actor_kind = *(u16*)(*0x8014624C + 0x2C); the table is 6 rows x 3 halfwords {0x03nn, 0x04nn, 0x05nn} so index = cue id and the actor's kind picks bank 3/4/5 (the three identical per-slot cue tables, SOUND_CUES.md); se_watch 20260917T073716: Ryu 0x402+0x404, Nina 0x502+0x504 through ra 0x801DD864 (this function's tail)"
+evidence = "ghidra decomp 2026-09-17 (BATTLE_EMI3): SE_Play(*(u16*)(0x801EAF80 + actor_kind*2 + index*6)) with actor_kind = *(u16*)(*0x8014624C + 0x2C); the table is 6 rows x 3 halfwords {0x03nn, 0x04nn, 0x05nn} so index = cue id and the actor's obj+0x2C voice-set index picks bank 3/4/5 (the three identical per-character cue tables, SOUND_CUES.md); player 2026-09-17: the bank stays with the character when moved on the battle field and when the menu party order is changed; se_watch 20260917T073716: Ryu 0x402+0x404, Nina 0x502+0x504 through ra 0x801DD864 (this function's tail)"
 note = "SOUND_CUES.md, Battle: how a cue is chosen"
 
 [[function]]

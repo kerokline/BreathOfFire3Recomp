@@ -31,6 +31,16 @@ are bank 1; field and battle code use banks 3..6 as well. Banks 7..15 have
 no handler: the words after the seven pointers at `0x80182CA4` are the
 `SoundSet_Layout` tables, so a bank above 6 would jump into data.
 
+## The banks — working model (player-verified 2026-09-17)
+
+| bank | what | evidence |
+|---|---|---|
+| 0 | title screen only | only `slot00` has entries |
+| 1 | the menu set `0x100..0x107`, context-free | same sound on every screen (player); the rest of the table differs field vs battle, and a loaded spell fires `0x100` with its own samples |
+| 2 | field / general sounds and the script `0x0A` cue; in battle the hit family and `0x204..0x206` | table swapped for battle; AREA052 conveyor = `0x202` in the field, a hit in a fight |
+| 3, 4, 5 | character voice slots, **dealt when the party's voice set loads and frozen until the next composition change** | Ryu/Nina/Momo = 3/4/5; field moves and menu reorders changed nothing; swapping Nina for Peco re-dealt Ryu/Momo/Peco = 3/4/5, which then held through a formation change |
+| 6 | creature sounds: 8 types x 2 tones from the object's type byte `+0xE0` | `Battle_PlayCreatureCue`; heard on enemies, but the code keys on any object |
+
 ## What one call does (`SE_Play`, 0x8015E908)
 
 1. `0x8018BD80 = bank` (the *first* store, `sh` at `0x8015E91C`), then
@@ -242,7 +252,7 @@ named (`names/functions.toml`, `symbols.toml`):
 (`BATTLE.EMI 0x801DD820`) reads a 6 x 3 halfword table at `0x801EAF80`:
 row = index 0..5, column = the actor's kind (`obj+0x2C`, 0..2), and the
 entries are simply `0x03nn / 0x04nn / 0x05nn` — so **bank = 3 + the
-party slot's kind, id = index**, and the three banks carry identical
+actor's voice-set index, id = index**, and the three banks carry identical
 six-cue tables because they are the three characters' personal sets. What
 the six indices are, from the callers:
 
@@ -251,7 +261,7 @@ the six indices are, from the callers:
 | 2, then 4 | `Battle_SwingCue_Step` (`0x801DFA14`, twin `0x801E1FA8`): the normal swing pair | Ryu `0x402+0x404`, Nina `0x502+0x504` in one frame |
 | 3, then 4 | same, when `Rand(3) % 100 < ctx+0xAA` (the crit roll — it also sets bit 7 of `0x801462E4`) | the crit variant |
 | 1 / 0 | `Battle_Impact_Step` (`0x801DFF0C`) on damage, by `ctx+0x128 & 2` | |
-| 5, then 3 | `0x801E1814` | unnamed step |
+| 5 | `0x801E1814` (then 3 conditionally) | **the character's spell-cast voice**: Momo `0x505` and Ryu `0x305` casting the same MAGIC070 (薬草 / アプリフ) resolved to different samples, while the spell's own `0x100` (from `0x801EEF8C` inside the overlay) and the `0x206` restore effect (via `SE_PlayTracked`) were the same sample for both — player + resolver, 2026-09-17 |
 
 So Nina's `0x502+0x504` labelled "Chlorine" is her **slot's swing pair**,
 fired for 毒撃 because 毒撃 (ability 8, type 3) is a physical skill; the
@@ -280,8 +290,21 @@ from `Battle_Impact_Step`.
 `SE_Play(0x600 | obj->0xE0 << 1)` — the object's byte `+0xE0` is its
 creature sound type 0..7 and bank 6's 16 cues are 8 programs x tones 0/2.
 
-**Spells.** `MAGIC008.EMI` (毒撃) contains no call to the `SE_Play`
-family, and across all 141 `BMAGIC` overlays only 12 call it, all with
+**A cue word is not a sound once a spell is loaded.** Third session
+(2026-09-17): the same `0x100` through `SE_PlayTracked` was a different
+sound per spell cast, and Ryu's `0x305` a different line on two casts.
+The reason is the audio triplet every sound-bearing `.EMI` carries (next
+section): a spell ships its own miniature VAB and the cue entries that
+point at it, installed over bank 1's slot. The identity of a battle sound
+is therefore the **sample**, which is what `se_watch` now labels. (An
+earlier reading blamed the type-3 sections; those are art.) The per-slot
+banks 3/4/5 are dealt at party load — see the bank model above.
+
+**Spells.** 12 of the 141 `BMAGIC` overlays call `SE_Play` directly, all
+with bank 1 words — those are their own sample triggers (`MAGIC064`:
+`0x100/0x101/0x102`, `MAGIC113` six calls); the rest fire through the
+effect interpreter and `SE_PlayTracked`. `MAGIC008.EMI` (毒撃) contains no
+call to the `SE_Play` family, and across all 141 `BMAGIC` overlays only 12 call it, all with
 bank 1 (menu) constants. Whatever distinctive sound a spell has therefore
 comes through the effect interpreter, most likely `SE_PlayTracked`
 (`0x8015E10C`, which records the keyed voices in the effect object) —
@@ -289,10 +312,144 @@ and the write trace cannot see past that wrapper because `SE_Play`'s `ra`
 is inside it. Next step for spells: arm the trace on `SE_PlayTracked`'s
 own first store (`0x8018BC94`) or add the wrapper to `se_watch`.
 
+## Inside an .EMI: the audio triplet (2026-09-17)
+
+The "consistent spot" the player asked for. Every sound-bearing `.EMI`
+carries a run of three sections with the same TOC `+0x04`, which for these
+is the **bank id 0..6**, not an address ([`EMI_TYPES.md`](EMI_TYPES.md)):
+
+| type | content | how the runtime uses it |
+|---|---|---|
+| 6 | a VAB header (`pBAV`, `0xC20` bytes for one program) | registered as VAB *bank* in libsnd (`0x8018EB18[bank]`); its tone attributes map tone → VAG, centre note, volume |
+| 8 | **the cue-table entries**: 4 bytes per cue word `{flags, pan\|prog, tone\|priority, chord\|voice}` | copied to the head of bank's 31-entry table at `0x8014869C + bank*0x7C`; a 16-byte record defines `bank<<8 \| 0..3`. Entries past the record are **not cleared**, so the previous occupant's words stay reachable — which is why the live table hash keeps changing and why a menu word can play a spell's sample |
+| 7 | the VAB body (the VAG samples) | uploaded to the bank's SPU RAM slot (`0x80191550[bank]`) |
+
+`MAGIC069.EMI` (めいれい / Influence — the player's "Command"; the ability
+table's names are one record off the engine ids, see [`STEAL.md`](STEAL.md),
+so engine id 69 is row 68), the three-sound skill the player heard: one program, four VAGs; the type-8 record installs `0x100..0x103`
+as tones 0/2/4/6 → VAG 1/2/3/4, and the catalogue hashes match the disc
+bytes exactly — VAG 1 = "Target", VAG 2 = "Whisk Away", VAG 4 = "Locked
+On" (VAG 3, 29,040 bytes, was not heard). The *order* of the three is the
+spell's script, run by the effect interpreter; the sounds are the body.
+
+Who lives in which bank, from the 901 triplets on the disc
+(`tools/audio_banks.py index` → `names/audio_banks.toml`):
+
+| bank | files | what |
+|---|---|---|
+| 1 | `COMN_SE.EMI`, `BATTLE*.EMI`, `BOSS*.EMI` (11 entries), `BATL_RET`/`BATL_SE` (4), `MAGIC*` (1..6) | the system set — the menu blings the player confirmed as context-free are `COMN_SE`'s VAGs 1..8, duplicated in every battle file — and each spell's own samples over `0x100..` |
+| 2 | `BATTLE*.EMI`, `BOSS*.EMI` (7), `AREAnnn.EMI` (3..13) | field / battle effects |
+| 3, 4, 5 | `BPLCHAR/BPLD*.EMI`, `BPLU*.EMI` (207 files) | the party voice slots; the file name carries the character ids of the party they were built for |
+| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds, named by species from the area's table (`names/enemies.toml`): **one enemy file per area** (`ENEMYnnn` = `AREAnnn`'s encounter group, no area file carries a bank 6 of its own), 8 programs = 8 species slots, cue `0x600 + 2*slot + tone`; the object's creature byte `+0xE0` is its slot in that group. 58 distinct groups; the set in 123 files (towns, story rooms, the world map, Dauna Mine) is the generic one, and the 77 others are the fight areas (Cedar Woods, Nu Cave, McNeil Manor, the Tower, Mount Mourangi, the Dump Site…). Boss files add a 1-program set for the boss |
+
+`tools/audio_banks.py join --apply` writes each catalogue sound's disc
+homes into `names/se_cues.toml` (`disc = [...]`); 28 of the first 29
+labelled sounds matched (the one miss is a 352-byte blip that appears in
+1,548 files under other hashes' neighbours). `se_watch` prints the first
+disc home beside each resolved cue.
+
+## Cataloguing by sample, not by cue word (2026-09-17)
+
+The player's diagnosis after three sessions: the cue word is a **slot**.
+Battle saves an array, executes from the array, and the slot holds whatever
+is needed to reach a sound — so `0x302+0x304` is "slot 0's swing" for any
+character with any weapon, `0x100` is "the loaded spell's sample", and a
+label on the word is only true for the state that was loaded. The stable
+identity is the sample itself. `tools/se_resolve.py` follows the runtime's
+own chain from a cue word to the bytes that will play:
+
+| step | where | what |
+|---|---|---|
+| cue entry | `0x8014869C + bank*0x7C + id*4` | `{flags, pan\|prog, tone\|pri, chord\|voice}`; `flags & 7` overrides the VAB |
+| VAB header | libsnd registry `0x8018EB18[vab]` | what `SsVabOpenHead` registered — **not** the game's `0x80148A14` pointers, which lag behind |
+| tone attributes | libsnd `0x8018EB60[vab] + prog*0x200 + tone*0x20` | `+2` vol, `+3` pan, `+4` centre, `+5` shift, `+0x16` VAG index |
+| VAG size table | header `+0x20 + nprog*0x10 + ps*0x200` | 256 u16 in 8-byte units; `nprog` is 0x80 for header byte `0x70` and version > 4 |
+| sample | libsnd `0x80191550[vab]` + sum of the earlier VAG sizes | read from SPU RAM (`spu_ram`, 4 KB per call) and hashed |
+
+Checked on the savestates: `0x202` is a 5,776-byte VAG at `0x60CF0`
+(centre 52) in battle and a 9,584-byte one at `0x562E0` in the field;
+`0x302` keeps its VAG slot but the bytes differ between `slot02` and
+`slot03`, which is the party-slot behaviour heard in play. `se_watch`
+now resolves every cue live, keys `names/se_cues.toml` by the sample's
+md5, and records each `cue@context` a sample was reached through, so the
+file accumulates the slot map as a by-product. The cue-keyed catalogue
+from the first three sessions is kept as
+`analysis/se_cues_by_cue_2026-09-17.toml` (the merged menu wording is in
+the commit that reset it).
+
+Limits: banks whose VAB libsnd has not reopened resolve to "not a VAB"
+(the 2026-09-05 savestates show this for vabs 5 and 6; live play does
+not), and the hash covers the sample only — the same VAG at another
+centre note is listed once with its first pitch.
+
+## Enemies: set groups per area, not a party-style concatenation (2026-09-17)
+
+The party voice files are built per character combination; the enemy
+files are not. Every `ENEMYnnn.EMI` is a ready-made **group of up to 8
+species** — 8 programs, 16 cue entries `0x600..0x60F` = slot × 2 + tone —
+and the number is the area's: no `AREA` file has a bank 6 of its own, and
+the files with a non-generic set are precisely the areas with random
+encounters (Cedar Woods 3/5/8/9/10, Nu Cave 22, McNeil Manor 27/28, the
+Tower 40/42/44/48, Mount Mourangi 51, Dump Site 52 …), while towns, story
+rooms and the world map carry the one generic set found in 123 files. So
+an enemy's creature byte `+0xE0` selects its slot within the area's group,
+and naming a bank-6 sample means naming the species in slot n of area
+nnn's encounter table — the enemy table this repo does not have yet. The
+boss fights add a `BOSSnnn` bank-6 set of one program for the boss itself.
+
+**The names are on the disc.** Every `AREAnnn.EMI` carries a 1,160-byte
+section at `0x800E4000`: eight `0x88`-byte species records — the table the
+slot byte (record `+0x60`, also the AI-script row) indexes — with the
+**8-byte name at `+0x48`** in the game's kana codes and the stat halfwords
+at `+0x54` (zenny, EXP, level, …, max HP, AP, ATK, DEF, AGI, Int; the
+wiki's Orc page matches やけっぱちオーク L18 HP100 AP20 50/17/11/30 EXP58
+zenny62 field for field). `tools/enemy_table.py extract` writes all 200
+tables to `names/enemies.toml` (448 species rows, 168 distinct names) and
+merges English names from `names/enemy_gloss.toml`, seeded from the
+Breath of Fire wiki's enemy list (168 of 168; the Tower frog's
+Japanese name really is the single character ギ, Ice Toad in English). `se_watch` reads the name
+live from the same table on every bank-6 cue, and `--label` only asks for
+an English name when the gloss lacks one. **The US disc has the same table
+in the same section with the name in ASCII** — the 8-character string the
+US game prints (`--us-cue`, the `us` column, all 448 rows): the wiki's
+titles are editorial full names, and the two disagree on 13 rows, two of
+them real swaps (the disc's `PainWeed` is the wiki's RankWeed and vice
+versa; the disc's `Charyb` is the wiki's Scylla and vice versa). Readable
+names should take `us`, then `en`, then `jp`, which is what the audio
+catalogue does: `Lizard (ENEMY040) 1`, `Ice Toad (ENEMY040) …`.
+
+## Names for every sample, by convention (2026-09-17)
+
+The player's rule, now `tools/audio_banks.py names --apply`: a sample is
+named **after the file that owns it plus its VAG number** — `Influence 1`,
+`Rei 3`, `System 10`. Owner = the first file carrying those
+bytes by family precedence (`COMN_SE`, `BATTLE`, `BATL_*`, `MAGIC`, `BOSS`,
+`ENEMY`, the party files, then `AREA`), lowest-numbered within a family.
+The display stem is the ability name (`names/magic.toml`), the area alias
+(`names/areas.toml`), the character for a party-file bank
+(`names/characters.toml`), else the file stem; two owners whose display
+collides but whose samples differ keep the stem (`Ryu (BPLD012)` vs `Ryu (BPLD034)` — the adult and the child voice). All 833 samples got a unique name; `names/se_cues.toml` carries it
+as `auto` beside the player's `label`, with status `derived` until someone
+listens. The ten samples labelled so far all agree with their auto names
+(Rei 1 = "Rei - Pilfer", Rei 6 = "Strike", Teepo 5 = "Nega", Influence
+1/2/4 = Target / Whisk Away / Locked On). Spell stems apply the one-record
+shift of the ability names (engine id N = abilities row N-1).
+
+**The party voice files decode the slot behaviour.** `BPLD034.EMI` is the
+party of character ids 0, 3, 4 (`names/characters.toml`: 0 Ryu, 1 Nina, 2
+Garr, 3 Teepo, 4 Rei, 5 Momo, 6 Peco), its three triplets are banks 3/4/5
+in digit order, and the digits are sorted — so the file for Ryu/Nina/Momo
+is `BPLD015` (banks 3/4/5 = Ryu/Nina/Momo) and after Peco replaces Nina it
+is `BPLD056` (Ryu/Momo/Peco) — which is exactly why Momo moved from bank 5 to bank 4 when Nina (1)
+left and Peco (6) joined, and why neither the menu order nor the field
+position moved anything. `BPLU*` is byte-identical to `BPLD*`; `BRTD/U`
+carry a second set for the same characters (tagged `(BRT)`); `PL*` are the
+field parties (bank 1); `RYUD/U` are the dragon forms.
+
 ## Open
 
 - **Hear one.** No trace yet pairs a cue id with an audible sound.
-  `tools/se_watch.py` is the hook: a write trace on the two halfwords
+  `tools/se_watch.py` is the hook (labels keyed by sample, see below): a write trace on the two halfwords
   `SE_Play` stores first (`0x8018BD7C` id, `0x8018BD80` bank) — the same
   no-framework-change trick as `tools/load_watch.py` — logs every cue with
   its caller to `analysis/se_timeline.jsonl` during any play session, and

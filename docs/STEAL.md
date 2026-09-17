@@ -87,6 +87,11 @@ are shifted by one record against the engine's ids (the name[8] field
 belongs to the previous record, or the extractor pairs it wrongly);
 `tools/text_tables.py` needs a look before those names are trusted for ids.
 The per-id *rows* (file ids, overlay ids) are right.
+**Direction confirmed by ear 2026-09-17 ([`SOUND_CUES.md`](SOUND_CUES.md)):** the
+name of engine id N is abilities row N-1 — `MAGIC070` played the spell the
+player knows as リリフ (row 69, Heal) and `MAGIC069` the targeting skill
+めいれい (row 68, Influence). `tools/audio_banks.py` applies the shift when
+it names a spell's samples; `text_tables.py` still does not.
 
 ## The mod
 

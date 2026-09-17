@@ -1,0 +1,866 @@
+# names/enemy_gloss.toml -- English names for the enemy species, keyed by the Japanese
+# name that names/enemies.toml carries (tools/enemy_table.py extract merges these into
+# its `en` column). Seeded 2026-09-17 from the Breath of Fire wiki's BoF3 enemy list
+# (bof.fandom.com/wiki/List_of_Breath_of_Fire_III_Enemies, one page per entry);
+# `en` is the wiki's article title (the US in-game name where the wiki uses it).
+# Add or fix rows by hand or from play (se_watch --label).
+
+[[gloss]]
+jp = "アデプト"
+en = "Adept"
+evidence = "bof.fandom.com/wiki/Adept"
+
+[[gloss]]
+jp = "コンガーマリト"
+en = "Amalgam"
+evidence = "bof.fandom.com/wiki/Amalgam"
+
+[[gloss]]
+jp = "アンモナイカ"
+en = "Ammonite"
+evidence = "bof.fandom.com/wiki/Ammonite"
+
+[[gloss]]
+jp = "アングラ"
+en = "Angler"
+evidence = "bof.fandom.com/wiki/Angler_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "マジックマスター"
+en = "ArchMage"
+evidence = "bof.fandom.com/wiki/Arch_Mage"
+
+[[gloss]]
+jp = "リビングアーマー"
+en = "Armor"
+evidence = "bof.fandom.com/wiki/Armor_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "アーマーポチ"
+en = "ArmorBot"
+evidence = "bof.fandom.com/wiki/ArmorBot"
+
+[[gloss]]
+jp = "ヘルライダー"
+en = "Arwan"
+evidence = "bof.fandom.com/wiki/Arwan"
+
+[[gloss]]
+jp = "アサシン"
+en = "Assassin"
+evidence = "bof.fandom.com/wiki/Assassin_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ジャックベア"
+en = "Audrey"
+evidence = "bof.fandom.com/wiki/Audrey"
+
+[[gloss]]
+jp = "バリオ"
+en = "Balio"
+evidence = "bof.fandom.com/wiki/Balio_(Boss)"
+
+[[gloss]]
+jp = "とげぎんちゃく"
+en = "BarbBulb"
+evidence = "bof.fandom.com/wiki/BarbBulb"
+
+[[gloss]]
+jp = "ぐんたいこうもり"
+en = "Bat"
+evidence = "bof.fandom.com/wiki/Bat"
+
+[[gloss]]
+jp = "バーサーカー"
+en = "Berserkr"
+evidence = "bof.fandom.com/wiki/Berserkr_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ベジタ"
+en = "Big Bulb"
+evidence = "bof.fandom.com/wiki/Big_Bulb"
+
+[[gloss]]
+jp = "ぬすっとこうもり"
+en = "BloodBat"
+evidence = "bof.fandom.com/wiki/BloodBat_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "やとわれゴブリン"
+en = "BlueGbln"
+evidence = "bof.fandom.com/wiki/Blue_Goblin"
+
+[[gloss]]
+jp = "ボルトファイター"
+en = "Bolt"
+evidence = "bof.fandom.com/wiki/Bolt"
+
+[[gloss]]
+jp = "ボルトアーチャー"
+en = "BoltArch"
+evidence = "bof.fandom.com/wiki/BoltArch_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ボルトロード"
+en = "BoltLord"
+evidence = "bof.fandom.com/wiki/Bolt_Lord"
+
+[[gloss]]
+jp = "ボルトシャーマン"
+en = "BoltMage"
+evidence = "bof.fandom.com/wiki/BoltMage_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "フライングボム"
+en = "Bomber"
+evidence = "bof.fandom.com/wiki/Bomber"
+
+[[gloss]]
+jp = "ボムシード"
+en = "BombSeed"
+evidence = "bof.fandom.com/wiki/Bomb_Seed"
+
+[[gloss]]
+jp = "ゴブリンエリート"
+en = "BossGbln"
+evidence = "bof.fandom.com/wiki/BossGbln"
+
+[[gloss]]
+jp = "さぼうに"
+en = "Cacti"
+evidence = "bof.fandom.com/wiki/Cacti"
+
+[[gloss]]
+jp = "カウワー"
+en = "Cawer"
+evidence = "bof.fandom.com/wiki/Cawer"
+
+[[gloss]]
+jp = "ヘルハウンド"
+en = "Cerebus"
+evidence = "bof.fandom.com/wiki/Cerebus"
+
+[[gloss]]
+jp = "アービィ"
+en = "Charybdis"
+evidence = "bof.fandom.com/wiki/Charyb"
+
+[[gloss]]
+jp = "ヘテロキメラ"
+en = "Chimera"
+evidence = "bof.fandom.com/wiki/Chimera_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "クロー"
+en = "Claw"
+evidence = "bof.fandom.com/wiki/Claw_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "クローンパピー"
+en = "Clone"
+evidence = "bof.fandom.com/wiki/Clone"
+
+[[gloss]]
+jp = "ハッスルじじい"
+en = "Codger"
+evidence = "bof.fandom.com/wiki/Codger"
+
+[[gloss]]
+jp = "おいぼれいぬ"
+en = "Curr"
+evidence = "bof.fandom.com/wiki/Curr"
+
+[[gloss]]
+jp = "エリミネーター"
+en = "DeathBot"
+evidence = "bof.fandom.com/wiki/DeathBot_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ドダイ"
+en = "Dodai"
+evidence = "bof.fandom.com/wiki/Dodai"
+
+[[gloss]]
+jp = "かんさいイルカ"
+en = "Dolphin"
+evidence = "bof.fandom.com/wiki/Dolphin"
+
+[[gloss]]
+jp = "ドラゴンフライ"
+en = "Dragonfly"
+evidence = "bof.fandom.com/wiki/Dragonfly"
+
+[[gloss]]
+jp = "ドラゴンロード"
+en = "D.Lord"
+evidence = "bof.fandom.com/wiki/Dragon_Lord"
+
+[[gloss]]
+jp = "ドラゴンゾンビ"
+en = "D.Zombie"
+evidence = "bof.fandom.com/wiki/Dragon_Zombie"
+
+[[gloss]]
+jp = "ドレイクナイト"
+en = "Drak"
+evidence = "bof.fandom.com/wiki/Drak"
+
+[[gloss]]
+jp = "ドクセン"
+en = "Doksen"
+evidence = "bof.fandom.com/wiki/Doksen"
+
+[[gloss]]
+jp = "エッグカンパニー"
+en = "Egg Gang"
+evidence = "bof.fandom.com/wiki/Egg_Gang_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "エルダードラゴン"
+en = "Elder"
+evidence = "bof.fandom.com/wiki/Elder"
+
+[[gloss]]
+jp = "エミタイ"
+en = "Emitai"
+evidence = "bof.fandom.com/wiki/Emitai_(Boss)"
+
+[[gloss]]
+jp = "はっぱぎし"
+en = "Engineer"
+evidence = "bof.fandom.com/wiki/Engineer"
+
+[[gloss]]
+jp = "めだまバルブ"
+en = "Eye Bulb"
+evidence = "bof.fandom.com/wiki/Eye_Bulb"
+
+[[gloss]]
+jp = "めだまグミ"
+en = "Eye Goo"
+evidence = "bof.fandom.com/wiki/Eye_Goo_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ヒルオウ"
+en = "FireSlug"
+evidence = "bof.fandom.com/wiki/Fire_Slug"
+
+[[gloss]]
+jp = "インセクター"
+en = "Fly Man"
+evidence = "bof.fandom.com/wiki/Fly_Man"
+
+[[gloss]]
+jp = "げんばしゅにん"
+en = "Foreman"
+evidence = "bof.fandom.com/wiki/Foreman"
+
+[[gloss]]
+jp = "ヨーン"
+en = "FoulWeed"
+evidence = "bof.fandom.com/wiki/FoulWeed"
+
+[[gloss]]
+jp = "ガイスト"
+en = "Gaist"
+evidence = "bof.fandom.com/wiki/Gaist_(Boss)"
+
+[[gloss]]
+jp = "カルテル"
+en = "Galtel"
+evidence = "bof.fandom.com/wiki/Galtel"
+
+[[gloss]]
+jp = "ガーランド"
+en = "Garr"
+evidence = "bof.fandom.com/wiki/Garr_(Boss)"
+
+[[gloss]]
+jp = "ギリー"
+en = "Gary"
+evidence = "bof.fandom.com/wiki/Gary_(Boss)"
+
+[[gloss]]
+jp = "ゲイザー"
+en = "Gazer"
+evidence = "bof.fandom.com/wiki/Gazer"
+
+[[gloss]]
+jp = "プチゴースト"
+en = "Ghost"
+evidence = "bof.fandom.com/wiki/Ghost_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ボーンデッド"
+en = "Ghoul"
+evidence = "bof.fandom.com/wiki/Ghoul_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "しおまねき"
+en = "GntCrab"
+evidence = "bof.fandom.com/wiki/GntCrab"
+
+[[gloss]]
+jp = "きょうかオーク"
+en = "Giant Orc"
+evidence = "bof.fandom.com/wiki/Giant_Orc"
+
+[[gloss]]
+jp = "ゴキゴッキ"
+en = "GntRoach"
+evidence = "bof.fandom.com/wiki/GntRoach_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ギシャボルゴ"
+en = "Gisshan"
+evidence = "bof.fandom.com/wiki/Gisshan"
+
+[[gloss]]
+jp = "ダメゴブリン"
+en = "Goblin"
+evidence = "bof.fandom.com/wiki/Goblin"
+
+[[gloss]]
+jp = "きんのたまご"
+en = "Gold Egg"
+evidence = "bof.fandom.com/wiki/Gold_Egg"
+
+[[gloss]]
+jp = "マッスルゴーレム"
+en = "Golem"
+evidence = "bof.fandom.com/wiki/Golem_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "サルガシラ"
+en = "Gonger"
+evidence = "bof.fandom.com/wiki/Gonger_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ガンヘッド"
+en = "Gonghead"
+evidence = "bof.fandom.com/wiki/Gonghead_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ヌイグルミ"
+en = "Gooey"
+evidence = "bof.fandom.com/wiki/Gooey"
+
+[[gloss]]
+jp = "グミオウ"
+en = "Goo King"
+evidence = "bof.fandom.com/wiki/Goo_King_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "グミダイン"
+en = "GooTitan"
+evidence = "bof.fandom.com/wiki/Goo_Titan"
+
+[[gloss]]
+jp = "けいびへい"
+en = "Guard"
+evidence = "bof.fandom.com/wiki/Guard"
+
+[[gloss]]
+jp = "ホブゴブリン"
+en = "Hobgoblin"
+evidence = "bof.fandom.com/wiki/Hobgoblin"
+
+[[gloss]]
+jp = "ホッパ"
+en = "Hopper"
+evidence = "bof.fandom.com/wiki/Hopper"
+
+[[gloss]]
+jp = "おばけなめくじ"
+en = "Huge Slug"
+evidence = "bof.fandom.com/wiki/Huge_Slug"
+
+[[gloss]]
+jp = "ハイパーポチ"
+en = "HyperBot"
+evidence = "bof.fandom.com/wiki/HyperBot"
+
+[[gloss]]
+jp = "ブルードラコ"
+en = "Ice Drake"
+evidence = "bof.fandom.com/wiki/Ice_Drake"
+
+[[gloss]]
+jp = "ブビビンマン"
+en = "Insector"
+evidence = "bof.fandom.com/wiki/Insector"
+
+[[gloss]]
+jp = "カッセン"
+en = "Kassen"
+evidence = "bof.fandom.com/wiki/Kassen"
+
+[[gloss]]
+jp = "ケロロロロ"
+en = "KingToad"
+evidence = "bof.fandom.com/wiki/King_Toad"
+
+[[gloss]]
+jp = "ラーバビースト"
+en = "Lava Man"
+evidence = "bof.fandom.com/wiki/Lava_Man"
+
+[[gloss]]
+jp = "ニードリザード"
+en = "Lizard"
+evidence = "bof.fandom.com/wiki/Lizard"
+
+[[gloss]]
+jp = "リザードマン"
+en = "LizardMn"
+evidence = "bof.fandom.com/wiki/LizardMn_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ヒューリー"
+en = "Mad Gong"
+evidence = "bof.fandom.com/wiki/Mad_Gong"
+
+[[gloss]]
+jp = "メイジグミ"
+en = "Mage Goo"
+evidence = "bof.fandom.com/wiki/Mage_Goo_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "イワオカイン"
+en = "Magmaite"
+evidence = "bof.fandom.com/wiki/Magmaite"
+
+[[gloss]]
+jp = "バーガープラント"
+en = "Man Trap"
+evidence = "bof.fandom.com/wiki/Man_Trap"
+
+[[gloss]]
+jp = "マンモ"
+en = "Manmo"
+evidence = "bof.fandom.com/wiki/Manmo"
+
+[[gloss]]
+jp = "ミクバ"
+en = "Mikba"
+evidence = "bof.fandom.com/wiki/Mikba_(Boss)"
+
+[[gloss]]
+jp = "マイナー"
+en = "Miner"
+evidence = "bof.fandom.com/wiki/Miner"
+
+[[gloss]]
+jp = "ミストアーマー"
+en = "Mist Man"
+evidence = "bof.fandom.com/wiki/Mist_Man"
+
+[[gloss]]
+jp = "モーグ"
+en = "Mogu"
+evidence = "bof.fandom.com/wiki/Mogu_(Boss)"
+
+[[gloss]]
+jp = "リフレクター"
+en = "Multi Bot"
+evidence = "bof.fandom.com/wiki/Multi_Bot"
+
+[[gloss]]
+jp = "ミュートプラント"
+en = "Mutant"
+evidence = "bof.fandom.com/wiki/Mutant_(Boss)"
+
+[[gloss]]
+jp = "ミリア"
+en = "Myria"
+evidence = "bof.fandom.com/wiki/Myria_(Breath_of_Fire_III_Boss)"
+
+[[gloss]]
+jp = "ドラゴニュート"
+en = "Newt"
+evidence = "bof.fandom.com/wiki/Newt"
+
+[[gloss]]
+jp = "ナイトバット"
+en = "Night Bat"
+evidence = "bof.fandom.com/wiki/Night_Bat"
+
+[[gloss]]
+jp = "ナイトメア"
+en = "Nitemare"
+evidence = "bof.fandom.com/wiki/Nitemare"
+
+[[gloss]]
+jp = "ぬえ"
+en = "Nue"
+evidence = "bof.fandom.com/wiki/Nue"
+
+[[gloss]]
+jp = "ナッツアーチャー"
+en = "NutArchr"
+evidence = "bof.fandom.com/wiki/NutArchr_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+evidence = "bof.fandom.com/wiki/Nut_Mage_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ナッツファイター"
+en = "NutTroop"
+evidence = "bof.fandom.com/wiki/NutTroop_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "クレーンぎし"
+en = "Operator"
+evidence = "bof.fandom.com/wiki/Operator"
+
+[[gloss]]
+jp = "やけっぱちオーク"
+en = "Orc"
+evidence = "bof.fandom.com/wiki/Orc"
+
+[[gloss]]
+jp = "ベヘリット"
+en = "PainWeed"
+evidence = "bof.fandom.com/wiki/Pain_Weed; the wiki's PainWeed page carries ベヘリット, but the US disc prints RankWeed on this very record (AREA052 slot 1; JP and US records byte-identical outside the name field) -- the two weeds have identical stats, so only the disc can split them; `us` wins"
+
+[[gloss]]
+jp = "パトリオ"
+en = "Patrio"
+evidence = "bof.fandom.com/wiki/Patrio"
+
+[[gloss]]
+jp = "ソウルハンター"
+en = "Phantom"
+evidence = "bof.fandom.com/wiki/Phantom"
+
+[[gloss]]
+jp = "ボイルドエッグ"
+en = "Pipe Bomb"
+evidence = "bof.fandom.com/wiki/Pipe_Bomb"
+
+[[gloss]]
+jp = "プラント"
+en = "Plant 42"
+evidence = "bof.fandom.com/wiki/Plant_42"
+
+[[gloss]]
+jp = "ポイチ"
+en = "Pooch"
+evidence = "bof.fandom.com/wiki/Pooch"
+
+[[gloss]]
+jp = "ポチプロトタイプ"
+en = "ProtoBot"
+evidence = "bof.fandom.com/wiki/ProtoBot_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ハレモノグミ"
+en = "Puff Goo"
+evidence = "bof.fandom.com/wiki/Puff_Goo"
+
+[[gloss]]
+jp = "ベヘソット"
+en = "RankWeed"
+evidence = "bof.fandom.com/wiki/RankWeed; the wiki's RankWeed page carries ベヘソット, but the US disc prints PainWeed on this record (AREA052 slot 4); see ベヘリット"
+
+[[gloss]]
+jp = "ペネトレイター"
+en = "Reaper"
+evidence = "bof.fandom.com/wiki/Reaper"
+
+[[gloss]]
+jp = "レッドドラコ"
+en = "Red Drake"
+evidence = "bof.fandom.com/wiki/Red_Drake"
+
+[[gloss]]
+jp = "ドゥエルガル"
+en = "Revenant"
+evidence = "bof.fandom.com/wiki/Revenant"
+
+[[gloss]]
+jp = "めつつき"
+en = "Ripper"
+evidence = "bof.fandom.com/wiki/Ripper"
+
+[[gloss]]
+jp = "ゴキ"
+en = "Roach"
+evidence = "bof.fandom.com/wiki/Roach_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ヒヨちゃん"
+en = "Rocky"
+evidence = "bof.fandom.com/wiki/Rocky"
+
+[[gloss]]
+jp = "サンプル"
+en = "Sample"
+evidence = "bof.fandom.com/wiki/Sample_1"
+
+[[gloss]]
+jp = "すなさそり"
+en = "Scorpion"
+evidence = "bof.fandom.com/wiki/Scorpion_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ルーファス"
+en = "Scylla"
+evidence = "bof.fandom.com/wiki/Scylla; the wiki's Scylla page carries ルーファス, but the US disc prints Charyb on this record (AREA103 slot 3); see アービィー"
+
+[[gloss]]
+jp = "キノコルゲ"
+en = "Shroom"
+evidence = "bof.fandom.com/wiki/Shroom"
+
+[[gloss]]
+jp = "ずつつき"
+en = "Slasher"
+evidence = "bof.fandom.com/wiki/Slasher"
+
+[[gloss]]
+jp = "ウッパ"
+en = "Sleepy"
+evidence = "bof.fandom.com/wiki/Sleepy"
+
+[[gloss]]
+jp = "まだらひる"
+en = "Slug"
+evidence = "bof.fandom.com/wiki/Slug"
+
+[[gloss]]
+jp = "マインドブラスタ"
+en = "Spectre"
+evidence = "bof.fandom.com/wiki/Spectre_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ハリセンボン"
+en = "Spiker"
+evidence = "bof.fandom.com/wiki/Spiker"
+
+[[gloss]]
+jp = "スタリオン"
+en = "Stallion"
+evidence = "bof.fandom.com/wiki/Stallion"
+
+[[gloss]]
+jp = "サント"
+en = "Sunder"
+evidence = "bof.fandom.com/wiki/Sunder_(Boss)"
+
+[[gloss]]
+jp = "リカバータンク"
+en = "TankBot"
+evidence = "bof.fandom.com/wiki/TankBot"
+
+[[gloss]]
+jp = "タールマン"
+en = "Tar Man"
+evidence = "bof.fandom.com/wiki/Tar_Man"
+
+[[gloss]]
+jp = "タナトス"
+en = "Thanotos"
+evidence = "bof.fandom.com/wiki/Thanotos"
+
+[[gloss]]
+jp = "リーパー"
+en = "Thrasher"
+evidence = "bof.fandom.com/wiki/Thrasher"
+
+[[gloss]]
+jp = "サンダーチャージ"
+en = "Thunder"
+evidence = "bof.fandom.com/wiki/Thunder_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "トラスト"
+en = "Torast"
+evidence = "bof.fandom.com/wiki/Torast"
+
+[[gloss]]
+jp = "かがりび"
+en = "Torch"
+evidence = "bof.fandom.com/wiki/Torch"
+
+[[gloss]]
+jp = "ツエツエバエ"
+en = "ToxicFly"
+evidence = "bof.fandom.com/wiki/ToxicFly_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ヘドロン"
+en = "ToxicMan"
+evidence = "bof.fandom.com/wiki/Toxic_Man"
+
+[[gloss]]
+jp = "トリックスター"
+en = "Tricker"
+evidence = "bof.fandom.com/wiki/Tricker"
+
+[[gloss]]
+jp = "バガボンド"
+en = "Vagabond"
+evidence = "bof.fandom.com/wiki/Vagabond"
+
+[[gloss]]
+jp = "ナイトロード"
+en = "Vampire"
+evidence = "bof.fandom.com/wiki/Vampire"
+
+[[gloss]]
+jp = "スクラップ"
+en = "Vile Weed"
+evidence = "bof.fandom.com/wiki/Vile_Weed"
+
+[[gloss]]
+jp = "サンダークライ"
+en = "Volt"
+evidence = "bof.fandom.com/wiki/Volt"
+
+[[gloss]]
+jp = "カザンガン"
+en = "Vulcan"
+evidence = "bof.fandom.com/wiki/Vulcan"
+
+[[gloss]]
+jp = "ワータイガー"
+en = "Weretiger"
+evidence = "bof.fandom.com/wiki/Weretiger_(Boss)"
+
+[[gloss]]
+jp = "ビルダー"
+en = "Worker"
+evidence = "bof.fandom.com/wiki/Worker"
+
+[[gloss]]
+jp = "ガードソウル"
+en = "Wraith"
+evidence = "bof.fandom.com/wiki/Wraith_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ジグ"
+en = "Zig"
+evidence = "bof.fandom.com/wiki/Zig_(Boss)"
+
+[[gloss]]
+jp = "あばれゾンビ"
+en = "Zombie"
+evidence = "bof.fandom.com/wiki/Zombie_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ゾンビドクター"
+en = "ZombieDr"
+evidence = "bof.fandom.com/wiki/ZombieDr_(Breath_of_Fire_III)"
+
+[[gloss]]
+jp = "ゴロツキ1"
+en = "Bully 1"
+evidence = "bof.fandom.com/wiki/Bully_1 (ゴロツキ = ruffian; numbered on disc)"
+
+[[gloss]]
+jp = "ゴロツキ2"
+en = "Bully 2"
+evidence = "bof.fandom.com/wiki/Bully_2"
+
+[[gloss]]
+jp = "ゴロツキ3"
+en = "Bully 3"
+evidence = "bof.fandom.com/wiki/Bully_3"
+
+[[gloss]]
+jp = "ドダイ1"
+en = "Dodai 1"
+evidence = "bof.fandom.com/wiki/Dodai (two numbered records on disc)"
+
+[[gloss]]
+jp = "ドダイ2"
+en = "Dodai 2"
+evidence = "bof.fandom.com/wiki/Dodai"
+
+[[gloss]]
+jp = "プラント42"
+en = "Plant 42"
+evidence = "bof.fandom.com/wiki/Plant_42"
+
+[[gloss]]
+jp = "ニーナ"
+en = "Nina"
+evidence = "the party member as an enemy record (story fight)"
+
+[[gloss]]
+jp = "ベイト"
+en = "Beyd"
+evidence = "bof.fandom.com/wiki/Beyd_(Breath_of_Fire_III) (story fight)"
+
+[[gloss]]
+jp = "アービィー"
+en = "Charybdis"
+evidence = "bof.fandom.com/wiki/Charyb (アービィ; disc spells it with a long vowel); the wiki's Charybdis page carries アービィ, but the US disc prints Scylla on this record (AREA103 slot 2); identical stats to ルーファス, only the disc can split them; `us` wins"
+
+[[gloss]]
+jp = "サンプル1"
+en = "Sample 1"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル2"
+en = "Sample 2"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル3"
+en = "Sample 3"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル4"
+en = "Sample 4"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル5"
+en = "Sample 5"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル6"
+en = "Sample 6"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル7"
+en = "Sample 7"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル8"
+en = "Sample 8"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル9"
+en = "Sample 9"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル100"
+en = "Sample 100"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル101"
+en = "Sample 101"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "サンプル102"
+en = "Sample 102"
+evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "ギ"
+en = "Ice Toad"
+evidence = "bof.fandom.com/wiki/Ice_Toad: Japanese name really is the single character ギ (Gi), English name Ice Toad (player 2026-09-17); stats match AREA040/044/048 slot 5 (the player remembers it looking odd in play, 2026-09-17; not a rendering gap); L15 HP80 AP30 EXP63 zenny45 Pwr54 Def7 match AREA040/044/048 slot 5 (wiki Agl 3 vs the disc field 8; player 2026-09-17: it was the frog)"

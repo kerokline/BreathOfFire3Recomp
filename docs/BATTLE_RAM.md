@@ -130,6 +130,27 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 | `0x801EB6A4` | flags u32 (`0x40` charge) | `Battle_CalcDamage` |
 | `0x801EB6B4` | charge multiplier byte | `Battle_CalcDamage` |
 
+### The area's species table — `0x800E4000`, 8 records of `0x88` (2026-09-17)
+
+Loaded from every `AREAnnn.EMI` (its 1,160-byte section with that
+destination), indexed by the working record's `+0x60` / the object's
+`+0xE0`. Record `s` at `0x800E4000 + s*0x88`: `+0x48` the **8-byte name**
+(kana font codes, ASCII digits for the numbered ones, `tools/jptext.py`),
+`+0x54` sixteen u16 — `[2]` zenny, `[3]` EXP, `[4]` level, `[10]` max HP,
+`[11]` max AP, `[12]` ATK, `[13]` DEF, `[14]` AGI, `[15]` Int — which the
+wiki's Orc page reproduces field for field; `+0x00..0x47` and `+0x74..`
+are the AI/behaviour bytes `EnemyAI_ChooseActions` walks (the "`0x800E407C`
+script" is record 0's `+0x7C`). Extracted for all 200 areas by
+`tools/enemy_table.py` → `names/enemies.toml`.
+
+**To check later:** the wiki shows a 3 × 3 resistance grid per species
+(values 0..7). It is not a plain byte run in the record (searched 2026-09-17
+for PainWeed's `7 7 7 / 7 7 5 / 4 4 2`), so it is encoded or packed
+somewhere in `+0x00..0x47`. Decoding it would also adjudicate the two
+wiki/US-disc name-pair disagreements noted in `names/enemy_gloss.toml`
+(PainWeed/RankWeed, Charyb/Scylla), and the drop slots (`+0x18..`) against
+the wiki's steal/drop columns.
+
 ### Persistent character records — boot-EXE data, `0x80144964 + roster*0xA4`, 8 records
 
 Base and stride are **proven by code**: `Char_RecalcStats` compares its

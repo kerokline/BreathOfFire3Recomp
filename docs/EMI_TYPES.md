@@ -32,6 +32,12 @@ before and a type 7 after, all three sharing the same `+0x04` value**; the
 other 3 follow a type 10 instead of a type 6. So a type 8 is a small record
 belonging to each VH/VB pair, not free-standing data.
 
+**Decoded 2026-09-17 ([`SOUND_CUES.md`](SOUND_CUES.md) "Inside an .EMI"):** the
+type 6 is the VAB header (`pBAV`), the type 7 the VAB body, and the type 8
+record is the **cue-table entries** the file installs at the head of its
+bank's table — 4 bytes per cue word, so 24 bytes = 6 cues, 64 = 16
+(`tools/audio_banks.py`).
+
 Its `+0x04` field takes only the values **0..6**. That field is the RAM
 destination for every other type, so **the TOC's `+0x04` is type-dependent** —
 for the audio triples it is a bank/slot id, not an address. Anyone reading the
