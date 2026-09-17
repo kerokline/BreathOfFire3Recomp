@@ -340,7 +340,7 @@ Who lives in which bank, from the 901 triplets on the disc
 | 1 | `COMN_SE.EMI`, `BATTLE*.EMI`, `BOSS*.EMI` (11 entries), `BATL_RET`/`BATL_SE` (4), `MAGIC*` (1..6) | the system set — the menu blings the player confirmed as context-free are `COMN_SE`'s VAGs 1..8, duplicated in every battle file — and each spell's own samples over `0x100..` |
 | 2 | `BATTLE*.EMI`, `BOSS*.EMI` (7), `AREAnnn.EMI` (3..13) | field / battle effects |
 | 3, 4, 5 | `BPLCHAR/BPLD*.EMI`, `BPLU*.EMI` (207 files) | the party voice slots; the file name carries the character ids of the party they were built for |
-| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds: **one enemy file per area** (`ENEMYnnn` = `AREAnnn`'s encounter group, no area file carries a bank 6 of its own), 8 programs = 8 species slots, cue `0x600 + 2*slot + tone`; the object's creature byte `+0xE0` is its slot in that group. 58 distinct groups; the set in 123 files (towns, story rooms, the world map, Dauna Mine) is the generic one, and the 77 others are the fight areas (Cedar Woods, Nu Cave, McNeil Manor, the Tower, Mount Mourangi, the Dump Site…). Boss files add a 1-program set for the boss |
+| 6 | `BENEMY/ENEMYnnn.EMI` (200), `BOSS*.EMI` | creature sounds, named by species from the area's table (`names/enemies.toml`): **one enemy file per area** (`ENEMYnnn` = `AREAnnn`'s encounter group, no area file carries a bank 6 of its own), 8 programs = 8 species slots, cue `0x600 + 2*slot + tone`; the object's creature byte `+0xE0` is its slot in that group. 58 distinct groups; the set in 123 files (towns, story rooms, the world map, Dauna Mine) is the generic one, and the 77 others are the fight areas (Cedar Woods, Nu Cave, McNeil Manor, the Tower, Mount Mourangi, the Dump Site…). Boss files add a 1-program set for the boss |
 
 `tools/audio_banks.py join --apply` writes each catalogue sound's disc
 homes into `names/se_cues.toml` (`disc = [...]`); 28 of the first 29
@@ -397,16 +397,20 @@ and naming a bank-6 sample means naming the species in slot n of area
 nnn's encounter table — the enemy table this repo does not have yet. The
 boss fights add a `BOSSnnn` bank-6 set of one program for the boss itself.
 
-**Naming them from play:** the slot byte is record `+0x60`, the same index
-the engine uses for the enemy's AI script row, and the working record
-(`obj + 0x80`: the object at `0x801EB5A0` owns record 0 at `0x801EB620`,
-`docs/BATTLE_RAM.md`) carries level, max HP, EXP, zenny and
-ATK/DEF/AGI. On every bank-6 cue `se_watch` reads the current enemy's
-record and, with `--label`, asks for the on-screen name once per (area,
-slot), writing `names/enemies.toml` with the stat signature and the sample
-ids heard. Two or three named fights per area pin the slot → species
-order; the stat signature lets the same species be recognised in another
-area's group even before it is named there.
+**The names are on the disc.** Every `AREAnnn.EMI` carries a 1,160-byte
+section at `0x800E4000`: eight `0x88`-byte species records — the table the
+slot byte (record `+0x60`, also the AI-script row) indexes — with the
+**8-byte name at `+0x48`** in the game's kana codes and the stat halfwords
+at `+0x54` (zenny, EXP, level, …, max HP, AP, ATK, DEF, AGI, Int; the
+wiki's Orc page matches やけっぱちオーク L18 HP100 AP20 50/17/11/30 EXP58
+zenny62 field for field). `tools/enemy_table.py extract` writes all 200
+tables to `names/enemies.toml` (448 species rows, 168 distinct names) and
+merges English names from `names/enemy_gloss.toml`, seeded from the
+Breath of Fire wiki's enemy list (167 of 168 matched; the holdout is a
+one-character name ギ at L15 in AREA040/048). `se_watch` reads the name
+live from the same table on every bank-6 cue, and `--label` only asks for
+an English name when the gloss lacks one. The audio catalogue names bank-6
+samples by species: `Lizard (ENEMY040) 1`.
 
 ## Names for every sample, by convention (2026-09-17)
 

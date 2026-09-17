@@ -52,11 +52,12 @@ new table hash is dumped once to analysis/se_tables/<md5>.bin for decode. Run it
 Enemies: a bank-6 cue names a creature slot (0x600 + 2*slot + tone) in the
 area's ENEMYnnn group (SOUND_CUES.md "Enemies"). On every bank-6 cue the
 watcher reads the current enemy object (*0x801EB458, its working record at
-obj + 0x80: +0x60 species slot, +0x08 level, +0x20 max HP, +0x04 zenny,
-+0x06 EXP, +0x24/26/28 ATK/DEF/AGI) and, with --label, asks which enemy
-that was -- read the name off the screen -- writing names/enemies.toml
-keyed by area + slot with the stat signature and the sample ids heard.
-Two or three named fights per area pin the slot -> species order.
+obj + 0x80: +0x60 species slot, +0x08 level, +0x20 max HP ...) and the
+species' own name from the area table the game loaded at 0x800E4000
+(slot*0x88 + 0x48, tools/enemy_table.py) -- so the Japanese name needs no
+typing. With --label it asks once per species for the English name you
+read off the screen and keeps it in names/enemy_gloss.toml (jp -> en),
+which tools/enemy_table.py extract merges into names/enemies.toml.
 
 Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
 """
@@ -80,15 +81,16 @@ import name_map               # noqa: E402
 import se_resolve             # noqa: E402
 
 DISC_INDEX = os.path.join(ROOT, "names", "audio_banks.toml")
-ENEMIES_TOML = os.path.join(ROOT, "names", "enemies.toml")
+GLOSS_TOML = os.path.join(ROOT, "names", "enemy_gloss.toml")
+SPECIES_TABLE = 0x800E4000       # the area's 8 x 0x88 species records (tools/enemy_table.py)
 CUR_OBJECT = 0x801EB458          # BATTLE.EMI: current actor object (docs/BATTLE_RAM.md)
 ENEMY_REC0, ENEMY_STRIDE, ENEMY_MAX = 0x801EB620, 0x118, 8
 OBJ_TO_REC = 0x80                # obj+0x84 is record+0x04 (zenny): record = obj + 0x80 (EXP_BOOST.md; slot03: obj 0x801EB5A0 -> record 0)
 
 
 def read_enemy(read_ram):
-    """The current enemy's record fields, or None when the current object is not
-    an enemy (a party member's object lives elsewhere)."""
+    """The current enemy's record fields plus its species name from the area
+    table, or None when the current object is not an enemy."""
     import struct
     try:
         obj = struct.unpack("<I", read_ram(CUR_OBJECT, 4))[0]
@@ -104,203 +106,38 @@ def read_enemy(read_ram):
     if len(b) < 0x70:
         return None
     u16 = lambda o: struct.unpack_from("<H", b, o)[0]
-    return dict(n=(rec - ENEMY_REC0) // ENEMY_STRIDE, rec="0x%08X" % rec, slot=b[0x60],
+    slot = b[0x60]
+    jp = ""
+    if slot < 8:
+        try:
+            import jptext
+            jp = jptext.decode(read_ram(SPECIES_TABLE + slot * 0x88 + 0x48, 8).rstrip(b"\0"))
+        except Exception:
+            jp = ""
+    return dict(n=(rec - ENEMY_REC0) // ENEMY_STRIDE, rec="0x%08X" % rec, slot=slot, jp=jp,
                 level=u16(0x08), max_hp=u16(0x20), hp=u16(0x14), zenny=u16(0x04), exp=u16(0x06),
                 atk=u16(0x24), df=u16(0x26), agi=u16(0x28), size=b[0x34])
 
 
-def load_enemies():
-    if not os.path.exists(ENEMIES_TOML):
+def load_gloss():
+    if not os.path.exists(GLOSS_TOML):
         return {}
-    d = tomllib.load(open(ENEMIES_TOML, "rb"))
-    return {(e["area"], int(e["slot"])): dict(e, sounds=list(e.get("sounds", []))) for e in d.get("enemy", [])}
+    return {g["jp"]: g for g in tomllib.load(open(GLOSS_TOML, "rb")).get("gloss", [])}
 
 
-def save_enemies(en):
-    rows = ["# names/enemies.toml -- enemy species by area and creature slot, read off the screen.",
-            "#   area      the AREAnnn resident when the enemy sounded (its ENEMYnnn audio group,",
-            "#             its 8-row AI script table: record +0x60 indexes both)",
-            "#   slot      record +0x60 = creature slot 0..7 (bank-6 cue = 0x600 + 2*slot + tone)",
-            "#   name      the on-screen name, in the player's words",
-            "#   level / max_hp / exp / zenny / atk / def / agi / size   the working record when first heard",
-            "#   sounds    sample ids (names/se_cues.toml) this enemy has been heard making",
-            "#   evidence  se_watch session and frame of the first hearing",
+def save_gloss(gl):
+    rows = ["# names/enemy_gloss.toml -- English names for the enemy species, read off the screen",
+            "# (se_watch --label) or typed by hand. Keyed by the Japanese name that names/enemies.toml",
+            "# carries (tools/enemy_table.py extract merges these into its `en` column).",
             ""]
-    for (area, slot), e in sorted(en.items()):
-        rows.append("[[enemy]]")
-        rows.append('area = "%s"' % area)
-        rows.append("slot = %d" % slot)
-        rows.append('name = "%s"' % e["name"].replace('"', "'"))
-        for k in ("level", "max_hp", "exp", "zenny", "atk", "def", "agi", "size"):
-            if k in e:
-                rows.append("%s = %d" % (k, e[k]))
-        rows.append("sounds = [%s]" % ", ".join('"%s"' % x for x in e.get("sounds", [])))
-        rows.append('evidence = "%s"' % e.get("evidence", "").replace('"', "'"))
+    for jp, g in sorted(gl.items()):
+        rows.append("[[gloss]]")
+        rows.append('jp = "%s"' % jp.replace('"', "'"))
+        rows.append('en = "%s"' % g.get("en", "").replace('"', "'"))
+        rows.append('evidence = "%s"' % g.get("evidence", "").replace('"', "'"))
         rows.append("")
-    with open(ENEMIES_TOML, "w", encoding="utf-8", newline="\n") as fh:
+    with open(GLOSS_TOML, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(rows))
-
-
-def disc_index():
-    """sample md5 -> ['FILE.EMI#vagN', ...] from names/audio_banks.toml (tools/audio_banks.py index)."""
-    if not os.path.exists(DISC_INDEX):
-        return {}
-    out = {}
-    for b in tomllib.load(open(DISC_INDEX, "rb")).get("bank", []):
-        base = b["file"].split("/")[-1]
-        for v in b.get("vags", []):
-            if v.get("md5"):
-                out.setdefault(v["md5"], []).append("%s#b%d#vag%d" % (base, b["bank"], v["n"]))
-    return out
-
-CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
-CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
-GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
-TABLES_LO, TABLES_HI = 0x80148718, 0x80148810     # bank 1 + bank 2 cue tables (2 x 31 x 4)
-TABLES_DIR = os.path.join(ROOT, "analysis", "se_tables")
-MAGIC_BAND = 0x801EEC00                            # BMAGIC swap band
-TABLE_MODES = {                                    # md5 of that span, from saves/openbios (2026-09-17)
-    "79b02fe1aa36a99d5c6e6cd96ae6fe74": "field",   # slot00 title, slot02 AREA014 field
-    "229197bba0c628f87fd4e2b7431dc09a": "battle",  # slot03 regular field battle
-}
-
-
-class Namer:
-    """ra -> nearest known function start at or below it, restricted to the
-    boot EXE plus the overlays resident right now (by md5)."""
-
-    # docs/OVERLAY_EXTRACTION.md ten-band map: each band ends where the next begins
-    BAND_END = {0x80093800: 0x800B4004, 0x800C1800: 0x800C3600, 0x80196800: 0x801CE400,
-                0x801CE000: 0x801D0C00, 0x801CE400: 0x801D0C00, 0x801D0C00: 0x801EEC00,
-                0x801EEC00: 0x801F2C00, 0x801F2C00: 0x801F6C00, 0x801F6C00: 0x80200000}
-
-    def __init__(self):
-        self.boot = []
-        p = os.path.join(ROOT, "symbols.toml")
-        if os.path.exists(p):
-            for f in tomllib.load(open(p, "rb")).get("func", []):
-                self.boot.append((int(f["pc"]), f["name"]))
-        self.boot.sort()
-        self.by_md5 = {}            # md5 -> sorted [(pc, name)] from names/functions.toml
-        for (md5, pc), e in name_map.load_function_names().items():
-            self.by_md5.setdefault(md5, []).append((int(pc), e["name"]))
-        for v in self.by_md5.values():
-            v.sort()
-        self.ghidra = {}            # md5 -> sorted [(pc, FUN_name)] from analysis/ghidra exports
-        for meta in glob.glob(os.path.join(GHIDRA_DIR, "*.meta.json")):
-            try:
-                m = json.load(open(meta, encoding="utf-8"))
-                md5 = m.get("source_md5") or m.get("md5")
-                prog = os.path.basename(meta)[:-len(".meta.json")]
-                ex = json.load(open(os.path.join(GHIDRA_DIR, prog + ".json"), encoding="utf-8"))
-                self.ghidra[md5] = sorted((int(f["entry"], 16), f["name"]) for f in ex["functions"])
-            except (OSError, ValueError, KeyError):
-                continue
-
-    @staticmethod
-    def _nearest(pc, starts):
-        lo, hi = 0, len(starts)
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if starts[mid][0] <= pc:
-                lo = mid + 1
-            else:
-                hi = mid
-        if lo == 0:
-            return None
-        spc, name = starts[lo - 1]
-        # nearest known start at or below ra -- a label, not proof the ra is inside it
-        return (spc, name) if pc - spc < 0x4000 else None
-
-    def name(self, ra, resident):
-        """resident: {band: {md5, name, ...}} = resident.resident_ids()['bands'].
-        Returns (label, overlay_name); label '' when nothing known covers ra."""
-        for base, e in resident.items():
-            md5 = e.get("md5")
-            if not md5 or e.get("wrong_band"):
-                continue
-            if not (base <= ra < self.BAND_END.get(base, base + 0x4000)):
-                continue
-            hit = self._nearest(ra, self.by_md5.get(md5, []))
-            if hit is None:
-                hit = self._nearest(ra, self.ghidra.get(md5, []))
-            return (hit[1] if hit else "", e.get("name", ""))
-        hit = self._nearest(ra, self.boot)
-        return (hit[1] if hit else "", "boot" if hit else "")
-
-
-def pair_rows(rows):
-    """Group the drained trace rows (seq order) into SE_Play calls: a bank
-    store followed by the id store with the next seq. Yields
-    (bank, id, id_entry, bank_entry); a missing half is -1 / None, never
-    guessed from a neighbouring call."""
-    pending = None   # bank entry waiting for its id
-    for e in rows:
-        phys = int(e["addr"], 16) & 0x1FFFFFFF
-        seq = int(e["seq"])
-        if phys == CELL_BANK & 0x1FFFFFFF:
-            if pending is not None:
-                yield (int(pending["new"], 16) & 0xF, -1, None, pending)
-            pending = e
-            continue
-        if phys != CELL_ID & 0x1FFFFFFF:
-            continue
-        cue_id = int(e["new"], 16) & 0xFF
-        if pending is not None and int(pending["seq"]) + 1 == seq:
-            yield (int(pending["new"], 16) & 0xF, cue_id, e, pending)
-        else:
-            if pending is not None:
-                yield (int(pending["new"], 16) & 0xF, -1, None, pending)
-            yield (-1, cue_id, e, None)
-        pending = None
-    if pending is not None:
-        yield (int(pending["new"], 16) & 0xF, -1, None, pending)
-
-
-def resident_now(port):
-    """{band: {...}} from tools/resident.py, {} when the debug server cannot say."""
-    try:
-        import resident
-        return resident.resident_ids(port)["bands"]
-    except Exception:
-        return {}
-
-
-def tables_now(port):
-    """(md5, raw) of the live bank 1+2 cue tables, ('', b'') when unreadable."""
-    try:
-        import resident
-        r = resident.q("read_ram", port, addr="0x%08X" % TABLES_LO, len=TABLES_HI - TABLES_LO)
-        raw = bytes.fromhex(r["hex"]) if r.get("hex") else b""
-    except Exception:
-        return "", b""
-    if len(raw) != TABLES_HI - TABLES_LO:
-        return "", b""
-    return hashlib.md5(raw).hexdigest(), raw
-
-
-def context_of(bands, tables_md5, raw, seen):
-    """The label context: the resident spell overlay's name if one is loaded
-    (its sample payload decides what the cue sounds like), else field/battle
-    by table hash, else the hash itself. Dumps each new table once."""
-    if tables_md5 and tables_md5 not in seen:
-        seen.add(tables_md5)
-        try:
-            os.makedirs(TABLES_DIR, exist_ok=True)
-            with open(os.path.join(TABLES_DIR, tables_md5 + ".bin"), "wb") as fh:
-                fh.write(raw)
-        except OSError:
-            pass
-    m = bands.get(MAGIC_BAND)
-    if m is not None and m.get("id") is not None and not m.get("wrong_band"):
-        # the band is shared: SHOP.EMI#8 / BATL_END.EMI#0 also live here and stay
-        # until a spell overwrites them, so only a BMAGIC occupant is a spell context
-        src = str(m.get("file", "")) + " " + str(m.get("name", ""))
-        if "MAGIC" in src.upper():
-            return "magic:" + str(m.get("name", "?"))
-    if tables_md5 in TABLE_MODES:
-        return TABLE_MODES[tables_md5]
-    return ("tables:" + tables_md5[:8]) if tables_md5 else "unknown"
 
 
 # ----------------------------------------------------------------- labels
@@ -380,27 +217,25 @@ def ask_pending(pending, labels, session):
         print("   -> names/se_cues.toml: %s = %s" % (row["sound"], ans), flush=True)
 
 
-def ask_enemies(pending, enemies, area, session):
-    """Ask the on-screen name of every enemy slot heard for the first time in this area."""
+def ask_enemies(pending, gloss, session):
+    """Ask the English (on-screen) name of every species heard for the first time."""
     items = sorted(pending.items(), key=lambda kv: kv[1]["frame"])
     pending.clear()
-    print("   -- %d enemy slot(s) not yet named in %s; Enter = skip --" % (len(items), area or "?"), flush=True)
-    for (ar, slot), q in items:
+    print("   -- %d enemy species without an English name; Enter = skip --" % len(items), flush=True)
+    for jp, q in items:
         en = q["en"]
         try:
-            ans = input("   [f%d] %s slot %d  L%d HP%d EXP%d zenny%d ATK%d DEF%d AGI%d: which enemy? " % (
-                q["frame"], ar, slot, en["level"], en["max_hp"], en["exp"], en["zenny"], en["atk"], en["df"], en["agi"])).strip()
+            ans = input("   [f%d] %s slot %d %s  L%d HP%d EXP%d: English name? " % (
+                q["frame"], q["area"] or "?", en["slot"], jp, en["level"], en["max_hp"], en["exp"])).strip()
         except EOFError:
             ans = ""
         if not ans:
             continue
-        enemies[(ar, slot)] = {"area": ar, "slot": slot, "name": ans,
-                               "level": en["level"], "max_hp": en["max_hp"], "exp": en["exp"], "zenny": en["zenny"],
-                               "atk": en["atk"], "def": en["df"], "agi": en["agi"], "size": en["size"],
-                               "sounds": [q["sound"]] if q.get("sound") else [],
-                               "evidence": "se_watch %s f%d, record %s" % (session, q["frame"], en["rec"])}
-        save_enemies(enemies)
-        print("   -> names/enemies.toml: %s slot %d = %s" % (ar, slot, ans), flush=True)
+        gloss[jp] = {"jp": jp, "en": ans,
+                     "evidence": "se_watch %s f%d, %s slot %d, L%d HP%d EXP%d" % (
+                         session, q["frame"], q["area"] or "?", en["slot"], en["level"], en["max_hp"], en["exp"])}
+        save_gloss(gloss)
+        print("   -> names/enemy_gloss.toml: %s = %s" % (jp, ans), flush=True)
 
 
 # ----------------------------------------------------------------- main
@@ -427,8 +262,8 @@ def main():
     labels = load_labels()
     read_ram, read_spu = se_resolve.live_readers(a.port)
     disc = disc_index()
-    enemies = load_enemies()
-    pending_enemies = {}    # (area, slot) -> first sighting, asked with the sounds
+    gloss = load_gloss()
+    pending_enemies = {}    # jp name -> first sighting, asked for its English name
     session = dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     prev, armed = cd.wtrace_arm_ranges(a.port, [(CELL_ID, CELL_BANK + 4)])
     print("se_watch: armed 0x%08X-0x%08X (%s), session %s -> %s, %d label(s) known" % (
@@ -493,20 +328,16 @@ def main():
                     if res:
                         row["disc"] = where[:12]
                     en = read_enemy(read_ram) if bank == 6 else None
-                    en_known = enemies.get((area, en["slot"])) if (en and area) else None
+                    en_known = gloss.get(en["jp"]) if (en and en["jp"]) else None
                     if en:
                         row["enemy"] = en
-                        if en_known:
-                            if sound and sound not in en_known["sounds"]:
-                                en_known["sounds"].append(sound)
-                                save_enemies(enemies)
-                        elif area and (area, en["slot"]) not in pending_enemies:
-                            pending_enemies[(area, en["slot"])] = dict(en=en, frame=int(e["frame"]), sound=sound)
+                        if en["jp"] and not en_known and en["jp"] not in pending_enemies:
+                            pending_enemies[en["jp"]] = dict(en=en, frame=int(e["frame"]), area=area)
                             last_cue_t = time.time()
                     if en:
-                        desc += "  enemy slot %d L%d HP%d/%d%s" % (
-                            en["slot"], en["level"], en["hp"], en["max_hp"],
-                            (" = " + en_known["name"]) if en_known else "")
+                        desc += "  enemy slot %d %s L%d HP%d/%d%s" % (
+                            en["slot"], en["jp"] or "?", en["level"], en["hp"], en["max_hp"],
+                            (" = " + en_known["en"]) if en_known else "")
                     print("[f%d] cue %s (%s) %-34s ra=%s %-26s %s" % (
                         row["frame"], row["cue"], mode, desc, e["ra"],
                         ("%s:%s" % (ovl, caller)) if caller else "",
@@ -523,7 +354,7 @@ def main():
                 if pending:
                     ask_pending(pending, labels, session)
                 if pending_enemies and a.label:
-                    ask_enemies(pending_enemies, enemies, area, session)
+                    ask_enemies(pending_enemies, gloss, session)
             if a.seconds and time.time() - t0 >= a.seconds:
                 break
     except KeyboardInterrupt:
@@ -534,7 +365,7 @@ def main():
                 if pending:
                     ask_pending(pending, labels, session)
                 if pending_enemies and a.label:
-                    ask_enemies(pending_enemies, enemies, area, session)
+                    ask_enemies(pending_enemies, gloss, session)
             except (KeyboardInterrupt, EOFError):
                 pass
         cd.wtrace_restore(a.port, prev)

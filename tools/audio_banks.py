@@ -169,6 +169,20 @@ def area_aliases():
 PARTY_FILES = re.compile(r"^(BPLD|BPLU|BRTD|BRTU)(\d+)\.EMI$", re.I)
 
 
+ENEMIES = os.path.join(ROOT, "names", "enemies.toml")
+
+
+def species_names():
+    """AREA number -> {slot: jp name} from names/enemies.toml (tools/enemy_table.py)."""
+    if not os.path.exists(ENEMIES):
+        return {}
+    out = {}
+    for r in tomllib.load(open(ENEMIES, "rb")).get("enemy", []):
+        n = int(re.sub(r"\D", "", r["area"]))
+        out.setdefault(n, {})[int(r["slot"])] = (r.get("en") or r.get("jp") or "")
+    return out
+
+
 def character_names():
     p = os.path.join(ROOT, "names", "characters.toml")
     if not os.path.exists(p):
@@ -211,13 +225,21 @@ def owner_display(base, spells, areas, bank=None, chars=None):
 
 def auto_names(bin_root=BIN_ROOT):
     """sample md5 -> (auto name, owner 'FILE.EMI#vagN', [all homes])."""
-    spells, areas, chars = spell_names(), area_aliases(), character_names()
+    spells, areas, chars, species = spell_names(), area_aliases(), character_names(), species_names()
     homes, banks_of, sets_of = {}, {}, {}
+    vag_species = {}      # (ENEMY file, vag n) -> species name: the program that keys this VAG
     for t in triplets(bin_root):
         d = decode(t)
         if not d:
             continue
         base = d["file"].split("/")[-1]
+        m = re.match(r"^ENEMY(\d+)\.EMI$", base, re.I)
+        if m and int(m.group(1)) in species:
+            sp = species[int(m.group(1))]
+            for tone in d["tones"]:
+                key = (base, tone["vag"])
+                if tone["prog"] in sp and key not in vag_species:
+                    vag_species[key] = sp[tone["prog"]]
         banks_of.setdefault(base, set()).add(d["bank"])
         disp = owner_display(base, spells, areas, d["bank"], chars)
         # the sample lists behind one display name: "Rei" from 17 party files is one set,
@@ -234,6 +256,9 @@ def auto_names(bin_root=BIN_ROOT):
         stem = base[:-4] if base.upper().endswith(".EMI") else base
         if len(sets_of[disp]) > 1:
             disp = "%s (%s)" % (disp, stem)
+        sp = vag_species.get((base, n))
+        if sp:
+            disp = "%s (%s)" % (sp, stem)      # enemy VAG: the species whose program keys it, e.g. やけっぱちオーク (ENEMY048)
         slot = ("b%d " % bank) if (len(banks_of[base]) > 1 and disp.startswith(stem)) else ""
         out[md5] = ("%s %s%d" % (disp, slot, n), "%s#b%d#vag%d" % (base, bank, n),
                     ["%s#b%d#vag%d" % (b, bk, k) for _, b, bk, k in hs])

@@ -1,0 +1,5836 @@
+# names/enemies.toml -- every area's enemy species table, read off the disc by
+# tools/enemy_table.py extract (do not hand-edit; English names go in names/enemy_gloss.toml).
+#   area    AREAnnn: the table is that file's 0x800E4000 section (ENEMYnnn.EMI is its audio)
+#   slot    species index 0..7 = enemy record +0x60 = AI script row = bank-6 cue 0x600 + 2*slot
+#   jp      the 8-byte name field at record +0x48 (game kana codes -> tools/jptext.py)
+#   en      from names/enemy_gloss.toml when someone has read the screen
+#   level / max_hp / exp / zenny / atk / def / agi   the stat halfwords at record +0x54
+
+[meta]
+generator = "tools/enemy_table.py"
+areas = 200
+species_rows = 448
+
+[[enemy]]
+area = "AREA002"
+slot = 0
+jp = "ビルダー"
+en = "Worker"
+level = 5
+max_hp = 65535
+exp = 65
+zenny = 20
+atk = 10
+def = 4
+agi = 3
+
+[[enemy]]
+area = "AREA002"
+slot = 1
+jp = "クレーンぎし"
+en = "Operator"
+level = 5
+max_hp = 65535
+exp = 0
+zenny = 0
+atk = 0
+def = 999
+agi = 0
+
+[[enemy]]
+area = "AREA003"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA003"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA003"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA003"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA003"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA003"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA005"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA005"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA005"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA005"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA005"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA005"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA006"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA006"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA006"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA006"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA006"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA006"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA008"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA008"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA008"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA008"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA008"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA008"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA009"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA009"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA009"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA009"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA009"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA009"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA010"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA010"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA010"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA010"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA010"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA010"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA011"
+slot = 0
+jp = "バリオ"
+en = "Balio"
+level = 28
+max_hp = 200
+exp = 85
+zenny = 180
+atk = 65
+def = 15
+agi = 10
+
+[[enemy]]
+area = "AREA011"
+slot = 1
+jp = "サント"
+en = "Sunder"
+level = 25
+max_hp = 180
+exp = 25
+zenny = 4
+atk = 70
+def = 20
+agi = 8
+
+[[enemy]]
+area = "AREA012"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA012"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA012"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA012"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA012"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA012"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA015"
+slot = 0
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA015"
+slot = 1
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA015"
+slot = 2
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA015"
+slot = 3
+jp = "ハレモノグミ"
+en = "Puff Goo"
+level = 9
+max_hp = 21
+exp = 15
+zenny = 7
+atk = 21
+def = 12
+agi = 6
+
+[[enemy]]
+area = "AREA015"
+slot = 4
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA018"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA018"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA018"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA018"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA018"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA018"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA019"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA019"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA019"
+slot = 2
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA019"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA019"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA019"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA020"
+slot = 0
+jp = "バーガープラント"
+en = "Man Trap"
+level = 10
+max_hp = 45
+exp = 24
+zenny = 40
+atk = 26
+def = 19
+agi = 9
+
+[[enemy]]
+area = "AREA020"
+slot = 1
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA020"
+slot = 2
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA020"
+slot = 3
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA020"
+slot = 4
+jp = "ヌイグルミ"
+en = "Gooey"
+level = 45
+max_hp = 48
+exp = 9
+zenny = 4
+atk = 22
+def = 6
+agi = 1
+
+[[enemy]]
+area = "AREA020"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA022"
+slot = 0
+jp = "おいぼれいぬ"
+en = "Curr"
+level = 7
+max_hp = 23
+exp = 7
+zenny = 4
+atk = 18
+def = 13
+agi = 9
+
+[[enemy]]
+area = "AREA022"
+slot = 1
+jp = "ぬえ"
+en = "Nue"
+level = 20
+max_hp = 290
+exp = 95
+zenny = 50
+atk = 23
+def = 11
+agi = 12
+
+[[enemy]]
+area = "AREA022"
+slot = 2
+jp = "あばれゾンビ"
+en = "Zombie"
+level = 6
+max_hp = 78
+exp = 8
+zenny = 8
+atk = 25
+def = 1
+agi = 0
+
+[[enemy]]
+area = "AREA022"
+slot = 3
+jp = "ぐんたいこうもり"
+en = "Bat"
+level = 7
+max_hp = 6
+exp = 8
+zenny = 0
+atk = 24
+def = 0
+agi = 16
+
+[[enemy]]
+area = "AREA023"
+slot = 0
+jp = "おいぼれいぬ"
+en = "Curr"
+level = 7
+max_hp = 23
+exp = 7
+zenny = 4
+atk = 18
+def = 13
+agi = 9
+
+[[enemy]]
+area = "AREA023"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA023"
+slot = 2
+jp = "ぬえ"
+en = "Nue"
+level = 18
+max_hp = 210
+exp = 95
+zenny = 20
+atk = 23
+def = 11
+agi = 11
+
+[[enemy]]
+area = "AREA023"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA023"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA023"
+slot = 5
+jp = "ハレモノグミ"
+en = "Puff Goo"
+level = 9
+max_hp = 21
+exp = 15
+zenny = 7
+atk = 21
+def = 12
+agi = 6
+
+[[enemy]]
+area = "AREA024"
+slot = 0
+jp = "マイナー"
+en = "Miner"
+level = 5
+max_hp = 65535
+exp = 5
+zenny = 20
+atk = 10
+def = 4
+agi = 3
+
+[[enemy]]
+area = "AREA024"
+slot = 1
+jp = "はっぱぎし"
+en = "Engineer"
+level = 5
+max_hp = 65535
+exp = 4
+zenny = 20
+atk = 10
+def = 4
+agi = 3
+
+[[enemy]]
+area = "AREA024"
+slot = 2
+jp = "げんばしゅにん"
+en = "Foreman"
+level = 5
+max_hp = 65535
+exp = 8
+zenny = 33
+atk = 10
+def = 4
+agi = 3
+
+[[enemy]]
+area = "AREA024"
+slot = 3
+jp = "ギリー"
+en = "Gary"
+level = 5
+max_hp = 65535
+exp = 0
+zenny = 0
+atk = 10
+def = 8
+agi = 0
+
+[[enemy]]
+area = "AREA024"
+slot = 4
+jp = "モーグ"
+en = "Mogu"
+level = 5
+max_hp = 65535
+exp = 0
+zenny = 0
+atk = 10
+def = 9
+agi = 0
+
+[[enemy]]
+area = "AREA026"
+slot = 0
+jp = "ヒヨちゃん"
+en = "Rocky"
+level = 18
+max_hp = 280
+exp = 85
+zenny = 0
+atk = 30
+def = 13
+agi = 13
+
+[[enemy]]
+area = "AREA026"
+slot = 1
+jp = "ポイチ"
+en = "Pooch"
+level = 15
+max_hp = 260
+exp = 55
+zenny = 10
+atk = 32
+def = 15
+agi = 12
+
+[[enemy]]
+area = "AREA027"
+slot = 0
+jp = "サンダークライ"
+en = "Volt"
+level = 6
+max_hp = 34
+exp = 28
+zenny = 6
+atk = 20
+def = 9
+agi = 9
+
+[[enemy]]
+area = "AREA027"
+slot = 1
+jp = "けいびへい"
+en = "Guard"
+level = 15
+max_hp = 47
+exp = 12
+zenny = 24
+atk = 25
+def = 16
+agi = 8
+
+[[enemy]]
+area = "AREA027"
+slot = 2
+jp = "トラスト"
+en = "Torast"
+level = 10
+max_hp = 115
+exp = 32
+zenny = 8
+atk = 28
+def = 13
+agi = 10
+
+[[enemy]]
+area = "AREA027"
+slot = 3
+jp = "カッセン"
+en = "Kassen"
+level = 14
+max_hp = 62
+exp = 37
+zenny = 20
+atk = 27
+def = 23
+agi = 7
+
+[[enemy]]
+area = "AREA027"
+slot = 4
+jp = "カルテル"
+en = "Galtel"
+level = 14
+max_hp = 145
+exp = 35
+zenny = 4
+atk = 27
+def = 16
+agi = 8
+
+[[enemy]]
+area = "AREA027"
+slot = 5
+jp = "ドクセン"
+en = "Doksen"
+level = 15
+max_hp = 140
+exp = 46
+zenny = 24
+atk = 29
+def = 18
+agi = 11
+
+[[enemy]]
+area = "AREA027"
+slot = 6
+jp = "ゴキ"
+en = "Roach"
+level = 8
+max_hp = 60
+exp = 10
+zenny = 0
+atk = 24
+def = 2
+agi = 12
+
+[[enemy]]
+area = "AREA028"
+slot = 0
+jp = "サンダークライ"
+en = "Volt"
+level = 6
+max_hp = 34
+exp = 28
+zenny = 6
+atk = 20
+def = 9
+agi = 9
+
+[[enemy]]
+area = "AREA028"
+slot = 1
+jp = "コンガーマリト"
+en = "Amalgam"
+level = 20
+max_hp = 520
+exp = 210
+zenny = 200
+atk = 35
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA028"
+slot = 2
+jp = "ぐんたいこうもり"
+en = "Bat"
+level = 7
+max_hp = 6
+exp = 8
+zenny = 0
+atk = 24
+def = 0
+agi = 16
+
+[[enemy]]
+area = "AREA029"
+slot = 0
+jp = "バーガープラント"
+en = "Man Trap"
+level = 10
+max_hp = 45
+exp = 24
+zenny = 40
+atk = 26
+def = 19
+agi = 9
+
+[[enemy]]
+area = "AREA029"
+slot = 1
+jp = "ダメゴブリン"
+en = "Goblin"
+level = 4
+max_hp = 10
+exp = 2
+zenny = 5
+atk = 15
+def = 10
+agi = 5
+
+[[enemy]]
+area = "AREA029"
+slot = 2
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA029"
+slot = 3
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA029"
+slot = 4
+jp = "ヌイグルミ"
+en = "Gooey"
+level = 45
+max_hp = 48
+exp = 9
+zenny = 4
+atk = 22
+def = 6
+agi = 1
+
+[[enemy]]
+area = "AREA029"
+slot = 5
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA032"
+slot = 0
+jp = "ビルダー"
+en = "Worker"
+level = 5
+max_hp = 65535
+exp = 65
+zenny = 20
+atk = 10
+def = 4
+agi = 3
+
+[[enemy]]
+area = "AREA035"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA035"
+slot = 1
+jp = "グミダイン"
+en = "GooTitan"
+level = 40
+max_hp = 350
+exp = 660
+zenny = 200
+atk = 120
+def = 40
+agi = 17
+
+[[enemy]]
+area = "AREA035"
+slot = 2
+jp = "バガボンド"
+en = "Vagabond"
+level = 22
+max_hp = 125
+exp = 88
+zenny = 80
+atk = 112
+def = 50
+agi = 13
+
+[[enemy]]
+area = "AREA035"
+slot = 3
+jp = "ワータイガー"
+en = "Weretiger"
+level = 60
+max_hp = 1200
+exp = 600
+zenny = 450
+atk = 120
+def = 30
+agi = 80
+
+[[enemy]]
+area = "AREA035"
+slot = 4
+jp = "ずつつき"
+en = "Slasher"
+level = 80
+max_hp = 98
+exp = 95
+zenny = 70
+atk = 95
+def = 27
+agi = 32
+
+[[enemy]]
+area = "AREA040"
+slot = 0
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA040"
+slot = 1
+jp = "ポチプロトタイプ"
+en = "ProtoBot"
+level = 12
+max_hp = 65
+exp = 30
+zenny = 0
+atk = 53
+def = 20
+agi = 11
+
+[[enemy]]
+area = "AREA040"
+slot = 2
+jp = "アーマーポチ"
+en = "ArmorBot"
+level = 25
+max_hp = 65
+exp = 45
+zenny = 0
+atk = 22
+def = 40
+agi = 7
+
+[[enemy]]
+area = "AREA040"
+slot = 3
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA040"
+slot = 4
+jp = "サルガシラ"
+en = "Gonger"
+level = 16
+max_hp = 70
+exp = 30
+zenny = 27
+atk = 45
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA040"
+slot = 5
+jp = "ギ"
+en = ""
+level = 15
+max_hp = 80
+exp = 63
+zenny = 45
+atk = 54
+def = 7
+agi = 8
+
+[[enemy]]
+area = "AREA041"
+slot = 0
+jp = "バリオ"
+en = "Balio"
+level = 28
+max_hp = 200
+exp = 85
+zenny = 180
+atk = 65
+def = 15
+agi = 10
+
+[[enemy]]
+area = "AREA041"
+slot = 1
+jp = "サント"
+en = "Sunder"
+level = 25
+max_hp = 180
+exp = 25
+zenny = 4
+atk = 70
+def = 20
+agi = 8
+
+[[enemy]]
+area = "AREA041"
+slot = 2
+jp = "ニーナ"
+en = "Nina"
+level = 8
+max_hp = 65535
+exp = 55
+zenny = 20
+atk = 25
+def = 12
+agi = 10
+
+[[enemy]]
+area = "AREA042"
+slot = 0
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA042"
+slot = 1
+jp = "ポチプロトタイプ"
+en = "ProtoBot"
+level = 12
+max_hp = 65
+exp = 30
+zenny = 0
+atk = 53
+def = 20
+agi = 11
+
+[[enemy]]
+area = "AREA042"
+slot = 2
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA042"
+slot = 3
+jp = "サルガシラ"
+en = "Gonger"
+level = 16
+max_hp = 70
+exp = 30
+zenny = 27
+atk = 45
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA043"
+slot = 0
+jp = "ミクバ"
+en = "Mikba"
+level = 80
+max_hp = 2400
+exp = 3000
+zenny = 1500
+atk = 110
+def = 52
+agi = 17
+
+[[enemy]]
+area = "AREA044"
+slot = 0
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA044"
+slot = 1
+jp = "ポチプロトタイプ"
+en = "ProtoBot"
+level = 12
+max_hp = 65
+exp = 30
+zenny = 0
+atk = 53
+def = 20
+agi = 11
+
+[[enemy]]
+area = "AREA044"
+slot = 2
+jp = "アーマーポチ"
+en = "ArmorBot"
+level = 25
+max_hp = 65
+exp = 45
+zenny = 0
+atk = 22
+def = 40
+agi = 7
+
+[[enemy]]
+area = "AREA044"
+slot = 3
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA044"
+slot = 4
+jp = "ハイパーポチ"
+en = "HyperBot"
+level = 13
+max_hp = 65
+exp = 120
+zenny = 0
+atk = 57
+def = 30
+agi = 20
+
+[[enemy]]
+area = "AREA044"
+slot = 5
+jp = "ギ"
+en = ""
+level = 15
+max_hp = 80
+exp = 63
+zenny = 45
+atk = 54
+def = 7
+agi = 8
+
+[[enemy]]
+area = "AREA048"
+slot = 0
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA048"
+slot = 1
+jp = "ポチプロトタイプ"
+en = "ProtoBot"
+level = 12
+max_hp = 65
+exp = 30
+zenny = 0
+atk = 53
+def = 20
+agi = 11
+
+[[enemy]]
+area = "AREA048"
+slot = 2
+jp = "アーマーポチ"
+en = "ArmorBot"
+level = 25
+max_hp = 65
+exp = 45
+zenny = 0
+atk = 22
+def = 40
+agi = 7
+
+[[enemy]]
+area = "AREA048"
+slot = 3
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA048"
+slot = 4
+jp = "ハイパーポチ"
+en = "HyperBot"
+level = 13
+max_hp = 65
+exp = 120
+zenny = 0
+atk = 57
+def = 30
+agi = 20
+
+[[enemy]]
+area = "AREA048"
+slot = 5
+jp = "ギ"
+en = ""
+level = 15
+max_hp = 80
+exp = 63
+zenny = 45
+atk = 54
+def = 7
+agi = 8
+
+[[enemy]]
+area = "AREA051"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA051"
+slot = 1
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+level = 10
+max_hp = 5
+exp = 17
+zenny = 18
+atk = 29
+def = 1
+agi = 1
+
+[[enemy]]
+area = "AREA051"
+slot = 2
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA051"
+slot = 3
+jp = "タールマン"
+en = "Tar Man"
+level = 14
+max_hp = 78
+exp = 70
+zenny = 15
+atk = 30
+def = 150
+agi = 4
+
+[[enemy]]
+area = "AREA052"
+slot = 0
+jp = "フライングボム"
+en = "Bomber"
+level = 22
+max_hp = 100
+exp = 102
+zenny = 45
+atk = 57
+def = 35
+agi = 15
+
+[[enemy]]
+area = "AREA052"
+slot = 1
+jp = "ベヘリット"
+en = "PainWeed"
+level = 20
+max_hp = 80
+exp = 57
+zenny = 40
+atk = 62
+def = 35
+agi = 13
+
+[[enemy]]
+area = "AREA052"
+slot = 2
+jp = "めだまバルブ"
+en = "Eye Bulb"
+level = 18
+max_hp = 60
+exp = 80
+zenny = 42
+atk = 56
+def = 34
+agi = 15
+
+[[enemy]]
+area = "AREA052"
+slot = 3
+jp = "ミュートプラント"
+en = "Mutant"
+level = 30
+max_hp = 500
+exp = 600
+zenny = 300
+atk = 73
+def = 22
+agi = 13
+
+[[enemy]]
+area = "AREA052"
+slot = 4
+jp = "ベヘソット"
+en = "RankWeed"
+level = 20
+max_hp = 80
+exp = 57
+zenny = 40
+atk = 62
+def = 35
+agi = 13
+
+[[enemy]]
+area = "AREA052"
+slot = 5
+jp = "まだらひる"
+en = "Slug"
+level = 15
+max_hp = 47
+exp = 35
+zenny = 20
+atk = 56
+def = 5
+agi = 10
+
+[[enemy]]
+area = "AREA052"
+slot = 6
+jp = "ヒルオウ"
+en = "FireSlug"
+level = 18
+max_hp = 61
+exp = 94
+zenny = 50
+atk = 62
+def = 35
+agi = 13
+
+[[enemy]]
+area = "AREA054"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA054"
+slot = 1
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+level = 10
+max_hp = 5
+exp = 17
+zenny = 18
+atk = 29
+def = 1
+agi = 1
+
+[[enemy]]
+area = "AREA054"
+slot = 2
+jp = "ナッツアーチャー"
+en = "NutArchr"
+level = 18
+max_hp = 5
+exp = 25
+zenny = 14
+atk = 31
+def = 1
+agi = 16
+
+[[enemy]]
+area = "AREA054"
+slot = 3
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA054"
+slot = 4
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA054"
+slot = 5
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA056"
+slot = 0
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+level = 10
+max_hp = 5
+exp = 17
+zenny = 18
+atk = 29
+def = 1
+agi = 1
+
+[[enemy]]
+area = "AREA056"
+slot = 1
+jp = "サンダークライ"
+en = "Volt"
+level = 6
+max_hp = 34
+exp = 28
+zenny = 6
+atk = 20
+def = 9
+agi = 9
+
+[[enemy]]
+area = "AREA056"
+slot = 2
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA056"
+slot = 3
+jp = "あばれゾンビ"
+en = "Zombie"
+level = 6
+max_hp = 78
+exp = 8
+zenny = 8
+atk = 25
+def = 1
+agi = 0
+
+[[enemy]]
+area = "AREA056"
+slot = 4
+jp = "ボーンデッド"
+en = "Ghoul"
+level = 20
+max_hp = 65
+exp = 22
+zenny = 20
+atk = 25
+def = 5
+agi = 7
+
+[[enemy]]
+area = "AREA056"
+slot = 5
+jp = "サンダーチャージ"
+en = "Thunder"
+level = 12
+max_hp = 45
+exp = 16
+zenny = 18
+atk = 18
+def = 10
+agi = 14
+
+[[enemy]]
+area = "AREA063"
+slot = 0
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+level = 10
+max_hp = 5
+exp = 17
+zenny = 18
+atk = 29
+def = 1
+agi = 1
+
+[[enemy]]
+area = "AREA063"
+slot = 1
+jp = "サンダークライ"
+en = "Volt"
+level = 6
+max_hp = 34
+exp = 28
+zenny = 6
+atk = 20
+def = 9
+agi = 9
+
+[[enemy]]
+area = "AREA063"
+slot = 2
+jp = "ナッツアーチャー"
+en = "NutArchr"
+level = 18
+max_hp = 5
+exp = 25
+zenny = 14
+atk = 31
+def = 1
+agi = 16
+
+[[enemy]]
+area = "AREA063"
+slot = 3
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA063"
+slot = 4
+jp = "タールマン"
+en = "Tar Man"
+level = 14
+max_hp = 78
+exp = 70
+zenny = 15
+atk = 30
+def = 150
+agi = 4
+
+[[enemy]]
+area = "AREA063"
+slot = 5
+jp = "サンダーチャージ"
+en = "Thunder"
+level = 12
+max_hp = 45
+exp = 16
+zenny = 18
+atk = 18
+def = 10
+agi = 14
+
+[[enemy]]
+area = "AREA064"
+slot = 0
+jp = "ナッツシャーマン"
+en = "Nut Mage"
+level = 10
+max_hp = 5
+exp = 17
+zenny = 18
+atk = 29
+def = 1
+agi = 1
+
+[[enemy]]
+area = "AREA064"
+slot = 1
+jp = "ナッツアーチャー"
+en = "NutArchr"
+level = 18
+max_hp = 5
+exp = 25
+zenny = 14
+atk = 31
+def = 1
+agi = 16
+
+[[enemy]]
+area = "AREA064"
+slot = 2
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA064"
+slot = 3
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA064"
+slot = 4
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA064"
+slot = 5
+jp = "サルガシラ"
+en = "Gonger"
+level = 16
+max_hp = 70
+exp = 30
+zenny = 27
+atk = 45
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA067"
+slot = 0
+jp = "スタリオン"
+en = "Stallion"
+level = 50
+max_hp = 1500
+exp = 800
+zenny = 500
+atk = 94
+def = 25
+agi = 14
+
+[[enemy]]
+area = "AREA067"
+slot = 1
+jp = "ゴロツキ1"
+en = "Bully 1"
+level = 20
+max_hp = 200
+exp = 80
+zenny = 100
+atk = 66
+def = 15
+agi = 22
+
+[[enemy]]
+area = "AREA067"
+slot = 2
+jp = "ゴロツキ2"
+en = "Bully 2"
+level = 20
+max_hp = 200
+exp = 80
+zenny = 100
+atk = 64
+def = 15
+agi = 10
+
+[[enemy]]
+area = "AREA067"
+slot = 3
+jp = "ゴロツキ3"
+en = "Bully 3"
+level = 20
+max_hp = 200
+exp = 80
+zenny = 150
+atk = 65
+def = 15
+agi = 15
+
+[[enemy]]
+area = "AREA069"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA069"
+slot = 1
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA069"
+slot = 2
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA069"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA069"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA070"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA070"
+slot = 1
+jp = "グミダイン"
+en = "GooTitan"
+level = 40
+max_hp = 350
+exp = 660
+zenny = 200
+atk = 120
+def = 40
+agi = 17
+
+[[enemy]]
+area = "AREA070"
+slot = 2
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA070"
+slot = 3
+jp = "やとわれゴブリン"
+en = "BlueGbln"
+level = 25
+max_hp = 120
+exp = 95
+zenny = 75
+atk = 100
+def = 35
+agi = 12
+
+[[enemy]]
+area = "AREA070"
+slot = 4
+jp = "ずつつき"
+en = "Slasher"
+level = 80
+max_hp = 98
+exp = 95
+zenny = 70
+atk = 95
+def = 27
+agi = 32
+
+[[enemy]]
+area = "AREA071"
+slot = 0
+jp = "ナッツアーチャー"
+en = "NutArchr"
+level = 18
+max_hp = 5
+exp = 25
+zenny = 14
+atk = 31
+def = 1
+agi = 16
+
+[[enemy]]
+area = "AREA071"
+slot = 1
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA071"
+slot = 2
+jp = "やけっぱちオーク"
+en = "Orc"
+level = 18
+max_hp = 100
+exp = 58
+zenny = 62
+atk = 50
+def = 17
+agi = 11
+
+[[enemy]]
+area = "AREA071"
+slot = 3
+jp = "タールマン"
+en = "Tar Man"
+level = 14
+max_hp = 78
+exp = 70
+zenny = 15
+atk = 30
+def = 150
+agi = 4
+
+[[enemy]]
+area = "AREA071"
+slot = 4
+jp = "サルガシラ"
+en = "Gonger"
+level = 16
+max_hp = 70
+exp = 30
+zenny = 27
+atk = 45
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA072"
+slot = 0
+jp = "フライングボム"
+en = "Bomber"
+level = 22
+max_hp = 100
+exp = 102
+zenny = 45
+atk = 57
+def = 35
+agi = 15
+
+[[enemy]]
+area = "AREA072"
+slot = 1
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA072"
+slot = 2
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA072"
+slot = 3
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA072"
+slot = 4
+jp = "ぬすっとこうもり"
+en = "BloodBat"
+level = 18
+max_hp = 35
+exp = 55
+zenny = 30
+atk = 70
+def = 15
+agi = 18
+
+[[enemy]]
+area = "AREA073"
+slot = 0
+jp = "フライングボム"
+en = "Bomber"
+level = 22
+max_hp = 100
+exp = 102
+zenny = 45
+atk = 57
+def = 35
+agi = 15
+
+[[enemy]]
+area = "AREA073"
+slot = 1
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA073"
+slot = 2
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA073"
+slot = 3
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA073"
+slot = 4
+jp = "ヘルハウンド"
+en = "Cerebus"
+level = 16
+max_hp = 65
+exp = 72
+zenny = 45
+atk = 85
+def = 25
+agi = 16
+
+[[enemy]]
+area = "AREA075"
+slot = 0
+jp = "アングラ"
+en = "Angler"
+level = 48
+max_hp = 3000
+exp = 3000
+zenny = 200
+atk = 160
+def = 55
+agi = 20
+
+[[enemy]]
+area = "AREA076"
+slot = 0
+jp = "フライングボム"
+en = "Bomber"
+level = 22
+max_hp = 100
+exp = 102
+zenny = 45
+atk = 57
+def = 35
+agi = 15
+
+[[enemy]]
+area = "AREA076"
+slot = 1
+jp = "サンダークライ"
+en = "Volt"
+level = 6
+max_hp = 34
+exp = 28
+zenny = 6
+atk = 20
+def = 9
+agi = 9
+
+[[enemy]]
+area = "AREA076"
+slot = 2
+jp = "ぬすっとこうもり"
+en = "BloodBat"
+level = 18
+max_hp = 35
+exp = 55
+zenny = 30
+atk = 70
+def = 15
+agi = 18
+
+[[enemy]]
+area = "AREA076"
+slot = 3
+jp = "サンダーチャージ"
+en = "Thunder"
+level = 12
+max_hp = 45
+exp = 16
+zenny = 18
+atk = 18
+def = 10
+agi = 14
+
+[[enemy]]
+area = "AREA076"
+slot = 4
+jp = "プチゴースト"
+en = "Ghost"
+level = 32
+max_hp = 65
+exp = 90
+zenny = 80
+atk = 71
+def = 40
+agi = 22
+
+[[enemy]]
+area = "AREA077"
+slot = 0
+jp = "フライングボム"
+en = "Bomber"
+level = 22
+max_hp = 100
+exp = 102
+zenny = 45
+atk = 57
+def = 35
+agi = 15
+
+[[enemy]]
+area = "AREA077"
+slot = 1
+jp = "ぬすっとこうもり"
+en = "BloodBat"
+level = 18
+max_hp = 35
+exp = 55
+zenny = 30
+atk = 70
+def = 15
+agi = 18
+
+[[enemy]]
+area = "AREA077"
+slot = 2
+jp = "ゲイザー"
+en = "Gazer"
+level = 60
+max_hp = 1100
+exp = 1500
+zenny = 1000
+atk = 78
+def = 35
+agi = 14
+
+[[enemy]]
+area = "AREA077"
+slot = 3
+jp = "プチゴースト"
+en = "Ghost"
+level = 32
+max_hp = 65
+exp = 90
+zenny = 80
+atk = 71
+def = 40
+agi = 22
+
+[[enemy]]
+area = "AREA077"
+slot = 4
+jp = "マインドブラスタ"
+en = "Spectre"
+level = 22
+max_hp = 30
+exp = 150
+zenny = 75
+atk = 73
+def = 70
+agi = 18
+
+[[enemy]]
+area = "AREA079"
+slot = 0
+jp = "クロー"
+en = "Claw"
+level = 40
+max_hp = 220
+exp = 150
+zenny = 200
+atk = 68
+def = 25
+agi = 17
+
+[[enemy]]
+area = "AREA079"
+slot = 1
+jp = "カウワー"
+en = "Cawer"
+level = 30
+max_hp = 200
+exp = 165
+zenny = 70
+atk = 67
+def = 32
+agi = 11
+
+[[enemy]]
+area = "AREA079"
+slot = 2
+jp = "パトリオ"
+en = "Patrio"
+level = 30
+max_hp = 350
+exp = 200
+zenny = 120
+atk = 64
+def = 18
+agi = 12
+
+[[enemy]]
+area = "AREA079"
+slot = 3
+jp = "ドダイ1"
+en = "Dodai 1"
+level = 1
+max_hp = 2000
+exp = 3000
+zenny = 0
+atk = 25
+def = 30
+agi = 10
+
+[[enemy]]
+area = "AREA079"
+slot = 4
+jp = "ドダイ2"
+en = "Dodai 2"
+level = 1
+max_hp = 1500
+exp = 500
+zenny = 0
+atk = 25
+def = 12
+agi = 10
+
+[[enemy]]
+area = "AREA080"
+slot = 0
+jp = "ガーランド"
+en = "Garr"
+level = 50
+max_hp = 65535
+exp = 500
+zenny = 500
+atk = 92
+def = 55
+agi = 10
+
+[[enemy]]
+area = "AREA081"
+slot = 0
+jp = "エミタイ"
+en = "Emitai"
+level = 17
+max_hp = 600
+exp = 400
+zenny = 300
+atk = 55
+def = 35
+agi = 10
+
+[[enemy]]
+area = "AREA081"
+slot = 1
+jp = "マッスルゴーレム"
+en = "Golem"
+level = 40
+max_hp = 750
+exp = 100
+zenny = 20
+atk = 170
+def = 10
+agi = 10
+
+[[enemy]]
+area = "AREA081"
+slot = 2
+jp = "マッスルゴーレム"
+en = "Golem"
+level = 40
+max_hp = 750
+exp = 100
+zenny = 20
+atk = 68
+def = 10
+agi = 10
+
+[[enemy]]
+area = "AREA082"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA082"
+slot = 1
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA082"
+slot = 2
+jp = "ヘルハウンド"
+en = "Cerebus"
+level = 16
+max_hp = 65
+exp = 72
+zenny = 45
+atk = 85
+def = 25
+agi = 16
+
+[[enemy]]
+area = "AREA082"
+slot = 3
+jp = "マインドブラスタ"
+en = "Spectre"
+level = 22
+max_hp = 30
+exp = 150
+zenny = 75
+atk = 73
+def = 70
+agi = 18
+
+[[enemy]]
+area = "AREA083"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA083"
+slot = 1
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA083"
+slot = 2
+jp = "ソウルハンター"
+en = "Phantom"
+level = 35
+max_hp = 140
+exp = 115
+zenny = 200
+atk = 83
+def = 42
+agi = 17
+
+[[enemy]]
+area = "AREA083"
+slot = 3
+jp = "ヘルハウンド"
+en = "Cerebus"
+level = 16
+max_hp = 65
+exp = 72
+zenny = 45
+atk = 85
+def = 25
+agi = 16
+
+[[enemy]]
+area = "AREA084"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA084"
+slot = 1
+jp = "ソウルハンター"
+en = "Phantom"
+level = 35
+max_hp = 140
+exp = 115
+zenny = 200
+atk = 83
+def = 42
+agi = 17
+
+[[enemy]]
+area = "AREA084"
+slot = 2
+jp = "ヘルハウンド"
+en = "Cerebus"
+level = 16
+max_hp = 65
+exp = 72
+zenny = 45
+atk = 85
+def = 25
+agi = 16
+
+[[enemy]]
+area = "AREA084"
+slot = 3
+jp = "マインドブラスタ"
+en = "Spectre"
+level = 22
+max_hp = 30
+exp = 150
+zenny = 75
+atk = 73
+def = 70
+agi = 18
+
+[[enemy]]
+area = "AREA085"
+slot = 0
+jp = "ガーランド"
+en = "Garr"
+level = 80
+max_hp = 380
+exp = 400
+zenny = 0
+atk = 0
+def = 50
+agi = 11
+
+[[enemy]]
+area = "AREA086"
+slot = 0
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA086"
+slot = 1
+jp = "ボルトシャーマン"
+en = "BoltMage"
+level = 26
+max_hp = 10
+exp = 185
+zenny = 180
+atk = 125
+def = 50
+agi = 35
+
+[[enemy]]
+area = "AREA086"
+slot = 2
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA091"
+slot = 0
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA091"
+slot = 1
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA091"
+slot = 2
+jp = "ハレモノグミ"
+en = "Puff Goo"
+level = 9
+max_hp = 21
+exp = 15
+zenny = 7
+atk = 21
+def = 12
+agi = 6
+
+[[enemy]]
+area = "AREA091"
+slot = 3
+jp = "ヌイグルミ"
+en = "Gooey"
+level = 45
+max_hp = 48
+exp = 9
+zenny = 4
+atk = 22
+def = 6
+agi = 1
+
+[[enemy]]
+area = "AREA091"
+slot = 4
+jp = "グミダイン"
+en = "GooTitan"
+level = 40
+max_hp = 350
+exp = 660
+zenny = 200
+atk = 120
+def = 40
+agi = 17
+
+[[enemy]]
+area = "AREA092"
+slot = 0
+jp = "ベイト"
+en = "Beyd"
+level = 8
+max_hp = 10000
+exp = 0
+zenny = 0
+atk = 25
+def = 12
+agi = 12
+
+[[enemy]]
+area = "AREA092"
+slot = 1
+jp = "ベイト"
+en = "Beyd"
+level = 8
+max_hp = 100
+exp = 0
+zenny = 0
+atk = 25
+def = 12
+agi = 12
+
+[[enemy]]
+area = "AREA092"
+slot = 2
+jp = "ジグ"
+en = "Zig"
+level = 45
+max_hp = 250
+exp = 0
+zenny = 0
+atk = 70
+def = 40
+agi = 12
+
+[[enemy]]
+area = "AREA095"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA095"
+slot = 1
+jp = "バーガープラント"
+en = "Man Trap"
+level = 10
+max_hp = 45
+exp = 24
+zenny = 40
+atk = 26
+def = 19
+agi = 9
+
+[[enemy]]
+area = "AREA095"
+slot = 2
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA095"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA095"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA095"
+slot = 5
+jp = "ハレモノグミ"
+en = "Puff Goo"
+level = 9
+max_hp = 21
+exp = 15
+zenny = 7
+atk = 21
+def = 12
+agi = 6
+
+[[enemy]]
+area = "AREA096"
+slot = 0
+jp = "めつつき"
+en = "Ripper"
+level = 10
+max_hp = 20
+exp = 7
+zenny = 5
+atk = 15
+def = 8
+agi = 12
+
+[[enemy]]
+area = "AREA096"
+slot = 1
+jp = "バーガープラント"
+en = "Man Trap"
+level = 10
+max_hp = 45
+exp = 24
+zenny = 40
+atk = 26
+def = 19
+agi = 9
+
+[[enemy]]
+area = "AREA096"
+slot = 2
+jp = "ガンヘッド"
+en = "Gonghead"
+level = 10
+max_hp = 31
+exp = 8
+zenny = 10
+atk = 19
+def = 11
+agi = 7
+
+[[enemy]]
+area = "AREA096"
+slot = 3
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA096"
+slot = 4
+jp = "メイジグミ"
+en = "Mage Goo"
+level = 6
+max_hp = 22
+exp = 6
+zenny = 20
+atk = 16
+def = 8
+agi = 7
+
+[[enemy]]
+area = "AREA096"
+slot = 5
+jp = "ハレモノグミ"
+en = "Puff Goo"
+level = 9
+max_hp = 21
+exp = 15
+zenny = 7
+atk = 21
+def = 12
+agi = 6
+
+[[enemy]]
+area = "AREA099"
+slot = 0
+jp = "ナッツアーチャー"
+en = "NutArchr"
+level = 18
+max_hp = 5
+exp = 25
+zenny = 14
+atk = 31
+def = 1
+agi = 16
+
+[[enemy]]
+area = "AREA099"
+slot = 1
+jp = "ナッツファイター"
+en = "NutTroop"
+level = 15
+max_hp = 5
+exp = 15
+zenny = 16
+atk = 30
+def = 1
+agi = 13
+
+[[enemy]]
+area = "AREA099"
+slot = 2
+jp = "タールマン"
+en = "Tar Man"
+level = 14
+max_hp = 78
+exp = 70
+zenny = 15
+atk = 30
+def = 150
+agi = 4
+
+[[enemy]]
+area = "AREA099"
+slot = 3
+jp = "サルガシラ"
+en = "Gonger"
+level = 16
+max_hp = 70
+exp = 30
+zenny = 27
+atk = 45
+def = 14
+agi = 10
+
+[[enemy]]
+area = "AREA102"
+slot = 0
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA102"
+slot = 1
+jp = "ニードリザード"
+en = "Lizard"
+level = 20
+max_hp = 45
+exp = 28
+zenny = 25
+atk = 49
+def = 15
+agi = 14
+
+[[enemy]]
+area = "AREA102"
+slot = 2
+jp = "ラーバビースト"
+en = "Lava Man"
+level = 20
+max_hp = 113
+exp = 90
+zenny = 75
+atk = 80
+def = 30
+agi = 15
+
+[[enemy]]
+area = "AREA102"
+slot = 3
+jp = "カザンガン"
+en = "Vulcan"
+level = 25
+max_hp = 300
+exp = 180
+zenny = 300
+atk = 95
+def = 550
+agi = 8
+
+[[enemy]]
+area = "AREA103"
+slot = 0
+jp = "リザードマン"
+en = "LizardMn"
+level = 30
+max_hp = 128
+exp = 160
+zenny = 102
+atk = 93
+def = 36
+agi = 13
+
+[[enemy]]
+area = "AREA103"
+slot = 1
+jp = "ラーバビースト"
+en = "Lava Man"
+level = 20
+max_hp = 113
+exp = 90
+zenny = 75
+atk = 80
+def = 30
+agi = 15
+
+[[enemy]]
+area = "AREA103"
+slot = 2
+jp = "アービィー"
+en = "Charybdis"
+level = 70
+max_hp = 1000
+exp = 500
+zenny = 0
+atk = 100
+def = 40
+agi = 13
+
+[[enemy]]
+area = "AREA103"
+slot = 3
+jp = "ルーファス"
+en = "Scylla"
+level = 70
+max_hp = 1000
+exp = 500
+zenny = 0
+atk = 100
+def = 40
+agi = 13
+
+[[enemy]]
+area = "AREA103"
+slot = 4
+jp = "ギシャボルゴ"
+en = "Gisshan"
+level = 40
+max_hp = 800
+exp = 500
+zenny = 1000
+atk = 95
+def = 32
+agi = 20
+
+[[enemy]]
+area = "AREA103"
+slot = 5
+jp = "カザンガン"
+en = "Vulcan"
+level = 25
+max_hp = 300
+exp = 180
+zenny = 300
+atk = 95
+def = 550
+agi = 8
+
+[[enemy]]
+area = "AREA105"
+slot = 0
+jp = "とげぎんちゃく"
+en = "BarbBulb"
+level = 30
+max_hp = 155
+exp = 125
+zenny = 110
+atk = 115
+def = 70
+agi = 15
+
+[[enemy]]
+area = "AREA105"
+slot = 1
+jp = "ウッパ"
+en = "Sleepy"
+level = 23
+max_hp = 120
+exp = 95
+zenny = 66
+atk = 113
+def = 42
+agi = 26
+
+[[enemy]]
+area = "AREA105"
+slot = 2
+jp = "ハリセンボン"
+en = "Spiker"
+level = 45
+max_hp = 250
+exp = 240
+zenny = 125
+atk = 122
+def = 40
+agi = 18
+
+[[enemy]]
+area = "AREA105"
+slot = 3
+jp = "ずつつき"
+en = "Slasher"
+level = 80
+max_hp = 98
+exp = 95
+zenny = 70
+atk = 95
+def = 27
+agi = 32
+
+[[enemy]]
+area = "AREA105"
+slot = 4
+jp = "ボムシード"
+en = "BombSeed"
+level = 40
+max_hp = 250
+exp = 212
+zenny = 150
+atk = 135
+def = 55
+agi = 27
+
+[[enemy]]
+area = "AREA106"
+slot = 0
+jp = "とげぎんちゃく"
+en = "BarbBulb"
+level = 30
+max_hp = 155
+exp = 125
+zenny = 110
+atk = 115
+def = 70
+agi = 15
+
+[[enemy]]
+area = "AREA106"
+slot = 1
+jp = "ウッパ"
+en = "Sleepy"
+level = 23
+max_hp = 120
+exp = 95
+zenny = 66
+atk = 113
+def = 42
+agi = 26
+
+[[enemy]]
+area = "AREA106"
+slot = 2
+jp = "ハリセンボン"
+en = "Spiker"
+level = 45
+max_hp = 250
+exp = 240
+zenny = 125
+atk = 122
+def = 40
+agi = 18
+
+[[enemy]]
+area = "AREA106"
+slot = 3
+jp = "ずつつき"
+en = "Slasher"
+level = 80
+max_hp = 98
+exp = 95
+zenny = 70
+atk = 95
+def = 27
+agi = 32
+
+[[enemy]]
+area = "AREA106"
+slot = 4
+jp = "ボムシード"
+en = "BombSeed"
+level = 40
+max_hp = 250
+exp = 212
+zenny = 150
+atk = 135
+def = 55
+agi = 27
+
+[[enemy]]
+area = "AREA107"
+slot = 0
+jp = "とげぎんちゃく"
+en = "BarbBulb"
+level = 30
+max_hp = 155
+exp = 125
+zenny = 110
+atk = 115
+def = 70
+agi = 15
+
+[[enemy]]
+area = "AREA107"
+slot = 1
+jp = "ウッパ"
+en = "Sleepy"
+level = 23
+max_hp = 120
+exp = 95
+zenny = 66
+atk = 113
+def = 42
+agi = 26
+
+[[enemy]]
+area = "AREA107"
+slot = 2
+jp = "ハリセンボン"
+en = "Spiker"
+level = 45
+max_hp = 250
+exp = 240
+zenny = 125
+atk = 122
+def = 40
+agi = 18
+
+[[enemy]]
+area = "AREA107"
+slot = 3
+jp = "ずつつき"
+en = "Slasher"
+level = 80
+max_hp = 98
+exp = 95
+zenny = 70
+atk = 95
+def = 27
+agi = 32
+
+[[enemy]]
+area = "AREA107"
+slot = 4
+jp = "ボムシード"
+en = "BombSeed"
+level = 40
+max_hp = 250
+exp = 212
+zenny = 150
+atk = 135
+def = 55
+agi = 27
+
+[[enemy]]
+area = "AREA108"
+slot = 0
+jp = "あばれゾンビ"
+en = "Zombie"
+level = 6
+max_hp = 78
+exp = 8
+zenny = 8
+atk = 25
+def = 1
+agi = 0
+
+[[enemy]]
+area = "AREA108"
+slot = 1
+jp = "ボーンデッド"
+en = "Ghoul"
+level = 20
+max_hp = 65
+exp = 22
+zenny = 20
+atk = 25
+def = 5
+agi = 7
+
+[[enemy]]
+area = "AREA108"
+slot = 2
+jp = "ドラゴンゾンビ"
+en = "D.Zombie"
+level = 110
+max_hp = 2500
+exp = 1000
+zenny = 300
+atk = 130
+def = 45
+agi = 13
+
+[[enemy]]
+area = "AREA108"
+slot = 3
+jp = "ゾンビドクター"
+en = "ZombieDr"
+level = 30
+max_hp = 145
+exp = 80
+zenny = 215
+atk = 90
+def = 12
+agi = 14
+
+[[enemy]]
+area = "AREA108"
+slot = 4
+jp = "ゴキゴッキ"
+en = "GntRoach"
+level = 23
+max_hp = 150
+exp = 85
+zenny = 0
+atk = 65
+def = 4
+agi = 22
+
+[[enemy]]
+area = "AREA108"
+slot = 5
+jp = "ヒルオウ"
+en = "FireSlug"
+level = 18
+max_hp = 61
+exp = 94
+zenny = 50
+atk = 62
+def = 35
+agi = 13
+
+[[enemy]]
+area = "AREA109"
+slot = 0
+jp = "あばれゾンビ"
+en = "Zombie"
+level = 6
+max_hp = 78
+exp = 8
+zenny = 8
+atk = 25
+def = 1
+agi = 0
+
+[[enemy]]
+area = "AREA109"
+slot = 1
+jp = "ボーンデッド"
+en = "Ghoul"
+level = 20
+max_hp = 65
+exp = 22
+zenny = 20
+atk = 25
+def = 5
+agi = 7
+
+[[enemy]]
+area = "AREA109"
+slot = 2
+jp = "ゾンビドクター"
+en = "ZombieDr"
+level = 30
+max_hp = 145
+exp = 80
+zenny = 215
+atk = 90
+def = 12
+agi = 14
+
+[[enemy]]
+area = "AREA109"
+slot = 3
+jp = "ゴキゴッキ"
+en = "GntRoach"
+level = 23
+max_hp = 150
+exp = 85
+zenny = 0
+atk = 65
+def = 4
+agi = 22
+
+[[enemy]]
+area = "AREA109"
+slot = 4
+jp = "ヒルオウ"
+en = "FireSlug"
+level = 18
+max_hp = 61
+exp = 94
+zenny = 50
+atk = 62
+def = 35
+agi = 13
+
+[[enemy]]
+area = "AREA110"
+slot = 0
+jp = "トリックスター"
+en = "Tricker"
+level = 23
+max_hp = 100
+exp = 70
+zenny = 120
+atk = 90
+def = 28
+agi = 25
+
+[[enemy]]
+area = "AREA110"
+slot = 1
+jp = "グミダイン"
+en = "GooTitan"
+level = 40
+max_hp = 350
+exp = 660
+zenny = 200
+atk = 120
+def = 40
+agi = 17
+
+[[enemy]]
+area = "AREA110"
+slot = 2
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA110"
+slot = 3
+jp = "バガボンド"
+en = "Vagabond"
+level = 22
+max_hp = 125
+exp = 88
+zenny = 80
+atk = 112
+def = 50
+agi = 13
+
+[[enemy]]
+area = "AREA110"
+slot = 4
+jp = "やとわれゴブリン"
+en = "BlueGbln"
+level = 25
+max_hp = 120
+exp = 95
+zenny = 75
+atk = 100
+def = 35
+agi = 12
+
+[[enemy]]
+area = "AREA111"
+slot = 0
+jp = "ハッスルじじい"
+en = "Codger"
+level = 45
+max_hp = 225
+exp = 380
+zenny = 230
+atk = 155
+def = 58
+agi = 23
+
+[[enemy]]
+area = "AREA111"
+slot = 1
+jp = "ペネトレイター"
+en = "Reaper"
+level = 60
+max_hp = 240
+exp = 420
+zenny = 270
+atk = 123
+def = 65
+agi = 35
+
+[[enemy]]
+area = "AREA111"
+slot = 2
+jp = "ブビビンマン"
+en = "Insector"
+level = 32
+max_hp = 274
+exp = 520
+zenny = 220
+atk = 160
+def = 65
+agi = 35
+
+[[enemy]]
+area = "AREA111"
+slot = 3
+jp = "ドラゴンフライ"
+en = "Dragonfly"
+level = 35
+max_hp = 75
+exp = 250
+zenny = 60
+atk = 149
+def = 75
+agi = 28
+
+[[enemy]]
+area = "AREA111"
+slot = 4
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA112"
+slot = 0
+jp = "ハッスルじじい"
+en = "Codger"
+level = 45
+max_hp = 225
+exp = 380
+zenny = 230
+atk = 155
+def = 58
+agi = 23
+
+[[enemy]]
+area = "AREA112"
+slot = 1
+jp = "ペネトレイター"
+en = "Reaper"
+level = 60
+max_hp = 240
+exp = 420
+zenny = 270
+atk = 123
+def = 65
+agi = 35
+
+[[enemy]]
+area = "AREA112"
+slot = 2
+jp = "ブビビンマン"
+en = "Insector"
+level = 32
+max_hp = 274
+exp = 520
+zenny = 220
+atk = 160
+def = 65
+agi = 35
+
+[[enemy]]
+area = "AREA112"
+slot = 3
+jp = "ドラゴンフライ"
+en = "Dragonfly"
+level = 35
+max_hp = 75
+exp = 250
+zenny = 60
+atk = 149
+def = 75
+agi = 28
+
+[[enemy]]
+area = "AREA112"
+slot = 4
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA117"
+slot = 0
+jp = "インセクター"
+en = "Fly Man"
+level = 25
+max_hp = 135
+exp = 160
+zenny = 140
+atk = 113
+def = 50
+agi = 14
+
+[[enemy]]
+area = "AREA117"
+slot = 1
+jp = "ツエツエバエ"
+en = "ToxicFly"
+level = 25
+max_hp = 40
+exp = 70
+zenny = 20
+atk = 100
+def = 12
+agi = 38
+
+[[enemy]]
+area = "AREA117"
+slot = 2
+jp = "ゾンビドクター"
+en = "ZombieDr"
+level = 30
+max_hp = 145
+exp = 80
+zenny = 215
+atk = 90
+def = 12
+agi = 14
+
+[[enemy]]
+area = "AREA117"
+slot = 3
+jp = "ゴキゴッキ"
+en = "GntRoach"
+level = 23
+max_hp = 150
+exp = 85
+zenny = 0
+atk = 65
+def = 4
+agi = 22
+
+[[enemy]]
+area = "AREA117"
+slot = 4
+jp = "ベジタ"
+en = "Big Bulb"
+level = 40
+max_hp = 110
+exp = 100
+zenny = 75
+atk = 30
+def = 45
+agi = 17
+
+[[enemy]]
+area = "AREA118"
+slot = 0
+jp = "インセクター"
+en = "Fly Man"
+level = 25
+max_hp = 135
+exp = 160
+zenny = 140
+atk = 113
+def = 50
+agi = 14
+
+[[enemy]]
+area = "AREA118"
+slot = 1
+jp = "ツエツエバエ"
+en = "ToxicFly"
+level = 25
+max_hp = 40
+exp = 70
+zenny = 20
+atk = 100
+def = 12
+agi = 38
+
+[[enemy]]
+area = "AREA118"
+slot = 2
+jp = "ゾンビドクター"
+en = "ZombieDr"
+level = 30
+max_hp = 145
+exp = 80
+zenny = 215
+atk = 90
+def = 12
+agi = 14
+
+[[enemy]]
+area = "AREA118"
+slot = 3
+jp = "ゴキゴッキ"
+en = "GntRoach"
+level = 23
+max_hp = 150
+exp = 85
+zenny = 0
+atk = 65
+def = 4
+agi = 22
+
+[[enemy]]
+area = "AREA118"
+slot = 4
+jp = "ベジタ"
+en = "Big Bulb"
+level = 40
+max_hp = 110
+exp = 100
+zenny = 75
+atk = 30
+def = 45
+agi = 17
+
+[[enemy]]
+area = "AREA119"
+slot = 0
+jp = "インセクター"
+en = "Fly Man"
+level = 25
+max_hp = 135
+exp = 160
+zenny = 140
+atk = 113
+def = 50
+agi = 14
+
+[[enemy]]
+area = "AREA119"
+slot = 1
+jp = "ゾンビドクター"
+en = "ZombieDr"
+level = 30
+max_hp = 145
+exp = 80
+zenny = 215
+atk = 90
+def = 12
+agi = 14
+
+[[enemy]]
+area = "AREA119"
+slot = 2
+jp = "ゴキゴッキ"
+en = "GntRoach"
+level = 23
+max_hp = 150
+exp = 85
+zenny = 0
+atk = 65
+def = 4
+agi = 22
+
+[[enemy]]
+area = "AREA119"
+slot = 3
+jp = "ベジタ"
+en = "Big Bulb"
+level = 40
+max_hp = 110
+exp = 100
+zenny = 75
+atk = 30
+def = 45
+agi = 17
+
+[[enemy]]
+area = "AREA119"
+slot = 4
+jp = "おばけなめくじ"
+en = "Huge Slug"
+level = 90
+max_hp = 2500
+exp = 2100
+zenny = 300
+atk = 150
+def = 40
+agi = 24
+
+[[enemy]]
+area = "AREA119"
+slot = 5
+jp = "キノコルゲ"
+en = "Shroom"
+level = 110
+max_hp = 3000
+exp = 3900
+zenny = 300
+atk = 150
+def = 35
+agi = 25
+
+[[enemy]]
+area = "AREA120"
+slot = 0
+jp = "ガイスト"
+en = "Gaist"
+level = 110
+max_hp = 2500
+exp = 1000
+zenny = 500
+atk = 135
+def = 65
+agi = 25
+
+[[enemy]]
+area = "AREA120"
+slot = 1
+jp = "かがりび"
+en = "Torch"
+level = 8
+max_hp = 300
+exp = 0
+zenny = 0
+atk = 70
+def = 30
+agi = 15
+
+[[enemy]]
+area = "AREA124"
+slot = 0
+jp = "リフレクター"
+en = "Multi Bot"
+level = 30
+max_hp = 115
+exp = 300
+zenny = 0
+atk = 148
+def = 150
+agi = 20
+
+[[enemy]]
+area = "AREA124"
+slot = 1
+jp = "リーパー"
+en = "Thrasher"
+level = 29
+max_hp = 90
+exp = 185
+zenny = 110
+atk = 140
+def = 50
+agi = 25
+
+[[enemy]]
+area = "AREA124"
+slot = 2
+jp = "ジャックベア"
+en = "Audrey"
+level = 29
+max_hp = 175
+exp = 330
+zenny = 110
+atk = 145
+def = 55
+agi = 22
+
+[[enemy]]
+area = "AREA124"
+slot = 3
+jp = "アサシン"
+en = "Assassin"
+level = 30
+max_hp = 160
+exp = 225
+zenny = 380
+atk = 142
+def = 60
+agi = 36
+
+[[enemy]]
+area = "AREA124"
+slot = 4
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA125"
+slot = 0
+jp = "すなさそり"
+en = "Scorpion"
+level = 40
+max_hp = 185
+exp = 620
+zenny = 320
+atk = 190
+def = 165
+agi = 28
+
+[[enemy]]
+area = "AREA125"
+slot = 1
+jp = "イワオカイン"
+en = "Magmaite"
+level = 50
+max_hp = 400
+exp = 1300
+zenny = 300
+atk = 215
+def = 160
+agi = 15
+
+[[enemy]]
+area = "AREA125"
+slot = 2
+jp = "さぼうに"
+en = "Cacti"
+level = 38
+max_hp = 160
+exp = 510
+zenny = 210
+atk = 190
+def = 85
+agi = 18
+
+[[enemy]]
+area = "AREA125"
+slot = 3
+jp = "ドレイクナイト"
+en = "Drak"
+level = 10
+max_hp = 340
+exp = 850
+zenny = 350
+atk = 245
+def = 120
+agi = 42
+
+[[enemy]]
+area = "AREA127"
+slot = 0
+jp = "リフレクター"
+en = "Multi Bot"
+level = 30
+max_hp = 115
+exp = 300
+zenny = 0
+atk = 148
+def = 150
+agi = 20
+
+[[enemy]]
+area = "AREA127"
+slot = 1
+jp = "リーパー"
+en = "Thrasher"
+level = 29
+max_hp = 90
+exp = 185
+zenny = 110
+atk = 140
+def = 50
+agi = 25
+
+[[enemy]]
+area = "AREA127"
+slot = 2
+jp = "ジャックベア"
+en = "Audrey"
+level = 29
+max_hp = 175
+exp = 330
+zenny = 110
+atk = 145
+def = 55
+agi = 22
+
+[[enemy]]
+area = "AREA127"
+slot = 3
+jp = "アサシン"
+en = "Assassin"
+level = 30
+max_hp = 160
+exp = 225
+zenny = 380
+atk = 142
+def = 60
+agi = 36
+
+[[enemy]]
+area = "AREA134"
+slot = 0
+jp = "しおまねき"
+en = "GntCrab"
+level = 40
+max_hp = 155
+exp = 230
+zenny = 150
+atk = 137
+def = 85
+agi = 18
+
+[[enemy]]
+area = "AREA134"
+slot = 1
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA134"
+slot = 2
+jp = "ボルトシャーマン"
+en = "BoltMage"
+level = 26
+max_hp = 10
+exp = 185
+zenny = 180
+atk = 125
+def = 50
+agi = 35
+
+[[enemy]]
+area = "AREA134"
+slot = 3
+jp = "ボルトロード"
+en = "BoltLord"
+level = 40
+max_hp = 20
+exp = 320
+zenny = 550
+atk = 140
+def = 50
+agi = 17
+
+[[enemy]]
+area = "AREA134"
+slot = 4
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA134"
+slot = 5
+jp = "アンモナイカ"
+en = "Ammonite"
+level = 75
+max_hp = 2000
+exp = 4500
+zenny = 500
+atk = 170
+def = 75
+agi = 28
+
+[[enemy]]
+area = "AREA134"
+slot = 6
+jp = "アンモナイカ"
+en = "Ammonite"
+level = 75
+max_hp = 2000
+exp = 4500
+zenny = 500
+atk = 170
+def = 75
+agi = 28
+
+[[enemy]]
+area = "AREA135"
+slot = 0
+jp = "ウッパ"
+en = "Sleepy"
+level = 23
+max_hp = 120
+exp = 95
+zenny = 66
+atk = 113
+def = 42
+agi = 26
+
+[[enemy]]
+area = "AREA135"
+slot = 1
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA135"
+slot = 2
+jp = "ボルトシャーマン"
+en = "BoltMage"
+level = 26
+max_hp = 10
+exp = 185
+zenny = 180
+atk = 125
+def = 50
+agi = 35
+
+[[enemy]]
+area = "AREA135"
+slot = 3
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA135"
+slot = 4
+jp = "ケロロロロ"
+en = "KingToad"
+level = 30
+max_hp = 210
+exp = 280
+zenny = 150
+atk = 135
+def = 50
+agi = 22
+
+[[enemy]]
+area = "AREA136"
+slot = 0
+jp = "ウッパ"
+en = "Sleepy"
+level = 23
+max_hp = 120
+exp = 95
+zenny = 66
+atk = 113
+def = 42
+agi = 26
+
+[[enemy]]
+area = "AREA136"
+slot = 1
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA136"
+slot = 2
+jp = "ボルトシャーマン"
+en = "BoltMage"
+level = 26
+max_hp = 10
+exp = 185
+zenny = 180
+atk = 125
+def = 50
+agi = 35
+
+[[enemy]]
+area = "AREA136"
+slot = 3
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA136"
+slot = 4
+jp = "ケロロロロ"
+en = "KingToad"
+level = 30
+max_hp = 210
+exp = 280
+zenny = 150
+atk = 135
+def = 50
+agi = 22
+
+[[enemy]]
+area = "AREA137"
+slot = 0
+jp = "しおまねき"
+en = "GntCrab"
+level = 40
+max_hp = 155
+exp = 230
+zenny = 150
+atk = 137
+def = 85
+agi = 18
+
+[[enemy]]
+area = "AREA137"
+slot = 1
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA137"
+slot = 2
+jp = "ボルトシャーマン"
+en = "BoltMage"
+level = 26
+max_hp = 10
+exp = 185
+zenny = 180
+atk = 125
+def = 50
+agi = 35
+
+[[enemy]]
+area = "AREA137"
+slot = 3
+jp = "ボルトロード"
+en = "BoltLord"
+level = 40
+max_hp = 20
+exp = 320
+zenny = 550
+atk = 140
+def = 50
+agi = 17
+
+[[enemy]]
+area = "AREA137"
+slot = 4
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA138"
+slot = 0
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA138"
+slot = 1
+jp = "ホブゴブリン"
+en = "Hobgoblin"
+level = 46
+max_hp = 380
+exp = 800
+zenny = 300
+atk = 188
+def = 90
+agi = 17
+
+[[enemy]]
+area = "AREA138"
+slot = 2
+jp = "エッグカンパニー"
+en = "Egg Gang"
+level = 45
+max_hp = 270
+exp = 560
+zenny = 420
+atk = 174
+def = 85
+agi = 27
+
+[[enemy]]
+area = "AREA138"
+slot = 3
+jp = "ボイルドエッグ"
+en = "Pipe Bomb"
+level = 36
+max_hp = 145
+exp = 495
+zenny = 180
+atk = 170
+def = 160
+agi = 32
+
+[[enemy]]
+area = "AREA138"
+slot = 4
+jp = "きんのたまご"
+en = "Gold Egg"
+level = 80
+max_hp = 500
+exp = 100
+zenny = 20000
+atk = 190
+def = 120
+agi = 38
+
+[[enemy]]
+area = "AREA139"
+slot = 0
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA139"
+slot = 1
+jp = "ホブゴブリン"
+en = "Hobgoblin"
+level = 46
+max_hp = 380
+exp = 800
+zenny = 300
+atk = 188
+def = 90
+agi = 17
+
+[[enemy]]
+area = "AREA139"
+slot = 2
+jp = "エッグカンパニー"
+en = "Egg Gang"
+level = 45
+max_hp = 270
+exp = 560
+zenny = 420
+atk = 174
+def = 85
+agi = 27
+
+[[enemy]]
+area = "AREA139"
+slot = 3
+jp = "ボイルドエッグ"
+en = "Pipe Bomb"
+level = 36
+max_hp = 145
+exp = 495
+zenny = 180
+atk = 170
+def = 160
+agi = 32
+
+[[enemy]]
+area = "AREA139"
+slot = 4
+jp = "きょうかオーク"
+en = "Giant Orc"
+level = 50
+max_hp = 245
+exp = 480
+zenny = 260
+atk = 174
+def = 57
+agi = 25
+
+[[enemy]]
+area = "AREA139"
+slot = 5
+jp = "きんのたまご"
+en = "Gold Egg"
+level = 80
+max_hp = 500
+exp = 100
+zenny = 20000
+atk = 190
+def = 120
+agi = 38
+
+[[enemy]]
+area = "AREA140"
+slot = 0
+jp = "ゴブリンエリート"
+en = "BossGbln"
+level = 5
+max_hp = 25
+exp = 12
+zenny = 10
+atk = 16
+def = 13
+agi = 27
+
+[[enemy]]
+area = "AREA140"
+slot = 1
+jp = "ホブゴブリン"
+en = "Hobgoblin"
+level = 46
+max_hp = 380
+exp = 800
+zenny = 300
+atk = 188
+def = 90
+agi = 17
+
+[[enemy]]
+area = "AREA140"
+slot = 2
+jp = "エッグカンパニー"
+en = "Egg Gang"
+level = 45
+max_hp = 270
+exp = 560
+zenny = 420
+atk = 174
+def = 85
+agi = 27
+
+[[enemy]]
+area = "AREA140"
+slot = 3
+jp = "ボイルドエッグ"
+en = "Pipe Bomb"
+level = 36
+max_hp = 145
+exp = 495
+zenny = 180
+atk = 170
+def = 160
+agi = 32
+
+[[enemy]]
+area = "AREA140"
+slot = 4
+jp = "きょうかオーク"
+en = "Giant Orc"
+level = 50
+max_hp = 245
+exp = 480
+zenny = 260
+atk = 174
+def = 57
+agi = 25
+
+[[enemy]]
+area = "AREA140"
+slot = 5
+jp = "きんのたまご"
+en = "Gold Egg"
+level = 80
+max_hp = 500
+exp = 100
+zenny = 20000
+atk = 190
+def = 120
+agi = 38
+
+[[enemy]]
+area = "AREA141"
+slot = 0
+jp = "ヒューリー"
+en = "Mad Gong"
+level = 40
+max_hp = 230
+exp = 850
+zenny = 0
+atk = 230
+def = 52
+agi = 30
+
+[[enemy]]
+area = "AREA141"
+slot = 1
+jp = "スクラップ"
+en = "Vile Weed"
+level = 35
+max_hp = 190
+exp = 750
+zenny = 0
+atk = 232
+def = 102
+agi = 9
+
+[[enemy]]
+area = "AREA142"
+slot = 0
+jp = "タナトス"
+en = "Thanotos"
+level = 40
+max_hp = 200
+exp = 755
+zenny = 0
+atk = 240
+def = 90
+agi = 23
+
+[[enemy]]
+area = "AREA142"
+slot = 1
+jp = "ヒューリー"
+en = "Mad Gong"
+level = 40
+max_hp = 230
+exp = 850
+zenny = 0
+atk = 230
+def = 52
+agi = 30
+
+[[enemy]]
+area = "AREA142"
+slot = 2
+jp = "スクラップ"
+en = "Vile Weed"
+level = 35
+max_hp = 190
+exp = 750
+zenny = 0
+atk = 232
+def = 102
+agi = 9
+
+[[enemy]]
+area = "AREA142"
+slot = 3
+jp = "ヘルライダー"
+en = "Arwan"
+level = 140
+max_hp = 2400
+exp = 5000
+zenny = 0
+atk = 250
+def = 114
+agi = 36
+
+[[enemy]]
+area = "AREA144"
+slot = 0
+jp = "エルダードラゴン"
+en = "Elder"
+level = 100
+max_hp = 5000
+exp = 6000
+zenny = 0
+atk = 245
+def = 90
+agi = 29
+
+[[enemy]]
+area = "AREA145"
+slot = 0
+jp = "ハッスルじじい"
+en = "Codger"
+level = 45
+max_hp = 225
+exp = 380
+zenny = 230
+atk = 155
+def = 58
+agi = 23
+
+[[enemy]]
+area = "AREA145"
+slot = 1
+jp = "リーパー"
+en = "Thrasher"
+level = 29
+max_hp = 90
+exp = 185
+zenny = 110
+atk = 140
+def = 50
+agi = 25
+
+[[enemy]]
+area = "AREA145"
+slot = 2
+jp = "ヘドロン"
+en = "ToxicMan"
+level = 30
+max_hp = 175
+exp = 325
+zenny = 25
+atk = 150
+def = 75
+agi = 22
+
+[[enemy]]
+area = "AREA145"
+slot = 3
+jp = "アサシン"
+en = "Assassin"
+level = 30
+max_hp = 160
+exp = 225
+zenny = 380
+atk = 142
+def = 60
+agi = 36
+
+[[enemy]]
+area = "AREA145"
+slot = 4
+jp = "ヘドロン"
+en = "ToxicMan"
+level = 30
+max_hp = 35
+exp = 335
+zenny = 25
+atk = 190
+def = 120
+agi = 28
+
+[[enemy]]
+area = "AREA145"
+slot = 5
+jp = "ヘドロン"
+en = "ToxicMan"
+level = 20
+max_hp = 600
+exp = 225
+zenny = 25
+atk = 120
+def = 10
+agi = 15
+
+[[enemy]]
+area = "AREA146"
+slot = 0
+jp = "マジックマスター"
+en = "ArchMage"
+level = 100
+max_hp = 3000
+exp = 48000
+zenny = 2000
+atk = 300
+def = 150
+agi = 80
+
+[[enemy]]
+area = "AREA146"
+slot = 1
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA146"
+slot = 2
+jp = "バーサーカー"
+en = "Berserkr"
+level = 100
+max_hp = 12000
+exp = 30000
+zenny = 3000
+atk = 600
+def = 300
+agi = 60
+
+[[enemy]]
+area = "AREA158"
+slot = 0
+jp = "サンプル1"
+en = "Sample 1"
+level = 20
+max_hp = 290
+exp = 95
+zenny = 50
+atk = 22
+def = 11
+agi = 12
+
+[[enemy]]
+area = "AREA159"
+slot = 0
+jp = "サンプル2"
+en = "Sample 2"
+level = 80
+max_hp = 1200
+exp = 2100
+zenny = 300
+atk = 145
+def = 40
+agi = 22
+
+[[enemy]]
+area = "AREA160"
+slot = 0
+jp = "サンプル3"
+en = "Sample 3"
+level = 80
+max_hp = 2400
+exp = 2000
+zenny = 1500
+atk = 110
+def = 52
+agi = 17
+
+[[enemy]]
+area = "AREA161"
+slot = 0
+jp = "サンプル4"
+en = "Sample 4"
+level = 80
+max_hp = 6500
+exp = 6000
+zenny = 500
+atk = 290
+def = 130
+agi = 42
+
+[[enemy]]
+area = "AREA162"
+slot = 0
+jp = "サンプル5"
+en = "Sample 5"
+level = 48
+max_hp = 3000
+exp = 3000
+zenny = 200
+atk = 160
+def = 55
+agi = 20
+
+[[enemy]]
+area = "AREA162"
+slot = 1
+jp = "サンプル6"
+en = "Sample 6"
+level = 60
+max_hp = 2000
+exp = 3000
+zenny = 500
+atk = 165
+def = 75
+agi = 30
+
+[[enemy]]
+area = "AREA163"
+slot = 0
+jp = "サンプル7"
+en = "Sample 7"
+level = 70
+max_hp = 2500
+exp = 6000
+zenny = 1000
+atk = 220
+def = 85
+agi = 30
+
+[[enemy]]
+area = "AREA164"
+slot = 0
+jp = "サンプル8"
+en = "Sample 8"
+level = 16
+max_hp = 280
+exp = 85
+zenny = 0
+atk = 28
+def = 12
+agi = 13
+
+[[enemy]]
+area = "AREA165"
+slot = 0
+jp = "サンプル9"
+en = "Sample 9"
+level = 80
+max_hp = 1500
+exp = 2000
+zenny = 500
+atk = 128
+def = 50
+agi = 25
+
+[[enemy]]
+area = "AREA166"
+slot = 0
+jp = "サンプル100"
+en = "Sample 100"
+level = 90
+max_hp = 2300
+exp = 5000
+zenny = 800
+atk = 250
+def = 100
+agi = 38
+
+[[enemy]]
+area = "AREA166"
+slot = 1
+jp = "サンプル101"
+en = "Sample 101"
+level = 90
+max_hp = 2300
+exp = 5000
+zenny = 800
+atk = 250
+def = 100
+agi = 38
+
+[[enemy]]
+area = "AREA166"
+slot = 2
+jp = "サンプル102"
+en = "Sample 102"
+level = 90
+max_hp = 2300
+exp = 5000
+zenny = 800
+atk = 250
+def = 100
+agi = 38
+
+[[enemy]]
+area = "AREA167"
+slot = 0
+jp = "エリミネーター"
+en = "DeathBot"
+level = 50
+max_hp = 450
+exp = 960
+zenny = 100
+atk = 200
+def = 125
+agi = 23
+
+[[enemy]]
+area = "AREA167"
+slot = 1
+jp = "ナイトメア"
+en = "Nitemare"
+level = 45
+max_hp = 215
+exp = 850
+zenny = 220
+atk = 213
+def = 130
+agi = 40
+
+[[enemy]]
+area = "AREA167"
+slot = 2
+jp = "リビングアーマー"
+en = "Armor"
+level = 40
+max_hp = 275
+exp = 1220
+zenny = 100
+atk = 225
+def = 220
+agi = 25
+
+[[enemy]]
+area = "AREA167"
+slot = 3
+jp = "アデプト"
+en = "Adept"
+level = 38
+max_hp = 190
+exp = 650
+zenny = 550
+atk = 205
+def = 91
+agi = 35
+
+[[enemy]]
+area = "AREA167"
+slot = 4
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA168"
+slot = 0
+jp = "エリミネーター"
+en = "DeathBot"
+level = 50
+max_hp = 450
+exp = 960
+zenny = 100
+atk = 200
+def = 125
+agi = 23
+
+[[enemy]]
+area = "AREA168"
+slot = 1
+jp = "ナイトメア"
+en = "Nitemare"
+level = 45
+max_hp = 215
+exp = 850
+zenny = 220
+atk = 213
+def = 130
+agi = 40
+
+[[enemy]]
+area = "AREA168"
+slot = 2
+jp = "リビングアーマー"
+en = "Armor"
+level = 40
+max_hp = 275
+exp = 1220
+zenny = 100
+atk = 225
+def = 220
+agi = 25
+
+[[enemy]]
+area = "AREA168"
+slot = 3
+jp = "アデプト"
+en = "Adept"
+level = 38
+max_hp = 190
+exp = 650
+zenny = 550
+atk = 205
+def = 91
+agi = 35
+
+[[enemy]]
+area = "AREA168"
+slot = 4
+jp = "リカバータンク"
+en = "TankBot"
+level = 50
+max_hp = 275
+exp = 500
+zenny = 0
+atk = 114
+def = 40
+agi = 30
+
+[[enemy]]
+area = "AREA169"
+slot = 0
+jp = "ホッパ"
+en = "Hopper"
+level = 38
+max_hp = 175
+exp = 380
+zenny = 120
+atk = 217
+def = 75
+agi = 29
+
+[[enemy]]
+area = "AREA169"
+slot = 1
+jp = "レッドドラコ"
+en = "Red Drake"
+level = 45
+max_hp = 350
+exp = 2050
+zenny = 250
+atk = 245
+def = 140
+agi = 30
+
+[[enemy]]
+area = "AREA169"
+slot = 2
+jp = "ブルードラコ"
+en = "Ice Drake"
+level = 45
+max_hp = 350
+exp = 2050
+zenny = 250
+atk = 245
+def = 140
+agi = 30
+
+[[enemy]]
+area = "AREA169"
+slot = 3
+jp = "クローンパピー"
+en = "Clone"
+level = 38
+max_hp = 90
+exp = 320
+zenny = 255
+atk = 220
+def = 65
+agi = 38
+
+[[enemy]]
+area = "AREA169"
+slot = 4
+jp = "ドラゴニュート"
+en = "Newt"
+level = 45
+max_hp = 250
+exp = 1550
+zenny = 350
+atk = 245
+def = 140
+agi = 45
+
+[[enemy]]
+area = "AREA170"
+slot = 0
+jp = "ホッパ"
+en = "Hopper"
+level = 38
+max_hp = 175
+exp = 380
+zenny = 120
+atk = 217
+def = 75
+agi = 29
+
+[[enemy]]
+area = "AREA170"
+slot = 1
+jp = "レッドドラコ"
+en = "Red Drake"
+level = 45
+max_hp = 350
+exp = 2050
+zenny = 250
+atk = 245
+def = 140
+agi = 30
+
+[[enemy]]
+area = "AREA170"
+slot = 2
+jp = "ブルードラコ"
+en = "Ice Drake"
+level = 45
+max_hp = 350
+exp = 2050
+zenny = 250
+atk = 245
+def = 140
+agi = 30
+
+[[enemy]]
+area = "AREA170"
+slot = 3
+jp = "クローンパピー"
+en = "Clone"
+level = 38
+max_hp = 90
+exp = 320
+zenny = 255
+atk = 220
+def = 65
+agi = 38
+
+[[enemy]]
+area = "AREA170"
+slot = 4
+jp = "ドラゴニュート"
+en = "Newt"
+level = 45
+max_hp = 250
+exp = 1550
+zenny = 350
+atk = 245
+def = 140
+agi = 45
+
+[[enemy]]
+area = "AREA171"
+slot = 0
+jp = "ヨーン"
+en = "FoulWeed"
+level = 42
+max_hp = 680
+exp = 1700
+zenny = 250
+atk = 248
+def = 80
+agi = 21
+
+[[enemy]]
+area = "AREA171"
+slot = 1
+jp = "グミオウ"
+en = "Goo King"
+level = 50
+max_hp = 1500
+exp = 15000
+zenny = 1000
+atk = 250
+def = 110
+agi = 70
+
+[[enemy]]
+area = "AREA171"
+slot = 2
+jp = "ホッパ"
+en = "Hopper"
+level = 38
+max_hp = 175
+exp = 380
+zenny = 120
+atk = 217
+def = 75
+agi = 29
+
+[[enemy]]
+area = "AREA171"
+slot = 3
+jp = "プラント42"
+en = "Plant 42"
+level = 38
+max_hp = 220
+exp = 1200
+zenny = 0
+atk = 225
+def = 135
+agi = 30
+
+[[enemy]]
+area = "AREA171"
+slot = 4
+jp = "ガードソウル"
+en = "Wraith"
+level = 44
+max_hp = 100
+exp = 1250
+zenny = 275
+atk = 210
+def = 600
+agi = 34
+
+[[enemy]]
+area = "AREA172"
+slot = 0
+jp = "めだまグミ"
+en = "Eye Goo"
+level = 4
+max_hp = 12
+exp = 2
+zenny = 4
+atk = 14
+def = 7
+agi = 4
+
+[[enemy]]
+area = "AREA172"
+slot = 1
+jp = "グミオウ"
+en = "Goo King"
+level = 50
+max_hp = 1500
+exp = 15000
+zenny = 1000
+atk = 250
+def = 110
+agi = 70
+
+[[enemy]]
+area = "AREA172"
+slot = 2
+jp = "グミダイン"
+en = "GooTitan"
+level = 40
+max_hp = 350
+exp = 660
+zenny = 200
+atk = 120
+def = 40
+agi = 17
+
+[[enemy]]
+area = "AREA172"
+slot = 3
+jp = "ドラゴンロード"
+en = "D.Lord"
+level = 120
+max_hp = 12500
+exp = 15000
+zenny = 3000
+atk = 315
+def = 140
+agi = 41
+
+[[enemy]]
+area = "AREA172"
+slot = 4
+jp = "ガードソウル"
+en = "Wraith"
+level = 44
+max_hp = 100
+exp = 1250
+zenny = 275
+atk = 210
+def = 600
+agi = 34
+
+[[enemy]]
+area = "AREA173"
+slot = 0
+jp = "グミオウ"
+en = "Goo King"
+level = 50
+max_hp = 1500
+exp = 15000
+zenny = 1000
+atk = 250
+def = 110
+agi = 70
+
+[[enemy]]
+area = "AREA173"
+slot = 1
+jp = "ナイトロード"
+en = "Vampire"
+level = 70
+max_hp = 1000
+exp = 12000
+zenny = 1000
+atk = 275
+def = 175
+agi = 50
+
+[[enemy]]
+area = "AREA173"
+slot = 2
+jp = "ドゥエルガル"
+en = "Revenant"
+level = 45
+max_hp = 290
+exp = 1500
+zenny = 500
+atk = 252
+def = 145
+agi = 47
+
+[[enemy]]
+area = "AREA173"
+slot = 3
+jp = "ミストアーマー"
+en = "Mist Man"
+level = 50
+max_hp = 450
+exp = 5200
+zenny = 400
+atk = 285
+def = 250
+agi = 40
+
+[[enemy]]
+area = "AREA173"
+slot = 4
+jp = "ナイトバット"
+en = "Night Bat"
+level = 35
+max_hp = 75
+exp = 350
+zenny = 58
+atk = 212
+def = 75
+agi = 52
+
+[[enemy]]
+area = "AREA175"
+slot = 0
+jp = "かんさいイルカ"
+en = "Dolphin"
+level = 60
+max_hp = 1200
+exp = 900
+zenny = 200
+atk = 97
+def = 55
+agi = 21
+
+[[enemy]]
+area = "AREA188"
+slot = 0
+jp = "ボルトファイター"
+en = "Bolt"
+level = 28
+max_hp = 10
+exp = 160
+zenny = 85
+atk = 135
+def = 50
+agi = 23
+
+[[enemy]]
+area = "AREA188"
+slot = 1
+jp = "ボルトアーチャー"
+en = "BoltArch"
+level = 45
+max_hp = 10
+exp = 190
+zenny = 100
+atk = 100
+def = 50
+agi = 50
+
+[[enemy]]
+area = "AREA196"
+slot = 0
+jp = "マンモ"
+en = "Manmo"
+level = 100
+max_hp = 3200
+exp = 6000
+zenny = 1000
+atk = 235
+def = 90
+agi = 35
+
+[[enemy]]
+area = "AREA197"
+slot = 0
+jp = "ヘテロキメラ"
+en = "Chimera"
+level = 110
+max_hp = 7500
+exp = 9000
+zenny = 2000
+atk = 310
+def = 85
+agi = 38
+
+[[enemy]]
+area = "AREA198"
+slot = 0
+jp = "ミリア"
+en = "Myria"
+level = 120
+max_hp = 20000
+exp = 0
+zenny = 0
+atk = 305
+def = 100
+agi = 52
