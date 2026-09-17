@@ -254,42 +254,60 @@ def row_sessions(r):
 
 
 def duplicate_sessions(rows):
-    """[(kept_id, [redundant_ids])] for ids that provably sample one process.
+    """[(kept_id, [redundant_ids])] for ids whose PC set another id contains.
 
     The runtime's per-PC table is cumulative and only grows within a process,
-    so if session A's PC set is a subset of session B's, A cannot be a separate
-    play session -- it is an earlier snapshot of the same one. Two ids over one
-    process split a sampling unit in half, deflating Q1 and overstating
-    coverage, so the report must not quietly count them as two.
+    so an earlier snapshot of one process is a subset of a later one. Two ids
+    over one process split a sampling unit in half, deflating Q1 and
+    overstating coverage, so the report must not quietly count them as two.
 
-    Equal sets are the degenerate case (two harvests seconds apart); the
-    earlier id wins so the merged id keeps the session's real start time.
+    A subset is NOT proof of one process, though: once the bands are seeded
+    from the disc (2026-09-12) every session enters the same small core of
+    kernel / boot-EXE PCs and a session on already-covered content adds
+    nothing, so it is a subset of every other session. The first version of
+    this function merged with union-find, and such a zero-gain session acted
+    as a bridge: A ⊇ X ⊆ B glued A and B into one group although each held
+    dozens of PCs the other never saw (the 2026-09-13 boss session, 29
+    exclusive PCs, was reported as a re-harvest of 2026-09-12). So there is no
+    transitivity here: an id is absorbed only into a superset of ITSELF, and
+    an absorbed id never pulls anything else along. Two incomparable sets stay
+    separate no matter what they share.
+
+    The superset chosen is the earliest one so the merged id keeps the
+    session's real start time; equal sets (two harvests seconds apart) fall
+    out the same way. If several supersets are themselves nested the chain is
+    followed to its root, which is still a superset of the absorbed id.
     """
     sets = {}
     for r in rows:
         for s in row_sessions(r):
             sets.setdefault(s, set()).add(r["pc"])
     ids = sorted(sets)
-    parent = {i: i for i in ids}
+    into = {}
+    for a in ids:
+        A = sets[a]
+        if not A:
+            continue
+        for b in ids:
+            if b == a or (a < b and sets[b] == A):
+                # an equal set later in the order is absorbed into a, not the
+                # other way round
+                continue
+            if A <= sets[b]:
+                into[a] = b
+                break                      # ids are sorted: earliest superset
 
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
+    def root(x):
+        seen = set()
+        while x in into and x not in seen:
+            seen.add(x)
+            x = into[x]
         return x
 
-    for i, a in enumerate(ids):
-        for b in ids[i + 1:]:
-            A, B = sets[a], sets[b]
-            if A and B and (A <= B or B <= A):
-                ra, rb = find(a), find(b)
-                if ra != rb:
-                    parent[max(ra, rb)] = min(ra, rb)   # earliest id survives
     groups = collections.defaultdict(list)
-    for i in ids:
-        groups[find(i)].append(i)
-    return [(k, sorted(set(v) - {k})) for k, v in sorted(groups.items())
-            if len(v) > 1]
+    for a in into:
+        groups[root(a)].append(a)
+    return [(k, sorted(v)) for k, v in sorted(groups.items())]
 
 
 def merge_duplicate_sessions(path, dups):
@@ -600,12 +618,13 @@ def print_report(rep):
         # Provable same-process splits inflate m and deflate Q1, so every
         # number above is optimistic until these are merged.
         print("")
-        print("DUPLICATE SESSIONS: %d id(s) provably sample a process already"
+        print("SUBSET SESSIONS: %d id(s) saw nothing another session did not"
               % sum(len(d) for _, d in dups))
         for keep, drop in dups:
-            print("         %s absorbs %s" % (keep, ", ".join(drop)))
-        print("         Their PC sets are subsets, which only happens within one")
-        print("         process. Counted separately they overstate coverage. Fix:")
+            print("         %s contains %s" % (keep, ", ".join(drop)))
+        print("         Either a re-harvest of one process (two ids, one sampling")
+        print("         unit) or a fresh run over already-covered content. The")
+        print("         estimator cannot tell; if the former, collapse them with")
         print("         python tools/pc_coverage.py --merge-duplicates")
     m = len(rep["sessions"])
     thin = g["s_obs"] and g["q1"] < 0.1 * g["s_obs"]

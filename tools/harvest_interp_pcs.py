@@ -271,10 +271,24 @@ def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
     s = need_ok(send({"cmd": "dispatch_stats"}, port=port, timeout=60.0),
                 "dispatch_stats")
     interp, native = d["insns_run"], s["static_hits"]
-    total = interp + native
+    # The headline is interpreted INSTRUCTIONS PER FRAME, lower is better.
+    # `native` counts static dispatches, not instructions, so a percentage of
+    # the two is meaningless (it read 30-45 % on sessions that interpreted
+    # under 0.1 % of the guest's work). A PSX frame is ~560 k guest
+    # instructions, which puts the number in context: 400/frame is 0.07 %.
+    # Both counters start at process start, so this is a whole-run average.
+    try:
+        frame = int(need_ok(send({"cmd": "frame"}, port=port, timeout=30.0),
+                            "frame").get("frame", 0))
+    except Exception:
+        frame = 0
+    per_frame = interp / float(frame) if frame > 0 else None
     if not quiet:
-        print("interpreted : {:>14,}  ({:.1f}%)".format(interp, 100.0 * interp / max(total, 1)))
-        print("native      : {:>14,}  ({:.1f}%)".format(native, 100.0 * native / max(total, 1)))
+        print("interpreted : {:>14,} insns over {:,} frames = {} per frame  "
+              "(lower is better; a frame is ~560,000 guest insns)"
+              .format(interp, frame,
+                      "%.0f" % per_frame if per_frame is not None else "?"))
+        print("native      : {:>14,} static dispatches".format(native))
         print("aborts      : %s   dispatch misses: %s" % (d["aborts"], s["miss_total"]))
 
     per_pc = d.get("per_pc") or []
@@ -427,7 +441,8 @@ def harvest(port=4370, save_json="analysis/observed_interp_pcs.json",
             if not quiet:
                 print("coverage    : unavailable (%s)" % exc)
 
-    return {"interp": interp, "native": native, "aborts": d["aborts"],
+    return {"interp": interp, "native": native, "frame": frame,
+            "interp_per_frame": per_frame, "aborts": d["aborts"],
             "misses": s["miss_total"], "before": before, "after": len(merged_rows),
             "new": len(existing) - before, "entered": entered,
             "newly_seen": shown, "session": session, "coverage": rep,
