@@ -379,8 +379,12 @@ pin on 2026-09-01 (see Log).
    on `build-relprof` read with `tools/interp_rate.py` (expect the 290–390
    per frame to fall toward the `0x27B4` floor), bump the pin to the merged
    commit (checkout sits on `integration/vector-stub-plus-367` `88f4582a`
-   meanwhile, which also carries item 1c). Wall clock is unproven (the day-to-day drift is
-   bigger than any signal in the headless runs).
+   meanwhile, which also carries item 1c). The headless wall-clock A/B is
+   inconclusive (day-to-day drift), but **the user reports the save /
+   memory-card screen visibly faster (2026-09-17 evening)** — the screen
+   that hits both this fix (~1,300 `ChangeTh` yields per frame) and 1c (a
+   decompressor run per card read) at once. That play report is the
+   wall-clock evidence.
 1c. ~~**The decompressor copy loop.**~~ **FIXED 2026-09-17, measured
    headless** — the non-kernel residual left after 1b was `func_80164CE4`'s
    unrolled byte copy entered mid-body by a computed jump (`jr t7`,
