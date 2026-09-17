@@ -31,6 +31,16 @@ are bank 1; field and battle code use banks 3..6 as well. Banks 7..15 have
 no handler: the words after the seven pointers at `0x80182CA4` are the
 `SoundSet_Layout` tables, so a bank above 6 would jump into data.
 
+## The banks — working model (player-verified 2026-09-17)
+
+| bank | what | evidence |
+|---|---|---|
+| 0 | title screen only | only `slot00` has entries |
+| 1 | the menu set `0x100..0x107`, context-free | same sound on every screen (player); the rest of the table differs field vs battle, and a loaded spell fires `0x100` with its own samples |
+| 2 | field / general sounds and the script `0x0A` cue; in battle the hit family and `0x204..0x206` | table swapped for battle; AREA052 conveyor = `0x202` in the field, a hit in a fight |
+| 3, 4, 5 | character voice slots, **dealt when the party's voice set loads and frozen until the next composition change** | Ryu/Nina/Momo = 3/4/5; field moves and menu reorders changed nothing; swapping Nina for Peco re-dealt Ryu/Momo/Peco = 3/4/5, which then held through a formation change |
+| 6 | creature sounds: 8 types x 2 tones from the object's type byte `+0xE0` | `Battle_PlayCreatureCue`; heard on enemies, but the code keys on any object |
+
 ## What one call does (`SE_Play`, 0x8015E908)
 
 1. `0x8018BD80 = bank` (the *first* store, `sh` at `0x8015E91C`), then
