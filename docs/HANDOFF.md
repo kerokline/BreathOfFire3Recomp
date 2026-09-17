@@ -903,6 +903,26 @@ aligned JP/EN lines ([`LOCALIZATION.md`](LOCALIZATION.md) §4.2).
 
 ## Building against the pin
 
+**Trap (paid for 2026-09-15): `build-relprof` silently became a Release tree
+with no debug server.** After the pin bump the game booted headless but every
+debug port refused connections, and the log never printed
+`debug server LISTENING`. The cache read `CMAKE_BUILD_TYPE=Release`,
+`PSX_DEBUG_TOOLS=OFF`, `PSX_SPLIT_DEBUG=OFF`. Mechanism, from the source:
+`runtime.cmake` sets an **unset** build type to Release, and `PSX_DEBUG_TOOLS`
+defaults OFF under Release; once those land in the cache they persist, so a
+bare `cmake -S . -B build-relprof` never puts them back. When or how the build
+type went missing was not recorded. The check is one line, and the fix names
+every option:
+
+```bash
+grep -E "^CMAKE_BUILD_TYPE:|^PSX_DEBUG_TOOLS:" build-relprof/CMakeCache.txt
+cmake -S . -B build-relprof -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DPSX_DEBUG_TOOLS=ON -DPSX_STATIC_RUNTIME=ON -DPSX_SPLIT_DEBUG=ON
+```
+
+A symptom worth recognising: a `build-relprof` exe with no `.exe.debug` sidecar
+next to it is a Release build.
+
 **Trap (paid for 2026-09-11): a RelWithDebInfo exe over ~1.9 GiB of image will not load.** Windows says "this app can't run on your PC" for a perfectly valid PE once the DWARF sections push SizeOfImage past that; `.bss` is not the problem, `.debug_*` is. `CMakeLists.txt` now splits the DWARF into `<exe>.debug` after every link (`PSX_SPLIT_DEBUG`, default ON outside Release). Keep the sidecar next to the exe: gdb and `addr2line` find it through `.gnu_debuglink`. If an old tree still fails to launch, `objcopy --strip-debug` the exe by hand.
 
 **Trap (paid for 2026-09-06): stale overlay objects survive a regeneration.**
@@ -963,15 +983,44 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
-- **`psxrecomp` is pinned to `baca0a8a` = `ed55299b` + our two commits on
-  `feat/kernel-install-slot-ranges`, open as
-  [#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346)**
-  (2026-09-11). The branch was cut from upstream `master` `6f77dcc3`, six
-  commits past the pin, and **rebased back onto `ed55299b`** so the PR carries
-  only this change; the change is byte-identical across that rebase and all
-  four generated BIOS files regenerate byte-identical at the older base. When
-  #346 merges, bump straight to the merged commit — nothing else in the title
-  moves. The description of the `ed55299b` base follows.
+- **`psxrecomp` is pinned to `4a792379` = upstream `master` `193a60b8` + one
+  commit on `fix/static-overlay-reconcile-cache-dir`, open as
+  [#367](https://github.com/RetroPortingToolKit/psxrecomp/pull/367)**
+  (2026-09-15). Bumped 62 commits from `baca0a8a`; our
+  [#346](https://github.com/RetroPortingToolKit/psxrecomp/pull/346) (kernel
+  install-slot ranges) **merged 2026-09-12** as `c5390e42` and is in that base.
+  The extra commit exists because plain master **cannot regenerate this
+  title**: upstream `3a174fab` calls a DLL-only reconciliation at the tail of
+  `compile_overlays.main()` with `cache_dir`, which `--static` never binds, so
+  every static run ends in `UnboundLocalError` after its output is written and
+  `axis_b_loop.sh` (accepts only 0 or 2) aborts before the rebuild. #367 guards
+  the call on the DLL path and adds `compile_overlays_static_tail`, which fails
+  on master and passes on the fix. When #367 merges, bump straight to its merge
+  commit. **Regenerate across this bump**: 7 base-EXE shards moved and the
+  overlay codegen hash changed (`0x4fe894d2`). The BIOS backends regenerate
+  with unchanged dispatch totals (OpenBIOS 3990, retail 13012) and still no
+  dispatch key inside a declared range; the emitter's "dropped N continuation
+  key(s)" line now reads 20 / 36 instead of 1 / 5 because it counts duplicate
+  continuation records before they collapse to the same keys.
+- **`recomp-ui` is pinned to `20e0540`**, fork branch
+  `feat/additional-ui-functionality` =
+  [#48](https://github.com/RetroPortingToolKit/recomp-ui/pull/48) refreshed
+  by **merging** upstream `master` `cb7e54b` (32 commits: netplay
+  account/Discord sign-in, automatch, block/report, LAN vs online, frame-blend
+  holding apply, snes deadzones, N64 pad profiles). One conflicting file,
+  `launcher_imgui.cpp`, where master's `cb7e54b` had independently fixed two
+  bugs this branch also fixed — resolved upstream-first: master's per-column
+  `PushID("key")`/`PushID("pad")` replaces our `##key`/`##pad` suffixes, with
+  the pad scope moved inside our "no gamepad, no pad column" branch so a hidden
+  column cannot pop the row ID; master's single Backspace-unbinds handler
+  replaces our three per-path ones, which had become unreachable. Our
+  `launcher_binds.c` half stays (it writes the `None` the PSX runtime reads as
+  an explicit unbind). psxrecomp's newer launcher features are all
+  `#if defined(RECOMP_LAUNCHER_HAS_*)`-gated, so the two pins move together
+  without an ABI break.
+- Previous `psxrecomp` pin, for the record: `baca0a8a` = `ed55299b` + the two
+  #346 commits, rebased off `6f77dcc3` so that PR carried only its change. The
+  description of the `ed55299b` base follows.
 - `psxrecomp` base **`ed55299b`** = plain upstream `master` on
   `RetroPortingToolKit/psxrecomp` (the org the project moved to on 2026-09-09;
   `mstan/*` URLs still redirect). Bumped 2026-09-10 from `2fa3472a`, 68 commits.
