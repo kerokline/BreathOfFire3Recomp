@@ -2,12 +2,13 @@
 
 **Status:** FIXED, MEASURED HEADLESS 2026-09-17 — `resolve_computed_stride_jump`
 in the psxrecomp game emitter, fork branch `feat/computed-stride-jump`
-(`67c79e8f`, one commit off upstream `master` `193a60b8`; PR not yet
-opened). The copy loop's interpreted work over twenty headless area loads
+(`67c79e8f` + `ee4db282`, off upstream `master` `193a60b8`), **open as
+[#382](https://github.com/RetroPortingToolKit/psxrecomp/pull/382)**. The copy loop's interpreted work over twenty headless area loads
 went **684,626 → 0** with every other row unchanged; see *Result* at the
 bottom. The checkout here sits on `integration/vector-stub-plus-367`
-`85894111` (= #367 + #381 + this), which is what `build-relprof` was
-rebuilt from (overlays recompiled, 27 audit-only shard failures as before). Evidence: the field probe below,
+`88f4582a` (= #367 + #381 + both commits of #382), which is what
+`build-relprof` was rebuilt from (overlays recompiled, 27 audit-only shard
+failures as before). Evidence: the field probe below,
 `analysis/observed_interp_pcs.json` (session `20260917T142556-0160`), the
 disassembly of `func_80164CE4`, and `generated/SLPS_009.90_full_10.c`.
 
@@ -118,6 +119,35 @@ general (any Duff's-device copy in any title, boot EXE or overlay, since the
 overlay compiler uses the same code generator), and it is measurable: the
 `bootexe` rows in a battle-transition harvest go to zero, and
 `tools/interp_rate.py` on a walk with loads falls toward the ~118 floor.
+
+## The sibling gap in the same decoder: a table with no bounds check
+
+The walk after the stride fix (384 → 152 per frame) left one boot-EXE row,
+`0x80164AC4`, two instructions per entry. It is the decoder's state
+dispatch in `func_80164A54`:
+
+```
+80164A90 lw    t4,16(t0)          ; stored, pre-scaled byte offset
+80164A94 lui   t5,0x8016
+80164A98 ori   t5,t5,0x4AB0       ; table base, in-function
+80164A9C addu  t5,t4,t5
+80164AA0 lw    t4,0(t5)
+80164AA8 jr    t4
+80164AB0 .word 80164AC4 80164B38 80164BE8 80164B20 80164BD0
+80164AC4 ...                      ; entry 0 is the word right after the table
+```
+
+A real in-image pointer table, but the index is read from the context
+block with no `sltiu/beq` guard and no `sll`, so the canonical bounded
+resolver has nothing to prove the extent with. `resolve_self_limited_jump_table`
+(second commit of the same branch) takes the extent from the table's own
+layout instead: words from the base while each is a 4-aligned in-function
+code address outside every delay slot, ending where the lowest target
+begins, since a pointer table cannot overlap the code it points at. Same
+safety argument as the stride resolver: the switch tests the real runtime
+target and keeps the CPS default, so an index past the recovered extent
+still falls back. One match in the boot EXE (five entries), every other
+shard byte-identical.
 
 ## Left
 

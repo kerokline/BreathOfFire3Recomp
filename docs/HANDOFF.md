@@ -997,16 +997,17 @@ Order matters, and each of these cost a session once:
 ## Pins and branches
 
 - **2026-09-17: the submodule checkout sits on fork branch
-  `integration/vector-stub-plus-367` `85894111` = upstream `master`
+  `integration/vector-stub-plus-367` `88f4582a` = upstream `master`
   `193a60b8` + `8b50cd09` (the two-shape call-vector guard, open as
   [#381](https://github.com/RetroPortingToolKit/psxrecomp/pull/381), branch `feat/openbios-vector-stub-shape`) + the #367
   cherry-pick.** Same content as `4a792379` + the fix, which is what
   `build-relprof` and both BIOS backends in `psxrecomp/generated/` were
   built and measured from ([`vector-stub-shapes.md`](vector-stub-shapes.md)).
-  + `85894111` (the computed-stride jump resolver, PR branch
-  `feat/computed-stride-jump` `67c79e8f`, [`computed-stride-jump.md`](computed-stride-jump.md)).
-  Bump the title gitlink to `85894111` now, or straight to master once
-  #367, #381 and the stride PR merge; the integration branch exists only so
+  + `85894111` + `88f4582a` (the computed-stride jump and self-limited
+  table resolvers, PR branch `feat/computed-stride-jump` = [#382](https://github.com/RetroPortingToolKit/psxrecomp/pull/382),
+  [`computed-stride-jump.md`](computed-stride-jump.md)).
+  Bump the title gitlink to `88f4582a` now, or straight to master once
+  #367, #381 and #382 merge; the integration branch exists only so
   the gitlink points at something pushed. **Regenerate across it:** the
   codegen hash changed, so the overlays were recompiled
   (`axis_b_loop.sh --skip-harvest --force`) and `build-relprof` rebuilt.

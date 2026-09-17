@@ -3,7 +3,7 @@
 **Status:** FIXED, MEASURED HEADLESS 2026-09-17 — psxrecomp fork branch
 `feat/openbios-vector-stub-shape` (`8b50cd09`, one commit off upstream
 `master` `193a60b8`), **open as [#381](https://github.com/RetroPortingToolKit/psxrecomp/pull/381)**; the
-checkout here sits on `integration/vector-stub-plus-367` (now `85894111`,
+checkout here sits on `integration/vector-stub-plus-367` (now `88f4582a`,
 = #367 + this PR + the copy-loop fix of [`computed-stride-jump.md`](computed-stride-jump.md)). The
 vector line reads **0.0 per frame on OpenBIOS** (was 459) and retail is
 unchanged; see *Result* at the bottom. Left: a real walk on `build-relprof`
