@@ -523,7 +523,7 @@ evidence = "bof.fandom.com/wiki/Orc"
 [[gloss]]
 jp = "ベヘリット"
 en = "PainWeed"
-evidence = "bof.fandom.com/wiki/Pain_Weed"
+evidence = "bof.fandom.com/wiki/Pain_Weed; the wiki's PainWeed page carries ベヘリット, but the US disc prints RankWeed on this very record (AREA052 slot 1; JP and US records byte-identical outside the name field) -- the two weeds have identical stats, so only the disc can split them; `us` wins"
 
 [[gloss]]
 jp = "パトリオ"
@@ -563,7 +563,7 @@ evidence = "bof.fandom.com/wiki/Puff_Goo"
 [[gloss]]
 jp = "ベヘソット"
 en = "RankWeed"
-evidence = "bof.fandom.com/wiki/RankWeed"
+evidence = "bof.fandom.com/wiki/RankWeed; the wiki's RankWeed page carries ベヘソット, but the US disc prints PainWeed on this record (AREA052 slot 4); see ベヘリット"
 
 [[gloss]]
 jp = "ペネトレイター"
@@ -608,7 +608,7 @@ evidence = "bof.fandom.com/wiki/Scorpion_(Breath_of_Fire_III)"
 [[gloss]]
 jp = "ルーファス"
 en = "Scylla"
-evidence = "bof.fandom.com/wiki/Scylla"
+evidence = "bof.fandom.com/wiki/Scylla; the wiki's Scylla page carries ルーファス, but the US disc prints Charyb on this record (AREA103 slot 3); see アービィー"
 
 [[gloss]]
 jp = "キノコルゲ"
@@ -798,7 +798,7 @@ evidence = "bof.fandom.com/wiki/Beyd_(Breath_of_Fire_III) (story fight)"
 [[gloss]]
 jp = "アービィー"
 en = "Charybdis"
-evidence = "bof.fandom.com/wiki/Charyb (アービィ; disc spells it with a long vowel)"
+evidence = "bof.fandom.com/wiki/Charyb (アービィ; disc spells it with a long vowel); the wiki's Charybdis page carries アービィ, but the US disc prints Scylla on this record (AREA103 slot 2); identical stats to ルーファス, only the disc can split them; `us` wins"
 
 [[gloss]]
 jp = "サンプル1"
