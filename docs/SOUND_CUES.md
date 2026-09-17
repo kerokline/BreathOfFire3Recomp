@@ -248,6 +248,12 @@ writer), so it is part of that file load or its DMA.
   wrong before the fix. The caller name is resolved against the overlay
   actually resident in the swap slot, falling back to the Ghidra export's
   `FUN_*` boundary for `START.EMI`, which has one human name so far.
+  **Mode is the live table, not the resident overlay:** after a fight
+  `BATTLE.EMI` stays in the swap slot while the area's own code is already
+  cueing field sounds (AREA052's conveyor loop calls `SE_Play(0x202)` every
+  ~36 frames from `0x801F3F18`, the same word that is a hit in battle), so
+  `se_watch` hashes banks 1+2 at `0x80148718..0x80148810` against the two
+  savestate tables to key a label.
 - Set 1 (seven banks) has not been observed in a savestate.
 - `0x8018BD5C` is the extra-voice count and `0x8018BD84` the tone-attribute
   offset; the rest of `0x8018BC80..0x8018BD84` is the per-voice parameter

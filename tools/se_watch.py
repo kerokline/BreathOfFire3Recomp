@@ -25,9 +25,13 @@ sound was, and upserts the answer into names/se_cues.toml (status =
 "evidence", the session and frame as the citation); Enter skips, and a cue
 that already has a label is printed with it and not asked again. The bank 1
 and bank 2 tables are swapped for battle (SOUND_CUES.md "Live contents"), so
-the label is keyed by cue AND mode: field vs battle is read off the
-resident game-mode overlay when tools/resident.py can name it, else
-"unknown". Run it beside area_poller.py; both are read-only on the runtime
+the label is keyed by cue AND mode. Mode is NOT the resident overlay
+(BATTLE.EMI stays in the swap slot after a fight, while the area's own code
+is already playing field cues): it is the live bank 1+2 cue table at
+0x80148718..0x80148810 hashed against the two tables the savestates hold
+(slot00/02 = field, slot03 = battle; docs/SOUND_CUES.md "Live contents"),
+which is what decides what a cue word sounds like. Anything else is
+"unknown" and the row carries the hash so a third table can be added. Run it beside area_poller.py; both are read-only on the runtime
 (this one arms write-trace ranges and puts the previous ones back on exit).
 
 Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
@@ -35,6 +39,7 @@ Requires a debug-tools build with --debug-port (build-dbg / build-relprof).
 import argparse
 import datetime as dt
 import glob
+import hashlib
 import json
 import os
 import sys
@@ -52,6 +57,11 @@ import name_map               # noqa: E402
 CELL_ID = 0x8018BD7C      # SE_Play: id   (u16), second store (0x8015E93C)
 CELL_BANK = 0x8018BD80    # SE_Play: bank (u16), first store (0x8015E91C)
 GHIDRA_DIR = os.path.join(ROOT, "analysis", "ghidra")
+TABLES_LO, TABLES_HI = 0x80148718, 0x80148810     # bank 1 + bank 2 cue tables (2 x 31 x 4)
+TABLE_MODES = {                                    # md5 of that span, from saves/openbios (2026-09-17)
+    "79b02fe1aa36a99d5c6e6cd96ae6fe74": "field",   # slot00 title, slot02 AREA014 field
+    "229197bba0c628f87fd4e2b7431dc09a": "battle",  # slot03 regular field battle
+}
 
 
 class Namer:
@@ -155,13 +165,18 @@ def resident_now(port):
         return {}
 
 
-def mode_of(bands):
-    """'battle' | 'field' | 'unknown' from the overlay resident in the game-mode
-    swap slot 0x801D0C00 (BATTLE.EMI there = a fight; anything else = field)."""
-    e = bands.get(0x801D0C00)
-    if e is None or e.get("id") is None:
-        return "unknown"
-    return "battle" if "BATTLE" in str(e.get("file", "") or e.get("name", "")).upper() else "field"
+def mode_of(port):
+    """('field' | 'battle' | 'unknown', md5) from the live bank 1+2 cue tables."""
+    try:
+        import resident
+        r = resident.q("read_ram", port, addr="0x%08X" % TABLES_LO, len=TABLES_HI - TABLES_LO)
+        raw = bytes.fromhex(r["hex"]) if r.get("hex") else b""
+    except Exception:
+        return "unknown", ""
+    if len(raw) != TABLES_HI - TABLES_LO:
+        return "unknown", ""
+    h = hashlib.md5(raw).hexdigest()
+    return TABLE_MODES.get(h, "unknown"), h
 
 
 # ----------------------------------------------------------------- labels
@@ -233,7 +248,7 @@ def main():
                     print("se_watch: write ring truncated in frames %d-%d, cues may be missing" % (
                         last_frame + 1, fr), flush=True)
                 bands = resident_now(a.port) if rows else {}
-                mode = mode_of(bands)
+                mode, tables_md5 = mode_of(a.port) if rows else ("unknown", "")
                 for bank, cue_id, e_id, e_bank in pair_rows(rows):
                     e = e_id or e_bank
                     cue = (bank << 8) | cue_id if bank >= 0 and cue_id >= 0 else -1
@@ -243,7 +258,7 @@ def main():
                     row = {"session": session, "frame": int(e["frame"]),
                            "t": dt.datetime.now().isoformat(timespec="seconds"),
                            "cue": "0x%04X" % cue if cue >= 0 else "?", "bank": bank,
-                           "id": cue_id, "mode": mode,
+                           "id": cue_id, "mode": mode, "tables_md5": tables_md5,
                            "store_pc_bank": e_bank["pc"] if e_bank else None,
                            "store_pc_id": e_id["pc"] if e_id else None,
                            "ra": e["ra"], "caller_nearest": caller, "caller_overlay": ovl,
