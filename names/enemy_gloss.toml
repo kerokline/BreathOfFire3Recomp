@@ -859,3 +859,8 @@ evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-
 jp = "サンプル102"
 en = "Sample 102"
 evidence = "bof.fandom.com/wiki/Sample_1..12 (the disc numbers them 1-9 and 100-102)"
+
+[[gloss]]
+jp = "ギ"
+en = "Ice Toad"
+evidence = "bof.fandom.com/wiki/Ice_Toad: the page gives the Japanese name as the single glyph ギ (Gi); L15 HP80 AP30 EXP63 zenny45 Pwr54 Def7 match AREA040/044/048 slot 5 (wiki Agl 3 vs the disc field 8; player 2026-09-17: it was the frog)"
