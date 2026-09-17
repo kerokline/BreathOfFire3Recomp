@@ -24,7 +24,8 @@ also RESOLVED to the sound it makes right now (tools/se_resolve.py: cue
 entry -> VAB program/tone -> VAG -> the sample bytes in SPU RAM, hashed),
 because a cue word is a slot, not a sound: spells, areas and party changes
 put other samples behind the same words. With --label the watcher pauses
-after each *new sound* (stdin must be a terminal), asks what it was, and
+once the cues pause for --label-gap seconds (stdin must be a terminal),
+asks what each *new sound* of the burst was, oldest first, and
 upserts the answer into names/se_cues.toml keyed by the sample hash
 (status = "evidence", the session, frame, cue and context as the citation);
 Enter skips. A sound already labelled is printed with its label, and the
@@ -255,6 +256,35 @@ def save_labels(labels):
         fh.write("\n".join(rows))
 
 
+def ask_pending(pending, labels, session):
+    """Ask about every queued unlabelled sound, oldest first, then clear the queue.
+    Deferred to a quiet moment so a burst of cues (a spell: cast voice, spell
+    sample, effect) does not stall the game mid-burst."""
+    items = sorted(pending.values(), key=lambda q: q["row"]["frame"])
+    pending.clear()
+    print("   -- %d new sound(s); Enter = skip --" % len(items), flush=True)
+    for q in items:
+        row, res = q["row"], q["res"]
+        if row["sound"] in labels:
+            continue
+        try:
+            ans = input("   [f%d] %s via %s (%s%s) vab%d p%d t%d: what was it? " % (
+                row["frame"], row["sound"], q["via"], (q["ovl"] + ":") if q["caller"] else "", q["caller"],
+                res["vab"], res["prog"], res["tone"])).strip()
+        except EOFError:
+            ans = ""
+        if not ans:
+            continue
+        labels[row["sound"]] = {
+            "id": row["sound"], "label": ans, "status": "evidence",
+            "evidence": "se_watch %s f%d via %s, ra %s %s%s, vab%d prog%d tone%d vag%d spu %s" % (
+                session, row["frame"], q["via"], q["ra"], (q["ovl"] + ":") if q["caller"] else "", q["caller"],
+                res["vab"], res["prog"], res["tone"], res["vag"], res["spu"]),
+            "cues": [q["via"]], "centre": res["centre"], "shift": res["shift"], "size": res["size"]}
+        save_labels(labels)
+        print("   -> names/se_cues.toml: %s = %s" % (row["sound"], ans), flush=True)
+
+
 # ----------------------------------------------------------------- main
 
 def main():
@@ -267,7 +297,9 @@ def main():
     ap.add_argument("--hold", action="append", default=[])
     ap.add_argument("--press-frames", type=int, default=2)
     ap.add_argument("--press-gap", type=int, default=20)
-    ap.add_argument("--label", action="store_true", help="pause after each new cue and ask what it was")
+    ap.add_argument("--label", action="store_true", help="ask what each new sound was, once the cues pause")
+    ap.add_argument("--label-gap", type=float, default=2.5,
+                    help="seconds of silence before the queued questions are asked (0 = ask at once)")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
 
@@ -284,6 +316,8 @@ def main():
     last_frame = cd.cur_frame(a.port)
     n = 0
     seen_tables = set()
+    pending = {}        # sound id -> first hearing, asked about once the cues pause
+    last_cue_t = 0.0
     try:
         if a.press or a.hold:
             cd.press_buttons(a.port, a.press, a.press_frames, a.press_gap, hold=a.hold or None)
@@ -338,26 +372,23 @@ def main():
                     if known and via not in known["cues"]:
                         known["cues"].append(via)
                         save_labels(labels)
-                    if a.label and sound and not known:
-                        try:
-                            ans = input("   what was that sound? (Enter = skip) ").strip()
-                        except EOFError:
-                            ans = ""
-                        if ans:
-                            labels[sound] = {
-                                "id": sound, "label": ans, "status": "evidence",
-                                "evidence": "se_watch %s f%d via %s, ra %s %s%s, vab%d prog%d tone%d vag%d spu %s" % (
-                                    session, row["frame"], via, e["ra"], (ovl + ":") if caller else "", caller,
-                                    res["vab"], res["prog"], res["tone"], res["vag"], res["spu"]),
-                                "cues": [via], "centre": res["centre"], "shift": res["shift"], "size": res["size"]}
-                            save_labels(labels)
-                            print("   -> names/se_cues.toml: %s = %s" % (sound, ans), flush=True)
+                    if a.label and sound and not known and sound not in pending:
+                        pending[sound] = dict(
+                            row=row, via=via, ra=e["ra"], ovl=ovl, caller=caller, res=res)
+                        last_cue_t = time.time()
                 last_frame = fr
+            if pending and (a.label_gap <= 0 or time.time() - last_cue_t >= a.label_gap):
+                ask_pending(pending, labels, session)
             if a.seconds and time.time() - t0 >= a.seconds:
                 break
     except KeyboardInterrupt:
         pass
     finally:
+        if pending:
+            try:
+                ask_pending(pending, labels, session)
+            except (KeyboardInterrupt, EOFError):
+                pass
         cd.wtrace_restore(a.port, prev)
     print("se_watch: %d cue(s) recorded" % n)
     return 0

@@ -261,7 +261,7 @@ the six indices are, from the callers:
 | 2, then 4 | `Battle_SwingCue_Step` (`0x801DFA14`, twin `0x801E1FA8`): the normal swing pair | Ryu `0x402+0x404`, Nina `0x502+0x504` in one frame |
 | 3, then 4 | same, when `Rand(3) % 100 < ctx+0xAA` (the crit roll — it also sets bit 7 of `0x801462E4`) | the crit variant |
 | 1 / 0 | `Battle_Impact_Step` (`0x801DFF0C`) on damage, by `ctx+0x128 & 2` | |
-| 5, then 3 | `0x801E1814` | unnamed step |
+| 5 | `0x801E1814` (then 3 conditionally) | **the character's spell-cast voice**: Momo `0x505` and Ryu `0x305` casting the same MAGIC070 (薬草 / アプリフ) resolved to different samples, while the spell's own `0x100` (from `0x801EEF8C` inside the overlay) and the `0x206` restore effect (via `SE_PlayTracked`) were the same sample for both — player + resolver, 2026-09-17 |
 
 So Nina's `0x502+0x504` labelled "Chlorine" is her **slot's swing pair**,
 fired for 毒撃 because 毒撃 (ability 8, type 3) is a physical skill; the
