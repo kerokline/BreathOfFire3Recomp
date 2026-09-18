@@ -29,7 +29,7 @@ real end, hashes those bytes (FNV-1a64), looks the hash up in a table
 compiled into the exe, copies the English bytes into **enhancement memory**
 (`psx_mod_alloc_guest_memory`, Expansion 1 at `0x9F000000`, host-backed and
 readable by ordinary guest loads), and rewrites both globals to point there.
-`MsgBox_Reset` then runs unchanged: it eats the leading `0x0C` speaker byte
+`MsgBox_Reset` then runs unchanged: it eats the leading `0x0C` box-selector byte
 from the English copy, and the stepper and renderer read the English stream
 with no idea anything happened. A miss (no table entry, a system-pool
 pointer, another language) leaves everything alone, so the failure mode is
@@ -51,7 +51,7 @@ point into the JP block, it is a fresh replay and the same lookup-and-copy
 runs (`redirect_message`, shared with the reset hook); a `0x0B` prompt also
 lands in state 1 but with the cursor past the base, so it is ignored; one
 attempt per distinct base so a miss is hashed once, not per frame. The
-replay does not eat a leading `0x0C` speaker byte either, so the copy is
+replay does not eat a leading `0x0C` box-selector byte either, so the copy is
 taken from the message start exactly as the game would read it.
 
 Why this and not the framework's own text layer: `text_xlate`'s apply hook
@@ -197,7 +197,7 @@ up, hold up, hold down puts the party on a talk trigger); frames are in
 | choice handling | Circle x2 leaves state 5; Cross resolves (state 2) | identical: same states after the same presses |
 
 The message is AREA150 slot 45 (`0x8C6`), a `0x14` choice prompt, so first
-light exercised the speaker-less head, word wrap, a page split (the English
+light exercised the selector-less head, word wrap, a page split (the English
 needs four rows at either width, so the encoder spent a `0x02`), and the
 re-encoded option strings. The English box behaves exactly as the JP box
 under the same inputs, which is the equivalence the design promised.

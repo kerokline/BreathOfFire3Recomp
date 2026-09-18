@@ -81,12 +81,12 @@ Shared by `0x80150598`, `0x8015096C` and `0x8015AD34`.
 | `0x07` | insert from 32-byte record table at `0x801490D3 + 0x20 * next_byte` |
 | `0x08` | **insert message by index** — see the table formula above |
 | `0x0A` | play sound — `SE_Play(next_byte \| 0x200)` (`0x8015E908`, bank 2; [`SOUND_CUES.md`](SOUND_CUES.md)) |
-| `0x0C` | (string head only) speaker/portrait id in the next byte → `0x801490CA`; consumed by `MsgBox_Reset`, never seen by the stepper |
+| `0x0C` | **box/presentation selector, argument in the next byte** — `MsgBox_Reset` eats a *leading* one into `0x801490CA` (else stores 0); nothing in the boot EXE reads `0x801490CA`, so an overlay does. `MsgBox_Step` shares one handler with `0x05`: skip the argument, do nothing. **Corrected 2026-09-18** — this row used to read "(string head only) speaker/portrait id". The disc census (`page_rows.py codes`, 6,696 messages) says 2,419 uses, **780 of them mid-message**, and the head arguments are 15 distinct values of which `05` (696) and `06` (669) are 83% — a mode selector's shape, not a cast's. The Chinese PC port's independent table calls it "textbox type" ([`PC_PORT_CROSS_REFERENCE.md`](PC_PORT_CROSS_REFERENCE.md) §2.2). Open: who reads `0x801490CA` |
 | `0x0B` | **in-line pause / beat** (`0x8015096C` sets state 1 with an 8-frame delay; the renderer's handler for it is a no-op, so nothing moves — the `y += 8` this row used to claim was that delay count misread, corrected 2026-09-12) — appears mid-sentence between ellipsis glyphs (AREA000 msg 50 `…<0b>…<0b>…で、ですねぇ`), not at page ends; the page break is `0x02` |
 | `0x0D` / `0x0E` | **open / close an emphasis span** (flag `0x8014909D` / `0x801490A0`). Read statically as enable/disable drawing; the script says otherwise — 105 opens, 105 closes, 106 `0x0F` uses, and every `0x0F` in the disc follows a closed span (`<0d>えらいっ<40><0e><0f><0a>`). The span is what the effect is applied to |
 | `0x0F` | **text effect preset** from the 4-byte table `0x8017FF30[next_byte]` = `{type, param, u16 duration}`, unpacked at `0x80150D34` into type `0x8014909E`, duration `0x801490A6`, param `0x801490C4`. Types 2 and 3 are **grow and shrink** — see *Two blitters, and the only font sizing there is* |
 | `0x16` | **timed page break** — `0x16 <frames>`; the narration/cutscene form of `0x02`, ends the page and advances itself. 670 uses, most often 0x20 or 0x30 frames. `TEXT_TABLES.md` already used this shape for the area caption banner |
-| `0x10` | toggle flag `0x10` of `0x801490A0` |
+| `0x10` / `0x11` | **instant-print start / end** (named 2026-09-18). Both bytes run the same arm, `0x801490A0 ^= 0x10`; the per-glyph delay at the bottom of `MsgBox_Step` is only computed `if ((0x801490A0 & 0x10) == 0)`, so while the bit is set the run prints in one step. A bare toggle, but used strictly in pairs: 101 uses of each over the 200-area script and the running depth returns to zero in **6,696 of 6,696** messages. Independently labelled the same way by the Chinese PC port ([`PC_PORT_CROSS_REFERENCE.md`](PC_PORT_CROSS_REFERENCE.md) §2.1) |
 | `0x14` | **choice menu** — `0x801490C0` = next byte, then count/cursor nibbles at `+3` (`0x801490C1/C2`); state 5 when the count is 0 |
 | `0x12`, `0x13`, `0x15` | **multi-byte character lead bytes** — consume one extra byte |
 | everything else `>= 0x12` | a **glyph** — the stepper's control switch covers `0x00..0x11` and `0x14` only, so `0x3E`/`0x3F`/`0x40` and the `0x48 0x50` of `HP` are single-byte atlas indices, not controls (settles the *Latin/digit bytes* question below for the box path) |
@@ -194,7 +194,9 @@ The string has **no per-line start control**. What the renderer does:
   padding.
 - Newline `0x01` (`0x80150688`): x = origin x, y += 14. Nothing else in the
   jump table at `0x80149A00` touches x or y; `0x09`, `0x10` and `0x11` are
-  no-ops in the renderer (free slots, but filling one needs guest code).
+  no-ops **in the renderer**. `0x09` is a free slot (filling one needs guest
+  code); `0x10`/`0x11` are not — they are instant print, and they act in the
+  stepper's delay calculation, not here.
 - The cursor is **re-read from RAM before every glyph** and written back
   after (`0x80150850`, `0x80150898`). Nothing caches it across glyphs.
 - Sprite path (`0x8014F6BC` → `0x8014F708`): draws at the cursor. Inside a
@@ -448,7 +450,7 @@ GAME.EMI  Script_ShowMessage(obj)  0x801A27A8        u16 id = obj+8
    └─ else        → Msg_OpenScript(id)           0x8015034C   (0x80010000 area script)
                        ptr = 0x80010000 + u16[0x80010000 + 2*id]
                        0x801490A8 = 0x801490AC = ptr          ← the box-string writers
-                       MsgBox_Reset()            0x8015042C   (clears state, eats a leading 0x0C speaker byte,
+                       MsgBox_Reset()            0x8015042C   (clears state, eats a leading 0x0C box-selector byte,
                                                                Window_Alloc(0,0), window 0 state = 2)
                        0x801490A4 = id
    then 0x80143BB0 = 2
@@ -458,7 +460,7 @@ replay:   MsgBox_Replay 0x801515F8  (callers: the page-break state handler at 0x
                                      MsgBox_ReplayIfShown 0x80151554 when window state 0x8014832F == 2)
                        ptr = 0x80010000 + u16[0x80010000 + 2*u16 0x801490A4]   ← the THIRD writer (2026-09-11)
                        0x801490A8 = 0x801490AC = ptr, state = 1, delay 0x801490A2 = 8 (16 from ReplayIfShown)
-                       NO MsgBox_Reset — the 0x0C speaker byte is not eaten, the state block is not cleared
+                       NO MsgBox_Reset — the 0x0C box-selector byte is not eaten, the state block is not cleared
 ```
 
 Facts that matter for the translation hook:

@@ -187,7 +187,7 @@ not the recompiler.
 
 That means the encoder owns three things: glyph codes, the control-code stream
 (`0x01` newline, `0x02` page break, and every code it must carry through
-untouched — speaker `0x0C`, substitutions `0x03`/`0x04`/`0x07`/`0x08`, choices
+untouched — box selector `0x0C`, substitutions `0x03`/`0x04`/`0x07`/`0x08`, choices
 `0x14`), and the `u16` offset table at the head of the block, which every index
 resolves through.
 
@@ -215,7 +215,7 @@ a reading that wraps to the start of a line would hang into the margin.
 
 What the encoder still owes, none of it blocked:
 
-1. **The control-code stream.** Carry through speaker `0x0C`, the
+1. **The control-code stream.** Carry through the box selector `0x0C`, the
    substitutions `0x03`/`0x04`/`0x07`/`0x08`, choices `0x14`, effects
    `0x0D`/`0x0E`/`0x0F`, and re-author only `0x01` and `0x02`.
 2. **The `u16` offset table** at the head of the block, which every message
