@@ -188,14 +188,15 @@ Class −100 on the element ladder means the hit **heals** the target.
 
 **That each byte's modal class is its own table's neutral index is the
 structural proof.** The five element bytes sit at class 2 (1,460 of 2,240);
-the holy byte sits at class 5 (140 of 168); the psionic byte sits at class 2.
+the holy byte sits at class 5 (396 of 448); the psionic byte sits at class 2.
 Three tables with neutrals at 2, 5 and 2, and every column lands on the right
 one.
 
 Evidence, 2026-09-18:
 
-- **Range.** All 2,240 affinity bytes (448 species rows × 5) and all nine bytes
-  of all 168 distinct species are in `0..8`. Nothing out of range anywhere.
+- **Range.** All **4,032 bytes** (448 species rows × 9) are in `0..8`.
+  `tools/enemy_table.py extract` now enforces this and refuses to write if any
+  byte is not a class index, so the check re-runs on every extraction.
 - **Semantics.** Undead and plants (Zombie, Ghoul, Man Trap, Audrey) sit at
   class 0 = 300% on element 0; fire creatures (Torch, Lava Man, Vulcan, Gaist,
   Scylla, Charyb) **absorb** element 0 at class 7 and take 200–300% on element
@@ -253,7 +254,7 @@ species that are weak to it are the undead:
 |---|---|---|
 | Zombie, Ghoul, Ghost, Phantom, ZombieDr, Reaper, ToxicMan | 0 | **300%** |
 | D>Zombie, Thanotos, Arwan, Spectre, Volt, Thunder, Worker | 1 | 200% |
-| everything else (140 of 168) | 5 | 100% |
+| everything else (396 of the 448 rows) | 5 | 100% |
 
 Ghostbuster doing triple damage to Ghost is the whole hypothesis, tested and
 passed.
@@ -278,10 +279,20 @@ different tables**. A direct fetch of the wiki page was attempted 2026-09-18
 and **not completed** (`bof.fandom.com` 402, GameFAQs 403), so the numbering
 is second-hand and the byte values are what this document asserts.
 
-Decoding this may also adjudicate the two wiki/US-disc name-pair
-disagreements noted in `names/enemy_gloss.toml`
-(PainWeed/RankWeed, Charyb/Scylla), and the drop slots (`+0x18..`) against
-the wiki's steal/drop columns.
+**Why the PainWeed / RankWeed pair is confusable** (2026-09-18, once the
+columns were extractable): AREA052 carries *both*, at slots 1 and 4, with
+**byte-identical stats** (L20 HP80 EXP57 zenny40 ATK62 DEF35 AGI13) and
+holy/psionic/status/death classes. They differ in exactly one thing — the
+five element classes are **mirror images**: `ベヘリット` is class 0 (300%) on
+all five, `ベヘソット` is class 7 (**absorbs**) on all five. So they are two
+genuinely distinct species whose only discriminator is the grid, which is
+ample reason for guides to have muddled them. It does **not** settle which
+name belongs to which: the US disc and the wiki assign the two names to
+opposite twins, and nothing on the disc arbitrates that.
+
+The other name-pair noted in `names/enemy_gloss.toml` (Charyb/Scylla) is
+worth the same check, as are the drop slots (`+0x18..`) against the wiki's
+steal/drop columns.
 
 ### Persistent character records — boot-EXE data, `0x80144964 + roster*0xA4`, 8 records
 
