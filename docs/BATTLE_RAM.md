@@ -314,14 +314,33 @@ name fixes the sound: `d2` = リ from ゴブリン/Goblin, バリオ/Balio,
 ギリー/Gary, スタリオン/Stallion; `b9` = ソ from ソウルハンター/Phantom
 ("Soul Hunter") and ガードソウル/Wraith ("Guard Soul").
 
-**The other pair stays open, and now we know why.** `アービィー` and
-`ルーファス` (Charyb/Scylla, also crossed between the `us` and `en` columns)
-are **byte-identical in all nine affinity classes** — `[7,1,2,2,2,5,4,5,7]`,
-both fire-absorbers — *and* in stats (L70 HP1000 ATK100). The grid split the
-weeds because the weeds differ in it; it cannot split this pair, because
-these two differ in nothing this document has read. That one needs a
-different discriminator (sprite, AI script row, or where each is encountered),
-not more of this table.
+#### Charyb / Scylla — settled 2026-09-18, but *not* by the grid
+
+`アービィー` and `ルーファス` are **byte-identical in all nine affinity
+classes** (`[7,1,2,2,2,5,4,5,7]`, both fire-absorbers) *and* in stats (L70
+HP1000 ATK100). The grid split the weeds because the weeds differ in it; it
+cannot split this pair, which differs in nothing this document has read.
+
+The discriminator was the screen. A JP/US screenshot pair of the **same
+Gisshan fight** (player, 2026-09-18) shows the battle name plates in the same
+order in both versions:
+
+| plate | JP | US |
+|---|---|---|
+| 1 | ギシャボルゴ | Gisshan |
+| 2 | ルーファス | **Charyb** |
+| 3 | アービィー | **Scylla** |
+
+All three are AREA103 slots 4, 3 and 2, and the US disc's own name at each of
+those slots is exactly what the US screenshot prints. So `ルーファス` is
+Charyb and `アービィー` is Scylla, and the wiki has this pair's Japanese
+names transposed — **the same error it makes on PainWeed/RankWeed**.
+`enemy_gloss.toml` corrected for both; the `en` column now agrees with `us`
+across all four records.
+
+Worth keeping as method: two of this table's name disputes came from the
+wiki's JP names being crossed, and in both cases the US disc's name *at the
+same record slot* was right. Prefer `us` over `en` whenever they disagree.
 
 The drop slots (`+0x18..`) against the wiki's steal/drop columns are still
 worth the same treatment.
