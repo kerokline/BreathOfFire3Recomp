@@ -30,10 +30,11 @@ dump, never committed).
   emitted in capitals for this first pass.  Characters with no JP glyph are
   counted and reported; an apostrophe is dropped, anything else prints as
   `?` so the gap is visible on screen rather than silent.
-* Controls are carried through byte for byte: speaker head 0x0C, name and
-  record inserts 0x03/0x04/0x07, colour 0x05/0x06, sound 0x0A, pause 0x0B,
-  spans 0x0D/0x0E/0x0F, flags 0x10/0x11, timed break 0x16, and the 0x14
-  choice menu (three argument bytes, then count NUL-terminated options).
+* Controls are carried through byte for byte: the 0x0C box selector (head or
+  mid-message alike), name and record inserts 0x03/0x04/0x07, colour
+  0x05/0x06, sound 0x0A, pause 0x0B, spans 0x0D/0x0E/0x0F, instant print
+  0x10/0x11, timed break 0x16, and the 0x14 choice menu (three argument
+  bytes, then count NUL-terminated options).
 * Layout is re-authored: US 0x01 newlines are soft (the US box is wider and
   proportional), each page is word-wrapped to --width cells, and a page that
   needs more than --rows rows is split with a 0x02 confirm break instead of a
@@ -150,7 +151,8 @@ def message_extent(buf, off):
 def parse_message(raw):
     """Split a message into (head, pages, tail).
 
-    head  -- the leading 0x0C nn speaker bytes, or b''
+    head  -- the leading 0x0C nn box-selector bytes, or b'' (mid-message
+             0x0C nn stays in the page stream as an inline control)
     pages -- list of (items, terminator) where items are
              ('w', text) a word, ('s',) a space, ('n',) a US newline,
              ('c', bytes, width) an inline control;

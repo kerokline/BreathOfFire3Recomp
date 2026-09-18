@@ -4,7 +4,7 @@
 
 Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer claims about it. An address alone does not say whether it is code or data (81.6% of `.text` is overlay zero fill, and named data shares addresses with sibling code — `DATA_ISLANDS.md`), and one address can resolve to several overlay functions because bands share load addresses (`AREA_PCS.md`). Unnamed is not a defect: most cited addresses are RAM variables, which `symbols.toml` has no table for.
 
-1091 distinct addresses · 165 resolve to a name · 926 do not.
+1109 distinct addresses · 165 resolve to a name · 944 do not.
 
 | Address | Region | Identity | Cited by |
 |---|---|---|---|
@@ -18,7 +18,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x800102A7` | pre-text | in area_script_block [message pool] +0x2A7 | `IDEAS.md` |
 | `0x80010371` | pre-text | in area_script_block [message pool] +0x371 | `LOCALIZATION_APPLY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x80013FFF` | pre-text | in area_script_block [message pool] +0x3FFF | `LOCALIZATION.md`, `TEXT_ENGINE.md` |
-| `0x80014000` | pre-text | system_message_block [message pool] (base) | `ADDRESS_MAPS.md`, `FURIGANA.md`, `HANDOFF.md`, `IDEAS.md`, `LOCALIZATION_APPLY.md`, `STATUS.md`, `TEXT_ENGINE.md`, `TEXT_TABLES.md`, `loader_records/BOSS.md`, `regional-builds.md`, `us-build-trial.md` |
+| `0x80014000` | pre-text | system_message_block [message pool] (base) | `ADDRESS_MAPS.md`, `FURIGANA.md`, `HANDOFF.md`, `IDEAS.md`, `LOCALIZATION_APPLY.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md`, `TEXT_TABLES.md`, `loader_records/BOSS.md`, `regional-builds.md`, `us-build-trial.md` |
 | `0x80014004` | pre-text | in system_message_block [message pool] +0x4 | `TEXT_ENGINE.md` |
 | `0x80014A86` | pre-text | in system_message_block [message pool] +0xA86 | `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x8001525C` | pre-text | in system_message_block [message pool] +0x125C | `TEXT_ENGINE.md`, `TEXT_TABLES.md` |
@@ -37,7 +37,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80033E00` | pre-text | unknown | `regional-builds.md` |
 | `0x80035800` | pre-text | unknown | `regional-builds.md` |
 | `0x80093000` | pre-text | unknown | `GHIDRA.md`, `STATUS.md`, `TEXT_ENGINE.md` |
-| `0x80093800` | text | boot EXE load address (disc_probe.json) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `BATTLE_RAM.md`, `BRINGUP.md`, `GHIDRA.md`, `HANDOFF.md`, `INVENTORY.md`, `LOCALIZATION.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_HEADERS.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `TEXT_ENGINE.md`, `loader_records/BOSS.md`, `loader_records/PLCHAR.md`, `regional-builds.md`, `remote-plan-2026-09-05.md`, `zero-fill-dispatch-audit.md` |
+| `0x80093800` | text | boot EXE load address (disc_probe.json) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `BATTLE_RAM.md`, `BRINGUP.md`, `GHIDRA.md`, `HANDOFF.md`, `INVENTORY.md`, `LOCALIZATION.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_HEADERS.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `TEXT_ENGINE.md`, `WALK_ROOTS_HANDOFF.md`, `loader_records/BOSS.md`, `loader_records/PLCHAR.md`, `regional-builds.md`, `remote-plan-2026-09-05.md`, `zero-fill-dispatch-audit.md` |
 | `0x80093801` | text | in band_80093800 [overlay band] +0x1 | `ADDRESS_MAPS.md`, `OVERLAYS.md`, `STATUS.md` |
 | `0x80093A74` | text | in band_80093800 [overlay band] +0x274 | `STATUS.md` |
 | `0x80093B24` | text | Attack_TargetSetup [evidence] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `BATTLE_RAM.md` |
@@ -63,6 +63,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8009A6F8` | text | ≤ Effect_ApplyResult (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x598 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x8009BA44` | text | in band_80093800 [overlay band] +0x8244 | `STEAL.md` |
 | `0x8009FA78` | text | in band_80093800 [overlay band] +0xC278 | `BATTLE_RAM.md`, `HANDOFF.md`, `STATUS.md`, `remote-plan-2026-09-05.md` |
+| `0x8009FD08` | text | in band_80093800 [overlay band] +0xC508 | `BATTLE_RAM.md`, `STATUS.md` |
+| `0x8009FE88` | text | in band_80093800 [overlay band] +0xC688 | `BATTLE_RAM.md` |
 | `0x800A0680` | text | in band_80093800 [overlay band] +0xCE80 | `BATTLE_RAM.md`, `GHIDRA.md` |
 | `0x800A783C` | text | in band_80093800 [overlay band] +0x1403C | `BATTLE_RAM.md` |
 | `0x800A79AC` | text | Formation_ApplyStatMods [hypothesis] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `BATTLE_RAM.md`, `STATUS.md`, `remote-plan-2026-09-05.md` |
@@ -76,6 +78,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x800A8E8C` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x3B8 (nearest below, span unknown) | `loader_records/BOSS.md` |
 | `0x800A8ED0` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x3FC (nearest below, span unknown) | `loader_records/BOSS.md` |
 | `0x800A8F4C` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x478 (nearest below, span unknown) | `loader_records/BOSS.md` |
+| `0x800A9148` | text | ≤ Battle_InitEncounterKind (overlay BATTLE (BIN/BATTLE/BATTLE.EMI#15)) +0x674 (nearest below, span unknown) | `BATTLE_RAM.md`, `STATUS.md` |
 | `0x800A9FA4` | text | in band_80093800 [overlay band] +0x167A4 | `BATTLE_RAM.md` |
 | `0x800AAF44` | text | in band_80093800 [overlay band] +0x17744 | `OVERLAY_HEADERS.md` |
 | `0x800AB120` | text | Magic_LoadForAbility [verified] in BATTLE (BIN/BATTLE/BATTLE.EMI#15) | `OVERLAY_HEADERS.md`, `STATUS.md` |
@@ -85,6 +88,9 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x800B1438` | text | in band_80093800 [overlay band] +0x1DC38 | `BATTLE_RAM.md`, `STATUS.md`, `STEAL.md` |
 | `0x800B164C` | text | in band_80093800 [overlay band] +0x1DE4C | `BATTLE_RAM.md`, `STATUS.md` |
 | `0x800B165C` | text | in band_80093800 [overlay band] +0x1DE5C | `BATTLE_RAM.md`, `HANDOFF.md`, `STATUS.md` |
+| `0x800B187C` | text | in band_80093800 [overlay band] +0x1E07C | `BATTLE_RAM.md`, `HANDOFF.md`, `STATUS.md` |
+| `0x800B188C` | text | in band_80093800 [overlay band] +0x1E08C | `BATTLE_RAM.md`, `STATUS.md` |
+| `0x800B189C` | text | in band_80093800 [overlay band] +0x1E09C | `BATTLE_RAM.md` |
 | `0x800B19A4` | text | in band_80093800 [overlay band] +0x1E1A4 | `OVERLAY_HEADERS.md` |
 | `0x800B19A8` | text | in band_80093800 [overlay band] +0x1E1A8 | `OVERLAY_HEADERS.md` |
 | `0x800B202C` | text | in band_80093800 [overlay band] +0x1E82C | `BATTLE_RAM.md`, `SOUND_CUES.md`, `STATUS.md` |
@@ -144,7 +150,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80143E68` | text | in band_80117000 [overlay band] +0x2CE68 | `GFX_PACKETS.md` |
 | `0x80143E6C` | text | in band_80117000 [overlay band] +0x2CE6C | `GFX_PACKETS.md` |
 | `0x80143EF8` | text | in band_80117000 [overlay band] +0x2CEF8 | `GFX_PACKETS.md` |
-| `0x80143F00` | text | in band_80117000 [overlay band] +0x2CF00 | `ADDRESS_MAPS.md`, `BATTLE_RAM.md`, `LOADER_RECORDS.md`, `LOCALIZATION_APPLY.md`, `OVERLAY_HEADERS.md`, `SAVE_IMPORT.md`, `STATUS.md`, `loader_records/AREA.md`, `loader_records/BOSS.md`, `loader_records/SCENARIO.md` |
+| `0x80143F00` | text | in band_80117000 [overlay band] +0x2CF00 | `ADDRESS_MAPS.md`, `BATTLE_RAM.md`, `LOADER_RECORDS.md`, `LOCALIZATION_APPLY.md`, `OVERLAY_HEADERS.md`, `PC_PORT_CROSS_REFERENCE.md`, `SAVE_IMPORT.md`, `STATUS.md`, `loader_records/AREA.md`, `loader_records/BOSS.md`, `loader_records/SCENARIO.md` |
 | `0x80143F02` | text | in band_80117000 [overlay band] +0x2CF02 | `loader_records/AREA.md` |
 | `0x80143F04` | text | in band_80117000 [overlay band] +0x2CF04 | `loader_records/AREA.md` |
 | `0x80143F10` | text | in band_80117000 [overlay band] +0x2CF10 | `LOADER_RECORDS.md`, `loader_records/AREA.md` |
@@ -157,8 +163,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801448F8` | text | in band_80117000 [overlay band] +0x2D8F8 | `loader_records/AREA.md` |
 | `0x80144944` | text | in band_80117000 [overlay band] +0x2D944 | `BATTLE_RAM.md` |
 | `0x8014494E` | text | in band_80117000 [overlay band] +0x2D94E | `BATTLE_RAM.md` |
-| `0x80144963` | text | in band_80117000 [overlay band] +0x2D963 | `INSERT_RUBY.md`, `TEXT_ENGINE.md` |
-| `0x80144964` | text | in band_80117000 [overlay band] +0x2D964 | `BATTLE_RAM.md`, `STATUS.md` |
+| `0x80144963` | text | in band_80117000 [overlay band] +0x2D963 | `INSERT_RUBY.md`, `PC_PORT_CROSS_REFERENCE.md`, `TEXT_ENGINE.md` |
+| `0x80144964` | text | in band_80117000 [overlay band] +0x2D964 | `BATTLE_RAM.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md` |
 | `0x8014496C` | text | in band_80117000 [overlay band] +0x2D96C | `BATTLE_RAM.md`, `STATUS.md`, `remote-plan-2026-09-05.md` |
 | `0x80144972` | text | in band_80117000 [overlay band] +0x2D972 | `BATTLE_RAM.md` |
 | `0x80144984` | text | in band_80117000 [overlay band] +0x2D984 | `BATTLE_RAM.md` |
@@ -252,6 +258,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80145F1C` | text | in band_80117000 [overlay band] +0x2EF1C | `BATTLE_RAM.md` |
 | `0x80145F1E` | text | in band_80117000 [overlay band] +0x2EF1E | `BATTLE_RAM.md` |
 | `0x80145F24` | text | in band_80117000 [overlay band] +0x2EF24 | `STEAL.md` |
+| `0x80145F2B` | text | in band_80117000 [overlay band] +0x2EF2B | `BATTLE_RAM.md` |
 | `0x80145F3C` | text | in band_80117000 [overlay band] +0x2EF3C | `BATTLE_RAM.md` |
 | `0x80145FA4` | text | in band_80117000 [overlay band] +0x2EFA4 | `BATTLE_RAM.md` |
 | `0x80145FA5` | text | in band_80117000 [overlay band] +0x2EFA5 | `BATTLE_RAM.md`, `OVERLAY_HEADERS.md` |
@@ -346,8 +353,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8014909C` | text | in band_80117000 [overlay band] +0x3209C | `TEXT_ENGINE.md` |
 | `0x8014909D` | text | in band_80117000 [overlay band] +0x3209D | `TEXT_ENGINE.md` |
 | `0x8014909E` | text | in band_80117000 [overlay band] +0x3209E | `TEXT_ENGINE.md` |
-| `0x801490A0` | text | in band_80117000 [overlay band] +0x320A0 | `IDEAS.md`, `INSERT_RUBY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
-| `0x801490A2` | text | in band_80117000 [overlay band] +0x320A2 | `TEXT_ENGINE.md` |
+| `0x801490A0` | text | in band_80117000 [overlay band] +0x320A0 | `IDEAS.md`, `INSERT_RUBY.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md` |
+| `0x801490A2` | text | in band_80117000 [overlay band] +0x320A2 | `PC_PORT_CROSS_REFERENCE.md`, `TEXT_ENGINE.md` |
 | `0x801490A3` | text | in band_80117000 [overlay band] +0x320A3 | `INSERT_RUBY.md`, `TEXT_ENGINE.md` |
 | `0x801490A4` | text | in band_80117000 [overlay band] +0x320A4 | `HANDOFF.md`, `IDEAS.md`, `LOCALIZATION_APPLY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x801490A6` | text | in band_80117000 [overlay band] +0x320A6 | `TEXT_ENGINE.md` |
@@ -363,8 +370,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801490C0` | text | in band_80117000 [overlay band] +0x320C0 | `TEXT_ENGINE.md` |
 | `0x801490C1` | text | in band_80117000 [overlay band] +0x320C1 | `TEXT_ENGINE.md` |
 | `0x801490C4` | text | in band_80117000 [overlay band] +0x320C4 | `STATUS.md`, `TEXT_ENGINE.md` |
-| `0x801490CA` | text | in band_80117000 [overlay band] +0x320CA | `TEXT_ENGINE.md` |
-| `0x801490D3` | text | in band_80117000 [overlay band] +0x320D3 | `INSERT_RUBY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
+| `0x801490CA` | text | in band_80117000 [overlay band] +0x320CA | `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md` |
+| `0x801490D3` | text | in band_80117000 [overlay band] +0x320D3 | `INSERT_RUBY.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x801490D4` | text | insert_scratch_records [scratch array] (base) | `ADDRESS_MAPS.md`, `HANDOFF.md`, `INSERT_RUBY.md`, `README.md`, `STATUS.md`, `WORLD_ITEMS.md` |
 | `0x801490DC` | text | in insert_scratch_records [scratch array] +0x8 | `INSERT_RUBY.md` |
 | `0x801492D4` | text | in band_80117000 [overlay band] +0x322D4 | `ADDRESS_MAPS.md` |
@@ -404,8 +411,8 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8014F708` | text | unnamed function root (seeds/ghidra_funcs.txt) | `IDEAS.md`, `TEXT_ENGINE.md` |
 | `0x8015034C` | text | Msg_OpenScript [confirmed] boot | `GHIDRA.md`, `IDEAS.md`, `LOCALIZATION_APPLY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x801503AC` | text | Msg_OpenSystem [confirmed] boot | `AREA_PCS.md`, `IDEAS.md`, `TEXT_ENGINE.md`, `WORLD_ITEMS.md` |
-| `0x801503F8` | text | Msg_SystemPtr [confirmed] boot | `GHIDRA.md`, `IDEAS.md`, `TEXT_ENGINE.md` |
-| `0x8015042C` | text | MsgBox_Reset [confirmed] boot | `LOCALIZATION_APPLY.md`, `STATUS.md`, `TEXT_ENGINE.md`, `us-build-trial.md` |
+| `0x801503F8` | text | Msg_SystemPtr [confirmed] boot | `GHIDRA.md`, `IDEAS.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md`, `TEXT_TABLES.md` |
+| `0x8015042C` | text | MsgBox_Reset [confirmed] boot | `LOCALIZATION_APPLY.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md`, `us-build-trial.md` |
 | `0x80150508` | text | MsgBox_FrameTask [confirmed] boot | `TEXT_ENGINE.md` |
 | `0x80150570` | text | ≤ MsgBox_FrameTask (boot) +0x68 (nearest below, span unknown) | `IDEAS.md`, `TEXT_ENGINE.md` |
 | `0x80150598` | text | MsgBox_Render [confirmed] boot | `FURIGANA.md`, `IDEAS.md`, `STATUS.md`, `TEXT_ENGINE.md`, `regional-builds.md` |
@@ -421,7 +428,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801508A0` | text | ≤ MsgBox_Render (boot) +0x308 (nearest below, span unknown) | `FURIGANA.md`, `IDEAS.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x801508EC` | text | MsgBox_StateDispatch [confirmed] boot | `TEXT_ENGINE.md` |
 | `0x80150910` | text | ≤ MsgBox_StateDispatch (boot) +0x24 (nearest below, span unknown) | `TEXT_ENGINE.md` |
-| `0x8015096C` | text | MsgBox_Step [confirmed] boot | `IDEAS.md`, `INSERT_RUBY.md`, `STATUS.md`, `TEXT_ENGINE.md` |
+| `0x8015096C` | text | MsgBox_Step [confirmed] boot | `IDEAS.md`, `INSERT_RUBY.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x80150D34` | text | ≤ MsgBox_Step (boot) +0x3C8 (nearest below, span unknown) | `TEXT_ENGINE.md` |
 | `0x80150DB0` | text | ≤ MsgBox_Step (boot) +0x444 (nearest below, span unknown) | `LOCALIZATION.md`, `TEXT_ENGINE.md` |
 | `0x80150F04` | text | ≤ MsgBox_Step (boot) +0x598 (nearest below, span unknown) | `IDEAS.md` |
@@ -485,10 +492,20 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80162B50` | text | File_LBA [confirmed] boot | `OVERLAY_HEADERS.md` |
 | `0x801636F0` | text | File_LoadDone [confirmed] boot | `BATTLE_RAM.md`, `OVERLAY_HEADERS.md`, `STATUS.md`, `loader_records/AREA.md`, `loader_records/PLCHAR.md`, `loader_records/SCENARIO.md` |
 | `0x80163A00` | text | unnamed function root (seeds/ghidra_funcs.txt) | `GFX_PACKETS.md` |
+| `0x80164A3C` | text | in boot_exe_image [exe image] +0xD123C | `STATUS.md`, `computed-stride-jump.md` |
+| `0x80164AB0` | text | in boot_exe_image [exe image] +0xD12B0 | `STATUS.md` |
+| `0x80164AC4` | text | in boot_exe_image [exe image] +0xD12C4 | `STATUS.md`, `computed-stride-jump.md` |
+| `0x80164D00` | text | in boot_exe_image [exe image] +0xD1500 | `computed-stride-jump.md` |
+| `0x80164D1C` | text | in boot_exe_image [exe image] +0xD151C | `computed-stride-jump.md` |
 | `0x80164D28` | text | in boot_exe_image [exe image] +0xD1528 | `STATUS.md` |
-| `0x80164E48` | text | in boot_exe_image [exe image] +0xD1648 | `LOADER_RECORDS.md`, `STATUS.md` |
-| `0x80164E84` | text | in boot_exe_image [exe image] +0xD1684 | `HANDOFF.md`, `STATUS.md` |
+| `0x80164E48` | text | in boot_exe_image [exe image] +0xD1648 | `LOADER_RECORDS.md`, `STATUS.md`, `computed-stride-jump.md` |
+| `0x80164E60` | text | in boot_exe_image [exe image] +0xD1660 | `computed-stride-jump.md` |
+| `0x80164E6C` | text | in boot_exe_image [exe image] +0xD166C | `computed-stride-jump.md` |
+| `0x80164E78` | text | in boot_exe_image [exe image] +0xD1678 | `computed-stride-jump.md` |
+| `0x80164E84` | text | in boot_exe_image [exe image] +0xD1684 | `HANDOFF.md`, `STATUS.md`, `computed-stride-jump.md` |
 | `0x80164E90` | text | in boot_exe_image [exe image] +0xD1690 | `LOADER_RECORDS.md` |
+| `0x80164E9C` | text | in boot_exe_image [exe image] +0xD169C | `computed-stride-jump.md` |
+| `0x80164EC0` | text | in boot_exe_image [exe image] +0xD16C0 | `computed-stride-jump.md` |
 | `0x80165434` | text | Char_RecalcStats [confirmed] boot | `STATUS.md` |
 | `0x80165AA4` | text | Inventory_Add [confirmed] boot | `AREA_PCS.md`, `BATTLE_RAM.md`, `STATUS.md` |
 | `0x80165BCC` | text | AbilityList_Add [guessed] boot | `STATUS.md` |
@@ -498,7 +515,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80166FCC` | text | Zenny_Sub [confirmed] boot | `BATTLE_RAM.md`, `STATUS.md` |
 | `0x80166FD4` | text | ≤ Zenny_Sub (boot) +0x8 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x80166FFC` | text | Zenny_Add [confirmed] boot | `AREA_PCS.md`, `BATTLE_RAM.md`, `STATUS.md`, `WORLD_ITEMS.md` |
-| `0x80167514` | text | AbilityList_ForType [confirmed] boot | `BATTLE_RAM.md`, `STATUS.md` |
+| `0x80167514` | text | AbilityList_ForType [confirmed] boot | `BATTLE_RAM.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md` |
 | `0x8016776C` | text | unnamed function root (seeds/ghidra_funcs.txt) | `loader_records/PLCHAR.md` |
 | `0x80167800` | text | ≤ AbilityList_ForType (boot) +0x2EC (nearest below, span unknown) | `loader_records/PLCHAR.md` |
 | `0x801678B4` | text | unnamed function root (seeds/ghidra_funcs.txt) | `loader_records/PLCHAR.md` |
@@ -572,6 +589,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x8017FD5C` | text | _patch_pad [confirmed] boot | `kernel-patch-sites.md` |
 | `0x8017FED4` | text | ≤ _patch_pad (boot) +0x178 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x8017FEF8` | text | ≤ _patch_pad (boot) +0x19C (nearest below, span unknown) | `STATUS.md`, `TEXT_ENGINE.md` |
+| `0x8017FF2C` | text | ≤ _patch_pad (boot) +0x1D0 (nearest below, span unknown) | `PC_PORT_CROSS_REFERENCE.md` |
 | `0x8017FF30` | text | ≤ _patch_pad (boot) +0x1D4 (nearest below, span unknown) | `IDEAS.md`, `STATUS.md`, `TEXT_ENGINE.md` |
 | `0x80180000` | text | ≤ _patch_pad (boot) +0x2A4 (nearest below, span unknown) | `loader_records/AREA.md` |
 | `0x801802EC` | text | ≤ _patch_pad (boot) +0x590 (nearest below, span unknown) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `HANDOFF.md`, `LOADER_RECORDS.md`, `README.md`, `STATUS.md`, `WORLD_ITEMS.md`, `loader_records/AREA.md`, `loader_records/SCENARIO.md` |
@@ -616,7 +634,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x80190000` | text | in boot_exe_image [exe image] +0xFC800 | `STATUS.md` |
 | `0x80191550` | text | in boot_exe_image [exe image] +0xFDD50 | `SOUND_CUES.md` |
 | `0x80195800` | text | in boot_exe_image [exe image] +0x102000 | `STATUS.md`, `TEXT_TABLES.md` |
-| `0x80196800` | text | band_80196800 [overlay band] (base) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `BATTLE_RAM.md`, `GHIDRA.md`, `HANDOFF.md`, `INSERT_RUBY.md`, `OVERLAYS.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `TEXT_TABLES.md`, `loader_records/AREA.md`, `loader_records/BOSS.md`, `loader_records/SCENARIO.md`, `regional-builds.md` |
+| `0x80196800` | text | band_80196800 [overlay band] (base) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `BATTLE_RAM.md`, `GHIDRA.md`, `HANDOFF.md`, `INSERT_RUBY.md`, `OVERLAYS.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `TEXT_TABLES.md`, `WALK_ROOTS_HANDOFF.md`, `loader_records/AREA.md`, `loader_records/BOSS.md`, `loader_records/SCENARIO.md`, `regional-builds.md` |
 | `0x80196801` | text | in band_80196800 [overlay band] +0x1 | `OVERLAYS.md`, `zero-fill-dispatch-audit.md` |
 | `0x80196F0C` | text | in band_80196800 [overlay band] +0x70C | `INSERT_RUBY.md` |
 | `0x80196FBC` | text | in band_80196800 [overlay band] +0x7BC | `INSERT_RUBY.md`, `WORLD_ITEMS.md` |
@@ -792,15 +810,15 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801C9904` | text | in band_80196800 [overlay band] +0x33104 | `loader_records/AREA.md` |
 | `0x801C9934` | text | in band_80196800 [overlay band] +0x33134 | `BATTLE_RAM.md`, `IDEAS.md`, `STATUS.md` |
 | `0x801C9948` | text | in band_80196800 [overlay band] +0x33148 | `BATTLE_RAM.md`, `STATUS.md` |
-| `0x801C995C` | text | in band_80196800 [overlay band] +0x3315C | `IDEAS.md`, `STATUS.md`, `TEXT_TABLES.md` |
+| `0x801C995C` | text | in band_80196800 [overlay band] +0x3315C | `IDEAS.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801C9E64` | text | in band_80196800 [overlay band] +0x33664 | `TEXT_TABLES.md` |
 | `0x801C9E7C` | text | in band_80196800 [overlay band] +0x3367C | `TEXT_TABLES.md` |
-| `0x801C9F24` | text | in band_80196800 [overlay band] +0x33724 | `SOUND_CUES.md`, `TEXT_TABLES.md` |
-| `0x801C9F2F` | text | in band_80196800 [overlay band] +0x3372F | `BATTLE_RAM.md` |
+| `0x801C9F24` | text | in band_80196800 [overlay band] +0x33724 | `BATTLE_RAM.md`, `SOUND_CUES.md`, `TEXT_TABLES.md` |
+| `0x801C9F2F` | text | in band_80196800 [overlay band] +0x3372F | `BATTLE_RAM.md`, `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801CA5A0` | text | in band_80196800 [overlay band] +0x33DA0 | `TEXT_TABLES.md` |
 | `0x801CA718` | text | in band_80196800 [overlay band] +0x33F18 | `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801CAA68` | text | in band_80196800 [overlay band] +0x34268 | `TEXT_TABLES.md` |
-| `0x801CB230` | text | in band_80196800 [overlay band] +0x34A30 | `BATTLE_RAM.md`, `EMI_TYPES.md`, `IDEAS.md`, `STATUS.md`, `TEXT_TABLES.md` |
+| `0x801CB230` | text | in band_80196800 [overlay band] +0x34A30 | `BATTLE_RAM.md`, `EMI_TYPES.md`, `IDEAS.md`, `PC_PORT_CROSS_REFERENCE.md`, `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801CB231` | text | in band_80196800 [overlay band] +0x34A31 | `BATTLE_RAM.md`, `IDEAS.md`, `TEXT_TABLES.md` |
 | `0x801CC068` | text | in band_80196800 [overlay band] +0x35868 | `BATTLE_RAM.md`, `EMI_TYPES.md`, `GHIDRA.md`, `STATUS.md` |
 | `0x801CD8F0` | text | in band_80196800 [overlay band] +0x370F0 | `HANDOFF.md`, `LOADER_RECORDS.md`, `STATUS.md`, `loader_records/PLCHAR.md`, `loader_records/SCENARIO.md` |
@@ -814,7 +832,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801CE000` | text | band_801CE000 [overlay band] (base) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `HANDOFF.md`, `IDEAS.md`, `STATUS.md`, `band-overlap-attribution.md`, `remote-plan-2026-09-05.md` |
 | `0x801CE04A` | text | in band_801CE000 [overlay band] +0x4A | `loader_records/BOSS.md` |
 | `0x801CE0E4` | text | in band_801CE000 [overlay band] +0xE4 | `OVERLAYS.md`, `loader_records/BOSS.md` |
-| `0x801CE400` | text | band_801CE400 [overlay band] (base) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `HANDOFF.md`, `IDEAS.md`, `LOADER_RECORDS.md`, `OVERLAYS.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_HEADERS.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `band-overlap-attribution.md`, `loader_records/PLCHAR.md`, `loader_records/SCENARIO.md`, `zero-fill-dispatch-audit.md` |
+| `0x801CE400` | text | band_801CE400 [overlay band] (base) | `ADDRESS_MAPS.md`, `AREA_PCS.md`, `HANDOFF.md`, `IDEAS.md`, `LOADER_RECORDS.md`, `OVERLAYS.md`, `OVERLAY_EXTRACTION.md`, `OVERLAY_HEADERS.md`, `OVERLAY_SIZE.md`, `STATUS.md`, `WALK_ROOTS_HANDOFF.md`, `band-overlap-attribution.md`, `loader_records/PLCHAR.md`, `loader_records/SCENARIO.md`, `zero-fill-dispatch-audit.md` |
 | `0x801CE401` | text | in band_801CE400 [overlay band] +0x1 | `OVERLAYS.md`, `STATUS.md` |
 | `0x801CE404` | text | engine loader entry: combo 0 slot[0][0] in Party character set 012 (BIN/PLCHAR/PLP012.EMI#0) (+18 more) | `HANDOFF.md`, `STATUS.md` |
 | `0x801CE724` | text | in band_801CE400 [overlay band] +0x324 | `STATUS.md` |
@@ -897,7 +915,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801DB594` | text | ≤ Battle_ActorFrameUpdate (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xA8 (nearest below, span unknown) | `GHIDRA.md` |
 | `0x801DBB40` | text | Battle_ApplyDamage [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `IDEAS.md`, `STATUS.md` |
 | `0x801DBEAC` | text | ≤ Battle_ApplyDamage (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x36C (nearest below, span unknown) | `BATTLE_RAM.md` |
-| `0x801DC00C` | text | Battle_CalcDamage [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `GHIDRA.md`, `IDEAS.md` |
+| `0x801DC00C` | text | Battle_CalcDamage [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `GHIDRA.md`, `IDEAS.md`, `STATUS.md`, `TEXT_TABLES.md` |
 | `0x801DC704` | text | Battle_HitCheck_PartyTarget [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `remote-plan-2026-09-05.md` |
 | `0x801DC85C` | text | Battle_HitCheck_EnemyTarget [evidence] in Battle game-mode (BIN/BATTLE/BATTLE.EMI#3) | `BATTLE_RAM.md`, `remote-plan-2026-09-05.md` |
 | `0x801DC9F8` | text | ≤ Battle_HitCheck_EnemyTarget (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x19C (nearest below, span unknown) | `STEAL.md` |
@@ -967,7 +985,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801EAF38` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x814 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EAF3E` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x81A (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EAF50` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x82C (nearest below, span unknown) | `BATTLE_RAM.md` |
-| `0x801EAF70` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x84C (nearest below, span unknown) | `BATTLE_RAM.md` |
+| `0x801EAF70` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x84C (nearest below, span unknown) | `BATTLE_RAM.md`, `STATUS.md` |
 | `0x801EAF80` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0x85C (nearest below, span unknown) | `SOUND_CUES.md`, `STATUS.md` |
 | `0x801EB448` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xD24 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB458` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xD34 (nearest below, span unknown) | `EXP_BOOST.md`, `STATUS.md` |
@@ -977,7 +995,7 @@ Every `0x80xxxxxx` literal cited in `docs/*.md`, joined to what the naming layer
 | `0x801EB5A0` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xE7C (nearest below, span unknown) | `OVERLAY_HEADERS.md`, `remote-plan-2026-09-05.md` |
 | `0x801EB5A5` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xE81 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB61D` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEF9 (nearest below, span unknown) | `BATTLE_RAM.md` |
-| `0x801EB620` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFC (nearest below, span unknown) | `BATTLE_RAM.md`, `SOUND_CUES.md` |
+| `0x801EB620` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFC (nearest below, span unknown) | `BATTLE_RAM.md`, `PC_PORT_CROSS_REFERENCE.md`, `SOUND_CUES.md` |
 | `0x801EB622` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xEFE (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB624` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF00 (nearest below, span unknown) | `BATTLE_RAM.md` |
 | `0x801EB626` | text | ≤ BattleBanner_SlideOut (overlay Battle game-mode (BIN/BATTLE/BATTLE.EMI#3)) +0xF02 (nearest below, span unknown) | `BATTLE_RAM.md` |

@@ -2,8 +2,10 @@
 
 **Status:** DONE 2026-09-05 (IDEAS I4 built; every id in the three card saves
 resolves; ability types and equipment powers cross-check against the saves;
-evening: the world-map place names found as painted plates and read out).
-Open items at the end.
+evening: the world-map place names found as painted plates and read out);
+extended 2026-09-18 — the `ref` u16 is the **description id** into the
+`0x80014000` system pool, resolved and verified for all 311 items and 227
+abilities (*`ref` is the description id* below). Open items at the end.
 
 The non-dialogue names do not live in the script blocks. They sit in
 **fixed-stride record tables** inside three `.EMI` containers, and the record
@@ -55,11 +57,84 @@ plus a fifth for key items. The item id byte in the save is the index into the
 table of its category; cat 1 id 3 is せいどうの剣 (Bronze Sword), Ryu's weapon
 in the file-2/3 saves.
 
-The `ref` u16 (`0x4000 + n`) runs through all five item tables and the ability
-table (`0x40FC + id` for the first ~200 abilities, then out of step) — one
-shared index into something not yet read, most likely the description strings.
-The other u16s (weapon `+8..+12`, armour `+8..+10`, accessory `+8..+10`) are
-kept raw in the sidecar and are unread.
+### `ref` is the description id — resolved 2026-09-18
+
+The `ref` u16 (`0x40xx`/`0x41xx`) that runs through all five item tables and the
+ability table (`abilities.toml` `u16_6`) is a **message id in the system pool**,
+resolved by `Msg_SystemPtr` `0x801503F8` exactly as any other system string
+([`TEXT_ENGINE.md`](TEXT_ENGINE.md)):
+
+```
+base   = 0x80014000 + *(u32 *)(0x80014000 + ((ref >> 12) & 0xC))   # header word, id bits 14-15
+string = base + *(u16 *)(base + 2 * (ref & 0x3FFF))
+```
+
+Every `ref` we hold has bits 14–15 = `01`, so they all select **header word 1**.
+On the main pool (the `dest 0x80014000` section, 11,560 bytes, identical in 42
+of the 44 `.EMI` files that carry one — `FIRST.EMI` and `AFLDKWA.EMI` hold the
+other variant) word 0 addresses 176 messages and **word 1 addresses 455**, which
+is the pool the 311 item refs and 227 ability refs index into.
+
+Verified three ways, 2026-09-18:
+
+- **Coverage.** All 311 item refs and all 227 ability refs land in range and
+  resolve to a non-empty string. Nothing falls off the end of either table.
+- **The text is the right text.** Consumable descriptions are the HP-restore
+  line with the item's own amount; weapon and armour descriptions are the
+  attack/defence and weight line; ability descriptions describe that ability's
+  effect (the button-timing skills say so, the luck-based ones say so).
+- **The numbers agree with a field we extracted separately.** Walking each
+  description control-aware and taking its first standalone digit run: it equals
+  our `power` for **81 of 82** weapons and **66 of 67** armour records. The two
+  exceptions (あしゅらの剣, おとこふく) have flavour-text descriptions containing no
+  digits at all, so there is nothing to disagree with. *Trap:* a naive
+  `[0-9]` scan over the raw bytes scores near zero — `0x30`–`0x39` occur as the
+  trailing byte of two-byte `0x12xx`/`0x13xx` kanji. Use the control-aware walk.
+
+Only **12 of 227** ability descriptions contain any digit, so AP cost cannot be
+cross-checked this way; `b2`/`b3` remain unread.
+
+The Chinese PC port names this field `descriptionId` on every item and skill
+record, which is what prompted the check
+([`PC_PORT_CROSS_REFERENCE.md`](PC_PORT_CROSS_REFERENCE.md) §3). Its `GetText`
+splits an id as `fileNum = index >> 14`, `index &= 0x3FFF` — the same two
+selector bits, independently derived.
+
+Ability refs run `0x40FB + id` for ids 1..57 and then drift (id 58 is `0x4134`,
+one short), so the table is authored per record, not generated. Id 0 (`なし` /
+the enemy-only row) points at `0x4000`, the shared empty string.
+
+### Weapon `+0x0B` is the element mask — and the ability record has no such field
+
+**Weapons: settled.** `Battle_CalcDamage` `0x801DC00C` loads the attacker's
+element mask from `0x801C9F2F + weapon_id * 0x14`, i.e. **weapon record
+`+0x0B`** — the high byte of the `u16_10` this sidecar keeps raw. Single bits
+only, and every named weapon matches its bit (`0x01` fire, `0x02` ice, `0x04`
+lightning, `0x08` earth, `0x10` wind, `0x20` **holy** — Holy Avenger,
+Ghostbuster, Silver Knife, and the undead are weak to it). Table and evidence in [`BATTLE_RAM.md`](BATTLE_RAM.md)
+*The element bits*. That also confirms what the PC port calls `element` on
+`WeaponData` ([`PC_PORT_CROSS_REFERENCE.md`](PC_PORT_CROSS_REFERENCE.md) §3).
+
+**Abilities: retracted.** An earlier revision of this section (written and
+withdrawn the same day, 2026-09-18) claimed the ability record's `u16_4` low
+byte was that element mask, on the strength of its value shapes — `0x01` on
+Fireblast, `0x02` on Iceblast, `0x04` on Lightning, `0x08` on Simoon, `0x10` on
+Quake. **It is not.** Against the bit order the weapon table proves, `0x08` is
+earth and `0x10` is wind, which makes Simoon earth and Quake wind — backwards.
+Frost sharing fire's bit was the other tell. Three coincidences out of five is
+what a suggestive-looking byte gets you; the claim was inference from value
+shapes and never from code, and the code says otherwise.
+
+Where a spell's element actually comes from: the **effect handler**. Of the
+BATTLE.EMI#15 handlers that call `0x801DC00C`, sixteen pass the `0xFFFF`
+"use the weapon's element" sentinel and one passes a literal `4`. So the mask
+is baked into the per-ability handler, and reaching it needs the ability →
+handler index mapping that [`BATTLE_RAM.md`](BATTLE_RAM.md) still lists as
+open, not another column of this table. `u16_4` remains what it was: flags read
+by `Actor_SkillItemDone` (`& 0x800`) and the enemy-AI mask.
+
+The other u16s (weapon `+8..+0x0A` and `+0x0C`, armour `+8..+10`, accessory
+`+8..+10`) are kept raw in the sidecar and are still unread.
 
 ### Encoding notes learned from the names
 
