@@ -1,7 +1,8 @@
 # The Chinese PC port as a cross-reference
 
 **Status:** STABLE (surveyed 2026-09-18; the two `TEXT_ENGINE.md` corrections it
-produced are proven by disc census + decompile, not by the port)
+produced are proven by disc census + decompile, not by the port. Third-derivative
+section added 2026-09-18.)
 
 A second, independent reverse-engineering effort exists against a *different
 binary of the same game*: **`bof3ext`**, a replacement `ddraw.dll` for the 2001
@@ -13,12 +14,20 @@ bugs, and run it on modern hardware.
 - Upstream: `github.com/TheRealBiggs/bof3ext`; text/font/texture assets live in a
   separate repo, `TheRealBiggs/bof3ext_resources`, installed as `NewData/`
 - **No `LICENSE` file.** Read it for reference; do not copy its code, tables or
-  translated strings into this repo without asking the author.
+  translated strings into this repo without asking the author. (The author
+  licenses his *other* repositories MIT, so the omission reads as an oversight
+  rather than a reservation of rights — but a pattern of licensing other work
+  permissively is evidence of intent, not a grant. The rule stands until the
+  file exists.)
 
 This document records what is worth taking from it and what is not. The rule for
 everything below: *the port is corroboration, never authority.* Where it and our
 own work disagree, the disc and the boot-EXE decompile decide — which is exactly
 what happened in §2.
+
+**Since 2026-09-18 there is also a third effort, ours** — see §6. It consumes
+this document rather than only feeding it, which is new, and it changes nothing
+about the rule above.
 
 ## 1. Why it is worth reading at all
 
@@ -193,6 +202,89 @@ packets through DirectDraw. We emulate the GPU properly; this is solved ground.
    tabs and categories, all in the `{{TAG}}` markup above. As dialogue it is a
    translation of a translation and worse than the US script. As **menu and name
    text** it is an English corpus, unconstrained by the JP byte budget, for
-   exactly the categories [`translation-scope-script-first`] deferred. Not
-   checked out locally; licence unclear (§ header). Revisit if and when menu
-   translation is scoped.
+   exactly the categories [`translation-scope-script-first`] deferred. **Checked
+   out locally 2026-09-18** at `C:\Users\kerok\Documents\GitHub\bof3ext_resources`
+   — confirmed 360 text files, 2 fonts + 7 glyph images, 13 HD textures. Licence
+   still unresolved (§ header). Revisit if and when menu translation is scoped.
+
+---
+
+## 6. A third derivative: `BreathOfFire3PCPort` (ours, living)
+
+As of 2026-09-18 there is a third reverse-engineering effort against these two
+binaries, and it is ours:
+[`kerokline/BreathOfFire3PCPort`](https://github.com/kerokline/BreathOfFire3PCPort)
+— a **living-game** renovation of the same Chinese PC port, aiming to replace
+`BOF3.exe` entirely with rewritten source that can be changed and extended.
+
+The relationships are lateral, not hierarchical. Three independent derivatives
+of two Capcom artifacts:
+
+```
+   BOF3.exe (Capcom, 2001, x86)          SLPS-00990 (Capcom, 1997, MIPS)
+        /              \                              |
+   bof3ext      BreathOfFire3PCPort          THIS REPO
+  (hook and         (replace                  (archival
+   translate         entirely)              recompilation)
+   in place)
+```
+
+None is built on another. In particular that project is **not** built on
+`bof3ext`: it vendors none of its code and inherits none of its architecture,
+because `bof3ext` exists to make the shipped executable better and it exists to
+make the shipped executable unnecessary.
+
+### Why this repo should care
+
+**It has the opposite invariant, deliberately.** Here, divergence from the
+original is a defect to be root-caused. There, divergence *is* the deliverable.
+That is not a relaxation of our standards — it is a different project with a
+different purpose, and the boundary must stay sharp in both directions:
+
+- **Do not import its liberties.** A change that is correct there may be a bug
+  here. This repo stays archival, and `psxrecomp`'s rules (no per-game hacks
+  during foundation work, evidence against an external comparative) are
+  unchanged by its existence.
+- **Do not export our constraints to it.** Its correctness criterion is intent,
+  not hardware.
+
+**The dependency runs toward us, and it is a real one.** That project's plan
+(§3 there) proposes transferring names onto the PC binary from our corpus — the
+1,026 named boot-EXE functions in `symbols.toml` plus the 29,036 overlay
+functions in `names/functions.toml` — on the argument that two binaries
+compiled from one source have call graphs isomorphic up to inlining. Every
+landmark in §1 and §2 of *this* document is evidence for that argument. If it
+works, this repo is that project's single largest input.
+
+Practical consequence: **the `names/` corpus and `symbols.toml` now have a
+consumer outside this repo.** The evidence tiering that `NAME_MAP.md` imposes
+(`evidence` / `hypothesis` / `unnamed`) was already good discipline; it is now
+load-bearing for someone else, because a name transferred across architectures
+inherits the confidence of its source, and a `hypothesis` silently promoted to
+fact over there would be very hard to trace back.
+
+**We gain a reason to keep being rigorous, and they gain an oracle.** An
+archival build is the ideal regression oracle for a living fork: because this
+repo is provably faithful, every behavioural difference over there can be
+detected and attributed. Their `docs/DIVERGENCE.md` ledger is built on that
+premise. Where a shared algorithm exists in both binaries — damage formulas,
+encounter tables, script control-code handling, RNG sequences — the two can be
+run head-to-head.
+
+### What flows back here
+
+The same thing that flowed back from `bof3ext`, but from a team that shares our
+conventions and our evidence rule:
+
+- **Field names for bytes we call gaps** (§3) — that project decompiles the PC
+  binary properly rather than declaring addresses, so `examineChance`,
+  `WeaponData.element`, and the equipment-id block ordering become answerable
+  instead of merely named.
+- **`0x801490CA`'s reader** (§5 lead 1) — the open `0x0C` question. A project
+  that reimplements the PC message box has to determine what the equivalent
+  value is *for*.
+- **Menu and name English text** (§5 lead 4), if it lands there first.
+
+The rule is unchanged and applies to them exactly as to `bof3ext`: *the port is
+corroboration, never authority.* Sharing an author does not make a finding
+proven. Where their PC-side work and our disc disagree, the disc decides.
