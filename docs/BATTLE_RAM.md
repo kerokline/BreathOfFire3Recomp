@@ -123,7 +123,7 @@ mirrors the party block `+0x1C..+0x3B` shifted by 4.
 | `0x801EB638` | `+0x18` drop 1: u16 item (`category<<8 \| id`, `0x0004`), `+0x1A` chance class (3); `+0x1C`/`+0x1E` drop 2 (`0x0019`, class 1). Zeroed once dropped. **Drop 1 is also the steal item and its class the steal level** — Pilfer/Steal roll `rand byte < rate[class] × AGI mod` in their own BMAGIC overlay and zero both on success ([`STEAL.md`](STEAL.md), 2026-09-13) | `Battle_RollDrops`, MAGIC065 `0x801EEF5C` |
 | `0x801EB640` | `+0x20` **max HP** (u16) — `0x801EB758` fed to the HUD; `+0x22` max AP (18) | `Battle_ApplyDamage`, `Battle_BeginAction` |
 | `0x801EB644` | `+0x24` **ATK** (19), `+0x26` **DEF** (11), `+0x28` **AGI** (7; the turn-order base, mirrors party `+0x24`), `+0x2A` (20) | `Battle_BeginAction` → `0x801EC27C`, `Battle_BuildTurnOrder` |
-| `0x801EB654` | `+0x34` type / size class byte (5) | `Battle_ScaleDamage` |
+| `0x801EB654` | `+0x34` **holy affinity class** (5 = neutral; indexes `0x801EAF70` under mask bit `0x20`). *Corrected 2026-09-18 from "type / size class"* — see *The resistance grid*. `+0x35`/`+0x36`/`+0x37` are psionic / status / death | `Battle_ScaleDamage`, `0x8009FD08` |
 | `0x801EB69C` | status byte | `Battle_ApplyDamage` |
 | `0x801EB69D` | byte zeroed on status clear | `Battle_CalcDamage` |
 | `0x801EB6A0` | flags u32 (`0x100`, `0x10000`) | both |
@@ -143,11 +143,143 @@ are the AI/behaviour bytes `EnemyAI_ChooseActions` walks (the "`0x800E407C`
 script" is record 0's `+0x7C`). Extracted for all 200 areas by
 `tools/enemy_table.py` → `names/enemies.toml`.
 
-**To check later:** the wiki shows a 3 × 3 resistance grid per species
-(values 0..7). It is not a plain byte run in the record (searched 2026-09-17
-for PainWeed's `7 7 7 / 7 7 5 / 4 4 2`), so it is encoded or packed
-somewhere in `+0x00..0x47`. Decoding it would also adjudicate the two
-wiki/US-disc name-pair disagreements noted in `names/enemy_gloss.toml`
+#### The resistance grid — found 2026-09-18, at `+0xC0..+0xC8`
+
+The 2026-09-17 search failed because it looked in `+0x00..0x47` and expected
+the wiki's own numbers. The block is **nine bytes at record `+0xC0..+0xC8`**
+(offsets from `0x800E4000 + n*0x88`, the same base the name `+0x48` and the
+stat halfwords `+0x54` use), and it is **nine affinity classes, one per mask
+bit** — exactly the wiki's nine-cell grid, in the wiki's order:
+
+| Species | → working | → party persistent | mask bit | category | consumer | table |
+|---|---|---|---|---|---|---|
+| `+0xC0` | `+0x2F` | `+0x2B` | `0x001` | **fire** | `Battle_ElementAffinity` `0x8009FA78` | `0x800B187C` |
+| `+0xC1` | `+0x30` | `+0x2C` | `0x002` | **ice** | ″ | ″ |
+| `+0xC2` | `+0x31` | `+0x2D` | `0x004` | **lightning** | ″ | ″ |
+| `+0xC3` | `+0x32` | `+0x2E` | `0x008` | **earth** | ″ | ″ |
+| `+0xC4` | `+0x33` | `+0x2F` | `0x010` | **wind** | ″ | ″ |
+| `+0xC5` | `+0x34` | `+0x30` | `0x020` | **holy** | `Battle_ScaleDamage` inline | `0x801EAF70` |
+| `+0xC6` | `+0x35` | `+0x31` | `0x040` | **psionic** | `0x8009FD08` (and `0x8009FE88`) | `0x800B188C` (`0x800B189C`) |
+| `+0xC7` | `+0x36` | `+0x32` | `0x080` | **status** | ″ | ″ |
+| `+0xC8` | `+0x37` | `+0x33` | `0x100` | **death** | ″ | ″ |
+
+**Corrected 2026-09-18** (same day, by the player supplying the wiki's
+category list): an earlier revision of this section read `+0xC5..+0xC8` as
+"type / size classes", inheriting this document's own unverified label on
+enemy `+0x34`. They are affinity classes like the other five — `+0x34` is
+**holy**, and its "5 for all three party members" is simply that table's
+neutral index, not a size.
+
+`Battle_EnemySpawn` **`0x800A9148`** does the copy: nine byte moves from
+`+0xC0..+0xC8` into working `+0x4F..+0x57`, then two word moves that land them
+at `+0x2F..+0x37`. (The record's *fields* run `+0x48..+0xCD` against a stride
+of `0x88`, so anything past `+0x88` falls outside the slice
+`tools/enemy_table.py` cuts — which is why the tool never saw these.)
+
+**Three tables, three different neutral indices:**
+
+| Table | classes 0..8 | neutral | used by |
+|---|---|---|---|
+| `0x800B187C` | 300, 200, 100, 75, 50, 25, 0, **−100**, −1 | **2** | the five elements — **summed** across every set bit, so a two-element hit on a neutral target is 200% |
+| `0x801EAF70` | 300, 200, 200, 150, 125, 100, 50, 0 | **5** | holy |
+| `0x800B188C` | −1, 150, 100, 75, 50, 25, 0, 0 | **2** | psionic / status / death — **not** summed: each set bit *assigns*, so the highest bit wins. `0x8009FE88` reads the same three bytes against `0x800B189C` (the element ladder) instead |
+
+Class −100 on the element ladder means the hit **heals** the target.
+
+**That each byte's modal class is its own table's neutral index is the
+structural proof.** The five element bytes sit at class 2 (1,460 of 2,240);
+the holy byte sits at class 5 (140 of 168); the psionic byte sits at class 2.
+Three tables with neutrals at 2, 5 and 2, and every column lands on the right
+one.
+
+Evidence, 2026-09-18:
+
+- **Range.** All 2,240 affinity bytes (448 species rows × 5) and all nine bytes
+  of all 168 distinct species are in `0..8`. Nothing out of range anywhere.
+- **Semantics.** Undead and plants (Zombie, Ghoul, Man Trap, Audrey) sit at
+  class 0 = 300% on element 0; fire creatures (Torch, Lava Man, Vulcan, Gaist,
+  Scylla, Charyb) **absorb** element 0 at class 7 and take 200–300% on element
+  1; the two robots (ProtoBot, TankBot) take 200% on element 2.
+- **The party table agrees.** The same five bytes sit at persistent character
+  record `+0x2B..+0x2F` (working `0x80145F2B..2F`). In the `START.EMI`
+  new-game templates all forty bytes are in range, the five humans are flat
+  100% everywhere, **Garr takes 50% on element 0**, and **パピー — the intro's
+  baby dragon — is immune to element 0 (class 6) and resistant on the other
+  four**. A dragon immune to fire and a Guardian resisting it is not a
+  coincidence of byte values.
+
+#### The element bits, settled by the weapon table (2026-09-18)
+
+`Battle_CalcDamage` **`0x801DC00C`** takes the mask as its third argument and
+puts it in **PSX scratchpad `0x1F800000`**, where `Battle_ScaleDamage` reads it
+back. The sentinel **`0xFFFF` means "use the attacker's weapon element"**, and
+the function then loads it from the weapon table:
+
+```c
+_DAT_1f800000 = param_3;
+if (param_3 == 0xffff) {
+    if (attacker < 3)  _DAT_1f800000 = *(u8 *)(0x801C9F2F + weapon_id * 0x14);  // record +0x0B
+    else               _DAT_1f800000 = 0;                                        // enemies: none
+}
+```
+
+`0x801C9F24` is the weapon table (20-byte records, [`TEXT_TABLES.md`](TEXT_TABLES.md)),
+so the element mask is **weapon record `+0x0B`** — the high byte of the `u16_10`
+the sidecar kept raw. Reading it for all 83 weapons gives single bits only, and
+every one of the 22 non-zero weapons is named for its bit:
+
+| bit | element | weapons carrying it |
+|---|---|---|
+| `0x01` | **fire** | Flare Sword, Heat Shotel, Ruby Scepter, Flame Spear, Flame Talons, Flame Chrysm, Dragon Blade |
+| `0x02` | **ice** | Ice Halberd, Ice Chrysm, Heavy Dagger |
+| `0x04` | **lightning** | Thunder Rod, Barbarossa, Royal Sword |
+| `0x08` | **earth** | Rockbreaker |
+| `0x10` | **wind** | WindCutter, Gale Javelin, FeatherSword |
+| `0x20` | *not an element* | Holy Avenger, Ghostbuster, Silver Knife, Ascension, Rufadés Spear |
+
+This is the bit order the community wiki uses, one-based (1 fire, 2 ice,
+3 lightning, 4 earth, 5 wind). It also matches the bestiary: flying species
+(Bat, BloodBat, Slasher, Ripper) are class 6 = **immune on bit 3, earth**,
+which is what a flyer should be.
+
+**Bit `0x20` is holy**, and it takes a different route: the element sum only
+looks at `mask & 0x1F`, so `Battle_ScaleDamage` tests `0x20` on its own and
+multiplies by `0x801EAF70[class]` `{300,200,200,150,125,100,50,0}` using the
+target's `+0x34` (party `+0x30`, species `+0xC5`). The weapons that set it are
+Holy Avenger, Ghostbuster, Silver Knife, Ascension and Rufadés Spear — and the
+species that are weak to it are the undead:
+
+| species | `+0xC5` | holy damage |
+|---|---|---|
+| Zombie, Ghoul, Ghost, Phantom, ZombieDr, Reaper, ToxicMan | 0 | **300%** |
+| D>Zombie, Thanotos, Arwan, Spectre, Volt, Thunder, Worker | 1 | 200% |
+| everything else (140 of 168) | 5 | 100% |
+
+Ghostbuster doing triple damage to Ghost is the whole hypothesis, tested and
+passed.
+
+Enemies pass `0` for a plain attack, so **enemy physical attacks are never
+elemental**. Abilities pass their own mask: of the effect handlers in
+BATTLE.EMI#15 that call `0x801DC00C`, sixteen pass `0xFFFF` (weapon element)
+and one passes a literal `4`. **Where a spell's element comes from is
+therefore its effect handler, not a field of the ability record** — see the
+retraction in [`TEXT_TABLES.md`](TEXT_TABLES.md).
+
+**Against the wiki: the categories match, the display scale does not.** The
+player supplied the wiki's nine categories — fire, ice, lightning, earth, wind,
+holy, psionic, status, death — and they are `+0xC0..+0xC8` in that exact order,
+which is how this section was corrected. What is still not decoded is the
+wiki's *numbering*: for PainWeed (`ベヘリット` / US `RankWeed`, AREA052 slot 1)
+the disc holds `0 0 0 0 0 5 4 4 2` and the wiki's grid reads
+`7 7 7 / 7 7 5 / 4 4 2`. The last four agree literally; the first five are our
+class 0 = 300% against the wiki's 7, and no single offset or inversion maps
+both halves — unsurprising now that we know the columns index **three
+different tables**. A direct fetch of the wiki page was attempted 2026-09-18
+and **not completed** (`bof.fandom.com` 402, GameFAQs 403), so the numbering
+is second-hand and the byte values are what this document asserts.
+
+Decoding this may also adjudicate the two wiki/US-disc name-pair
+disagreements noted in `names/enemy_gloss.toml`
 (PainWeed/RankWeed, Charyb/Scylla), and the drop slots (`+0x18..`) against
 the wiki's steal/drop columns.
 
@@ -193,7 +325,7 @@ at `0x801DB214` in the same roster order.
 | `+0x19` | status bits that halve the byte stats `+0x2B..+0x33` | `Char_RecalcStats` |
 | `+0x1A` | percent-style byte: effective max HP −= (base max HP × this + 5)/10 *?* | `Char_RecalcStats` |
 | `+0x1C..+0x38` | **effective stats**, recomputed from the base block + equipment (`Stat_AddClamped`, cap 999): `+0x1C` max HP, `+0x1E` max AP, **`+0x20` ATK**, **`+0x22` DEF**, `+0x24` (Agl-derived: 3 / 10 / 20), `+0x26` (Int-derived: 10 / 43 / 34), `+0x2A` (513 / 513 / 515) *?*. The whole `+0x1C..+0x3B` block is copied to `0x801EC278` / `0x801EC258` when the member acts / is targeted (damage path) | `Char_RecalcStats`, `Battle_BeginAction`, `Battle_ResolveAction_Party` |
-| `+0x30` | **type / size class** byte (5 for all three; indexes the `0x801EAF70` percent table under weapon flag `0x20`) | `Battle_ScaleDamage` |
+| `+0x30` | **holy affinity class** (5 = neutral for all three; indexes `0x801EAF70` under mask bit `0x20`). *Corrected 2026-09-18 from "type / size class"*. `+0x2B..+0x2F` are the five element classes, `+0x31..+0x33` psionic / status / death — see *The resistance grid* | `Battle_ScaleDamage`, `0x8009FA78`, `0x8009FD08` |
 | `+0x34..+0x38` | 5 bytes checked against a per-roster 5-byte table at `0x80148668` — of which **`+0x37` = evade %** (6 / 4 / 25) and **`+0x38` = hit %** (95 / 95 / 100) | `Char_RecalcStats`, `Battle_HitCheck_*` |
 | `+0x3C` | **base max HP** (u16) | `Char_LevelUp` +4 |
 | `+0x3E` | **base max AP** | +4 |
@@ -452,7 +584,11 @@ Battle_BaseDamage(attacker, target, mode)             0x801DCAA0
 Battle_ScaleDamage(attacker, target, d)               0x801DCD18   (8.8 fixed point throughout)
   d *= 205/256                                              (0.80; the expression before the max() can never exceed 0xCD for d >= 0)
   d *= {0xDA,0xE6,0xF3,0x100,0x10D,0x11A,0x126,0x133}[Rand & 7] / 256     (0.85 .. 1.20, table 0x801EAF50)
-  if scratch & 0x1F:  d = d * engine 0x8009FA78(target) / 100            (elemental affinity of the target; BATTLE.EMI#15, not read)
+  if scratch & 0x1F:  d = d * Battle_ElementAffinity(target, scratch & 0x1F) / 100   (0x8009FA78, read 2026-09-18:
+                          scratch & 0x1F is a 5-bit ELEMENT MASK; for each set bit, sum table 0x800B187C[class]
+                          where class = party rec+0x2B..+0x2F (slot < 3) / enemy working +0x2F..+0x33 (slot - 3).
+                          Table = {300,200,100,75,50,25,0,-100,-1} percent; multi-element attacks SUM their
+                          affinities, so a two-element hit on a neutral target is 200%, not 100%)
   if scratch & 0x20:  d = d * s16 table 0x801EAF70[type] / 100            (type = party rec+0x30 / enemy+0x34; {300,200,200,150,125,100,50,0})
   return round-half-up(d)
 
@@ -668,9 +804,11 @@ PLCHAR / BOSS / BMAGIC actor overlays — read one to get all.
 - Party HP cell: `ramdiff` on a round where the enemy hits, deltas from
   the screen; expected `0x80145F14 + m*0x140`.
 - ~~Decompile `Battle_BaseDamage` and the defence steps.~~ **Done 2026-09-05**
-  (they are hit checks, not defence steps). Still unread: the elemental
-  affinity function `0x8009FA78` (BATTLE.EMI#15) and the party
-  `+0x26`/`+0x2A` derived stats. ~~What enemy `+0x08` is~~ — **level**, and
+  (they are hit checks, not defence steps). ~~Still unread: the elemental
+  affinity function `0x8009FA78` (BATTLE.EMI#15)~~ — **read 2026-09-18**, see
+  *The resistance grid* above. Still unread: the party `+0x26`/`+0x2A`
+  derived stats, the three type/size bytes beyond `+0xC5`, and the
+  ability → effect-handler index mapping (where a spell's element mask is). ~~What enemy `+0x08` is~~ — **level**, and
   party `+0x24` is **AGI** (turn order, 2026-09-05).
 - ~~Where Run succeeds or fails, where Auto-attack fills the commands~~ —
   **found in the engine band** (section above). Still open: the Defend
