@@ -232,8 +232,11 @@ else
 fi
 
 # ---- phase 5a: compile overlays (all bands, one file) -----------------------
-# Exit 2 is EXPECTED: a few shards fail audit as UNSUPPORTED_INSTRUCTION (data
-# walked as code). Only OTHER failure classes are a real regression.
+# Exit 0 with failed=0 is EXPECTED since 2026-09-18 (docs/frameless-dispatch-roots.md).
+# Exit 2 with [audit] UNSUPPORTED_INSTRUCTION shards is still tolerated -- it is
+# not a build break -- but it is no longer "expected noise": it means a data
+# shape the walk-root CFG probe does not recognise. Read it. Only OTHER failure
+# classes are a hard regression.
 say "phase 5a/5 — compile all overlay bands"
 OVERLAY_MTIME_BEFORE=$(stat -c %Y "$OVERLAY_C" 2>/dev/null || echo 0)
 COMPILE_LOG="$(mktemp)"
@@ -246,11 +249,13 @@ python psxrecomp/tools/compile_overlays.py --static --force \
 COMPILE_RC=${PIPESTATUS[0]}
 set -e
 
-# A shard audit failure is EXPECTED when it is the documented "data walked as
-# code" case: class [audit], ZERO unknown_bad, only <N> unsupported (MIPS-II/IV
-# opcodes the R3000A lacks). That count drifts UP as the observed set grows into
-# new data regions — not a regression (HANDOFF). A REAL regression is any
-# SHARD FAIL that is not that shape: a non-audit class, or unknown_bad > 0.
+# A shard audit failure -- class [audit], ZERO unknown_bad, only <N> unsupported
+# (MIPS-II/IV opcodes the R3000A lacks) -- is the "data walked as code" case. It
+# is NOT fatal here, because a new data shape should not break the loop. It is
+# also no longer expected: since the walk-root CFG probe landed the baseline is
+# failed=0, so a non-zero count is a finding, and the summary below says so.
+# A HARD regression is any SHARD FAIL that is not that shape: a non-audit class,
+# or unknown_bad > 0.
 UNEXPECTED_FAILS="$(grep -E 'SHARD FAIL ' "$COMPILE_LOG" \
   | grep -vE '\[audit\] overlay 0x[0-9A-Fa-f]+ crc [0-9A-Fa-f]+: 0 unknown_bad, [0-9]+ unsupported' \
   || true)"
@@ -275,7 +280,14 @@ if [ "$OVERLAY_MTIME_AFTER" -le "$OVERLAY_MTIME_BEFORE" ]; then
   [ -n "$SHARD_RESULT" ]     || die "$OVERLAY_C was not rewritten and the compile reported no PSX_SHARD_RESULT"
   echo "note: $OVERLAY_C unchanged (content-identical rewrite skipped)"
 fi
-echo "overlays ok — ${SHARD_RESULT:-(no PSX_SHARD_RESULT line)} (exit $COMPILE_RC, expected UNSUPPORTED_INSTRUCTION only)"
+if [ "$COMPILE_RC" -eq 0 ]; then
+  echo "overlays ok — ${SHARD_RESULT:-(no PSX_SHARD_RESULT line)} (exit 0, the expected clean result)"
+else
+  echo "overlays ok — ${SHARD_RESULT:-(no PSX_SHARD_RESULT line)} (exit $COMPILE_RC)" >&2
+  echo "NOTE: [audit] shard failures are no longer expected (baseline is failed=0 since" >&2
+  echo "      2026-09-18, docs/frameless-dispatch-roots.md). Each one is a data shape the" >&2
+  echo "      walk-root CFG probe does not recognise — phase 5a' below says what the bytes are." >&2
+fi
 
 # ---- phase 5a' : explain the [audit] rejections ---------------------------
 # "N unsupported" only says the walk from a shared-band entry hit a non-R3000

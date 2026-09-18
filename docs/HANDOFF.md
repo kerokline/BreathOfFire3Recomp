@@ -489,8 +489,11 @@ Phases, for when you need to run one by hand:
    bands; output is `generated/overlays_static.c` (dispatcher) plus one
    translation unit per overlay, `overlays_static_NNNN.c` (358 today), which
    `runtime.cmake` globs. Runs in a process pool (`--jobs`, default cores−2).
-   Exit 2 with `[audit]` `0 unknown_bad, N unsupported` failures is the
-   expected outcome. Since 2026-09-02 this phase takes ~20 s, not ~12 min.
+   **Exit 0 with `failed=0` is the expected outcome since 2026-09-18**
+   ([`frameless-dispatch-roots.md`](frameless-dispatch-roots.md)); an `[audit]`
+   `0 unknown_bad, N unsupported` failure now means a data shape the CFG probe
+   does not recognise and is worth reading. Since 2026-09-02 this phase takes
+   ~20 s, not ~12 min.
 6. Build `psx-runtime`; re-measure per PC with `harvest_interp_pcs.py`.
 
 **It needs a play session reaching new content — that is the only blocking
@@ -1179,11 +1182,17 @@ Measurement:
 
 Pipeline:
 
-- **The all-bands compile exits 2, and that is correct.** Benign iff class is
-  `[audit]` and the detail is `0 unknown_bad, N unsupported` (data walked as
-  code — TGE/TLT/MOVCI words the R3000A lacks). The count drifts up one
-  occupant at a time as the observed set grows (4 → 6 → **7** on 2026-09-01).
-  Anything else is a real regression. `axis_b_loop.sh` matches on that shape.
+- **The all-bands compile exits 0 with `failed=0`** (2026-09-18). This entry
+  used to say it exits 2 and that this is correct, with the count drifting up
+  one occupant at a time as the observed set grows (4 → 6 → 7 → 27). That was
+  wrong: all 27 were one predicate — a dispatch entry admitted as a walk root
+  by the weak "a `jr $ra` two words back" arm of `_callable_legacy_seed`, at
+  the head of the pointer table / record array / zero fill that follows the
+  image's last function, walked to the image end. Prologue-less dispatch
+  entries now need `plausible_callable_target`, the same bounded CFG probe the
+  discovery roots already use. **Any `[audit]` failure is now a real signal**:
+  a data shape the probe does not recognise. `axis_b_loop.sh` still tolerates
+  exit 2 but says so loudly. [`frameless-dispatch-roots.md`](frameless-dispatch-roots.md).
 - **`harvest_interp_pcs.py` writes PCs as physical addresses.** Mask with
   `(pc & 0x1FFFFFFF) | 0x80000000` before bucketing, or everything is "unmapped".
 - **Do not seed the `GAME.EMI` §0 header pointer table** — chained jump-table
