@@ -100,13 +100,23 @@ What does not work yet:
 - [ ] No end-to-end playthrough, and no soak past the early game. (The
       screens that used to run slow — Capcom logo, world map, memory-card — hold
       60 fps as of 2026-09-01 after two framework fixes, both merged upstream)
-- [ ] JP→EN runtime string translation — the script is located, the engine is
-      identified and the lookup confirmed live; what remains is variable-width
-      glyph advance, line-break policy, and applying translated text
+- [x] Area-script localization at runtime — English (from the player's own US
+      disc) and Japanese with furigana, delivered by a function-entry plugin
+      without modifying the disc
+      ([`docs/LOCALIZATION_APPLY.md`](docs/LOCALIZATION_APPLY.md),
+      [`docs/FURIGANA.md`](docs/FURIGANA.md)). Kept working, not extended here
 - [ ] Menus, items and name entry are a **separate** text pool from the `.EMI`
-      area script — translating only the script leaves them in Japanese
+      area script and stay Japanese — **out of scope for this repo** (below)
 
-### Localization research
+### Localization — where the work lives
+
+**As of 2026-09-18, localization work happens in
+[`BreathOfFire3PCPort`](https://github.com/kerokline/BreathOfFire3PCPort)**, a
+living-game fork where extended text logic belongs. This repo's scope is the
+narrower job of finishing the recompilation. The script localization already
+built here stays in the build and keeps working; its open items (menus and
+items, lowercase, the furigana reading review, further languages) are pursued
+in the other repo. What follows is the research record.
 
 The Japanese script does **not** live in the boot executable. It sits in
 per-area `.EMI` container sections — the section whose destination address is
@@ -115,9 +125,10 @@ slot rather than by address. The message engine is identified and confirmed
 live ([`docs/TEXT_ENGINE.md`](docs/TEXT_ENGINE.md)); the whole translation
 surface (area script, a separate menu/item pool, a string table inside
 `GAME.EMI`, and 37 language-bearing images) is enumerated in
-[`docs/regional-builds.md`](docs/regional-builds.md). What remains is applying
-it: variable-width glyph advance, a line-break policy, and the hook at the
-message-table lookup ([`docs/LOCALIZATION.md`](docs/LOCALIZATION.md)).
+[`docs/regional-builds.md`](docs/regional-builds.md). The area script is
+applied by a hook at the message-box reset
+([`docs/LOCALIZATION_APPLY.md`](docs/LOCALIZATION_APPLY.md)); the original
+assessment is [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md).
 
 Current state, evidence, and next actions live in
 [`docs/STATUS.md`](docs/STATUS.md) and [`docs/HANDOFF.md`](docs/HANDOFF.md).
@@ -444,14 +455,16 @@ The highest-value contributions right now, in order:
    rather than post-mortem, and say which screen and which area. Playing *new*
    content also directly advances overlay coverage — a live session is the one
    manual input the Axis B loop needs.
-2. **Apply the translation.** The message engine is identified and confirmed
-   live; what remains is variable-width glyph advance, a line-break policy,
-   applying translated text, and the separate menus/items/name-entry text pool.
-3. **Deepen overlay coverage.** The ten overlay bands are compiled; the open work
+2. **Deepen overlay coverage.** The ten overlay bands are compiled; the open work
    is interior entry points reached only by dynamic dispatch (Axis B) and
    per-occupant attribution inside multi-tenant bands.
-4. **Reverse engineering.** Identify functions and record them in
+3. **Reverse engineering.** Identify functions and record them in
    `symbols.toml` with the rationale for how they were identified.
+
+Translation and localization contributions belong in
+[`BreathOfFire3PCPort`](https://github.com/kerokline/BreathOfFire3PCPort), not
+here — see *Localization — where the work lives* above. Fixes that keep the
+existing script plugin working are still welcome.
 
 Ground rules:
 

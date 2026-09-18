@@ -10,6 +10,11 @@ delivered by the same `MsgBox_Reset` plugin as English
 packet hooks do the drawing. Readings are still SudachiPy's, not proofread —
 that review pass is what remains.
 
+> **2026-09-18 — localization work has moved to `BreathOfFire3PCPort`**
+> ([`STATUS.md`](STATUS.md) banner). `jp_furigana` stays in the build and in
+> daily use; the reading review and any further furigana logic happen in the
+> other repo. Here it is maintained, not extended.
+
 **Retired the same day (user's call):** the inline-bracket variants
 `jp_ruby` / `jp_ruby_all` (`漢字（かんじ）`, pages re-flowed) and the
 first-occurrence-per-area scope. Furigana rows cost no width, so the
