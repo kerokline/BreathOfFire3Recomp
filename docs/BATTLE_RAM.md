@@ -279,20 +279,52 @@ different tables**. A direct fetch of the wiki page was attempted 2026-09-18
 and **not completed** (`bof.fandom.com` 402, GameFAQs 403), so the numbering
 is second-hand and the byte values are what this document asserts.
 
-**Why the PainWeed / RankWeed pair is confusable** (2026-09-18, once the
-columns were extractable): AREA052 carries *both*, at slots 1 and 4, with
-**byte-identical stats** (L20 HP80 EXP57 zenny40 ATK62 DEF35 AGI13) and
-holy/psionic/status/death classes. They differ in exactly one thing — the
-five element classes are **mirror images**: `ベヘリット` is class 0 (300%) on
-all five, `ベヘソット` is class 7 (**absorbs**) on all five. So they are two
-genuinely distinct species whose only discriminator is the grid, which is
-ample reason for guides to have muddled them. It does **not** settle which
-name belongs to which: the US disc and the wiki assign the two names to
-opposite twins, and nothing on the disc arbitrates that.
+#### PainWeed / RankWeed — the name pair, settled 2026-09-18
 
-The other name-pair noted in `names/enemy_gloss.toml` (Charyb/Scylla) is
-worth the same check, as are the drop slots (`+0x18..`) against the wiki's
-steal/drop columns.
+`names/enemy_gloss.toml` had carried this pair as an open US-disc-vs-wiki
+disagreement, with the note that *"the two weeds have identical stats, so
+only the disc can split them"*. The affinity grid is the discriminator that
+was missing, and it closes the question.
+
+AREA052 carries **both** twins, at slots 1 and 4, with byte-identical stats
+(L20 HP80 EXP57 zenny40 ATK62 DEF35 AGI13) and identical
+holy/psionic/status/death classes. They differ in exactly one thing — the
+five element classes, which are **mirror images**:
+
+| slot | JP | element classes | behaviour | US disc prints |
+|---|---|---|---|---|
+| 1 | `ベヘリット` | 0 ×5 | **300% — weak to all five** | RankWeed |
+| 4 | `ベヘソット` | 7 ×5 | **−100% — absorbs all five** | PainWeed |
+
+The wiki describes **RankWeed as the elemental-weak one and PainWeed as the
+absorber** (player, 2026-09-18). That is exactly the pairing the US disc
+prints on those two records. **So there was never a disagreement about which
+English name belongs to which enemy** — the disc and the wiki agree. What is
+transposed is the *Japanese* name on the wiki's two pages: its RankWeed page
+carries `ベヘソット` and its PainWeed page `ベヘリット`, the other way round
+from the disc. The gloss had been seeded from those page titles keyed by JP
+name, which is how the phantom conflict entered.
+
+`enemy_gloss.toml` is corrected: `ベヘリット` → RankWeed, `ベヘソット` →
+PainWeed, both now agreeing with the US disc and with the behaviour.
+
+Our decode of the two names is not the weak link. They differ in one byte
+(`d2` vs `b9`), and both codes were checked against other species whose US
+name fixes the sound: `d2` = リ from ゴブリン/Goblin, バリオ/Balio,
+ギリー/Gary, スタリオン/Stallion; `b9` = ソ from ソウルハンター/Phantom
+("Soul Hunter") and ガードソウル/Wraith ("Guard Soul").
+
+**The other pair stays open, and now we know why.** `アービィー` and
+`ルーファス` (Charyb/Scylla, also crossed between the `us` and `en` columns)
+are **byte-identical in all nine affinity classes** — `[7,1,2,2,2,5,4,5,7]`,
+both fire-absorbers — *and* in stats (L70 HP1000 ATK100). The grid split the
+weeds because the weeds differ in it; it cannot split this pair, because
+these two differ in nothing this document has read. That one needs a
+different discriminator (sprite, AI script row, or where each is encountered),
+not more of this table.
+
+The drop slots (`+0x18..`) against the wiki's steal/drop columns are still
+worth the same treatment.
 
 ### Persistent character records — boot-EXE data, `0x80144964 + roster*0xA4`, 8 records
 
