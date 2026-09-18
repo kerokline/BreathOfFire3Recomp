@@ -188,14 +188,15 @@ Class −100 on the element ladder means the hit **heals** the target.
 
 **That each byte's modal class is its own table's neutral index is the
 structural proof.** The five element bytes sit at class 2 (1,460 of 2,240);
-the holy byte sits at class 5 (140 of 168); the psionic byte sits at class 2.
+the holy byte sits at class 5 (396 of 448); the psionic byte sits at class 2.
 Three tables with neutrals at 2, 5 and 2, and every column lands on the right
 one.
 
 Evidence, 2026-09-18:
 
-- **Range.** All 2,240 affinity bytes (448 species rows × 5) and all nine bytes
-  of all 168 distinct species are in `0..8`. Nothing out of range anywhere.
+- **Range.** All **4,032 bytes** (448 species rows × 9) are in `0..8`.
+  `tools/enemy_table.py extract` now enforces this and refuses to write if any
+  byte is not a class index, so the check re-runs on every extraction.
 - **Semantics.** Undead and plants (Zombie, Ghoul, Man Trap, Audrey) sit at
   class 0 = 300% on element 0; fire creatures (Torch, Lava Man, Vulcan, Gaist,
   Scylla, Charyb) **absorb** element 0 at class 7 and take 200–300% on element
@@ -253,7 +254,7 @@ species that are weak to it are the undead:
 |---|---|---|
 | Zombie, Ghoul, Ghost, Phantom, ZombieDr, Reaper, ToxicMan | 0 | **300%** |
 | D>Zombie, Thanotos, Arwan, Spectre, Volt, Thunder, Worker | 1 | 200% |
-| everything else (140 of 168) | 5 | 100% |
+| everything else (396 of the 448 rows) | 5 | 100% |
 
 Ghostbuster doing triple damage to Ghost is the whole hypothesis, tested and
 passed.
@@ -278,10 +279,71 @@ different tables**. A direct fetch of the wiki page was attempted 2026-09-18
 and **not completed** (`bof.fandom.com` 402, GameFAQs 403), so the numbering
 is second-hand and the byte values are what this document asserts.
 
-Decoding this may also adjudicate the two wiki/US-disc name-pair
-disagreements noted in `names/enemy_gloss.toml`
-(PainWeed/RankWeed, Charyb/Scylla), and the drop slots (`+0x18..`) against
-the wiki's steal/drop columns.
+#### PainWeed / RankWeed — the name pair, settled 2026-09-18
+
+`names/enemy_gloss.toml` had carried this pair as an open US-disc-vs-wiki
+disagreement, with the note that *"the two weeds have identical stats, so
+only the disc can split them"*. The affinity grid is the discriminator that
+was missing, and it closes the question.
+
+AREA052 carries **both** twins, at slots 1 and 4, with byte-identical stats
+(L20 HP80 EXP57 zenny40 ATK62 DEF35 AGI13) and identical
+holy/psionic/status/death classes. They differ in exactly one thing — the
+five element classes, which are **mirror images**:
+
+| slot | JP | element classes | behaviour | US disc prints |
+|---|---|---|---|---|
+| 1 | `ベヘリット` | 0 ×5 | **300% — weak to all five** | RankWeed |
+| 4 | `ベヘソット` | 7 ×5 | **−100% — absorbs all five** | PainWeed |
+
+The wiki describes **RankWeed as the elemental-weak one and PainWeed as the
+absorber** (player, 2026-09-18). That is exactly the pairing the US disc
+prints on those two records. **So there was never a disagreement about which
+English name belongs to which enemy** — the disc and the wiki agree. What is
+transposed is the *Japanese* name on the wiki's two pages: its RankWeed page
+carries `ベヘソット` and its PainWeed page `ベヘリット`, the other way round
+from the disc. The gloss had been seeded from those page titles keyed by JP
+name, which is how the phantom conflict entered.
+
+`enemy_gloss.toml` is corrected: `ベヘリット` → RankWeed, `ベヘソット` →
+PainWeed, both now agreeing with the US disc and with the behaviour.
+
+Our decode of the two names is not the weak link. They differ in one byte
+(`d2` vs `b9`), and both codes were checked against other species whose US
+name fixes the sound: `d2` = リ from ゴブリン/Goblin, バリオ/Balio,
+ギリー/Gary, スタリオン/Stallion; `b9` = ソ from ソウルハンター/Phantom
+("Soul Hunter") and ガードソウル/Wraith ("Guard Soul").
+
+#### Charyb / Scylla — settled 2026-09-18, but *not* by the grid
+
+`アービィー` and `ルーファス` are **byte-identical in all nine affinity
+classes** (`[7,1,2,2,2,5,4,5,7]`, both fire-absorbers) *and* in stats (L70
+HP1000 ATK100). The grid split the weeds because the weeds differ in it; it
+cannot split this pair, which differs in nothing this document has read.
+
+The discriminator was the screen. A JP/US screenshot pair of the **same
+Gisshan fight** (player, 2026-09-18) shows the battle name plates in the same
+order in both versions:
+
+| plate | JP | US |
+|---|---|---|
+| 1 | ギシャボルゴ | Gisshan |
+| 2 | ルーファス | **Charyb** |
+| 3 | アービィー | **Scylla** |
+
+All three are AREA103 slots 4, 3 and 2, and the US disc's own name at each of
+those slots is exactly what the US screenshot prints. So `ルーファス` is
+Charyb and `アービィー` is Scylla, and the wiki has this pair's Japanese
+names transposed — **the same error it makes on PainWeed/RankWeed**.
+`enemy_gloss.toml` corrected for both; the `en` column now agrees with `us`
+across all four records.
+
+Worth keeping as method: two of this table's name disputes came from the
+wiki's JP names being crossed, and in both cases the US disc's name *at the
+same record slot* was right. Prefer `us` over `en` whenever they disagree.
+
+The drop slots (`+0x18..`) against the wiki's steal/drop columns are still
+worth the same treatment.
 
 ### Persistent character records — boot-EXE data, `0x80144964 + roster*0xA4`, 8 records
 

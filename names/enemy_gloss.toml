@@ -4,6 +4,12 @@
 # (bof.fandom.com/wiki/List_of_Breath_of_Fire_III_Enemies, one page per entry);
 # `en` is the wiki's article title (the US in-game name where the wiki uses it).
 # Add or fix rows by hand or from play (se_watch --label).
+#
+# When `en` here and the `us` column of names/enemies.toml disagree, `us` wins:
+# it is the name the US disc prints on that same record slot. Both disputes
+# found so far (PainWeed/RankWeed, Charyb/Scylla) were the wiki carrying a
+# near-identical pair's Japanese names transposed, and both resolved in the
+# disc's favour -- see docs/BATTLE_RAM.md "The resistance grid".
 
 [[gloss]]
 jp = "アデプト"
@@ -522,8 +528,8 @@ evidence = "bof.fandom.com/wiki/Orc"
 
 [[gloss]]
 jp = "ベヘリット"
-en = "PainWeed"
-evidence = "bof.fandom.com/wiki/Pain_Weed; the wiki's PainWeed page carries ベヘリット, but the US disc prints RankWeed on this very record (AREA052 slot 1; JP and US records byte-identical outside the name field) -- the two weeds have identical stats, so only the disc can split them; `us` wins"
+en = "RankWeed"
+evidence = "RESOLVED 2026-09-18 by the affinity grid. This record (AREA052 slot 1) is class 0 = 300% on all five elements, i.e. the weed that is WEAK to elements, and the US disc prints RankWeed on it. The wiki's RankWeed page also describes the elemental-weak weed -- so the disc and the wiki agree on which English name belongs to which enemy, and the only error is that the wiki's two pages carry the Japanese names transposed (its RankWeed page shows ベヘソット). Was 'PainWeed' here, taken from the wiki's page title keyed by JP name; corrected to agree with the US disc and the behaviour. See ベヘソット and docs/BATTLE_RAM.md 'The resistance grid'"
 
 [[gloss]]
 jp = "パトリオ"
@@ -562,8 +568,8 @@ evidence = "bof.fandom.com/wiki/Puff_Goo"
 
 [[gloss]]
 jp = "ベヘソット"
-en = "RankWeed"
-evidence = "bof.fandom.com/wiki/RankWeed; the wiki's RankWeed page carries ベヘソット, but the US disc prints PainWeed on this record (AREA052 slot 4); see ベヘリット"
+en = "PainWeed"
+evidence = "RESOLVED 2026-09-18 by the affinity grid. This record (AREA052 slot 4) is class 7 = -100% on all five elements, i.e. the weed that ABSORBS elements, and the US disc prints PainWeed on it. The wiki's PainWeed page also describes the absorbing weed, so disc and wiki agree on the enemy; the wiki's page carries the other twin's Japanese name (ベヘリット). Was 'RankWeed' here; corrected. See ベヘリット"
 
 [[gloss]]
 jp = "ペネトレイター"
@@ -607,8 +613,8 @@ evidence = "bof.fandom.com/wiki/Scorpion_(Breath_of_Fire_III)"
 
 [[gloss]]
 jp = "ルーファス"
-en = "Scylla"
-evidence = "bof.fandom.com/wiki/Scylla; the wiki's Scylla page carries ルーファス, but the US disc prints Charyb on this record (AREA103 slot 3); see アービィー"
+en = "Charybdis"
+evidence = "RESOLVED 2026-09-18 from a JP/US screenshot pair of the same Gisshan fight (player): the battle name plates run ギシャボルゴ / ルーファス / アービィー in JP and Gisshan / Charyb / Scylla in US, position for position, so ルーファス IS Charyb. That matches the US disc's own name on this record (AREA103 slot 3) and confirms the wiki's two pages carry the Japanese names transposed. The grid could not split this pair -- ルーファス and アービィー are byte-identical in all nine affinity classes and in stats -- so the in-game plates are the discriminator. Was 'Scylla' here, from the wiki page title keyed by JP name; corrected. See アービィー"
 
 [[gloss]]
 jp = "キノコルゲ"
@@ -797,8 +803,8 @@ evidence = "bof.fandom.com/wiki/Beyd_(Breath_of_Fire_III) (story fight)"
 
 [[gloss]]
 jp = "アービィー"
-en = "Charybdis"
-evidence = "bof.fandom.com/wiki/Charyb (アービィ; disc spells it with a long vowel); the wiki's Charybdis page carries アービィ, but the US disc prints Scylla on this record (AREA103 slot 2); identical stats to ルーファス, only the disc can split them; `us` wins"
+en = "Scylla"
+evidence = "RESOLVED 2026-09-18 from the same JP/US screenshot pair as ルーファス: the Gisshan fight's name plates run ギシャボルゴ / ルーファス / アービィー in JP and Gisshan / Charyb / Scylla in US, so アービィー IS Scylla, agreeing with the US disc's own name on this record (AREA103 slot 2). Was 'Charybdis' here, from the wiki page title keyed by JP name; the wiki has this pair's Japanese names transposed, the same error it makes on PainWeed/RankWeed. See ルーファス"
 
 [[gloss]]
 jp = "サンプル1"
