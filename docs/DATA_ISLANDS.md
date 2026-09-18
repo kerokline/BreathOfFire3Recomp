@@ -126,6 +126,17 @@ run over a shared address window has no negative evidence in it. Data decodes.
 What separated code from tables here was structure the data does not imitate —
 a stack frame, a return — and coverage the compile already emitted.
 
+**That lesson was then applied to the compiler, 2026-09-18.** The *shard*-level
+`[audit]` failures (as opposed to the per-entry memo this file explains) were
+all the same predicate: a dispatch entry admitted as a walk root because a
+`jr $ra` sat two words back, at the head of the table that follows the last
+function. The walk-root gate now requires the bounded CFG probe — a reachable
+return, the structure data does not imitate — for any prologue-less dispatch
+entry, and the all-bands compile exits 0. This file's subject is unchanged: the
+*fragment* memo is still the right place to ask what the bytes are, and the
+join, the tiebreaker and the classification below still stand.
+[`frameless-dispatch-roots.md`](frameless-dispatch-roots.md).
+
 ## Using it
 
 ```bash
