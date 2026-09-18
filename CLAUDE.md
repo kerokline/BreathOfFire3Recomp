@@ -124,6 +124,16 @@ From `psxrecomp/CLAUDE.md` — these bind work here, not just in the submodule:
 | `psxrecomp/docs/MOD_PACKAGES.md` | `mods/preloaded/` format |
 | `psxrecomp/docs/ci/README.md` | Release CI |
 
+## Scope
+
+This repo's job is **finishing the recompilation**. Since 2026-09-18,
+localization work (translation, furigana, text-engine extensions) happens in
+the sibling checkout `C:\Users\kerok\Documents\GitHub\BreathOfFire3PCPort`.
+The script plugin and tables here (`src/bof3_localize.c`, the builders under
+`tools/`, `[localization]` in `game.toml`) stay and must keep building and
+working — maintain them, don't extend them, and don't pick up their open items
+here. See the banner in `docs/STATUS.md`.
+
 ## Conventions for agents
 
 - Title-specific findings go in `docs/` — see `docs/README.md` for naming,

@@ -10,6 +10,18 @@ Read [`STATUS.md`](STATUS.md) for where the project stands. This file is what
 to pick up, how to build against the current pin, and the traps already paid
 for. It points at evidence rather than restating it.
 
+## Scope (2026-09-18)
+
+**This repo is for finishing the recompilation. Localization work happens in
+`BreathOfFire3PCPort`** (`C:\Users\kerok\Documents\GitHub\BreathOfFire3PCPort`,
+[`kerokline/BreathOfFire3PCPort`](https://github.com/kerokline/BreathOfFire3PCPort)).
+Do not pick up translation, furigana or text-engine extension tasks here, even
+where the paragraphs below or §3 still describe them as next. What exists —
+the `MsgBox_Reset` plugin, the table builders, the English and Japanese
+(Furigana) tables — stays, stays built into `build-relprof`, and is used in
+play; keep it working across pin bumps and regenerates, and leave its open
+items to the other repo. [`STATUS.md`](STATUS.md) carries the banner.
+
 ## Where things stand in one paragraph
 
 The game **plays at 60 fps** on `build-relprof` (Capcom logo, world map,
@@ -816,7 +828,16 @@ declare the observed slots in both profiles and pin the retail sha256
 (Step 3), bump the pin and re-measure with `psxrecomp/tools/kernel_patch_diff.py`
 (Step 4). One PR per step, off the current pin.
 
-### 3. Translation, and the ruby variant — **pick this up next** (2026-09-09)
+### 3. Translation, and the ruby variant — **moved to `BreathOfFire3PCPort`** (2026-09-18)
+
+> **Not a next action here any more.** Since 2026-09-18 new localization work
+> happens in `BreathOfFire3PCPort` (*Scope* at the top of this file). This
+> section is kept as the record of where the PSX-side work stopped and as the
+> maintenance notes for what still ships in the build — the traps below still
+> apply whenever the tables are regenerated. The "Left:" items (reading review,
+> readings dropped after runtime inserts, lowercase, the apostrophe cell, the
+> 691 shared-string conflicts) are open *there*, not here. The heading used to
+> read "pick this up next (2026-09-09)".
 
 **2026-09-10 — inserted names read too; see [`INSERT_RUBY.md`](INSERT_RUBY.md).**
 **2026-09-12 — true ruby (readings above the kanji) is back on the table.**

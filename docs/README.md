@@ -7,7 +7,7 @@ belong to *this game*, not to the framework.
 
 | Location | Owner | Rule |
 |---|---|---|
-| `docs/` (here) | This repo | Title-specific work: boot/soak logs, overlay findings, symbol archaeology, translation notes, enhancement plans |
+| `docs/` (here) | This repo | Title-specific work: boot/soak logs, overlay findings, symbol archaeology, enhancement plans. Localization notes already here stay as the record; **new localization work and its notes go to `BreathOfFire3PCPort`** (2026-09-18, [`STATUS.md`](STATUS.md) banner) |
 | `psxrecomp/docs/` | Framework submodule | Read-only reference. **Never edit** — changes there belong upstream in `mstan/psxrecomp` |
 | `psxrecomp/CLAUDE.md` | Framework submodule | Framework constitution. Read it before touching anything under `psxrecomp/` |
 | `recomp-ui/docs/` | Launcher submodule | Read-only reference |

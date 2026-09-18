@@ -3,6 +3,10 @@
 **Status:** IN PROGRESS (last verified 2026-08-30; next-actions and §3
 refreshed 2026-09-01)
 
+> **2026-09-18 — localization work has moved to `BreathOfFire3PCPort`**
+> ([`STATUS.md`](STATUS.md) banner). This file is the evidence record of the
+> PSX-side assessment; its next-actions are not this repo's queue any more.
+
 > §1's "text-draw PC census" and §4.2c/§4.3 were superseded on 2026-08-30 — the
 > text engine is identified and confirmed live. Read
 > [`TEXT_ENGINE.md`](TEXT_ENGINE.md) and [`regional-builds.md`](regional-builds.md)

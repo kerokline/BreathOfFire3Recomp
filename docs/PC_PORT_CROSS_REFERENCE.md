@@ -2,7 +2,7 @@
 
 **Status:** STABLE (surveyed 2026-09-18; the two `TEXT_ENGINE.md` corrections it
 produced are proven by disc census + decompile, not by the port. Third-derivative
-section added 2026-09-18.)
+section added 2026-09-18; localization hand-off recorded in §6 the same day.)
 
 A second, independent reverse-engineering effort exists against a *different
 binary of the same game*: **`bof3ext`**, a replacement `ddraw.dll` for the 2001
@@ -270,6 +270,24 @@ detected and attributed. Their `docs/DIVERGENCE.md` ledger is built on that
 premise. Where a shared algorithm exists in both binaries — damage formulas,
 encounter tables, script control-code handling, RNG sequences — the two can be
 run head-to-head.
+
+### Localization lives there now (2026-09-18)
+
+The boundary above got its first practical consequence the same day: **this
+repo's localization work moved to that project.** Extended text logic —
+menus and items, lowercase, further languages, anything that changes what the
+game says or how it draws it — is divergence by definition, so it belongs on
+the side whose deliverable is divergence. This repo keeps the narrower job of
+finishing the recompilation.
+
+Nothing was removed here. The `MsgBox_Reset` script plugin and the English and
+Japanese (Furigana) tables stay in the build and in play as an
+enhancement-phase shim, maintained but not extended
+([`STATUS.md`](STATUS.md) banner). What crosses over is knowledge, not code:
+[`TEXT_ENGINE.md`](TEXT_ENGINE.md), [`LOCALIZATION_APPLY.md`](LOCALIZATION_APPLY.md),
+[`FURIGANA.md`](FURIGANA.md) and [`regional-builds.md`](regional-builds.md) are
+that project's reference for the PSX-side message engine, exactly as the
+`names/` corpus is its reference for function names.
 
 ### What flows back here
 

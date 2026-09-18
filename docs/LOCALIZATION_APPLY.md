@@ -5,6 +5,11 @@ same evening the plugin became multi-table and the **Japanese (Ruby)**
 variant went through it, verified the same way; see *Verification* and
 *Open* for what is deliberately not done yet)
 
+> **2026-09-18 — localization work has moved to `BreathOfFire3PCPort`**
+> ([`STATUS.md`](STATUS.md) banner). The plugin and the tables described here
+> stay in the build and are **maintained, not extended**: the build recipe and
+> traps below are current, the *Open* items are pursued in the other repo.
+
 This is the apply path that [`LOCALIZATION.md`](LOCALIZATION.md) §4.3 item 3
 and [`TEXT_ENGINE.md`](TEXT_ENGINE.md) "The resolver" left open: how English
 bytes reach the dialogue box of the JP build without touching the disc, the
