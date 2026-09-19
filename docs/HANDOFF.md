@@ -1020,6 +1020,31 @@ Order matters, and each of these cost a session once:
 
 ## Pins and branches
 
+- **2026-09-19: `psxrecomp` is back on upstream `master` `5803def0`; no fork
+  branch.** All four of our open PRs merged
+  ([#367](https://github.com/RetroPortingToolKit/psxrecomp/pull/367),
+  [#381](https://github.com/RetroPortingToolKit/psxrecomp/pull/381),
+  [#382](https://github.com/RetroPortingToolKit/psxrecomp/pull/382),
+  [#384](https://github.com/RetroPortingToolKit/psxrecomp/pull/384)), so
+  `integration/vector-stub-plus-367` `aba55c55` has nothing upstream lacks --
+  verified by diffing the two trees: every difference is upstream-only work
+  (the Alexbeav CHD reader, toolchain staging, packaging gate, frame report,
+  launcher dialogs, MDEC freeze, text-restore recompute) plus the named
+  skip-message constant. Every entry below this one is history; read it for
+  the traps, not for the current pin.
+- **2026-09-19: `recomp-ui` pinned to fork `feat/additional-ui-functionality`
+  `cf8738e`** (was `20e0540`).
+  [#48](https://github.com/RetroPortingToolKit/recomp-ui/pull/48) went
+  CONFLICTING when master generalized keyboard capture's alt-slot dispatch
+  past N64: it hoisted a `const bool alt_slots` local at the exact line where
+  our branch had added the `m->settings_bindings &&` guard to the assist-capture
+  condition. Independent changes, so the merge keeps both -- hoisted local,
+  our guard on the same `if`. The three merged TUs (`launcher_imgui.cpp`,
+  `launcher_binds.c`, `launcher_model.c`) compile clean in `build-relprof`;
+  PR is `MERGEABLE`/`CLEAN` again. **This will recur**: our branch and master
+  keep editing the same capture block, so expect a one-hunk conflict on every
+  master merge and resolve it upstream-first.
+
 - **2026-09-17: the submodule checkout sits on fork branch
   `integration/vector-stub-plus-367` `88f4582a` = upstream `master`
   `193a60b8` + `8b50cd09` (the two-shape call-vector guard, open as

@@ -31,8 +31,8 @@ CMakeLists.txt       psxrecomp_add_game_runtime(psx-runtime …)
 disc/                staged boot EXE (gitignored)
 docs/                title-owned notes  ← put agent documents here
 psxrecomp/           SUBMODULE (read-only) — see docs/HANDOFF.md "Pins and
-                     branches" for the current gitlink; temporarily on a fork
-                     integration branch while upstream PRs are open
+                     branches" for the current gitlink; on upstream master
+                     unless an unmerged PR forces a fork branch
 recomp-ui/           SUBMODULE (read-only) — launcher; same rule. Moves in
                      lockstep with a psxrecomp bump when the launcher ABI changes
 ```
